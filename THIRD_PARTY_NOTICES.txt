@@ -1,0 +1,26 @@
+World Conquest — Üçüncü taraf bileşenler / Third-party notices
+
+MÜZİK VE SES EFEKTLERİ / MUSIC AND SFX
+  www/wc_audio.js — tamamı kodla üretilir (WebAudio osilatör + gürültü). Hazır ses dosyası, örnek veya başkasının müziği YOKTUR.
+  Melodi ve akor dizisi bu proje için yazılmış özgün bir bestedir. Telif/lisans yükümlülüğü yoktur.
+
+KÜTÜPHANELER / LIBRARIES (hepsi izin verici lisans / all permissive)
+  Three.js — MIT — www/globe/three.min.js
+  D3 — BSD-3-Clause — www/app.js içinde / bundled
+  PeerJS 1.5.4 — MIT — online mod / online mode (www/peerjs.min.js, lisans: licenses_PeerJS_MIT.txt)
+  Capacitor — MIT — Android sarmalayıcı / Android wrapper
+  cordova-plugin-purchase — MIT — Google Play satın alma / purchases
+  Lisans metinlerini yayından önce ilgili projelerden kopyalayıp bu dosyaya ekleyin / copy each license text here before release.
+
+BAYRAKLAR / FLAGS
+  www/flags.js — SVG bayraklar. ABD bayrağı V110'da bu projede üretilmiştir (50 yıldız, kamu malı tasarım).
+  Diğer bayrakların kaynağı: geliştiricinin doğrulaması gerekir (flag-icons MIT veya Flagpedia kamu malı ise sorun yok).
+
+HARİTA VE DOKU / MAP AND TEXTURES
+  www/globe/data.js (ülke sınırları, doku görselleri) — KAYNAĞI KOD İÇİNDEN DOĞRULANAMADI.
+  Yayından önce kaynağı ve lisansını teyit edin (ör. Natural Earth = kamu malı; NASA Blue Marble = kamu malı).
+  Lisansı belirsiz bir doku varsa değiştirin.
+
+Firebase JS SDK (Apache-2.0) — Rank Maçı için, yalnızca Firebase yapılandırılırsa yüklenir.
+
+Lora Bold (SIL Open Font License 1.1) — Rank ekranı sayıları için www/fonts/Lora-Bold-sub.woff (yalnızca Latin/Türkçe alt kümesi). Telif: The Lora Project Authors.
