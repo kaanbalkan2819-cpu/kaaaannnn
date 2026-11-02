@@ -1,11 +1,11 @@
 /* V114 — Rank Maçı arayüzü. Geri almak için index.html'deki ranked.css satırını silin. */
 
 /* ---- Ana menü düğmesi: mevcut #wcm .mb ölçüleri, lacivert cam + altın çerçeve ---- */
-#wcm .mb.rk{background:linear-gradient(90deg,rgba(74,18,30,.94),rgba(10,6,12,.94));border-color:#d9b866;color:#f3e3b4;min-width:0}
-#wcm .mb.rk em{color:#e3c377;font-size:15px}
-#wcm .mb.rk small{color:#b99a52}
-#wcm .mb.rk:hover,#wcm .mb.rk:focus-visible,#wcm .mb.rk:active{background:linear-gradient(90deg,#6b1a2a,#120a10);border-color:#f0d48a;color:#fff6d8}
-#wcm .mb.rk:before{background:#d9b866}
+#wcm .mb.rk{background:linear-gradient(90deg,rgba(34,58,120,.92),rgba(8,16,40,.92));border-color:#e8b856;color:#ffe9b0;min-width:0}
+#wcm .mb.rk em{color:#ffd067;font-size:15px}
+#wcm .mb.rk small{color:#c9a24d}
+#wcm .mb.rk:hover,#wcm .mb.rk:focus-visible,#wcm .mb.rk:active{background:linear-gradient(90deg,#2a4aa8,#0b1840);border-color:#ffe29a;color:#fff6d8}
+#wcm .mb.rk:before{background:#e8b856}
 /* taşma önlemi (dar ekran): metin kısalır, alt yazı gizlenir */
 #wcm .mb{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:380px){#wcm .mb.rk small{display:none}#wcm .mb{letter-spacing:.12em;padding:0 12px;gap:10px}}
@@ -131,87 +131,3 @@
 .wcr-rays{animation:none!important}
 .wcr-m3d{animation:none!important;filter:none!important;transform:rotateY(-10deg) rotateX(3deg)!important}
 .wcr-badge,.wcr-wp,.wcr-title .wcr-ic,.wcr-div .wcr-ic{filter:none!important}
-
-/* V119 — gerçekçi PNG madalya */
-img.wcr-medal{display:block;max-width:none;height:auto;pointer-events:none;-webkit-user-drag:none;user-select:none}
-.wcr-mini img.wcr-medal{width:100%}
-
-
-/* ================= V122 — Rank ekranı: ana menüyle AYNI dil (Georgia, altın/şarap başlık, pah kırık numaralı düğmeler, istatistik kutuları) =================
-   Geri almak için bu bloğu sil ve ranked.js / ranked_art.js'in önceki sürümünü geri koy. */
-.box.wcr-box{position:relative;border:1px solid rgba(201,162,77,.33)!important;border-image:none!important;border-radius:0!important;padding:22px 22px 20px!important;color:#efe3c2;font-family:Georgia,'Times New Roman',serif;text-align:left;
-  background:radial-gradient(120% 90% at 70% 30%,#1a0b12 0,#07050c 55%,#020208 100%)!important;
-  box-shadow:0 22px 60px #000e,inset 0 0 0 5px #07050c,inset 0 0 0 6px rgba(201,162,77,.18)!important}
-.wcr-seal,.box.wcr-box h3{display:flex;align-items:center;gap:10px;margin:0;color:#c9a24d;font:400 11px Georgia,serif;letter-spacing:.42em;text-transform:uppercase;text-shadow:none;text-align:left}
-.wcr-seal:after,.box.wcr-box h3:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#c9a24d99,transparent)}
-.wcr-stage{height:176px;margin:10px -22px 4px;perspective:none;border:0;background:radial-gradient(ellipse at 50% 50%,rgba(120,22,34,.28),transparent 64%)}
-.wcr-stage:before{opacity:.14}
-.wcr-grat{position:absolute;inset:0;opacity:.5;pointer-events:none;
-  background:repeating-radial-gradient(circle at 50% 50%,transparent 0 34px,rgba(201,162,77,.2) 34px 35px),
-    linear-gradient(rgba(201,162,77,.16),rgba(201,162,77,.16)) 50% 0/1px 100% no-repeat,
-    linear-gradient(rgba(201,162,77,.16),rgba(201,162,77,.16)) 0 50%/100% 1px no-repeat;
-  -webkit-mask-image:radial-gradient(circle,#000 30%,transparent 76%);mask-image:radial-gradient(circle,#000 30%,transparent 76%)}
-.wcr-m3d{transform:none!important}
-.wcr-stage .wcr-m3d img.wcr-medal{filter:drop-shadow(0 8px 8px rgba(0,0,0,.75))}
-/* başlık: ana menüdeki oyun adıyla aynı (altın degrade + şarap alt başlık) */
-.wcr-h1{margin:2px 0 0;line-height:.95;font-weight:900;letter-spacing:.06em;font-size:clamp(28px,8.5vw,40px);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  background:linear-gradient(180deg,#fff4c9 0,#e3b94f 46%,#8a5a10 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.wcr-h1 span{display:block;font-size:.46em;letter-spacing:.34em;margin-top:.14em;
-  background:linear-gradient(180deg,#ff8a74,#b3201a 70%,#5e0b17);-webkit-background-clip:text;background-clip:text;color:transparent}
-/* istatistik kutuları: ana menüdekiyle aynı */
-.wcr-stats{display:flex;gap:8px;margin-top:14px}
-.wcr-stats div{flex:1 1 90px;border:1px solid #c9a24d44;background:#0a060ccc;padding:7px 10px;clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px))}
-.wcr-stats small{display:block;font-size:9.5px;letter-spacing:.25em;color:#8a7a52;text-transform:uppercase}
-.wcr-stats b{font-size:17px;color:#f3e6c4;font-variant-numeric:tabular-nums}
-.wcr-prog{margin:12px 0 0}
-.wcr-bar2{height:8px;border-radius:0;background:#050307;border:1px solid #6e5a2c;box-shadow:inset 0 1px 3px #000}
-.wcr-bar2 i{border-radius:0;background:linear-gradient(180deg,#e6cc86,#ad8636 55%,#6b4c12);box-shadow:none}
-.wcr-bar2 em{background:repeating-linear-gradient(90deg,transparent 0 9.4%,#050307 9.4% 10%)}
-.wcr-sm{font-size:10px;letter-spacing:.25em;color:#8a7a52;text-transform:uppercase;text-align:left}
-.wcr-note{border-radius:0;border:1px solid rgba(201,162,77,.4);background:rgba(94,11,23,.3);color:#e3c377;font-size:11px;letter-spacing:.04em;text-align:left}
-
-/* düğmeler: #wcm .mb ile birebir (numara, sola yaslı, pah kırık, hover'da şarap) */
-.box.wcr-box .menu{display:flex;flex-direction:column;gap:9px;margin-top:16px}
-.box.wcr-box .mb,.box.wcr-box button.big{position:relative;display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;min-height:52px;margin:0;padding:0 18px!important;
-  border:1px solid #c9a24d55!important;border-image:none!important;border-radius:0!important;background:linear-gradient(90deg,#1a0d12ee,#0a060ccc)!important;color:#efe3c2!important;
-  font:700 15px Georgia,serif!important;letter-spacing:.2em!important;text-transform:uppercase;text-align:left;text-shadow:none!important;box-shadow:none!important;
-  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));transition:background .25s,color .25s,padding .25s,border-color .25s;-webkit-tap-highlight-color:transparent}
-.box.wcr-box .mb em{font-style:normal;color:#c9a24d;font-size:12px;width:22px;letter-spacing:0;flex:none}
-.box.wcr-box .mb:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#b3201a;transform:scaleY(0);transition:transform .25s}
-.box.wcr-box .mb:hover,.box.wcr-box .mb:active,.box.wcr-box button.big:active{background:linear-gradient(90deg,#5e0b17,#1a0d12)!important;border-color:#e3b94f!important;color:#fff4c9!important;padding-left:26px!important;filter:none;transform:none}
-.box.wcr-box .mb:active:before,.box.wcr-box .mb:hover:before{transform:none}
-.box.wcr-box .mb.pri,.box.wcr-box button.big.pri{background:linear-gradient(90deg,#c9a24d,#8a5a10)!important;color:#1b1402!important;border-color:#f0d48a!important;min-height:60px;font-size:17px!important}
-.box.wcr-box .mb.pri em{color:#3b2a06}
-.box.wcr-box .mb.pri:hover,.box.wcr-box .mb.pri:active,.box.wcr-box button.big.pri:active{background:linear-gradient(90deg,#f0d48a,#b88b2c)!important;color:#000!important}
-.box.wcr-box .mb.gh,.box.wcr-box button.big.ghost{background:transparent!important;border-color:#c9a24d33!important;color:#b9a77a!important;min-height:40px;font-size:12px!important;clip-path:none}
-.box.wcr-box button.big{justify-content:center;text-align:center}
-
-/* diğer rank ekranları: aynı yazı tipi, mavi yok */
-.wcr-list{border-radius:0;border-color:rgba(201,162,77,.4);background:rgba(0,0,0,.3)}
-.wcr-row{border-bottom-color:rgba(201,162,77,.16);font-family:Georgia,serif}
-.wcr-row .n{color:#8a7a52}.wcr-row b{color:#e3c377}
-.box.wcr-box .wcr-in{border-radius:0;border-color:rgba(201,162,77,.6);letter-spacing:.14em;color:#f0d890;font-family:Georgia,serif}
-.wcr-x{color:#e3c377;font-weight:700;letter-spacing:.2em}.wcr-cd b{color:#f0d890}
-.wcr-res h2{font:900 24px Georgia,serif;letter-spacing:.3em;text-transform:uppercase}
-.wcr-res.win h2{color:#98cf8f}.wcr-res.loss h2{color:#e0705f}.wcr-res.draw h2{color:#e3c377}.wcr-res.invalid h2{color:#9d8c63}
-.wcr-d{font:900 36px Georgia,serif}.wcr-d.p{color:#98cf8f}.wcr-d.n{color:#e0705f}
-.box.wcr-box .wcr-lg{border-radius:0;border:1px solid rgba(201,162,77,.5);background:linear-gradient(180deg,rgba(201,162,77,.12),rgba(9,5,10,.6))}
-.wcr-lg span{letter-spacing:.3em;font-size:12px}.wcr-lg.up span{color:#98cf8f}.wcr-lg.down span{color:#e0705f}
-.box.wcr-box .wcr-spin{border:3px solid rgba(201,162,77,.18);border-top-color:#d9b866}
-#wcr-t{border-radius:0;background:linear-gradient(90deg,#1a0d12ee,#0a060ccc);border-color:#c9a24d88;color:#e3c377;font-family:Georgia,serif;letter-spacing:.16em;font-size:12px;text-transform:uppercase}
-#wcr-t.op{color:#d6cfba;border-color:rgba(160,150,120,.6)}
-#wcr-dc{border-radius:0;font-family:Georgia,serif}
-
-/* ---- V123: sayılar ve başlık için gömülü Lora Bold (düzgün hizalı rakamlar; Georgia'nın eski usul rakamları 1480'i bozuyordu) ---- */
-@font-face{font-family:'WCNum';src:url(fonts/Lora-Bold-sub.woff) format('woff');font-weight:700;font-style:normal;font-display:swap}
-.wcr-h1,.wcr-stats b,.wcr-row b,.wcr-row .n,.wcr-d,.wcr-cd b,.wcr-res h2,.box.wcr-box .mb em,.box.wcr-box .wcr-in,#wcr-dc span{font-family:'WCNum',Georgia,serif!important;font-weight:700;font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1}
-.wcr-h1{font-size:clamp(30px,9vw,42px);letter-spacing:.05em;line-height:1}
-.wcr-h1 span{font-family:Georgia,'Times New Roman',serif;font-weight:900;font-size:.4em;letter-spacing:.38em;margin-top:.3em}
-.wcr-stats{gap:10px;margin-top:16px}
-.wcr-stats div{padding:9px 12px 8px}
-.wcr-stats small{font-family:Georgia,serif;font-size:10px;letter-spacing:.26em;color:#a8976a;margin-bottom:3px}
-.wcr-stats b{display:block;font-size:30px;line-height:1.05;letter-spacing:.04em;
-  background:linear-gradient(180deg,#fff4c9 0,#e3b94f 55%,#a87a1e 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.box.wcr-box .mb em{font-size:14px;width:26px;color:#c9a24d}
-.box.wcr-box .mb.pri em{color:#3b2a06}
-.wcr-row b{font-size:15px}

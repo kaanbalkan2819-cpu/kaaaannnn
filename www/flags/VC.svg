@@ -1,1 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 85.333 512 341.333"><path fill="#FFDA44" d="M0 85.331h512v341.337H0z"/><path fill="#338AF3" d="M0 85.331h170.663v341.337H0z"/><g fill="#6DA544"><path d="M341.337 85.331H512v341.337H341.337zM214.261 283.82l-33.393-50.086 33.392-50.087 33.392 50.087zM297.739 283.82l-33.391-50.086 33.391-50.087 33.393 50.087zM256 350.603l-33.391-50.087L256 250.429l33.391 50.087z"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="0.00" y="0.00" width="513.00" height="342.00" viewBox="0 0 425.15 283.46" preserveAspectRatio="none">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.17 0 L 424.61 0 L 424.61 282.92 L 0.17 282.92 Z M 0.17 0 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 0.17 0 L 107 0 L 107 282.92 L 0.17 282.92 Z M 0.17 0 "/>
+</clipPath>
+<clipPath id="clip-2">
+<path clip-rule="nonzero" d="M 318 0 L 424.61 0 L 424.61 282.92 L 318 282.92 Z M 318 0 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(100%, 80.39%, 0%)" fill-opacity="1" d="M 0.17 282.93 L 0.17 0 L 424.61 0 L 424.61 282.93 Z M 0.17 282.93 "/>
+</g>
+<g clip-path="url(#clip-1)">
+<path fill-rule="nonzero" fill="rgb(0%, 36.86%, 72.15%)" fill-opacity="1" d="M 0.17 282.93 L 0.17 0 L 106.28 0 L 106.28 282.93 Z M 0.17 282.93 "/>
+</g>
+<g clip-path="url(#clip-2)">
+<path fill-rule="nonzero" fill="rgb(0%, 60.39%, 26.66%)" fill-opacity="1" d="M 318.50 282.93 L 318.50 0 L 424.61 0 L 424.61 282.93 Z M 318.50 282.93 "/>
+</g>
+<path fill-rule="nonzero" fill="rgb(0%, 60.39%, 26.66%)" fill-opacity="1" d="M 212.39 141.46 L 235.97 188.62 L 212.39 235.77 L 188.81 188.62 Z M 212.39 141.46 "/>
+<path fill-rule="nonzero" fill="rgb(0%, 60.39%, 26.66%)" fill-opacity="1" d="M 241.86 82.52 L 265.44 129.67 L 241.86 176.83 L 218.28 129.67 Z M 241.86 82.52 "/>
+<path fill-rule="nonzero" fill="rgb(0%, 60.39%, 26.66%)" fill-opacity="1" d="M 182.92 82.52 L 206.5 129.67 L 182.92 176.83 L 159.34 129.67 Z M 182.92 82.52 "/>
+</svg></svg>

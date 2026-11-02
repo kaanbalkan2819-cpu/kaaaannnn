@@ -34,14 +34,7 @@
     return s;
   }
   /* madalya: lg = WCRank.league() çıktısı ({i, div}), size = piksel genişlik */
-  /* V119: gerçekçi madalya (medals/m_<lig>_<kademe>.png, ranked_real.js ile üretildi). Dosya yoksa eski SVG çizim devreye girer. */
   function medal(lg, size) {
-    var i = lg.i, d = i >= 5 ? 0 : Math.min(3, Math.max(1, lg.div || 1)), w = size || 120, h = Math.round(w * 1.2);
-    return '<img class="wcr-medal wcr-real" src="medals/m_' + i + '_' + d + '.png" width="' + w + '" height="' + h + '" alt="" draggable="false" ' +
-      'onerror="this.onerror=null;this.outerHTML=WCArt.medalSvg(' + i + ',' + (lg.div || 0) + ',' + w + ')">';
-  }
-  function medalSvg(i, dv, size) { return medalOld({ i: i, div: dv }, size); }
-  function medalOld(lg, size) {
     var i = lg.i, p = PAL[i] || PAL[0], id = 'wm' + (++uid), w = size || 120, h = Math.round(w * 1.2), d = lg.div || 0;
     var rom = ['', 'I', 'II', 'III'][d] || '';
     var s = '<svg class="wcr-medal" width="' + w + '" height="' + h + '" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>' +
@@ -115,19 +108,11 @@
     '<circle cx="20" cy="20" r="8" fill="#c2332a" stroke="#4a0808" stroke-width=".8"/><path d="M20 20m-5 0a5 5 0 1 1 5 5M20 20m-2.4 0a2.4 2.4 0 1 1 2.4 2.4" fill="none" stroke="#5e0b0b" stroke-width="1" stroke-linecap="round"/><circle cx="17.5" cy="16.5" r="1.8" fill="#ff9a8c" opacity=".7"/></symbol>' +
     '</defs></svg>';
   function ensure() { if (document.getElementById('wcr-sprite')) return; var d = document.createElement('div'); d.id = 'wcr-sprite'; d.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden'; d.innerHTML = SPR; (document.body || document.documentElement).appendChild(d); }
-  /* V121: fantezi süsler (gül, kılıç, balta, mızrak, kalkan) kaldırıldı; yerine ince çizgili askeri motifler */
-  function ic(name, w, h, cls, style) {
-    var body = name === 'shield'
-      ? '<path d="M30 4L54 12V36Q54 56 30 68Q6 56 6 36V12Z" fill="none" stroke="#c9a24d" stroke-width="3" stroke-linejoin="miter"/>'
-      : name === 'rose'
-        ? '<path d="M20 3L37 20L20 37L3 20Z" fill="none" stroke="#c9a24d" stroke-width="2.4"/><path d="M20 12L28 20L20 28L12 20Z" fill="#c9a24d"/>'
-        : '';
-    if (!body) return '';
-    return '<svg class="wcr-ic ' + (cls || '') + '" width="' + w + '" height="' + h + '" viewBox="' + (name === 'shield' ? '0 0 60 72' : '0 0 40 40') + '" style="' + (style || '') + '" aria-hidden="true">' + body + '</svg>';
-  }
-  /* rütbe şeridi (çift şevron) */
+  function ic(name, w, h, cls, style) { ensure(); return '<svg class="wcr-ic ' + (cls || '') + '" width="' + w + '" height="' + h + '" viewBox="' + ({ sword: '0 0 24 120', axe: '0 0 60 120', spear: '0 0 20 130', shield: '0 0 60 72', rose: '0 0 40 40' }[name]) + '" style="' + (style || '') + '" aria-hidden="true"><use href="#wcr-' + name + '"/></svg>'; }
+  /* çapraz kılıçlar (başlık / düğme süsü) */
   function crossed(sz, cls) {
-    return '<svg class="wcr-ic ' + (cls || '') + '" width="' + sz + '" height="' + sz + '" viewBox="0 0 100 100" aria-hidden="true"><path d="M18 46L50 22L82 46" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="square"/><path d="M18 74L50 50L82 74" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="square"/></svg>';
+    ensure(); var u = '<use href="#wcr-sword" x="38" y="-6" width="24" height="112"/>';
+    return '<svg class="wcr-ic ' + (cls || '') + '" width="' + sz + '" height="' + sz + '" viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(-42 50 50)">' + u + '</g><g transform="rotate(42 50 50)">' + u + '</g></svg>';
   }
-  window.WCArt = { medal: medal, medalSvg: medalSvg, mini: mini, ic: ic, crossed: crossed, ensure: ensure, PAL: PAL };
+  window.WCArt = { medal: medal, mini: mini, ic: ic, crossed: crossed, ensure: ensure, PAL: PAL };
 })();

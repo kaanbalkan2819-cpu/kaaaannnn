@@ -17,7 +17,29 @@
     ['Elçi gönder, ama hançeri unutma. Diplomasi, savaşın daha ucuz halidir.', 'Send the envoy, but never forget the dagger. Diplomacy is war made cheaper.'],
     ['Kader yarısını elinde tutar; kalan yarısı cesaretini bekler.', 'Fortune holds half of all deeds; the other half waits for boldness.']
   ];
-  var WHO = 'Il Principe’den esinle · Inspired by Il Principe';
+  /* V122: alıntılar yalnızca Il Principe'den değil; 3. eleman kaynak numarasıdır (yoksa 0). Kaynak yazısı SRC'den gelir. */
+  var SRC = [
+    ['Il Principe’den esinle', 'Inspired by Il Principe'],
+    ['Discorsi’den esinle', 'Inspired by the Discourses on Livy'],
+    ['Savaş Sanatı’ndan esinle', 'Inspired by The Art of War'],
+    ['Floransa Tarihi’nden esinle', 'Inspired by Florentine Histories'],
+    ['Mektuplar’dan esinle', 'Inspired by his Letters']
+  ];
+  QUOTES.push(
+    ['İnsanlar zorunluluk sıkıştırmadıkça iyilik yapmaz; kanunlar bu yüzden vardır.', 'Men do good only when necessity compels them; that is why laws exist.', 1],
+    ['Savaş istediğin zaman başlar, ama istediğin zaman bitmez.', 'War begins when you choose, but it ends only when it chooses.', 1],
+    ['Savaşın kasları para değil, iyi askerdir; iyi asker parayı da bulur.', 'The sinews of war are not gold but good soldiers; good soldiers find the gold.', 1],
+    ['Soylularla halkın çekişmesi Roma’yı yıkmadı; onu özgür ve güçlü kıldı.', 'The strife between nobles and people did not ruin Rome; it made her free and strong.', 1],
+    ['Düzeni değiştirirken eski biçimlerin gölgesini koru; halk değişimi geç fark etsin.', 'When you reshape an order, keep the shadow of the old forms; let the people notice late.', 1],
+    ['Barışta savaşı düşünmeyen komutan, savaşta barışı hayal eder.', 'The commander who ignores war in peacetime will dream of peace in war.', 2],
+    ['Paralı askere güvenen devlet, sonunu kiralamış olur.', 'A state that trusts hired swords has rented out its own ending.', 2],
+    ['İyi plan, düşmanı savaş başlamadan seçeneksiz bırakandır.', 'The best plan leaves the enemy without choices before the battle begins.', 2],
+    ['Erdem huzur doğurur, huzur tembellik, tembellik karışıklık, karışıklık yeniden erdemi.', 'Virtue brings quiet, quiet brings idleness, idleness brings disorder, and disorder brings virtue again.', 3],
+    ['Güç boşluğu asla boş kalmaz; onu ya sen doldurursun ya komşun.', 'A power vacuum never stays empty; you fill it, or your neighbour does.', 3],
+    ['Vatanımı ruhumdan çok seviyorum.', 'I love my homeland more than my own soul.', 4],
+    ['Haberi erken alan, kararı erken verir; kararı erken veren, savaşı seçer.', 'Who learns early decides early; who decides early chooses the war.', 4]
+  );
+  function who(q) { var s = SRC[q[2] || 0] || SRC[0]; return s[X(0, 1)]; }
 
   function lonlat(lon, lat, r) {
     var phi = (lon + 180) * Math.PI / 180, la = lat * Math.PI / 180, c = Math.cos(la);
@@ -53,7 +75,7 @@
         if (drag.on) { drag.vx = (e.clientX - drag.x) * .006; drag.vy = (e.clientY - drag.y) * .004; rotY += drag.vx; rotX = Math.max(-.7, Math.min(.9, rotX + drag.vy)); drag.x = e.clientX; drag.y = e.clientY; }
       });
       window.addEventListener('pointerup', function () { drag.on = false; });
-      var _rt = 0; window.addEventListener('resize', function () { clearTimeout(_rt); _rt = setTimeout(fit, 200); });   /* V119: resize fırtınasında tek seferde uygula */
+      window.addEventListener('resize', fit);
       document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else if (root.classList.contains('on')) start(); });
     }
     var sv = saveInfo(), emb = CFG.emblem ? '<img class="crest" src="' + CFG.emblem + '" alt="" style="animation:none">' : CREST;
@@ -64,23 +86,23 @@
       '<div class="tick">' + X('Divan toplantıda', 'The council convenes') + '<br><b>●</b> ' + X('Cihan masası açık', 'World table open') + '</div>' +
       '<div class="col"><div class="seal">' + emb + '<span>' + X('Cihan Hâkimiyeti Yolunda', 'The Road to World Dominion') + '</span></div>' +
       '<h1>' + letters('WORLD', 0.4) + '<span>' + letters('CONQUEST', 0.9) + '</span></h1>' +
-      '<div class="quote" id="wcq">' + X(q[0], q[1]) + '<b>' + WHO.split(' · ')[X(0, 1)] + '</b></div>' +
+      '<div class="quote" id="wcq">' + X(q[0], q[1]) + '<b>' + who(q) + '</b></div>' +
       (sv ? '<div class="stats"><div><small>' + X('Tur', 'Turn') + '</small><b>' + sv.turn + '</b></div><div><small>' + X('Fethedilen', 'Conquered') + '</small><b>' + sv.mine + '</b></div><div><small>' + X('Dünya', 'World') + '</small><b>' + Math.round(sv.mine / Math.max(1, sv.tot) * 100) + '%</b></div></div>' : '') +
       '<div class="menu">' +
       btn('pri', 'I', X('Yeni Fetih', 'New Conquest'), '', 'new', false, 0) +
       btn('', 'II', X('Seferi Sürdür', 'Resume Campaign'), sv ? X('Tur ', 'Turn ') + sv.turn : '', 'cont', !sv, 1) +
-      (window.Shop ? btn('', 'III', X('Hazine', 'Treasury'), '', 'shop', false, 2) : '') +
       (window.WCRank ? btn('rk', '★', X('Rank Maçı', 'Ranked Match'), X('Sıralamalı', 'Ladder'), 'rank', false, 2.5) : '') +
+      (window.WCTut ? btn('', '?', X('Nasıl Oynanır', 'How to Play'), X('Öğretici', 'Tutorial'), 'tut', false, 2.8) : '') +
       '<div class="row">' + btn('', '⚙', X('Ayarlar', 'Settings'), '', 'set', false, 3) + btn('', '☉', X('Dil', 'Lang'), L === 'tr' ? 'TR' : 'EN', 'lang', false, 4) + '</div>' +
       '</div></div><div class="ver">v35 · ' + X('Makyavelist Sürüm', 'Machiavellian Edition') + '</div>';
     cv = root.querySelector('canvas');
     clearInterval(qTimer);
     qTimer = setInterval(function () {
       var el = document.getElementById('wcq'); if (!el || !running) return; qi++; var q2 = QUOTES[qi % QUOTES.length];
-      el.classList.remove('sw'); void el.offsetWidth; el.innerHTML = X(q2[0], q2[1]) + '<b>' + WHO.split(' · ')[X(0, 1)] + '</b>'; el.classList.add('sw');
+      el.classList.remove('sw'); void el.offsetWidth; el.innerHTML = X(q2[0], q2[1]) + '<b>' + who(q2) + '</b>'; el.classList.add('sw');
     }, 7500);
   }
-  var qi = Math.floor(Math.random() * 7);
+  qi = Math.floor(Math.random() * QUOTES.length);
 
   /* ---- Yeni oyun adımları (onay + mod seçimi) menü içinde çözülür ---- */
   var mainHTML = '';
@@ -116,9 +138,10 @@
     try {
       if (a === 'yes') { subModes(); return; }
       if (a === 'back') { subBack(); return; }
-      if (a === 'm1') { launch(1); return; }
+      if (a === 'm1') { if (window.WCTut && WCTut.ask) WCTut.ask(function () { launch(1); }); else launch(1); return; }   /* V122: yeni oyundan önce öğretici sorusu (yalnızca tek kişilik) */
       if (a === 'onl') { if (window.WCOnline) WCOnline.open(); return; }
       if (a === 'rank') { if (window.WCRank) WCRank.open(); return; }
+      if (a === 'tut') { if (window.WCTut) WCTut.open(); return; }
       if (a === 'cont') { root.classList.add('flash'); cont(); setTimeout(function () { root.classList.remove('flash'); }, 950); }
       else if (a === 'new') { askNew(); }
       else if (a === 'shop') { window.Shop.open(); }
@@ -233,11 +256,7 @@
   function fit() {
     if (!ready || !root) return; W = root.clientWidth || window.innerWidth; H = root.clientHeight || window.innerHeight;
     var _pr = Math.max(.6, Math.min(COARSE ? 1.25 : 1.5, window.devicePixelRatio || 1, Math.sqrt((COARSE ? 600000 : 1100000) / (W * H))) * qMul);
-    _pr = Math.round(_pr * 4) / 4;   /* V119: çözünürlük 0.25'lik sabit adımlara oturur; adres çubuğu/klavye gibi küçük boyut oynamaları gidip gelmeye yol açmaz */
-    if (Math.abs(W - fW) > 2 || Math.abs(H - fH) > 48 || Math.abs(_pr - fR) >= .2) {
-      fW = W; fH = H; fR = _pr; try { renderer.setPixelRatio(_pr); } catch (e) { } renderer.setSize(W, H, false);
-      try { renderer.render(scene, camera); } catch (e) { }   /* V119: setSize tuvali siler; hemen yeniden çiz (pencere açıkken kare atlandığı için boş kalmasın) */
-    }   /* V56: gereksiz yeniden boyutlandırma yok (küre yaklaşırken takılma) */
+    if (W !== fW || H !== fH || Math.abs(_pr - fR) > .01) { fW = W; fH = H; fR = _pr; try { renderer.setPixelRatio(_pr); } catch (e) { } renderer.setSize(W, H, false); }   /* V56: gereksiz yeniden boyutlandırma yok (küre yaklaşırken takılma) */
     camera.aspect = W / H; camera.updateProjectionMatrix();
     // Kamera yakınlaşma animasyonunda z değişir; yerleşim her zaman son mesafeye (3.8) göre hesaplanır
     var hh = Math.tan(20 * Math.PI / 180) * 3.8, hw = hh * camera.aspect, wide = W > 720 && W / H > 1.05, ppu = (H / 2) / hh;
@@ -268,7 +287,7 @@
     for (var i = 0; i < ev.length; i++) { var y = ep.getY(i) + ev[i] * dt; if (y > 3.2) { y = -3.2; ep.setX(i, (Math.random() - .5) * 9); } ep.setY(i, y); ep.setX(i, ep.getX(i) + Math.sin(t / 1400 + i) * dt * .06); }
     ep.needsUpdate = true;
     arcs.forEach(function (a) { stepArc(a, dt); });
-    if (fc > 60) { if (dt > (COARSE ? .06 : .03)) { if (++slowN > 60 && qMul > .75) { qMul = Math.max(.75, qMul * .85); slowN = 0; fit(); } } else if (slowN > 0) slowN--; }   /* V119: yalnızca kalıcı yavaşlıkta ve en fazla .75'e kadar düşer (çözünürlük gidip gelmesin) */   /* uyarlanabilir çözünürlük: yavaş cihazda otomatik düşür */
+    if (fc > 20) { if (dt > (COARSE ? .045 : .026)) { if (++slowN > 20 && qMul > .5) { qMul *= .85; slowN = 0; fit(); } } else if (slowN > 0) slowN--; }   /* uyarlanabilir çözünürlük: yavaş cihazda otomatik düşür */
     fc++; if (fc > 3) introAcc += dt; if (fc === 4) cv.classList.add('rd');
     var intro = Math.min(1, introAcc / 2.4); camera.position.z = 3.8 + (1 - intro * intro * (3 - 2 * intro)) * 1.8;
     renderer.render(scene, camera);

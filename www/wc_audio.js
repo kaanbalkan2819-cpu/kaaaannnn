@@ -44,20 +44,31 @@
   function horn(t, f, d, g) { [0, 7].forEach(function (dt) { tone(f, t, d, 'sawtooth', g, sf, { a: .12, det: dt, lp: 1100 }); }); }
 
   /* ---------- efektler ---------- */
+  /* V122: gerçekçi zar atma sesi — elde sallama (hızlı tıkırtılar) + masaya çarpıp sekme (aralıklar kısalır, ses sönümlenir) + yuvarlanma sürtünmesi */
+  function clack(t, g, f) {
+    nz(t, .035, g, 'bandpass', f * 1.5 + R(-150, 150), f * .8, sf, 3);                   // sert plastik/ahşap "tak"
+    tone(f * .26 * R(.92, 1.08), t, .07, 'triangle', g * .75, sf, { to: f * .14, a: .002 });   // gövde tınısı
+  }
+  function diceRoll(t) {
+    var i, g = .5;
+    for (i = 0; i < 7; i++) clack(t + i * .042 + R(0, .014), .14 + R(0, .07), R(1500, 2300));   // elde sallama
+    [.33, .45, .56, .66, .75, .83, .9, .96].forEach(function (o) { clack(t + o + R(-.008, .008), g, R(1800, 2700)); g *= .72; });   // sekmeler
+    nz(t + .33, .7, .1, 'lowpass', 1000, 280, sf, .7);                                  // masada yuvarlanma
+  }
   function play(k) {
     if (!c || !S().sfxOn) return; var t = c.currentTime + .005, i;
     try {
       switch (k) {
         case 'click': tone(660, t, .07, 'triangle', .22); break;
         case 'tick': tone(880, t, .05, 'sine', .2); break;
-        case 'dice': for (i = 0; i < 7; i++) nz(t + i * .07, .05, .45, 'bandpass', 2200, 0, sf, 2); break;
+        case 'dice': diceRoll(t); break;
         case 'notify': tone(988, t, .16, 'sine', .1); tone(1319, t + .09, .22, 'sine', .08); break;
         case 'ping': tone(1200, t, .5, 'sine', .14, sf, { to: 1180 }); tone(1200, t + .55, .5, 'sine', .07, sf, { to: 1180 }); break;
         case 'coin': tone(1568, t, .09, 'square', .1, sf, { lp: 4000 }); tone(2093, t + .08, .3, 'square', .09, sf, { lp: 4000 }); break;
         case 'attack': drum(t, .9, 110); drum(t + .22, .7, 110); drum(t + .44, .9, 90); horn(t + .1, 196, .9, .12); horn(t + .1, 293.7, .9, .08); break;
         case 'cannon': cannon(t, .8); break;
         case 'boom': boom(t, .9); break;
-        case 'rifle': rifle(t, 6, .22); break;
+        case 'rifle': cannon(t, .35); break;
         case 'missile': whoosh(t, 1.4, .35, true); tone(80, t, 1.4, 'sawtooth', .12, sf, { to: 200, lp: 500, a: .2 }); break;
         case 'horn': horn(t, 130.8, 1.6, .16); horn(t, 196, 1.6, .1); break;
         case 'win': [392, 494, 587, 784].forEach(function (f, j) { tone(f, t + j * .13, .5, 'triangle', .3, sf, { lp: 3000 }); tone(f / 2, t + j * .13, .5, 'sine', .2); }); drum(t, .7, 100); break;
@@ -72,10 +83,10 @@
   function animStart(kind) {
     animEnd(); if (!c) return; animKind = kind || 'land';
     var t0 = Date.now();
-    if (animKind === 'sea') { play('horn'); wave(); } else if (animKind === 'missile') play('missile'); else play('cannon');
+    if (animKind === 'sea') { play('horn'); wave(); } else if (animKind === 'missile' || animKind === 'air') play('missile'); else play('cannon');
     animT = setInterval(function () {
       if (!c || !S().sfxOn || document.hidden) return; var t = c.currentTime + .01, r = Math.random(), el = (Date.now() - t0) / 1000;
-      if (animKind === 'land') { if (r < .5) rifle(t, 5, .2); else if (r < .75) cannon(t, .55); else if (r < .9) boom(t, .45); }
+      if (animKind === 'land') { if (r < .5) cannon(t, .4); else if (r < .75) cannon(t, .55); else if (r < .9) boom(t, .45); }   /* v120: balon patlaması gibi duyulan tiz rifle sesi kaldırıldı */
       else if (animKind === 'sea') { if (r < .35) cannon(t, .5); else if (r < .55) boom(t, .55); if (Math.random() < .3) wave(); }
       else { if (el > 1.8 && r < .6) boom(t, .6); else if (r < .25) whoosh(t, 1.1, .25, true); }
     }, 650);
@@ -127,7 +138,8 @@
           var res = _sb.apply(this, arguments);
           try {
             play('attack');
-            setTimeout(function () { try { if (!window.BSH) return; var me = window.G && G.pl, w = r && r.win; if (p === me) play(w ? 'win' : 'lose'); else if (e === me) play(w ? 'lose' : 'win'); } catch (x) { } }, 2600);
+            /* V122: zafer/yenilgi müziği artık burada 2,6 sn sonra çalmaz — savaş ekranı (v7.js finish) sonuç gerçekten açıldığında çalar;
+               aksi halde rakip 6 atınca sonuç görünmeden "yenilgi" müziği giriyordu. */
           } catch (x) { }
           return res;
         };

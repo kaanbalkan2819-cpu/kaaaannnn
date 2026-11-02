@@ -1,1 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 513 342"><path fill="#ba0c2f" d="M0 0h513v342H0z"/><path fill="#FFF" d="M513 211H202.6v131h-79.9V211H0v-80h122.7V0h79.9v131H513v61.4z"/><path fill="#00205b" d="M513 149.6v42.8H184V342h-42.7V192.4H0v-42.8h141.3V0H184v149.6z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="21.41" y="0.00" width="470.19" height="342.00" viewBox="0 0 389.71 283.46" preserveAspectRatio="xMidYMid meet">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0 0.05 L 388.91 0.05 L 388.91 282.87 L 0 282.87 Z M 0 0.05 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 0 106 L 388.91 106 L 388.91 177 L 0 177 Z M 0 106 "/>
+</clipPath>
+<clipPath id="clip-2">
+<path clip-rule="nonzero" d="M 106 0.05 L 177 0.05 L 177 282.87 L 106 282.87 Z M 106 0.05 "/>
+</clipPath>
+<clipPath id="clip-3">
+<path clip-rule="nonzero" d="M 0 123 L 388.91 123 L 388.91 160 L 0 160 Z M 0 123 "/>
+</clipPath>
+<clipPath id="clip-4">
+<path clip-rule="nonzero" d="M 123 0.05 L 160 0.05 L 160 282.87 L 123 282.87 Z M 123 0.05 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(72.94%, 4.70%, 18.42%)" fill-opacity="1" d="M -0.00 282.87 L -0.00 0.05 L 388.91 0.05 L 388.91 282.87 Z M -0.00 282.87 "/>
+</g>
+<g clip-path="url(#clip-1)">
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M -0.00 176.82 L -0.00 106.11 L 388.91 106.11 L 388.91 176.82 Z M -0.00 176.82 "/>
+</g>
+<g clip-path="url(#clip-2)">
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 106.05 282.87 L 106.05 0.05 L 176.76 0.05 L 176.76 282.87 Z M 106.05 282.87 "/>
+</g>
+<g clip-path="url(#clip-3)">
+<path fill-rule="nonzero" fill="rgb(0%, 12.54%, 35.68%)" fill-opacity="1" d="M -0.00 159.14 L -0.00 123.78 L 388.91 123.78 L 388.91 159.14 Z M -0.00 159.14 "/>
+</g>
+<g clip-path="url(#clip-4)">
+<path fill-rule="nonzero" fill="rgb(0%, 12.54%, 35.68%)" fill-opacity="1" d="M 123.73 282.87 L 123.73 0.05 L 159.08 0.05 L 159.08 282.87 Z M 123.73 282.87 "/>
+</g>
+</svg></svg>

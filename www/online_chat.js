@@ -30,6 +30,17 @@
     '#wcinfo{position:fixed;left:calc(env(safe-area-inset-left,0px) + 8px);bottom:calc(env(safe-area-inset-bottom,0px) + 8px);z-index:57;max-width:46vw;pointer-events:none;display:none;flex-direction:column;gap:2px;font:600 11px system-ui,sans-serif;color:#f2c14e;text-shadow:0 1px 2px #000}' +
     '#wcinfo div{background:rgba(20,14,6,.78);border:1px solid #6b5420;border-radius:8px;padding:2px 8px}';
   document.head.appendChild(css);
+  /* V122: sohbet düğmesi alt paneli (#panel) örtmesin — panel açıkken düğme panelin hemen üstüne çıkar */
+  function place() {
+    try {
+      var hb = $i('wcchb'); if (!hb) return;
+      var p = $i('panel'), b = null;
+      if (p && getComputedStyle(p).display !== 'none') { var r = p.getBoundingClientRect(); if (r.height > 0) b = Math.round(window.innerHeight - r.top) + 8; }
+      hb.style.bottom = b == null ? '' : b + 'px';
+      var pv = $i('wcchp'); if (pv) pv.style.bottom = b == null ? '' : (b + 4) + 'px';
+    } catch (e) { }
+  }
+  setInterval(place, 300);
 
   // ---------- Info (sol alt) ----------
   function info(txt) {

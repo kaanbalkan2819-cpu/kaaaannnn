@@ -76,9 +76,6 @@ if (!new RegExp('applicationId\\s+"' + cfg.appId.replace(/\./g, '\\.') + '"').te
 const mf = A('app', 'src', 'main', 'AndroidManifest.xml'); let m = fs.readFileSync(mf, 'utf8');
 if (!/screenOrientation/.test(m)) { m = m.replace('<activity', '<activity\n            android:screenOrientation="fullUser"'); fs.writeFileSync(mf, m); log('Manifest: ekran yönü = fullUser'); }
 
-// ---- 3b) alt sistem çubuğu (geri/ana ekran) oyunda gizli; ekranın altından çekince görünür ----
-run('node', [path.join(ROOT, 'scripts', 'android_immersive.js')]);
-
 // ---- 4) simge + açılış ekranı ----
 const resSrc = path.join(ROOT, 'resources', 'android');
 if (fs.existsSync(resSrc)) {

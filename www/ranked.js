@@ -1,6 +1,6 @@
 /* V114 — RANK MAÇI. Eşleşme: Firebase (anonim giriş + Firestore kuyruğu). Oyun içi canlı bağlantı: mevcut PeerJS (online.js).
    Bu dosya: profil/Elo/lig, eşleşme, sığınak (YZ rakip), hamle süresi, bağlantı kopması, tur limiti, sonuç doğrulama, liderlik.
-   online.js / v20.js / v35.js içindeki küçük kancalar WCRank.* fonksiyonlarını çağırır (README_V114.txt).
+   online.js / v20.js / v35.js içindeki küçük kancalar WCRank.* fonksiyonlarını çağırır.
    TEST EDİLMEDİ (yalnızca söz dizimi denetimi). */
 (function () {
   'use strict';
@@ -65,6 +65,27 @@
   function refund(n) { P.gold = gold() + n; saveP(); }
   function goodNick(n) { return /^[A-Za-z0-9ÇĞİÖŞÜçğıöşü _.\-]{3,14}$/.test(n || ''); }
 
+  /* V122 — ad sürtünmesi: ekran boş açılmaz, hazır öneriyle ("Oyuncu4821") açılır; değiştirilebilir.
+     Google Play Games oyuncu adı varsa (native köprü: window.WCPlayGames.getDisplayName) otomatik doldurulur. */
+  function newSuggestion() { return X('Oyuncu', 'Player') + Math.floor(rnd(1000, 10000)); }
+  function suggestNick() {
+    var v = jget('wcr_nicksug', ''); if (goodNick(v)) return v;
+    v = newSuggestion(); jset('wcr_nicksug', v); return v;
+  }
+  function cleanNick(n) {   // dış kaynaktan gelen adı izinli karakterlere ve 14 sınırına getirir; geçersizse ''
+    n = String(n || '').replace(/[^A-Za-z0-9ÇĞİÖŞÜçğıöşü _.\-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 14).trim();
+    return goodNick(n) ? n : '';
+  }
+  function pgName(cb) {
+    try {
+      var pg = window.WCPlayGames;
+      if (pg && typeof pg.getDisplayName === 'function') {
+        Promise.resolve(pg.getDisplayName()).then(function (n) { cb(cleanNick(n)); }, function () { cb(''); }); return;
+      }
+    } catch (e) { }
+    cb('');
+  }
+
   /* ---------------- Firebase ---------------- */
   var FB = { ok: false, db: null, uid: null, busy: null };
   function cfgOk() { var c = window.WC_FIREBASE_CONFIG; return !!(c && c.apiKey && c.projectId); }
@@ -112,6 +133,81 @@
     }).catch(function () { cb(); });
   }
 
+  /* ---------------- V122: hesap bağı (Google) ----------------
+     Sorun: puan/ad cihaza bağlı anonim Firebase kimliğine yazılır; telefon değişince/uygulama silinince kimlik kaybolur.
+     Çözüm: anonim kimliği Google hesabına BAĞLA (linkWithCredential → uid değişmez, puan yerinde kalır). Hesap daha önce
+     başka bir kimlikle bağlandıysa (telefon değişimi) o hesaba GİRİŞ yapılır ve sunucudaki puan geri yüklenir.
+     Google kimlik jetonu (idToken) şu kaynaklardan biriyle alınır (hangisi varsa; yoksa düğme hiç görünmez):
+       1) window.WCPlayGames.getIdToken()  — Google Play Games / native köprün (ileride bağlanınca bunu doldur)
+       2) Capacitor.Plugins.SocialLogin (Capgo)   3) Capacitor.Plugins.GoogleAuth (codetrix)
+       4) tarayıcıda (native değil) Firebase popup. TEST EDİLMEDİ. */
+  var AL = { cred: null, busy: false, last: null };
+  function isNative() { try { var C = window.Capacitor; return !!(C && (C.isNativePlatform ? C.isNativePlatform() : (C.getPlatform && C.getPlatform() !== 'web'))); } catch (e) { return false; } }
+  function plug() { try { return (window.Capacitor && Capacitor.Plugins) || {}; } catch (e) { return {}; } }
+  function tokenSource() {
+    var pg = window.WCPlayGames, pl = plug();
+    if (pg && typeof pg.getIdToken === 'function') return 'pg';
+    if (pl.SocialLogin && pl.SocialLogin.login) return 'social';
+    if (pl.GoogleAuth && pl.GoogleAuth.signIn) return 'gauth';
+    if (!isNative()) return 'popup';
+    return null;
+  }
+  function getIdToken(src) {
+    var pl = plug(), bad = function () { throw new Error('notoken'); };
+    if (src === 'pg') return Promise.resolve(window.WCPlayGames.getIdToken()).then(function (t) { return t || bad(); });
+    if (src === 'social') return pl.SocialLogin.login({ provider: 'google', options: { scopes: ['email', 'profile'] } }).then(function (r) { var x = r && r.result; return (x && x.idToken) || bad(); });
+    if (src === 'gauth') return pl.GoogleAuth.signIn().then(function (r) { return (r && r.authentication && r.authentication.idToken) || bad(); });
+    return Promise.reject(new Error('nosrc'));
+  }
+  function curUser() { try { return firebase.auth().currentUser; } catch (e) { return null; } }
+  function linkedInfo() {
+    var u = curUser(); if (!u || u.isAnonymous) return null;
+    var em = u.email; (u.providerData || []).forEach(function (p) { if (!em && p && p.email) em = p.email; });
+    return { email: em || '' };
+  }
+  function acctHtml() {
+    if (!FB.ok) return '';
+    var li = linkedInfo();
+    if (li) return '<div class="wcr-sm">✓ ' + X('Google hesabına bağlı', 'Linked to Google') + (li.email ? ' · ' + esc(li.email) : '') + '</div>';
+    if (tokenSource()) return '<div class="wcr-note">' + X('Puanın şu an bu cihaza bağlı: telefon değiştirirsen ya da uygulamayı silersen kaybolur.', 'Your rating is tied to this device: you lose it if you change phones or uninstall.') + '</div>' +
+      '<button class="big" onclick="WCRank.link()">🔗 ' + X('Google ile Bağla', 'Link with Google') + '</button>';
+    return '<div class="wcr-sm">' + X('Hesap: bu cihaza bağlı (misafir). Google ile bağlama Google Play sürümüyle gelecek.', 'Account: tied to this device (guest). Google linking arrives with the Google Play build.') + '</div>';
+  }
+  function linkErr(e) {
+    var c = (e && (e.code || e.message)) || '';
+    if (/cancel|popup-closed|12501|canceled/i.test(c)) return hub();   // kullanıcı vazgeçti
+    hub(); toast(X('Hesap bağlanamadı', 'Could not link account') + (c ? ' (' + String(c).slice(0, 40) + ')' : ''));
+  }
+  function link() {
+    if (AL.busy || !FB.ok) return; var u = curUser(); if (!u || !u.isAnonymous) return hub();
+    var src = tokenSource(); if (!src) return hub();
+    AL.busy = true; AL.cred = null;
+    rmodal('<h3>' + X('Hesap Bağla', 'Link Account') + '</h3>' + M_(X('Google ile bağlanılıyor…', 'Connecting to Google…')));
+    function fin(ok) { AL.busy = false; if (ok) { syncProfile(function () { hub(); toast(X('Hesabın bağlandı ✓', 'Account linked ✓')); }); } }
+    function conflict(e) {   // bu Google hesabı daha önce başka kimlikle bağlanmış → geri yükleme onayı
+      var cr = e && e.credential; if (!cr) { AL.busy = false; return linkErr(e); }
+      AL.cred = cr; AL.busy = false;
+      rmodal('<h3>' + X('Kayıtlı Hesap Bulundu', 'Saved Account Found') + '</h3>' +
+        M_(X('Bu Google hesabı daha önce bağlanmış. Devam edersen o hesaptaki puanın yüklenir; bu cihazdaki misafir puanın (★ ', 'This Google account was linked before. If you continue, its saved rating is loaded; this device\'s guest rating (★ ') + P.rating + X(') kullanılmaz.', ') will not be used.')) +
+        '<button class="big pri" onclick="WCRank.linkSwitch()">' + X('Kayıtlı hesabı yükle', 'Load saved account') + '</button>' +
+        '<button class="big ghost" onclick="WCRank.hub()">' + X('Vazgeç', 'Cancel') + '</button>');
+    }
+    var isConf = function (e) { return e && (e.code === 'auth/credential-already-in-use' || e.code === 'auth/email-already-in-use'); };
+    var p;
+    if (src === 'popup') p = u.linkWithPopup(new firebase.auth.GoogleAuthProvider());
+    else p = getIdToken(src).then(function (t) { AL.last = firebase.auth.GoogleAuthProvider.credential(t); return u.linkWithCredential(AL.last); });
+    p.then(function () { fin(true); }).catch(function (e) { if (isConf(e)) { if (!e.credential && AL.last) e.credential = AL.last; conflict(e); } else { AL.busy = false; linkErr(e); } });
+  }
+  function linkSwitch() {
+    var cr = AL.cred; AL.cred = null; if (!cr) return hub();
+    rmodal('<h3>' + X('Hesap Bağla', 'Link Account') + '</h3>' + M_(X('Hesap yükleniyor…', 'Loading account…')));
+    firebase.auth().signInWithCredential(cr).then(function (r) {
+      FB.uid = r.user.uid; FB.db = firebase.firestore();
+      P.games = 0; P.w = P.l = P.d = 0; P.rating = CFG.start; saveP();   // sunucu kaydı (varsa) syncProfile ile üzerine yazılır
+      syncProfile(function () { if (!P.nick) return askNick(true); hub(); toast(X('Kayıtlı hesap yüklendi ✓', 'Saved account loaded ✓')); });
+    }).catch(linkErr);
+  }
+
   /* ---------------- ekranlar ---------------- */
   var timers = [];
   function tset(f, ms) { var t = setTimeout(f, ms); timers.push(t); return t; }
@@ -130,21 +226,27 @@
     var A = art(), lg = league(P.rating), nx = lg.i < LG.length - 1 ? league(LG[lg.i + 1].min) : null,
       pct = lg.hi ? Math.max(3, Math.round((P.rating - lg.lo) / (lg.hi - lg.lo) * 100)) : 100, left = lg.hi ? lg.hi - P.rating : 0;
     rmodal('<div class="wcr-hub">' +
-      '<div class="wcr-seal">' + X('RANK MAÇI', 'RANKED MATCH') + '</div>' +
-      '<div class="wcr-stage" style="--c:' + lg.c + '"><div class="wcr-grat"></div><div class="wcr-m3d">' + A.medal(lg, 140) + '</div></div>' +
-      '<h1 class="wcr-h1">' + esc(P.nick || '—') + '<span>' + esc(lg.label.toLocaleUpperCase(X('tr', 'en-US'))) + '</span></h1>' +
-      '<div class="wcr-stats"><div><small>' + X('PUAN', 'RATING') + '</small><b>' + P.rating + '</b></div><div><small>' + X('SONRAKİ LİGE', 'TO NEXT LEAGUE') + '</small><b>' + (lg.hi ? left : '—') + '</b></div></div>' +
+      '<div class="wcr-corner c-tl">' + A.ic('rose', 26, 26) + '</div><div class="wcr-corner c-tr">' + A.ic('rose', 26, 26) + '</div><div class="wcr-corner c-bl">' + A.ic('rose', 26, 26) + '</div><div class="wcr-corner c-br">' + A.ic('rose', 26, 26) + '</div>' +
+      '<div class="wcr-title">' + A.crossed(34) + '<h3>' + X('RANK MAÇI', 'RANKED MATCH') + '</h3>' + A.crossed(34) + '</div>' +
+      '<div class="wcr-div"><i></i>' + A.ic('rose', 18, 18) + '<i></i></div>' +
+      '<div class="wcr-stage" style="--c:' + lg.c + '"><div class="wcr-rays"></div><div class="wcr-sh">' + A.ic('shield', 150, 180) + '</div>' +
+        '<div class="wcr-wp l">' + A.ic('axe', 44, 88) + A.ic('sword', 18, 90) + '</div><div class="wcr-wp r">' + A.ic('spear', 20, 104) + A.ic('sword', 18, 90) + '</div>' +
+        '<div class="wcr-m3d">' + A.medal(lg, 150) + '</div></div>' +
+      '<div class="wcr-plate"><b>' + esc(P.nick || '—') + '</b></div>' +
+      '<div class="wcr-lgn" style="color:' + lg.c + '">' + esc(lg.label.toUpperCase()) + '</div>' +
+      '<div class="wcr-rat">★ ' + P.rating + '</div>' +
       '<div class="wcr-prog"><span class="pm">' + A.mini(lg, 34) + '</span><div class="wcr-bar2"><i style="width:' + pct + '%"></i><em></em></div><span class="pm dim">' + (nx ? A.mini(nx, 34) : A.ic('rose', 30, 30)) + '</span></div>' +
+      '<div class="wcr-sm">' + (lg.hi ? X('Sonraki lige ', 'To next league: ') + left + X(' puan', ' pts') : X('En üst lig', 'Top league')) + '</div>' +
       (cfgOk() ? '' : '<div class="wcr-note">' + X('Firebase ayarlanmamış: gerçek rakip aranmaz, liderlik tablosu kapalı.', 'Firebase is not configured: no live opponents, leaderboard disabled.') + '</div>') +
-      '<div class="menu">' +
-        '<button class="mb pri" onclick="WCRank.find()"><em>01</em><span>' + X('Maç Bul', 'Find Match') + '</span></button>' +
-        '<button class="mb" onclick="WCRank.board()"><em>02</em><span>' + X('Liderlik', 'Leaderboard') + '</span></button>' +
-        '<button class="mb" onclick="WCRank.nick()"><em>03</em><span>' + X('Takma Ad', 'Nickname') + '</span></button>' +
-        '<button class="mb gh" onclick="closeMod()"><em>×</em><span>' + X('Kapat', 'Close') + '</span></button></div></div>');
+      '<button class="big pri wcr-go" onclick="WCRank.find()">' + A.crossed(26) + '<span>' + X('Maç Bul', 'Find Match') + '</span>' + A.crossed(26) + '</button>' +
+      '<div class="wcr-two"><button class="big" onclick="WCRank.board()">' + A.ic('shield', 18, 22) + '<span>' + X('Liderlik', 'Leaderboard') + '</span></button>' +
+      '<button class="big" onclick="WCRank.nick()">' + A.ic('rose', 20, 20) + '<span>' + X('Takma Ad', 'Nickname') + '</span></button></div>' +
+      acctHtml() +
+      '<button class="big ghost wcr-x2" onclick="closeMod()">' + X('Kapat', 'Close') + '</button></div>');
   }
   function openHub() {
     if (!window.WCStats || !WCStats.ready()) return toast(X('Ülke verisi yükleniyor, birazdan tekrar dene', 'Country data is loading, try again shortly'));
-    rmodal('<h3>' + X('Rank Maçı', 'Ranked Match') + '</h3>' + M_(X('Bağlanılıyor…', 'Connecting…')));
+    rmodal('<h3>★ ' + X('Rank Maçı', 'Ranked Match') + '</h3>' + M_(X('Bağlanılıyor…', 'Connecting…')));
     fbInit(function () {
       syncProfile(function () {
         if (!P.nick) return askNick(true);
@@ -153,10 +255,19 @@
     });
   }
   function askNick(first) {
-    rmodal('<h3>' + X('Takma Ad', 'Nickname') + '</h3><div style="color:var(--tx2);margin-bottom:8px">' + X('3–14 karakter (harf, rakam, boşluk, _ . -). Liderlik tablosunda görünür.', '3–14 chars (letters, digits, space, _ . -). Shown on the leaderboard.') + '</div>' +
-      '<input id="wcrn" maxlength="14" value="' + esc(P.nick) + '" class="wcr-in"><div id="wcre" class="wcr-err"></div>' +
+    var pre = P.nick || suggestNick();
+    rmodal('<h3>' + X('Takma Ad', 'Nickname') + '</h3><div style="color:var(--tx2);margin-bottom:8px">' + X('Senin için bir ad hazırladık; istersen değiştir. 3–14 karakter (harf, rakam, boşluk, _ . -). Liderlik tablosunda görünür.', 'We picked a name for you; change it if you like. 3–14 chars (letters, digits, space, _ . -). Shown on the leaderboard.') + '</div>' +
+      '<input id="wcrn" maxlength="14" value="' + esc(pre) + '" class="wcr-in" oninput="this.dataset.d=1"><div id="wcre" class="wcr-err"></div>' +
       '<button class="big pri" onclick="WCRank.saveNick(' + (first ? 1 : 0) + ')">' + X('Kaydet', 'Save') + '</button>' +
+      (P.nick ? '' : '<button class="big" onclick="WCRank.reroll()">🎲 ' + X('Başka Öner', 'Suggest Another') + '</button>') +
       '<button class="big ghost" onclick="' + (first ? 'closeMod()' : 'WCRank.hub()') + '">' + X('Vazgeç', 'Cancel') + '</button>');
+    if (!P.nick) pgName(function (n) {   // Play Games adı geldiyse ve oyuncu henüz yazmadıysa doldur
+      var e = $i('wcrn'); if (n && e && !e.dataset.d) e.value = n;
+    });
+  }
+  function reroll() {
+    var v = newSuggestion(); jset('wcr_nicksug', v);
+    var e = $i('wcrn'); if (e) { e.value = v; e.dataset.d = 1; }
   }
   function saveNick(first) {
     var v = (($i('wcrn') || {}).value || '').trim();
@@ -240,8 +351,8 @@
       return FB.db.runTransaction(function (t) {
         return Promise.all([t.get(qa), t.get(qb)]).then(function (r) {
           var a = r[0].data(), b = r[1].data(); if (!a || !b || a.status !== 'waiting' || b.status !== 'waiting') throw new Error('gone');
-          var tier = WCStats.randomTier(), hc = WCStats.pick(tier, 0), gc = WCStats.pick(tier, 1);
-          t.set(mref, { players: [FB.uid, b.uid], host: { uid: FB.uid, nick: P.nick, rating: P.rating }, guest: { uid: b.uid, nick: b.nick, rating: b.rating || CFG.start }, tier: tier, hc: hc, gc: gc, hsw: false, gsw: false, code: mkCode(), rh: null, rg: null, created: ts() });
+          var tier = WCStats.randomTier(), pr = WCStats.pickPair(tier), hc = pr.hc, gc = pr.gc;
+          t.set(mref, { players: [FB.uid, b.uid], host: { uid: FB.uid, nick: P.nick, rating: P.rating }, guest: { uid: b.uid, nick: b.nick, rating: b.rating || CFG.start }, tier: tier, hc: hc, gc: gc, hsw: false, gsw: false, hok: false, gok: false, code: mkCode(), rh: null, rg: null, created: ts() });
           t.update(qa, { status: 'matched', mid: mref.id }); t.update(qb, { status: 'matched', mid: mref.id });
         });
       }).then(function () { if (MM && !MM.got) { MM.got = true; gotMatch(mref.id); } });
@@ -258,30 +369,50 @@
     }).catch(fail);
   }
   function fail() { hub(); toast(X('Eşleşme kurulamadı', 'Could not set up the match')); }
-  var FN1 = ['Efe', 'Deniz', 'Mert', 'Aras', 'Emre', 'Burak', 'Cem', 'Arda', 'Kerem', 'Onur', 'Tolga', 'Yigit', 'Baran', 'Selin', 'Ece', 'Zeynep', 'Defne', 'Nova', 'Vex', 'Atlas', 'Orion', 'Kral', 'Aslan', 'Kurt', 'Bora', 'Alp', 'Ege', 'Mira', 'Leo', 'Ryan', 'Alex', 'Max', 'Jake', 'Luka', 'Marco'];
-  var FN2 = ['', '', '_', 'x', 'TR', 'Pro', 'Gaming', 'Wolf', '_tr', 'GG'];
+  /* V122: bot adları — tek "Mira" ve "Gaming" yerine geniş, gerçek oyuncu gibi görünen biçimler. Tek bir kelime sık tekrarlanmasın diye
+     son kullanılan adlar hatırlanır (aynı sözcük art arda gelmez). */
+  var FN1 = ['Efe', 'Deniz', 'Mert', 'Aras', 'Emre', 'Burak', 'Cem', 'Arda', 'Kerem', 'Onur', 'Tolga', 'Yigit', 'Baran', 'Selin', 'Ece', 'Zeynep', 'Defne', 'Nova', 'Vex', 'Atlas', 'Orion', 'Kral', 'Aslan', 'Kurt', 'Bora', 'Alp', 'Ege', 'Leo', 'Ryan', 'Alex', 'Max', 'Jake', 'Luka', 'Marco', 'Berk', 'Kaan', 'Umut', 'Ozan', 'Can', 'Ilker', 'Tuna', 'Mete', 'Doruk', 'Poyraz', 'Taha', 'Sarp', 'Ilgaz', 'Rüzgar', 'Yildiz', 'Elif', 'Ada', 'Asya', 'Derya', 'Naz', 'Lara', 'Ayaz', 'Sina', 'Nikos', 'Ivan', 'Omar', 'Hugo', 'Felix', 'Theo', 'Mika', 'Dante', 'Kai', 'Rex', 'Zed', 'Rio'];
+  var FN2 = ['', '', '', '', '_', 'x', 'TR', 'Pro', 'Wolf', '_tr', 'GG', 'King', 'Boss', 'Zero', 'Fire', 'Storm', 'Shadow', 'Hunter', 'Ace', 'Lord', 'Tank', 'Blade', 'Sniper', 'FX', '34', '06', '35', '61'];
+  var NAMED = [];   // son kullanılan adlar
+  var STYLES = [
+    function (a, b, n) { return a + n; },                       // Efe42
+    function (a, b, n) { return a + '_' + (b || pickOf(FN2.slice(5))); },   // Mert_Wolf
+    function (a, b, n) { return (b || pickOf(FN2.slice(5))) + a; },         // KingBora
+    function (a, b, n) { return a.toLowerCase() + (n || Math.floor(rnd(10, 999))); },   // arda317
+    function (a, b, n) { return a + pickOf(FN1); },             // EfeKaan
+    function (a, b, n) { return 'xX' + a + 'Xx'; },             // xXBoraXx
+    function (a, b, n) { return a + '.' + pickOf(['tr', 'gz', 'ist', 'ank', 'izm', 'jr']); },   // Cem.ist
+    function (a, b, n) { return a + (Math.random() < .5 ? '07' : '99') ; }
+  ];
   function botIdentity() {
-    var a = pickOf(FN1), b = pickOf(FN2), n = Math.random() < .6 ? String(Math.floor(rnd(1, 99))) : (Math.random() < .5 ? String(Math.floor(rnd(1990, 2010))) : ''), nk;
-    nk = Math.random() < .5 ? a + b + n : b + a + n; nk = nk.replace(/^_+/, '').slice(0, 14); if (nk.length < 3) nk = a + '77';
-    var r = Math.max(0, Math.round(P.rating + rnd(-70, 70)));
-    return { nick: nk, rating: r };
+    var nk = '', tries = 0;
+    do {
+      var a = pickOf(FN1), b = pickOf(FN2), n = Math.random() < .55 ? String(Math.floor(rnd(1, 99))) : (Math.random() < .5 ? String(Math.floor(rnd(1990, 2010))) : '');
+      nk = pickOf(STYLES)(a, b, n).replace(/[^A-Za-z0-9ÇĞİÖŞÜçğıöşü _.\-]/g, '').replace(/^[_.\-]+/, '').slice(0, 14);
+      if (nk.length < 3) nk = a + String(Math.floor(rnd(10, 99)));
+      tries++;
+    } while (tries < 8 && NAMED.some(function (x) { return x.toLowerCase() === nk.toLowerCase() || x.toLowerCase().indexOf(nk.toLowerCase().slice(0, 4)) === 0; }));
+    NAMED.push(nk); if (NAMED.length > 12) NAMED.shift();
+    var rt = Math.max(0, Math.round(P.rating + rnd(-70, 70)));
+    return { nick: nk, rating: rt };
   }
   function toBot() {
     stopMM();
     if (FB.ok) FB.db.collection('queue').doc(FB.uid).delete().catch(function () { });
-    var b = botIdentity(), tier = WCStats.randomTier();
-    lobby({ mid: 'bot-' + Date.now(), role: 'host', myC: WCStats.pick(tier, 0), opC: WCStats.pick(tier, 1), opNick: b.nick, opRating: b.rating, tier: tier, code: null, ref: null, bot: true });
+    var b = botIdentity(), tier = WCStats.randomTier(), pr = WCStats.pickPair(tier);
+    lobby({ mid: 'bot-' + Date.now(), role: 'host', myC: pr.hc, opC: pr.gc, opNick: b.nick, opRating: b.rating, tier: tier, code: null, ref: null, bot: true });
   }
 
   /* ---- "rakip bulundu" + tek seferlik ülke değiştirme ---- */
   var LB = null;
   function lobby(o) {
-    clearT(); LB = o; LB.swapped = false; LB.locked = false; LB.end = Date.now() + CFG.lobbySec * 1000;
+    clearT(); LB = o; LB.swapped = false; LB.locked = false; LB.myOk = false; LB.opOk = false; LB.end = Date.now() + CFG.lobbySec * 1000;
     CUR = { mid: o.mid, bot: o.bot, role: o.role, opNick: o.opNick, opRating: o.opRating, ref: o.ref, done: false, before: P.rating };
     if (o.ref) {
       LB.unsub = o.ref.onSnapshot(function (s) {
         var d = s.data(); if (!d || !LB) return;
         var oc = o.role === 'host' ? d.gc : d.hc; if (oc && oc !== LB.opC) { LB.opC = oc; if (!LB.locked) draw(); }
+        var ok = o.role === 'host' ? d.gok : d.hok; if (ok && !LB.opOk) { LB.opOk = true; if (!LB.locked) { if (LB.myOk) return launch(); draw(); } }   // V122: rakip ülkeyi onayladı
       });
     }
     draw(); iset(tick, 250);
@@ -293,18 +424,30 @@
       '<div class="wcr-vs"><div class="wcr-side">' + fimg(LB.myC, 'lg') + '<b>' + esc(M[LB.myC].name) + '</b><small>' + X('Sen', 'You') + '</small></div><div class="wcr-x">VS</div>' +
       '<div class="wcr-side">' + fimg(LB.opC, 'lg') + '<b>' + esc(M[LB.opC].name) + '</b><small>' + esc(LB.opNick) + ' · ' + esc(lg.label) + '</small></div></div>' +
       '<div class="wcr-cd">' + X('Maç başlıyor: ', 'Match starts: ') + '<b id="wcr-lbt">' + Math.max(0, Math.ceil((LB.end - Date.now()) / 1000)) + '</b></div>' +
-      '<button class="big" ' + (LB.swapped ? 'disabled' : '') + ' onclick="WCRank.swap()">' + (LB.swapped ? X('Ülke değiştirildi (hak bitti)', 'Country changed (used)') : X('Ülkeyi Değiştir — ', 'Change Country — ') + CFG.swapCost + ' 🪙') + '</button>' +
+      '<button class="big pri" ' + (LB.myOk ? 'disabled' : '') + ' onclick="WCRank.confirmC()">' + (LB.myOk ? (LB.opOk ? '✓' : X('✓ Onaylandı — rakip bekleniyor…', '✓ Confirmed — waiting for rival…')) : '✓ ' + X('Ülkeyi Onayla (hemen başla)', 'Confirm Country (start now)')) + '</button>' +
+      (LB.opOk && !LB.myOk ? '<div class="wcr-sm">' + X('Rakip hazır!', 'Rival is ready!') + '</div>' : '') +
+      '<button class="big" ' + (LB.swapped || LB.myOk ? 'disabled' : '') + ' onclick="WCRank.swap()">' + (LB.swapped ? X('Ülke değiştirildi (hak bitti)', 'Country changed (used)') : X('Ülkeyi Değiştir — ', 'Change Country — ') + CFG.swapCost + ' 🪙') + '</button>' +
       '<div class="wcr-sm">🪙 ' + gold() + ' · ' + X('Bir kez, aynı güç grubundan rastgele.', 'Once, random from the same strength group.') + '</div>');
   }
   function swap() {
-    if (!LB || LB.swapped || LB.locked) return;
+    if (!LB || LB.swapped || LB.locked || LB.myOk) return;
     if (!spend(CFG.swapCost)) return toast(X('Yeterli altın yok (', 'Not enough gold (') + CFG.swapCost + ')');
-    var t = WCStats.tierOf(LB.myC), n = WCStats.pick(t, LB.role === 'host' ? 0 : 1, [LB.myC, LB.opC]);
+    var t = WCStats.tierOf(LB.myC), n = WCStats.pickNear(t, LB.role === 'host' ? 0 : 1, [LB.myC, LB.opC], LB.opC);   // V122: değişimde de rakibe makul uzaklıkta
     if (!n) { refund(CFG.swapCost); return toast(X('Uygun ülke bulunamadı', 'No suitable country')); }
     LB.swapped = true; LB.myC = n; draw();
     if (LB.ref) { var u = LB.role === 'host' ? { hc: n, hsw: true } : { gc: n, gsw: true }; LB.ref.update(u).catch(function () { }); }
   }
-  function botLevel(r) { r = +r || CFG.start; return Math.max(0, Math.min(1, (r - 900) / 1000)); }
+  /* V122: "Ülkeyi Onayla" — iki taraf da onaylarsa geri sayımı beklemeden maç başlar. Rakip YZ ise onay anında geçerli sayılır. */
+  function confirmC() {
+    if (!LB || LB.locked || LB.myOk) return;
+    LB.myOk = true;
+    if (LB.ref) LB.ref.update(LB.role === 'host' ? { hok: true } : { gok: true }).catch(function () { });
+    if (LB.bot) LB.opOk = true;
+    if (LB.opOk) return launch();
+    draw();
+  }
+  /* V122: YZ rakip daha yumuşak — en üst lig bile tam gücün yarısını geçmez (asıl amaç gerçek rakiple mücadele) */
+  function botLevel(r) { r = +r || CFG.start; return Math.max(0, Math.min(.5, (r - 900) / 1800)); }
   function launch() {
     if (!LB || LB.locked) return; LB.locked = true; clearT(); var o = LB; try { if (o.unsub) o.unsub(); } catch (e) { }
     jset('wcr_pending', { mid: o.mid, opRating: o.opRating, t: Date.now() });   // yarıda bırakma = mağlubiyet (sonraki açılışta işlenir)
@@ -446,7 +589,7 @@
 
   window.WCRank = {
     CFG: CFG, league: league, eloDelta: eloDelta,
-    open: openHub, hub: hub, find: find, cancelFind: cancelFind, board: board, nick: function () { askNick(false); }, saveNick: saveNick, swap: swap,
+    open: openHub, hub: hub, find: find, cancelFind: cancelFind, board: board, nick: function () { askNick(false); }, saveNick: saveNick, confirmC: confirmC, reroll: reroll, link: link, linkSwitch: linkSwitch, swap: swap,
     // online.js / v20.js kancaları
     botTurnNow: botTurnNow, botTurn: botTurn, beforeHandoff: beforeHandoff, onDisc: onDisc, onResume: onResume, onFail: onFail, graceSec: function () { return CFG.graceSec; },
     _profile: function () { return P; }

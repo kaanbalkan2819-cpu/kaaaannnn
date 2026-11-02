@@ -14,7 +14,6 @@ if not exist android\gradlew.bat (
   pause
   exit /b 1
 )
-call node scripts\android_immersive.js
 echo [1/3] Capacitor dosyalari senkronize ediliyor...
 call npx cap sync android
 if errorlevel 1 (echo HATA: Capacitor sync basarisiz. & pause & exit /b 1)

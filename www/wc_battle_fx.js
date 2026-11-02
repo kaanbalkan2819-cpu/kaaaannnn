@@ -13,6 +13,7 @@
  *    fx.infantryAttack({ from, to, color, count:4, target })
  *    fx.navalAttack({ from, to, color, targetColor })        // gemi + torpido, hedef gemi batar
  *    fx.missileAttack({ from, to, tos:[{x,y,z}..], color, missiles:6 })   // v6: füze atar kamyonu + minik füzeler (tos = isabet noktaları)
+ *    fx.planeAttack({ from, to, tos:[{x,y,z}..], color, planes:2, bombs:2 })   // v7: savaş uçakları + bombalar (hava saldırısı)
  *    fx.clear();  fx.timeScale = 0.35;  // yavaş çekim
  *
  *  Tüm koordinatlar fx.root grubunun YEREL uzayındadır (Y = yukarı, deniz seviyesi y=0).
@@ -610,6 +611,66 @@
     return g;
   }
 
+
+
+  /* ---- v7: SAVAŞ UÇAĞI + BOMBA — tank / füze atar ile aynı malzeme, kamuflaj ve takım şeridi diliyle ---- */
+  // (x,z) düzleminde dışbükey çokgen -> ince, çift yüzlü kanat (üstü açık, altı koyu, kenarlar orta ton)
+  function planform(pts, th, mat) {
+    const mb = new MB(), n = pts.length, h = th / 2;
+    for (let i = 1; i < n - 1; i++) {
+      mb.tri([pts[0][0], h, pts[0][1]], [pts[i][0], h, pts[i][1]], [pts[i + 1][0], h, pts[i + 1][1]], [1, 1, 1]);
+      mb.tri([pts[0][0], -h, pts[0][1]], [pts[i + 1][0], -h, pts[i + 1][1]], [pts[i][0], -h, pts[i][1]], [.55, .55, .55]);
+    }
+    for (let i = 0; i < n; i++) { const a = pts[i], b = pts[(i + 1) % n]; mb.quad([a[0], -h, a[1]], [b[0], -h, b[1]], [b[0], h, b[1]], [a[0], h, a[1]], [.75, .75, .75]); }
+    return new T.Mesh(mb.build(), mat);
+  }
+  function buildBomb(color) {
+    const g = new T.Group();
+    const body = stdv(0x6a7357, { roughness: .6, metalness: .3 }), band = stdv(color, { roughness: .45, emissive: color, emissiveIntensity: .25 });
+    const dark = stdv(0x1a2138, { roughness: .9 }), finM = stdv(0x5b6482, { metalness: .4, roughness: .5 });
+    g.add(along(cyv(.085, .085, .5, 12, body, 0, 0, 0)));
+    g.add(along(cov(.085, .22, 12, body, 0, 0, .36)));                     // burun
+    g.add(along(cyv(.089, .089, .07, 12, band, 0, 0, .08)));               // takım bandı
+    g.add(along(cyv(.05, .085, .1, 10, dark, 0, 0, -.3)));                 // kuyruk lülesi
+    for (let k = 0; k < 4; k++) { const f = new T.Group(); f.rotation.z = Math.PI / 4 + k * Math.PI / 2; f.add(bxv(.014, .14, .2, finM, 0, .15, -.38)); g.add(f); }
+    bake(g);
+    return g;
+  }
+  function buildPlane(color) {
+    const g = new T.Group();
+    const cm = { map: camoTex(color), roughness: .8, metalness: .15 }, camo = stdv(0xffffff, cm), camo2 = stdv(0xc4c4c4, cm);
+    const dark = stdv(0x1a2138, { roughness: .9 }), metal = stdv(0x8b97b8, { metalness: .5, roughness: .35 });
+    const team = stdv(color, { roughness: .45, emissive: color, emissiveIntensity: .2 });
+    const glass = stdv(0xaee8ff, { emissive: 0x58c8ff, emissiveIntensity: .5, roughness: .2 });
+    const red = stdv(0xff3a2a, { emissive: 0xff2010, emissiveIntensity: .9 }), grn = stdv(0x3aff6a, { emissive: 0x10ff40, emissiveIntensity: .9 });
+    g.add(along(cyv(.17, .13, 2.0, 14, camo, 0, 0, -.05)));                // gövde
+    g.add(along(cov(.17, .75, 14, camo2, 0, 0, 1.33)));                    // burun konisi
+    g.add(along(cov(.03, .28, 8, metal, 0, 0, 1.84)));                     // pitot borusu
+    g.add(along(cyv(.176, .176, .12, 14, team, 0, 0, .3)));                // takım bandı
+    g.add(along(cyv(.1, .13, .12, 12, dark, 0, 0, -1.08)));                // egzoz lülesi
+    const cp = spv(.13, 12, 8, glass, 0, .14, .5); cp.scale.set(.85, .8, 2.1); g.add(cp);   // kokpit camı
+    for (const s of [-1, 1]) {
+      g.add(bxv(.1, .13, .5, dark, s * .2, -.03, .38));                    // hava girişleri
+      g.add(bxv(.04, .06, .3, dark, s * .62, -.075, .0));                  // kanat altı payandası
+      g.add(bxv(.05, .1, .22, team, s * 1.28, .0, -.6));                   // kanat ucu takım bandı
+      g.add(bxv(.045, .045, .06, s > 0 ? grn : red, s * 1.31, .0, -.38));  // seyir ışığı
+      g.add(bxv(.3, .012, .22, team, s * .72, .03, -.18));                 // kanat üstü takım işareti
+    }
+    const wr = [[.12, .6], [1.3, -.45], [1.3, -.75], [.12, -.7]], tr = [[.1, -.72], [.62, -1.05], [.62, -1.25], [.1, -1.1]];
+    g.add(planform(wr, .045, camo), planform(wr.map(q => [-q[0], q[1]]), .045, camo));         // ana kanatlar
+    g.add(planform(tr, .035, camo2), planform(tr.map(q => [-q[0], q[1]]), .035, camo2));       // yatay kuyruk
+    const fin = prism([[-.2, 0], [-1.05, 0], [-1.05, .5], [-.78, .5]], .018, camo); fin.position.y = .1; g.add(fin);   // dikey kuyruk
+    g.add(bxv(.04, .11, .2, team, 0, .5, -.95));
+    bake(g);
+    // bake sonrası eklenenler: hareketli / ışıklı parçalar
+    const bombs = [];
+    for (const q of [[-.62, -.19, 0], [.62, -.19, 0], [0, -.23, -.15]]) { const b = buildBomb(color); b.position.set(q[0], q[1], q[2]); b.scale.setScalar(.85); g.add(b); bombs.push(b); }
+    const fm = new T.MeshBasicMaterial({ color: 0xffa24a, transparent: true, opacity: .85, blending: T.AdditiveBlending, depthWrite: false });
+    const flame = new T.Mesh(new T.ConeGeometry(.1, .7, 10), fm); flame.rotation.x = -Math.PI / 2; flame.position.set(0, 0, -1.5); g.add(flame);   // art yakıcı alevi
+    const fm2 = new T.MeshBasicMaterial({ color: 0xfff0c0, transparent: true, opacity: .9, blending: T.AdditiveBlending, depthWrite: false });
+    const core = new T.Mesh(new T.ConeGeometry(.05, .4, 8), fm2); core.rotation.x = -Math.PI / 2; core.position.set(0, 0, -1.35); g.add(core);
+    return { group: g, bombs, flame, core };
+  }
 
   /* ---------------------------------------------------------------- ana sınıf */
   class WCBattleFX {
@@ -1224,6 +1285,81 @@
       return { duration: leave + .6 };
     }
 
+    /* v7: HAVA SALDIRISI — uçaklar (varsayılan 2) hedefin üstünden alçalarak geçer, bombaları isabet noktalarına bırakır, yükselip uzaklaşır.
+       planeAttack({ from, to, tos:[{x,y,z}..], color, scale, planes:2, bombs:2, blast })  — tos = isabet noktaları (hedef ülkenin içinde) */
+    planeAttack(o) {
+      o = Object.assign({ color: 0x3b82f6, scale: .95, planes: 2, bombs: 2, gap: .5, linger: 1, blast: 1, speed: 6.5 }, o || {});
+      const from = V(o.from), to = V(o.to), sc = o.scale, yaw = yawBetween(from, to), K = this.projK;
+      const fw = new T.Vector3(Math.sin(yaw), 0, Math.cos(yaw)), rt = new T.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+      const nP = Math.max(1, o.planes | 0), nB = Math.max(1, o.bombs | 0), v = o.speed;
+      const imp = i => V(o.tos && o.tos.length ? o.tos[i % o.tos.length] : { x: to.x + rnd(-.8, .8), y: to.y, z: to.z + rnd(-.8, .8) });
+      const sOf = p => (p.x - from.x) * fw.x + (p.z - from.z) * fw.z, lOf = p => (p.x - from.x) * rt.x + (p.z - from.z) * rt.z;
+      const H0 = 3.6, YL = 2.4, H1 = 6.2, tf = .45 + Math.sqrt(YL - .1) * .42;   // yerel yükseklikler; tf = bomba düşüş süresi
+      // her uçağın bombaları, bırakma konumu (s) ve şeridi (lat)
+      const P = [];
+      let z0 = 1e9, z1 = -1e9;
+      for (let k = 0; k < nP; k++) {
+        const bl = [], lats = [];
+        for (let j = 0; j < nB; j++) { const idx = k * nB + j, tg = imp(idx), sr = sOf(tg) - v * tf; bl.push({ idx, tg, sr }); lats.push(lOf(tg)); z0 = Math.min(z0, sr); z1 = Math.max(z1, sr); }
+        P.push({ bl, lat: lats.reduce((a, b) => a + b, 0) / lats.length, out: k % 2 ? 1 : -1, d: .15 + k * o.gap });
+      }
+      const sA = Math.min(-4.5, z0 - 4), sB = z1 + 9, total = sB - sA, Tf = total / v;
+      const cl = clamp01;
+      const yy = s => s < z0 ? lerp(H0, YL, E.io(cl((s - sA) / Math.max(.01, z0 - sA)))) : s <= z1 ? YL : lerp(YL, H1, E.io(cl((s - z1) / Math.max(.01, sB - z1))));
+      const veer = s => E.io(cl((s - z1 - .8) / Math.max(.01, sB - z1 - .8)));
+      const posAt = (s, pl, out) => { const l = pl.lat + pl.out * 3.2 * veer(s); return out.set(from.x + fw.x * s + rt.x * l, from.y + yy(s), from.z + fw.z * s + rt.z * l); };
+      let ends = 0, lastHit = 0;
+      const tmp0 = new T.Vector3(), tmp1 = new T.Vector3();
+      P.forEach((pl, k) => {
+        const M = buildPlane(o.color), g = new T.Group(); g.add(M.group); g.scale.setScalar(.001); M.group.rotation.order = 'YXZ';
+        posAt(sA, pl, tmp0); g.position.copy(tmp0); g.visible = false; this.spawn(g);
+        const shd = this.blob(from, 1.6 * sc); shd.visible = false;
+        const tail = new T.Vector3(), wl = new T.Vector3(), wr = new T.Vector3();
+        this.at(pl.d, () => { g.visible = true; this.ringFx(g.position, o.color, 2.4 * sc, .5); this.flash(g.position, o.color, 14, .3); });
+        this.tween(Tf, (u, dt) => {
+          const s = sA + u * total; posAt(s, pl, tmp0); posAt(s + .4, pl, tmp1);
+          const dx = tmp1.x - tmp0.x, dy = tmp1.y - tmp0.y, dz = tmp1.z - tmp0.z, hz = Math.hypot(dx, dz) || 1e-6, ya = Math.atan2(dx, dz), pa = Math.atan2(dy, hz);
+          g.position.copy(tmp0); g.rotation.set(0, 0, 0);
+          const vb = veer(s), bank = -pl.out * .7 * Math.sin(Math.PI * cl((s - z1 - .8) / Math.max(.01, sB - z1 - .8))) + Math.sin(this.time * 2.3 + k * 2) * .04;
+          M.group.rotation.y = ya; M.group.rotation.x = -pa; M.group.rotation.z = bank;
+          g.scale.setScalar(sc * Math.max(.001, E.out(cl(u / .07))) * Math.max(.001, 1 - E.io(cl((u - .92) / .08))));
+          shd.visible = g.scale.x > .1; shd.position.set(tmp0.x, from.y + .02, tmp0.z); shd.scale.setScalar(1.6 * sc * 1.15 * (1 + tmp0.y * .05));
+          // art yakıcı titreşimi
+          const fk = 1 + rnd(-.15, .3); M.flame.scale.set(1, fk, 1); M.core.scale.set(1, fk * .9, 1);
+          // egzoz dumanı + kanat ucu izleri (contrail)
+          const cx = Math.sin(ya), cz = Math.cos(ya), rx = Math.cos(ya), rz = -Math.sin(ya);
+          for (let n = emitCount(16, dt); n > 0; n--) this.pnorm.emit({ x: tmp0.x - cx * 1.4 * sc, y: tmp0.y + Math.sin(pa) * 1.4 * sc, z: tmp0.z - cz * 1.4 * sc, vx: rnd(-.08, .08), vy: rnd(.05, .2), vz: rnd(-.08, .08), life: rnd(.8, 1.3), s0: .1 * sc, s1: .5 * sc, c0: [.55, .55, .58], c1: [.32, .32, .35], a0: .35, a1: 0 });
+          for (let n = emitCount(10, dt); n > 0; n--) this.padd.emit({ x: tmp0.x - cx * 1.6 * sc, y: tmp0.y, z: tmp0.z - cz * 1.6 * sc, life: .1, s0: .35 * sc, s1: .1 * sc, c0: [1, .85, .5], c1: [1, .45, .15], a0: .8, a1: 0 });
+          if (g.scale.x > .3) for (const sg of [-1, 1]) for (let n = emitCount(18, dt); n > 0; n--) this.pnorm.emit({ x: tmp0.x + rx * sg * 1.28 * sc - cx * .6 * sc, y: tmp0.y, z: tmp0.z + rz * sg * 1.28 * sc - cz * .6 * sc, vx: 0, vy: .04, vz: 0, life: rnd(.9, 1.4), s0: .05 * sc, s1: .32 * sc, c0: [.96, .96, 1], c1: [.82, .84, .92], a0: .26, a1: 0 });
+        }, () => { this.kill(g); this.kill(shd); if (k === nP - 1 && o.onDone) o.onDone(); }, pl.d);
+        ends = Math.max(ends, pl.d + Tf);
+        // bombaların bırakılması
+        pl.bl.forEach((b, j) => {
+          const tr = pl.d + (b.sr - sA) / v, last = k === nP - 1 && j === nB - 1; lastHit = Math.max(lastHit, tr + tf);
+          this.at(tr, () => {
+            const slot = M.bombs[j % M.bombs.length]; slot.visible = false;
+            g.updateMatrixWorld(true); const R = new T.Vector3(); slot.getWorldPosition(R); this.root.worldToLocal(R);
+            const tgt = b.tg, msc = sc * K, ms = buildBomb(o.color); ms.scale.setScalar(msc); ms.position.copy(R); this.spawn(ms);
+            for (let q = 0; q < 6; q++) this.pnorm.emit({ x: R.x, y: R.y, z: R.z, vx: rnd(-.2, .2), vy: rnd(.1, .4), vz: rnd(-.2, .2), life: rnd(.6, 1), s0: .08 * sc, s1: .3 * sc, c0: [.8, .8, .84], c1: [.55, .55, .6], a0: .4, a1: 0 });
+            const pa = new T.Vector3(), pb = new T.Vector3(), tw = new T.Vector3(), prev = R.clone();
+            const at = (u, out) => out.set(lerp(R.x, tgt.x, u), lerp(R.y, tgt.y, u * u), lerp(R.z, tgt.z, u));
+            this.tween(tf, u => {
+              at(u, pa); at(Math.min(1, u + .03), pb); tw.copy(pb).sub(pa); if (tw.lengthSq() > 1e-9) { tw.normalize(); ms.quaternion.setFromUnitVectors(ZAX(), tw); }
+              ms.position.copy(pa);
+              const nn = Math.max(1, Math.ceil(prev.distanceTo(pa) / .22));
+              for (let q = 1; q <= nn; q++) { const kk = q / nn; this.pnorm.emit({ x: lerp(prev.x, pa.x, kk), y: lerp(prev.y, pa.y, kk) + .05, z: lerp(prev.z, pa.z, kk), life: rnd(.5, .9), s0: .05 * msc + .03 * K, s1: .3 * msc + .12 * K, c0: [.9, .9, .94], c1: [.6, .6, .65], a0: .3, a1: 0 }); }
+              prev.copy(pa);
+            }, () => {
+              this.kill(ms); this.explosion(tgt, o.blast * (last ? 1.3 : .8)); this.ringFx(tgt, 0xffd9a0, 1.8 * o.blast * K, .5);
+              this.dust(tgt, 1.2 * K, 8); this.shake(last ? .26 : .16); this.flash(tgt, 0xffb050, 22, .3);
+              if (o.onHit) o.onHit(b.idx);
+            });
+          });
+        });
+      });
+      return { duration: Math.max(ends, lastHit + o.linger) + .6 };
+    }
+
     navalAttack(o) {
       o = Object.assign({ color: 0x3b82f6, targetColor: 0xff5a47, scale: .9, torpedoes: 2, sink: true, advance: 1.2, linger: .8, runSpeed: 5.5 }, o || {});
       const from = V(o.from), to = V(o.to), sc = o.scale; from.y = 0; to.y = 0;
@@ -1299,7 +1435,7 @@
     }
   }
 
-  WCBattleFX.models = { tank: buildTank, soldier: buildSoldier, ship: buildShip, torpedo: buildTorpedo, tower: buildTower, house: buildHouse, missile: buildMissile, missileLauncher: buildMissileLauncher };
+  WCBattleFX.models = { tank: buildTank, soldier: buildSoldier, ship: buildShip, torpedo: buildTorpedo, tower: buildTower, house: buildHouse, missile: buildMissile, missileLauncher: buildMissileLauncher, plane: buildPlane, bomb: buildBomb };
   G.WCBattleFX = WCBattleFX;
   if (typeof module !== 'undefined' && module.exports) module.exports = WCBattleFX;
 })(typeof window !== 'undefined' ? window : globalThis);

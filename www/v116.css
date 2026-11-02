@@ -22,7 +22,7 @@
 
 #hud #goldchip:active,#hud .chip:active,#hud .v15m:active,#hud .hb:active{transform:none;opacity:.7;filter:none}
 
-/* Yazı: ince, zarif (oyunun başlık fontuyla aynı aile), kalın değil */
-#hud #goldchip,#hud .chip,#hud .v15c{font-family:Georgia,'Palatino Linotype',Palatino,'Times New Roman',serif!important;font-weight:400!important;letter-spacing:.04em;font-variant-numeric:lining-nums}
-#hud .chip b,#hud .chip strong,#goldchip b{font-weight:400!important}
+/* V119: üst panel yazısı alt panel ile aynı yazı tipi (oyunun genel yazı tipi) */
+#hud #goldchip,#hud .chip,#hud .v15c{font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif!important;font-weight:400!important;letter-spacing:normal;font-variant-numeric:normal}
+#hud .chip b,#hud .chip strong,#goldchip b{font-weight:700!important}
 #goldchip::after{font-weight:400!important}

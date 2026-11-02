@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60"><path fill="#FDEB01" d="m0 0 90 60H0z"/><path fill="#58A846" d="M90 0v60L0 0z"/><path fill="#ED3D24" d="m50.7 33.3 9.3-6.7H48.5L45 15.7l-3.5 10.9H30l9.3 6.7-3.6 11 9.3-6.7 9.3 6.7z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="0.00" y="0.00" width="513.00" height="342.00" viewBox="0 0 425.15 283.46" preserveAspectRatio="none">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.17 0 L 424.61 0 L 424.61 282.92 L 0.17 282.92 Z M 0.17 0 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(0%, 51.76%, 23.92%)" fill-opacity="1" d="M 0.17 282.93 L 0.17 0 L 424.61 0 L 424.61 282.93 Z M 0.17 282.93 "/>
+<path fill-rule="nonzero" fill="rgb(99.60%, 86.66%, 0%)" fill-opacity="1" d="M 0.17 282.93 L 0.17 0 L 424.61 282.93 Z M 0.17 282.93 "/>
+</g>
+<path fill-rule="nonzero" fill="rgb(78.43%, 6.27%, 18.03%)" fill-opacity="1" d="M 212.39 94.31 L 201.80 126.89 L 167.55 126.89 L 195.26 147.03 L 184.68 179.61 L 212.39 159.47 L 240.10 179.61 L 229.52 147.03 L 257.23 126.89 L 222.98 126.89 Z M 212.39 94.31 "/>
+</svg></svg>

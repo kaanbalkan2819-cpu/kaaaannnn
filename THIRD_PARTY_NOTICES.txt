@@ -22,5 +22,3 @@ HARİTA VE DOKU / MAP AND TEXTURES
   Lisansı belirsiz bir doku varsa değiştirin.
 
 Firebase JS SDK (Apache-2.0) — Rank Maçı için, yalnızca Firebase yapılandırılırsa yüklenir.
-
-Lora Bold (SIL Open Font License 1.1) — Rank ekranı sayıları için www/fonts/Lora-Bold-sub.woff (yalnızca Latin/Türkçe alt kümesi). Telif: The Lora Project Authors.

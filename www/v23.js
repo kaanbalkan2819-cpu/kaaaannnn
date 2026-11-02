@@ -178,44 +178,38 @@
     ENV = { x: e, y: null };
     var pc = window.v20PactCost ? v20PactCost(e) : 10, pactOn = window.v20Pacted && v20Pacted(G.pl, e);
     modal('<div class="envx">' + head('🕊', T('Elçi', 'Envoy') + ' — ' + nmE(e), e) +
-      '<button class="ecard" style="--ec:#4fe0a0;animation-delay:.05s" onclick="v20Pact()"' + (pactOn ? ' disabled' : '') + '><span class="eic">' + ICON.pact + '</span><span class="etx"><b>' + T('Saldırmazlık Paktı', 'Non-Aggression Pact') + '</b><small>' + T('Belirli bir süre birbirinize saldıramazsınız.', 'Neither side can attack for a set time.') + '</small></span><span class="ecost">' + (pactOn ? T('Aktif', 'Active') : pc + ' ' + T('altın', 'gold')) + '</span></button>' +
-      (guardOk(e) ? '<button class="ecard" style="--ec:#4aa3ff;animation-delay:.12s" onclick="v23Guard()"><span class="eic">' + ICON.guard + '</span><span class="etx"><b>' + T('Tampon Bölge Talebi', 'Buffer Zone Request') + '</b><small>' + T('İki güçlü devletin arasında kaldın: sana saldıranlara karşı savaşır.', 'You are caught between two strong states: it fights whoever attacks you.') + '</small></span><span class="ecost">' + COST.guard + ' 🪙<br>' + T('veya', 'or') + ' ' + MV.guard + ' 🎲</span></button>' : '') +
-      '<button class="ecard" style="--ec:#4fb0ff;animation-delay:.15s" onclick="v55GuardJoint()"><span class="eic">' + ICON.guard + '</span><span class="etx"><b>' + T('Koruma Talebi', 'Request Protection') + '</b><small>' + T('Biri sana savaş açarsa ikiniz birlikte savaşa girersiniz. Olumlu ilişkide ücret düşer.', 'If someone attacks you, you both enter the war together. Cheaper with good relations.') + '</small></span><span class="ecost">' + protCost(e) + ' 🪙<br>' + T('veya', 'or') + ' ' + MV.prot + ' 🎲</span></button>' +
-      '<button class="ecard" style="--ec:#ff6b5a;animation-delay:.19s" onclick="v23Incite()"><span class="eic">' + ICON.incite + '</span><span class="etx"><b>' + T('Kışkırt', 'Incite') + '</b><small>' + T('İki ülkeyi birbirine düşür (%50 daha olası).', 'Push two states into war (+50% likely).') + '</small></span><span class="ecost">' + COST.incite + ' 🪙<br>' + T('veya', 'or') + ' ' + MV.incite + ' 🎲</span></button>' +
+      '<button class="ecard" style="--ec:#4fe0a0;animation-delay:.05s" onclick="v20Pact()"' + (pactOn ? ' disabled' : '') + '><span class="eic">' + ICON.pact + '</span><span class="etx"><b>' + T('Saldırmazlık Paktı', 'Non-Aggression Pact') + '</b><small>' + T('Belirli bir süre birbirinize saldıramazsınız.', 'Neither side can attack for a set time.') + '</small></span><span class="ecost">' + (pactOn ? T('Aktif', 'Active') : WCPay.label()) + '</span></button>' +
+      (guardShow(e) ? '<button class="ecard" style="--ec:#4aa3ff;animation-delay:.12s" onclick="v23Guard()"><span class="eic">' + ICON.guard + '</span><span class="etx"><b>' + T('Güvenlik Garantisi', 'Security Guarantee') + '</b><small>' + T('İki güçlü devletin arasında kaldın: sana saldıranlara karşı savaşır.', 'You are caught between two strong states: it fights whoever attacks you.') + '</small></span><span class="ecost">' + WCPay.label() + '</span></button>' : '') +
+      '<button class="ecard" style="--ec:#4fb0ff;animation-delay:.15s" onclick="v55GuardJoint()"><span class="eic">' + ICON.guard + '</span><span class="etx"><b>' + T('Koruma Talebi', 'Request Protection') + '</b><small>' + T('Biri sana savaş açarsa ikiniz birlikte savaşa girersiniz.', 'If someone attacks you, you both enter the war together.') + '</small></span><span class="ecost">' + WCPay.label() + '</span></button>' +
+      '<button class="ecard" style="--ec:#ff6b5a;animation-delay:.19s" onclick="v23Incite()"><span class="eic">' + ICON.incite + '</span><span class="etx"><b>' + T('Kışkırt', 'Incite') + '</b><small>' + T('İki ülkeyi birbirine düşür (%50 daha olası).', 'Push two states into war (+50% likely).') + '</small></span><span class="ecost">' + WCPay.label() + '</span></button>' +
       '<button class="big" onclick="closeMod()">' + T('Kapat', 'Close') + '</button></div>');
   };
-  function payRow(kind, fn) {
-    var g = bal() >= COST[kind], m = G.T.moves >= MV[kind];
-    return '<button class="big pri" onclick="' + fn + '(\'gold\')"' + (g ? '' : ' disabled') + '>' + T('Altınla öde', 'Pay gold') + ' — ' + COST[kind] + '<small>' + T('Bakiye: ', 'Balance: ') + bal() + '</small></button>' +
-      '<button class="big" onclick="' + fn + '(\'moves\')"' + (m ? '' : ' disabled') + '>' + T('Hamle ile öde', 'Pay with moves') + ' — ' + MV[kind] + '<small>' + T('Kalan hamle: ', 'Moves left: ') + G.T.moves + '</small></button>';
-  }
-  function pay(kind, how) {
-    if (how === 'gold') { if (!window.Gold || !Gold.spend(COST[kind], 'envoy-' + kind)) { toast(T('Yeterli altının yok', 'Not enough gold')); return false; } }
-    else { if (G.T.moves < MV[kind]) { toast(T('Yeterli hamle yok', 'Not enough moves')); return false; } G.T.moves -= MV[kind]; }
-    return true;
-  }
+  function payRow(kind, fn) { return WCPay.rows(fn); }   // V119: 2 zar ya da reklam
   function strong(e) {      // koruyucu, ortalama devletten çok zayıf olmamalı
     var al = [], tot = 0, n = 0; for (var k in G.owner) { var o = G.owner[k]; if (al.indexOf(o) < 0) al.push(o); }
     al.forEach(function (o) { if (o === G.pl) return; var s = 0, a = st(o); for (var i = 0; i < 5; i++) s += +a[i] || 0; tot += s; n++; });
     var me = 0, b = st(e); for (var j = 0; j < 5; j++) me += +b[j] || 0; return me >= 0.9 * (tot / Math.max(1, n));
   }
+  function guardShow(e) { try { return guardOk(e) && !(G.guard23 && G.guard23[e] >= turnNo()); } catch (x) { return false; } }   // V119: yalnızca kullanılabilirken menüde görünür
   function guardOk(e) { try { return strong(e) && !!(window.V24 && V24.isBuffer(e, G.pl)); } catch (x) { return false; } }
   window.v23Guard = function () {
     if (!inAct() || !ENV) return;
     var e = ENV.x, active = G.guard23 && G.guard23[e] >= turnNo(), ok = guardOk(e);
-    emodal(head('🛡', T('Tampon Bölge Talebi', 'Buffer Zone Request'), e) + '<p style="color:var(--tx2)">' +
-      T('<b>' + nmE(e) + '</b>, ' + GUARD_TURNS + ' tur boyunca sana saldıran ülkeye karşı savaşır.<br>Güçlü bir devlet yalnızca, sen onunla başka bir güçlü devlet arasında <b>tampon bölge</b> isen bu talebi kabul eder.', 'If you accept, <b>' + nmE(e) + '</b> fights whoever attacks you for ' + GUARD_TURNS + ' turns.<br>A strong state agrees only if you are a <b>buffer state</b> between it and another strong state.') + '</p>' +
-      (active ? '<p>' + T('Tampon anlaşması zaten aktif.', 'Buffer agreement is already active.') + '</p>' :
-        ok ? '<div class="pacthint24" style="background:#2a7a4a22;border-color:#2a7a4a88;color:#bff0d2">' + T('Tampon bölgesin: bu devlet talebini değerlendirecek.', 'You are a buffer state: this nation will consider your request.') + '</div>' + payRow('guard', 'v23GuardPay') :
-        '<div class="pacthint24">' + T('Bu devletle başka bir güçlü devlet arasında tampon bölge değilsin; talep kabul edilmez.', 'You are not a buffer between this nation and another strong state; the request will be refused.') + '</div>') +
+    emodal(head('🛡', T('Güvenlik Garantisi', 'Security Guarantee'), e) + '<p style="color:var(--tx2)">' +
+      T('<b>' + nmE(e) + '</b>, ' + GUARD_TURNS + ' tur boyunca sana saldıran ülkeye karşı savaşır (yalnızca savunma savaşı; senin saldırı savaşlarına girmez). Saldıran ülke sana saldırmadan önce onunla savaşmak zorundadır; onu yenerse sana saldırmak için bir hamle daha harcar.<br>Güçlü bir devlet bu garantiyi yalnızca, onunla başka bir güçlü devlet arasında kaldıysan verir.', 'If you accept, <b>' + nmE(e) + '</b> fights whoever attacks you for ' + GUARD_TURNS + ' turns (defensive wars only, never your attack wars). An attacker must first fight it; if the attacker wins, it needs one more move to attack you.<br>A strong state gives this guarantee only when you are caught between it and another strong state.') + '</p>' +
+      (active ? '<p>' + T('Güvenlik garantisi zaten aktif.', 'The guarantee is already active.') + '</p>' :
+        ok ? '<div class="pacthint24" style="background:#2a7a4a22;border-color:#2a7a4a88;color:#bff0d2">' + T('İki güçlü devletin arasındasın: bu devlet talebini değerlendirecek.', 'You are caught between two strong states: this nation will consider your request.') + '</div><p>' + WCPay.costLine() + '</p>' + payRow('guard', 'v23GuardPay') :
+        '<div class="pacthint24">' + T('İki güçlü devletin arasında değilsin; talep kabul edilmez.', 'You are not caught between two strong states; the request will be refused.') + '</div>') +
       '<button class="big" onclick="v23Envoy()">‹ ' + T('Geri', 'Back') + '</button>');
   };
   window.v23GuardPay = function (how) {
     if (!inAct() || !ENV) return; var e = ENV.x;
-    if (!guardOk(e)) { closeMod(); toast('🛡 ' + nmE(e) + ' — ' + T('talebi reddetti: tampon bölge değilsin veya yeterince güçlü değil (ücret alınmadı)', 'declined: you are not a buffer state or it is not strong enough (no charge)')); return; }
-    if (!pay('guard', how)) return;
-    G.guard23 = G.guard23 || {}; G.guard23[e] = turnNo() + GUARD_TURNS;
-    closeMod(); try { save(); } catch (x) { } render(); fx('guard', e, G.pl, T('Tampon Anlaşması', 'Buffer Agreement')); toast('🛡 ' + nmE(e) + ' — ' + T('seni korumayı kabul etti', 'agreed to protect you'));
+    if (!guardOk(e)) { closeMod(); toast('🛡 ' + nmE(e) + ' — ' + T('talebi reddetti: iki güçlü devletin arasında değilsin veya yeterince güçlü değil (ücret alınmadı)', 'declined: you are not caught between two strong states, or it is not strong enough (no charge)')); return; }
+    closeMod();
+    WCPay.spend(how, function () {
+      G.guard23 = G.guard23 || {}; G.guard23[e] = turnNo() + GUARD_TURNS;
+      try { save(); } catch (x) { } render(); fx('guard', e, G.pl, T('Güvenlik Garantisi', 'Security Guarantee')); toast('🛡 ' + nmE(e) + ' — ' + T('seni korumayı kabul etti', 'agreed to protect you'));
+    });
   };
 
   // ---- KORUMA TALEBİ (V55): biri sana savaş açarsa talep edilen ülke ile birlikte savaşa girersiniz. Her zaman talep edilebilir. ----
@@ -234,16 +228,17 @@
     var e = ENV.x, active = G.prot55 && G.prot55[e] >= turnNo(), pc = protCost(e); COST.prot = pc;
     var disc = pc < COST.guard;
     emodal(head('🛡', T('Koruma Talebi', 'Protection Request'), e) + '<p style="color:var(--tx2)">' +
-      T('<b>' + nmE(e) + '</b>, ' + PROT_TURNS + ' tur boyunca biri sana savaş açarsa <b>seninle birlikte</b> o ülkeye karşı savaşa girer.', 'For ' + PROT_TURNS + ' turns, if anyone attacks you, <b>' + nmE(e) + '</b> enters the war against them <b>together with you</b>.') + '</p>' +
-      (disc ? '<div class="pacthint24" style="background:#2a7a4a22;border-color:#2a7a4a88;color:#bff0d2">' + T('Olumlu ilişki: ücret düştü.', 'Good relations: price reduced.') + '</div>' : '') +
+      T('<b>' + nmE(e) + '</b>, ' + PROT_TURNS + ' tur boyunca biri sana savaş açarsa <b>seninle birlikte</b> o ülkeye karşı savaşa girer. Yalnızca savunma savaşına katılır; senin başlattığın saldırı savaşlarına girmez.', 'For ' + PROT_TURNS + ' turns, if anyone attacks you, <b>' + nmE(e) + '</b> enters the war against them <b>together with you</b>. It joins defensive wars only, not attack wars you start.') + '</p>' +
+      '<p>' + WCPay.costLine() + '</p>' +
       (active ? '<p>' + T('Koruma zaten aktif.', 'Protection is already active.') + '</p>' : payRow('prot', 'v55GuardJointPay')) +
       '<button class="big" onclick="v23Envoy()">‹ ' + T('Geri', 'Back') + '</button>');
   };
   window.v55GuardJointPay = function (how) {
-    if (!inAct() || !ENV) return; var e = ENV.x; COST.prot = protCost(e);
-    if (!pay('prot', how)) return;
-    G.prot55 = G.prot55 || {}; G.prot55[e] = turnNo() + PROT_TURNS;
-    closeMod(); try { save(); } catch (x) { } render(); fx('guard', e, G.pl, T('Ortak Savunma', 'Joint Defense')); toast('🛡 ' + nmE(e) + ' — ' + T('saldırıya uğrarsan seninle birlikte savaşacak', 'will fight alongside you if you are attacked'));
+    if (!inAct() || !ENV) return; var e = ENV.x; closeMod();
+    WCPay.spend(how, function () {
+      G.prot55 = G.prot55 || {}; G.prot55[e] = turnNo() + PROT_TURNS;
+      try { save(); } catch (x) { } render(); fx('guard', e, G.pl, T('Ortak Savunma', 'Joint Defense')); toast('🛡 ' + nmE(e) + ' — ' + T('saldırıya uğrarsan seninle birlikte savaşacak', 'will fight alongside you if you are attacked'));
+    });
   };
   window.v23Incite = function () {
     if (!inAct() || !ENV) return; var e = ENV.x, seen = {}, opts = [];
@@ -258,9 +253,11 @@
     emodal(head('🔥', T('Kışkırt', 'Incite'), ENV.x) + '<p style="color:var(--tx2)">' + nmE(ENV.x) + ' ➜ <b>' + nmE(y) + '</b></p>' + payRow('incite', 'v23InciteGo') + '<button class="big" onclick="v23Incite()">‹ ' + T('Geri', 'Back') + '</button>');
   };
   window.v23InciteGo = function (how) {
-    if (!inAct() || !ENV || !ENV.y) return; if (!pay('incite', how)) return;
-    G.inc23 = G.inc23 || {}; G.inc23[ENV.x + '>' + ENV.y] = { until: turnNo(), m: 1.5, add: 0 };
-    var x = ENV.x, y = ENV.y; closeMod(); try { save(); } catch (e) { } render(); fx('incite', x, y, T('Kışkırtma Başarılı', 'Incitement Successful')); toast('🔥 ' + nmE(x) + ' ➜ ' + nmE(y) + ' — ' + T('kışkırtıldı', 'incited'));
+    if (!inAct() || !ENV || !ENV.y) return; var x = ENV.x, y = ENV.y; closeMod();
+    WCPay.spend(how, function () {
+      G.inc23 = G.inc23 || {}; G.inc23[x + '>' + y] = { until: turnNo(), m: 1.5, add: 0 };
+      try { save(); } catch (e) { } render(); fx('incite', x, y, T('Kışkırtma Başarılı', 'Incitement Successful')); toast('🔥 ' + nmE(x) + ' ➜ ' + nmE(y) + ' — ' + T('kışkırtıldı', 'incited'));
+    });
   };
 
   // ================= DÜKKAN animasyonları =================
@@ -296,7 +293,7 @@
   panel = function () {
     var r = _pn2.apply(this, arguments);
     try {
-      if (G && G.sel && (G.sel === G.pl || G.owner[G.sel] === G.pl)) {   // V121: fethedilen bölgeler de "kendi ülkemiz"
+      if (G && G.sel && G.sel === G.pl) {
         var el = document.getElementById('panel');
         if (el) el.querySelectorAll('.v15a > button:not(.polbtn), .px > button:not(.polbtn)').forEach(function (b) { b.remove(); });
       }

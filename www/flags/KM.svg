@@ -1,1 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 513 342"><path fill="#0052B4" d="M0 0h513v342H0z"/><path fill="#FFDA44" d="M0 0h513v85.5H0z"/><path fill="#FFF" d="M0 85.5h513V171H0z"/><path fill="#D80027" d="M0 171h513v85.5H0z"/><path fill="#6DA544" d="M256.5 171 0 342V0z"/><g fill="#FFF"><path d="M68.6 170.7c0-24.9 17.5-45.6 40.8-50.7-3.6-.8-7.3-1.2-11.1-1.2-28.7 0-51.9 23.3-51.9 51.9s23.3 51.9 51.9 51.9c3.8 0 7.5-.4 11.1-1.2-23.3-5.1-40.8-25.9-40.8-50.7z"/><path d="m108.9 126.1 2.7 8.5h9l-7.3 5.3 2.8 8.5-7.2-5.2-7.3 5.2 2.8-8.5-7.2-5.3h8.9zM108.9 148.4l2.7 8.5h9l-7.3 5.3 2.8 8.5-7.2-5.3-7.3 5.3 2.8-8.5-7.2-5.3h8.9z"/><path d="m108.9 170.7 2.7 8.5h9l-7.3 5.2 2.8 8.5-7.2-5.2-7.3 5.2 2.8-8.5-7.2-5.2h8.9zM108.9 192.9l2.7 8.5h9l-7.3 5.3 2.8 8.5-7.2-5.3-7.3 5.3 2.8-8.5-7.2-5.3h8.9z"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="0.00" y="17.08" width="513.00" height="307.84" viewBox="0 0 472.38 283.46" preserveAspectRatio="xMidYMid meet">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.33 0 L 471.91 0 L 471.91 71 L 0.33 71 Z M 0.33 0 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 0.33 70 L 471.91 70 L 471.91 142 L 0.33 142 Z M 0.33 70 "/>
+</clipPath>
+<clipPath id="clip-2">
+<path clip-rule="nonzero" d="M 0.33 141 L 471.91 141 L 471.91 213 L 0.33 213 Z M 0.33 141 "/>
+</clipPath>
+<clipPath id="clip-3">
+<path clip-rule="nonzero" d="M 0.33 212 L 471.91 212 L 471.91 282.92 L 0.33 282.92 Z M 0.33 212 "/>
+</clipPath>
+<clipPath id="clip-4">
+<path clip-rule="nonzero" d="M 0.33 0 L 237 0 L 237 282.92 L 0.33 282.92 Z M 0.33 0 "/>
+</clipPath>
+<clipPath id="clip-5">
+<path clip-rule="nonzero" d="M 16 77 L 145 77 L 145 206 L 16 206 Z M 16 77 "/>
+</clipPath>
+<clipPath id="clip-6">
+<path clip-rule="nonzero" d="M 144.16 141.46 C 144.16 106.30 115.66 77.80 80.5 77.80 C 45.33 77.80 16.83 106.30 16.83 141.46 C 16.83 176.62 45.33 205.12 80.5 205.12 C 115.66 205.12 144.16 176.62 144.16 141.46 Z M 144.16 141.46 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(100%, 78.03%, 17.25%)" fill-opacity="1" d="M 0.33 70.73 L 0.33 0 L 471.91 0 L 471.91 70.73 Z M 0.33 70.73 "/>
+</g>
+<g clip-path="url(#clip-1)">
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 0.33 141.46 L 0.33 70.73 L 471.91 70.73 L 471.91 141.46 Z M 0.33 141.46 "/>
+</g>
+<g clip-path="url(#clip-2)">
+<path fill-rule="nonzero" fill="rgb(78.43%, 6.27%, 18.03%)" fill-opacity="1" d="M 0.33 212.19 L 0.33 141.46 L 471.91 141.46 L 471.91 212.19 Z M 0.33 212.19 "/>
+</g>
+<g clip-path="url(#clip-3)">
+<path fill-rule="nonzero" fill="rgb(0%, 44.70%, 80.78%)" fill-opacity="1" d="M 0.33 282.93 L 0.33 212.19 L 471.91 212.19 L 471.91 282.93 Z M 0.33 282.93 "/>
+</g>
+<g clip-path="url(#clip-4)">
+<path fill-rule="nonzero" fill="rgb(29.80%, 55.29%, 16.86%)" fill-opacity="1" d="M 0.33 282.93 L 236.11 141.46 L 0.33 0 Z M 0.33 282.93 "/>
+</g>
+<g clip-path="url(#clip-5)">
+<g clip-path="url(#clip-6)">
+<path fill-rule="evenodd" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 144.79 141.46 C 144.79 105.95 116.01 77.16 80.5 77.16 C 44.98 77.16 16.20 105.95 16.20 141.46 C 16.20 176.97 44.98 205.76 80.5 205.76 C 116.01 205.76 144.79 176.97 144.79 141.46 Z M 172.45 141.46 C 172.45 106.30 143.95 77.80 108.79 77.80 C 73.63 77.80 45.13 106.30 45.13 141.46 C 45.13 176.62 73.63 205.12 108.79 205.12 C 143.95 205.12 172.45 176.62 172.45 141.46 Z M 172.45 141.46 "/>
+</g>
+</g>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 111.71 174.93 L 107.68 180.47 L 101.16 178.35 L 105.19 183.90 L 101.16 189.44 L 107.68 187.33 L 111.71 192.87 L 111.71 186.02 L 118.22 183.90 L 111.71 181.78 Z M 111.71 174.93 "/>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 111.71 146.64 L 107.68 152.18 L 101.16 150.06 L 105.19 155.60 L 101.16 161.15 L 107.68 159.03 L 111.71 164.57 L 111.71 157.72 L 118.22 155.60 L 111.71 153.49 Z M 111.71 146.64 "/>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 111.71 118.35 L 107.68 123.89 L 101.16 121.77 L 105.19 127.32 L 101.16 132.86 L 107.68 130.75 L 111.71 136.29 L 111.71 129.44 L 118.22 127.32 L 111.71 125.20 Z M 111.71 118.35 "/>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 111.71 90.05 L 107.68 95.60 L 101.16 93.48 L 105.19 99.02 L 101.16 104.57 L 107.68 102.45 L 111.71 107.99 L 111.71 101.14 L 118.22 99.02 L 111.71 96.91 Z M 111.71 90.05 "/>
+</svg></svg>

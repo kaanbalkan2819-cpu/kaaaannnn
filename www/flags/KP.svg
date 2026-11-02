@@ -1,1 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 513 342"><path fill="#91DC5A" d="M0 0h513v342H0z"/><path fill="#FFF" d="M0 0h513v342H0z"/><g fill="#0052B4"><path d="M0 0h513v57.188H0zM0 284.1h513v57.177H0z"/></g><path fill="#D80027" d="M0 79.9h513v181.582H0z"/><circle fill="#FFF" cx="190.33" cy="171" r="65.668"/><path fill="#D80027" d="m190.3 105 14.8 45.3h47.7l-38.6 28.1 14.8 45.5-38.7-28.2-38.6 28.1 14.8-45.4-38.6-28.1h47.7z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="0.00" y="42.73" width="513.00" height="256.54" viewBox="0 0 566.85 283.46" preserveAspectRatio="xMidYMid meet">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.16 0 L 566.02 0 L 566.02 282.92 L 0.16 282.92 Z M 0.16 0 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 0.16 47 L 566.02 47 L 566.02 236 L 0.16 236 Z M 0.16 47 "/>
+</clipPath>
+<clipPath id="clip-2">
+<path clip-rule="nonzero" d="M 0.16 55 L 566.02 55 L 566.02 228 L 0.16 228 Z M 0.16 55 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(0%, 23.92%, 64.70%)" fill-opacity="1" d="M 0.16 282.93 L 0.16 0 L 566.02 0 L 566.02 282.93 Z M 0.16 282.93 "/>
+</g>
+<g clip-path="url(#clip-1)">
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 0.16 235.77 L 0.16 47.15 L 566.02 47.15 L 566.02 235.77 Z M 0.16 235.77 "/>
+</g>
+<g clip-path="url(#clip-2)">
+<path fill-rule="nonzero" fill="rgb(83.52%, 0%, 19.60%)" fill-opacity="1" d="M 0.16 227.91 L 0.16 55.01 L 566.02 55.01 L 566.02 227.91 Z M 0.16 227.91 "/>
+</g>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 251.63 141.46 C 251.63 106.74 223.48 78.59 188.76 78.59 C 154.03 78.59 125.89 106.74 125.89 141.46 C 125.89 176.19 154.03 204.33 188.76 204.33 C 223.48 204.33 251.63 176.19 251.63 141.46 Z M 251.63 141.46 "/>
+<path fill-rule="nonzero" fill="rgb(83.52%, 0%, 19.60%)" fill-opacity="1" d="M 188.76 80.55 L 175.08 122.64 L 130.82 122.64 L 166.63 148.65 L 152.95 190.75 L 188.76 164.73 L 224.56 190.75 L 210.89 148.65 L 246.69 122.64 L 202.43 122.64 Z M 188.76 80.55 "/>
+</svg></svg>

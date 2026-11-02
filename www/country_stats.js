@@ -26,6 +26,18 @@
   }
   function get() { return cache || build(); }
   function rnd(a) { return a[Math.floor(Math.random() * a.length)]; }
+  /* V122: Rank'ta iki ülke birbirine aşırı uzak olmasın — merkezleri arası açısal mesafe (rad; 1 rad ≈ 6370 km) */
+  var MAXD = 0.9, cuMap = null;
+  function cuOf(id) {
+    try {
+      if (!cuMap) { cuMap = {}; R.forEach(function (r) { if (r && r.id && r.cu) cuMap[r.id] = r.cu; }); }
+      return cuMap[id] || null;
+    } catch (e) { return null; }
+  }
+  function dist(a, b) {
+    var A = cuOf(a), B = cuOf(b); if (!A || !B) return 0;
+    return Math.acos(Math.max(-1, Math.min(1, A[0] * B[0] + A[1] * B[1] + A[2] * B[2])));
+  }
   window.WCStats = {
     NAMES: NAMES,
     ready: function () { return !!get(); },
@@ -38,6 +50,19 @@
       var p = this.pool(t, parity).filter(function (id) { return !exclude || exclude.indexOf(id) < 0; });
       return p.length ? rnd(p) : null;
     },
+    /* near'a MAXD içinde olanlardan seç; yoksa en yakını (veri yoksa rastgele) */
+    pickNear: function (t, parity, exclude, near) {
+      var p = this.pool(t, parity).filter(function (id) { return !exclude || exclude.indexOf(id) < 0; });
+      if (!p.length) return null; if (!near || !cuOf(near)) return rnd(p);
+      var ok = p.filter(function (id) { return dist(id, near) <= MAXD; });
+      if (ok.length) return rnd(ok);
+      p.sort(function (a, b) { return dist(a, near) - dist(b, near); }); return p[0];
+    },
+    pickPair: function (t) {   // {hc, gc}: kurucu ülkesi + ona makul uzaklıkta konuk ülkesi
+      var h = this.pick(t, 0); if (!h) return { hc: null, gc: this.pick(t, 1) };
+      return { hc: h, gc: this.pickNear(t, 1, [h], h) };
+    },
+    dist: dist,
     randomTier: function () { return Math.floor(Math.random() * 4); }
   };
 })();

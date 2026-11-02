@@ -1,1 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 513 342"><path fill="#FFF" d="M0 0h513v342H0z"/><g fill="#E00"><path d="M0 0h513v68.4H0zM0 136.8h513v68.4H0zM0 273.6h513V342H0z"/></g><path fill="#04F" d="M256.5 171 0 342V0z"/><path fill="#FFF" d="m84 110.1 15.1 46.5H148l-39.6 28.8 15.1 46.5L84 203.1l-39.6 28.8 15.1-46.5L20 156.6h48.9z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="0.00" y="0.00" width="513.00" height="342.00" viewBox="0 0 425.15 283.46" preserveAspectRatio="none">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.17 0 L 424.61 0 L 424.61 282.92 L 0.17 282.92 Z M 0.17 0 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 0.17 226 L 424.61 226 L 424.61 282.92 L 0.17 282.92 Z M 0.17 226 "/>
+</clipPath>
+<clipPath id="clip-2">
+<path clip-rule="nonzero" d="M 0.17 113 L 424.61 113 L 424.61 170 L 0.17 170 Z M 0.17 113 "/>
+</clipPath>
+<clipPath id="clip-3">
+<path clip-rule="nonzero" d="M 0.17 0 L 424.61 0 L 424.61 57 L 0.17 57 Z M 0.17 0 "/>
+</clipPath>
+<clipPath id="clip-4">
+<path clip-rule="nonzero" d="M 0.17 0 L 246 0 L 246 282.92 L 0.17 282.92 Z M 0.17 0 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 0.17 282.93 L 0.17 0 L 424.61 0 L 424.61 282.93 Z M 0.17 282.93 "/>
+</g>
+<g clip-path="url(#clip-1)">
+<path fill-rule="nonzero" fill="rgb(72.94%, 4.70%, 18.42%)" fill-opacity="1" d="M 0.17 282.93 L 0.17 226.34 L 424.61 226.34 L 424.61 282.93 Z M 0.17 282.93 "/>
+</g>
+<g clip-path="url(#clip-2)">
+<path fill-rule="nonzero" fill="rgb(72.94%, 4.70%, 18.42%)" fill-opacity="1" d="M 0.17 169.75 L 0.17 113.17 L 424.61 113.17 L 424.61 169.75 Z M 0.17 169.75 "/>
+</g>
+<g clip-path="url(#clip-3)">
+<path fill-rule="nonzero" fill="rgb(72.94%, 4.70%, 18.42%)" fill-opacity="1" d="M 0.17 56.58 L 0.17 0 L 424.61 0 L 424.61 56.58 Z M 0.17 56.58 "/>
+</g>
+<g clip-path="url(#clip-4)">
+<path fill-rule="nonzero" fill="rgb(0.39%, 12.94%, 41.17%)" fill-opacity="1" d="M 0.17 282.93 L 0.17 0 L 245.19 141.46 Z M 0.17 282.93 "/>
+</g>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 81.85 94.31 L 71.26 126.89 L 37.01 126.89 L 64.73 147.03 L 54.14 179.61 L 81.85 159.47 L 109.56 179.61 L 98.98 147.03 L 126.69 126.89 L 92.44 126.89 Z M 81.85 94.31 "/>
+</svg></svg>

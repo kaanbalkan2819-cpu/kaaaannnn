@@ -117,7 +117,7 @@
     try {
       if (!is5() || !G.sel || G.over || BSH) return;
       var el = $('panel'), bx = el && (el.querySelector('.v15a') || el.querySelector('.px')); if (!bx || el.querySelector('.polbtn')) return;
-      if (G.sel === G.pl || G.owner[G.sel] === G.pl) {   // V121: fethedilen bölgeye tıklayınca da aynı Politikalar menüsü
+      if (G.sel === G.pl) {
         var n = Object.keys(pol().act).length;
         bx.insertAdjacentHTML('afterbegin', '<button class="polbtn" style="flex:1 1 100%" onclick="polMenu()">📜 ' + T('Politikalar', 'Policies') + (n ? ' (' + n + ')' : '') + '</button>');
       }

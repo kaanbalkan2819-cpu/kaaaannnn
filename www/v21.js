@@ -2,7 +2,7 @@
    - Altın paketleri PACKS'ten (ürün kimlikleri Play Console'daki "tüketilebilir ürün" kimlikleriyle birebir aynı olmalı).
    - Satın alma yalnızca Capacitor/Cordova içinde `cordova-plugin-purchase` (global CdvPurchase) varsa çalışır; yoksa dükkan açılır ama satın alma yapılmaz.
    - Onaylanan satın alma işlem kimliğiyle (transactionId) TEK kez kuyruğa yazılır, sonra tüketilir; altın oyun açıkken Gold.add ile eklenir.
-   - Sahte/ücretsiz altın verme YOK. Sunucu tarafı makbuz doğrulaması yoktur (README_APK.md'ye bakın). */
+   - Sahte/ücretsiz altın verme YOK. Sunucu tarafı makbuz doğrulaması yoktur. */
 (function () {
   'use strict';
   var PACKS = [{ id: 'gold_50', gold: 50 }, { id: 'gold_150', gold: 150 }, { id: 'gold_500', gold: 500 }, { id: 'gold_1500', gold: 1500 }];   // <<< AYAR

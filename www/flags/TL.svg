@@ -1,1 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 85.333 512 341.333"><path fill="#D80027" d="M0 85.337h512v341.326H0z"/><path fill="#FFDA44" d="M256 256 0 90.691v44.242L155.826 256 0 377.067v44.242z"/><path d="M0 90.691v330.618L189.217 256z"/><path fill="#FFF" d="m44.184 213.36 24.912 23.577 30.121-16.41-14.723 30.98 24.911 23.575-34.012-4.43L60.67 301.63l-6.296-33.716-34.012-4.43 30.119-16.408z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="0.00" y="42.73" width="513.00" height="256.54" viewBox="0 0 566.85 283.46" preserveAspectRatio="xMidYMid meet">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.16 0 L 566.02 0 L 566.02 282.92 L 0.16 282.92 Z M 0.16 0 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 0.16 0 L 284 0 L 284 282.92 L 0.16 282.92 Z M 0.16 0 "/>
+</clipPath>
+<clipPath id="clip-2">
+<path clip-rule="nonzero" d="M 0.16 0 L 189 0 L 189 282.92 L 0.16 282.92 Z M 0.16 0 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(85.48%, 16.07%, 10.97%)" fill-opacity="1" d="M 0.16 282.93 L 0.16 0 L 566.02 0 L 566.02 282.93 Z M 0.16 282.93 "/>
+</g>
+<g clip-path="url(#clip-1)">
+<path fill-rule="nonzero" fill="rgb(100%, 78.03%, 17.25%)" fill-opacity="1" d="M 0.16 282.93 L 0.16 0 L 283.09 141.46 Z M 0.16 282.93 "/>
+</g>
+<g clip-path="url(#clip-2)">
+<path fill-rule="nonzero" fill="rgb(0%, 0%, 0%)" fill-opacity="1" d="M 0.16 282.93 L 0.16 0 L 188.78 141.46 Z M 0.16 282.93 "/>
+</g>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 43.85 98.39 L 47.43 132.46 L 16.14 146.39 L 49.64 153.51 L 53.23 187.58 L 70.35 157.92 L 103.86 165.04 L 80.94 139.58 L 98.07 109.91 L 66.77 123.84 Z M 43.85 98.39 "/>
+</svg></svg>

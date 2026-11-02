@@ -1,0 +1,11 @@
+V125 — (yalnızca tarayıcıda otomatik ölçüldü; telefonda/elle oynanarak TEST EDİLMEDİ)
+
+YAPILDI
+1) Kazanamayan ülkeler (www/v16.js, "V124 kurtarma"): mevcut hedefleri (kara+deniz) içinde en iyi kazanma şansı %35'in altında olan ülkeler
+   (Butan, Nepal, Moğolistan, Sri Lanka, Kuzey Kore, Doğu Timor, Lüksemburg, Falkland, Lesotho, İrlanda, Brunei, Ekvador, Moldova... 15 ülke)
+   kazanma şansı en az %40 olan en yakın ülkelerden 3 tanesini ek hedef olarak alır (menzil kademeli: ~3500 / 5700 / 8300 km).
+   Ölçüm: en iyi şansı <%35 olan ülke 15 -> 0. Ek hedefler 'deniz' etiketlidir (2 hamle) ve çift yönlüdür.
+   Ayar: RESC_MIN, RESC_WIN, RESC_N, RESC_MAX. Liste: konsolda WC.seaReport().rescued
+2) İlk savaş koruması (www/v124.js, index.html'e eklendi): oyuncunun oyundaki ilk savaşında (saldırı veya savunma) 5 değeri ×1.15.
+   Yalnızca tek kişilik; savaş ekranında "İlk savaş desteği" satırı görünür. Ayar: FIRST_BONUS.
+   Örnek ölçüm (TUR vs ABD): kazanma %3 -> %11; yakın güçteki savaşlarda etkisi daha büyük.

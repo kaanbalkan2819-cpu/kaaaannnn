@@ -1,1 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 513 342"><path fill="#205831" d="M0 0h513v342H0z"/><path fill="#004EB4" d="M0 342V0h513"/><path fill="#F4CA15" d="M0 328v14h28L513 14V0h-28z"/><g fill="#FFF"><path d="M47.2 11.5 54 32.6h22.3l-18 13.2 6.9 21.1-18-13.1-18 13.1L36 45.8 18 32.6h22.3zM160.8 11.5l6.9 21.1H190l-18 13.2 6.8 21.1-18-13.1-18 13.1 6.9-21.1-18-13.2H154zM47.2 122.3l6.8 21.1h22.3l-18 13.2 6.9 21.1-18-13-18 13 6.8-21.1-18-13.2h22.3zM160.8 122.3l6.9 21.1H190l-18 13.2 6.8 21.1-18-13-18 13 6.9-21.1-18-13.2H154zM104 66.9l6.8 21.2h22.3l-18 13 6.9 21.2-18-13.1-18 13.1 6.8-21.2-18-13h22.3z"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="0.00" y="42.73" width="513.00" height="256.54" viewBox="0 0 566.85 283.46" preserveAspectRatio="xMidYMid meet">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.16 0 L 566.02 0 L 566.02 282.92 L 0.16 282.92 Z M 0.16 0 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(0%, 40.39%, 27.84%)" fill-opacity="1" d="M 0.16 282.93 L 566.02 282.93 L 566.02 0 Z M 0.16 282.93 "/>
+<path fill-rule="nonzero" fill="rgb(0%, 36.86%, 72.15%)" fill-opacity="1" d="M 0.16 282.93 L 566.02 0 L 0.16 0 Z M 0.16 282.93 "/>
+<path fill="none" stroke-width="28.34" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(99.21%, 85.48%, 14.50%)" stroke-opacity="1" stroke-miterlimit="10" d="M -283.46 -141.73 L 283.46 141.73 " transform="matrix(0.99, 0, 0, -0.99, 283.09, 141.46)"/>
+</g>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 99.18 56.58 L 92.83 76.13 L 72.27 76.13 L 88.91 88.21 L 82.55 107.76 L 99.18 95.68 L 115.82 107.76 L 109.46 88.21 L 126.09 76.13 L 105.54 76.13 Z M 99.18 56.58 "/>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 151.20 4.57 L 144.85 24.12 L 124.29 24.12 L 140.92 36.20 L 134.57 55.75 L 151.20 43.67 L 167.83 55.75 L 161.48 36.20 L 178.11 24.12 L 157.55 24.12 Z M 151.20 4.57 "/>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 47.17 4.57 L 40.82 24.12 L 20.26 24.12 L 36.89 36.20 L 30.54 55.75 L 47.17 43.67 L 63.80 55.75 L 57.45 36.20 L 74.08 24.12 L 53.52 24.12 Z M 47.17 4.57 "/>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 47.17 108.59 L 40.82 128.14 L 20.26 128.14 L 36.89 140.23 L 30.54 159.78 L 47.17 147.70 L 63.80 159.78 L 57.45 140.23 L 74.08 128.14 L 53.52 128.14 Z M 47.17 108.59 "/>
+<path fill-rule="nonzero" fill="rgb(100%, 100%, 100%)" fill-opacity="1" d="M 151.20 108.59 L 144.85 128.14 L 124.29 128.14 L 140.92 140.23 L 134.57 159.78 L 151.20 147.70 L 167.83 159.78 L 161.48 140.23 L 178.11 128.14 L 157.55 128.14 Z M 151.20 108.59 "/>
+</svg></svg>

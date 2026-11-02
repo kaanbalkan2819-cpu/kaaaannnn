@@ -1,1 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.5 15"><path fill="#20AA46" d="M0 0h22.5v5H0V0z"/><path fill="#E92F3B" d="M0 10h22.5v5H0v-5z"/><path fill="#FADF50" d="M0 5h22.5v5H0V5z"/><circle fill="#205CCA" cx="11.3" cy="7.5" r="5.2"/><g stroke="#FFDB3D" fill="none"><g stroke-width=".5"><path d="m11.3 8.8-2.1 1.5.8-2.4-2-1.5h2.5l.8-2.3.8 2.3h2.6l-2.1 1.5.8 2.4-2.1-1.5zM10.3 6.4h1.9M9.9 7.8l1.3 1M12 6.2l.7 1.8M10 7.9l.6-1.8M11 9l1.6-1.1"/></g><g stroke-width=".25"><path d="m8.7 3.9 1.1 1.6M13.8 3.8l-1 1.6M11.3 10.1V12M8.9 8.3 7.1 9M15.5 9l-1.8-.7"/></g></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="0.00" y="42.73" width="513.00" height="256.54" viewBox="0 0 566.85 283.46" preserveAspectRatio="xMidYMid meet">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.16 0 L 566.02 0 L 566.02 95 L 0.16 95 Z M 0.16 0 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 0.16 94 L 566.02 94 L 566.02 189 L 0.16 189 Z M 0.16 94 "/>
+</clipPath>
+<clipPath id="clip-2">
+<path clip-rule="nonzero" d="M 0.16 188 L 566.02 188 L 566.02 282.92 L 0.16 282.92 Z M 0.16 188 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(0%, 60.39%, 26.66%)" fill-opacity="1" d="M 0.16 94.31 L 0.16 0 L 566.02 0 L 566.02 94.31 Z M 0.16 94.31 "/>
+</g>
+<g clip-path="url(#clip-1)">
+<path fill-rule="nonzero" fill="rgb(100%, 84.31%, 0%)" fill-opacity="1" d="M 0.16 188.62 L 0.16 94.31 L 566.02 94.31 L 566.02 188.62 Z M 0.16 188.62 "/>
+</g>
+<g clip-path="url(#clip-2)">
+<path fill-rule="nonzero" fill="rgb(93.72%, 19.99%, 25.09%)" fill-opacity="1" d="M 0.16 282.93 L 0.16 188.62 L 566.02 188.62 L 566.02 282.93 Z M 0.16 282.93 "/>
+</g>
+<path fill-rule="nonzero" fill="rgb(0%, 23.92%, 64.70%)" fill-opacity="1" d="M 377.40 141.46 C 377.40 89.37 335.17 47.15 283.09 47.15 C 231.00 47.15 188.78 89.37 188.78 141.46 C 188.78 193.55 231.00 235.77 283.09 235.77 C 335.17 235.77 377.40 193.55 377.40 141.46 Z M 377.40 141.46 "/>
+<path fill-rule="nonzero" fill="rgb(100%, 84.31%, 0%)" fill-opacity="1" d="M 283.09 66.07 L 279.78 76.23 L 293.41 118.16 L 275.25 118.16 L 273.21 124.44 L 331.45 124.44 L 340.10 118.16 L 300.01 118.16 Z M 283.09 66.07 "/>
+<path fill="none" stroke-width="3.03" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(100%, 84.31%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 20.34 28.00 L 44.39 61.10 " transform="matrix(0.99, 0, 0, -0.99, 283.09, 141.46)"/>
+<path fill-rule="nonzero" fill="rgb(100%, 84.31%, 0%)" fill-opacity="1" d="M 354.79 118.16 L 344.10 118.16 L 308.44 144.08 L 302.82 126.80 L 296.22 126.80 L 314.21 182.19 L 322.86 188.48 L 310.48 150.36 Z M 354.79 118.16 "/>
+<path fill="none" stroke-width="3.03" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(100%, 84.31%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 32.92 -10.69 L 71.83 -23.33 " transform="matrix(0.99, 0, 0, -0.99, 283.09, 141.46)"/>
+<path fill-rule="nonzero" fill="rgb(100%, 84.31%, 0%)" fill-opacity="1" d="M 327.40 202.45 L 324.10 192.29 L 288.43 166.37 L 303.13 155.70 L 301.08 149.42 L 253.97 183.65 L 250.67 193.82 L 283.09 170.26 Z M 327.40 202.45 "/>
+<path fill="none" stroke-width="3.03" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(100%, 84.31%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 0.00 -34.61 L 0.00 -75.52 " transform="matrix(0.99, 0, 0, -0.99, 283.09, 141.46)"/>
+<path fill-rule="nonzero" fill="rgb(100%, 84.31%, 0%)" fill-opacity="1" d="M 211.39 118.16 L 220.03 124.45 L 264.12 124.45 L 258.51 141.72 L 263.85 145.60 L 281.85 90.21 L 278.55 80.05 L 266.16 118.16 Z M 211.39 118.16 "/>
+<path fill="none" stroke-width="3.03" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(100%, 84.31%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -20.35 28.00 L -44.40 61.10 " transform="matrix(0.99, 0, 0, -0.99, 283.09, 141.46)"/>
+<path fill-rule="nonzero" fill="rgb(100%, 84.31%, 0%)" fill-opacity="1" d="M 238.78 202.45 L 247.42 196.17 L 261.05 154.24 L 275.74 164.92 L 281.08 161.03 L 233.97 126.80 L 223.28 126.80 L 255.70 150.36 Z M 238.78 202.45 "/>
+<path fill="none" stroke-width="3.03" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(100%, 84.31%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -32.92 -10.69 L -71.83 -23.33 " transform="matrix(0.99, 0, 0, -0.99, 283.09, 141.46)"/>
+</svg></svg>

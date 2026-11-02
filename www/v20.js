@@ -268,22 +268,21 @@
   window.v20Pact = function () {
     if (!is5() || G.ph != 'act' || G.busy || BSH || !G.sel) return;
     var e = G.owner[G.sel]; if (typeof e != 'string' || e === G.pl) return;
-    var c = pactCost(e), have = window.Gold ? Gold.get() : 0;
     modal('<h3>🤝 ' + T('Saldırmazlık Paktı', 'Non-Aggression Pact') + '</h3><div style="text-align:center;margin:8px 0">' + fimg(G.pl, 'sm') + ' ⇄ ' + fimg(e, 'sm') + '</div>' +
-      '<p style="color:var(--tx2)">' + T('<b>' + nm(e) + '</b> ile ' + PACT_TURNS + ' tur boyunca birbirinize saldıramazsınız.', 'You and <b>' + nm(e) + '</b> cannot attack each other for ' + PACT_TURNS + ' turns.') + '<br>' +
-      T('Bedel: ', 'Cost: ') + '<b>' + c + ' 🪙</b> · ' + T('Bakiyen: ', 'Balance: ') + '<b>' + have + ' 🪙</b></p>' +
-      (have >= c ? '<button class="big pri" onclick="closeMod();v20PactOk()">' + T('Pakt kur', 'Sign pact') + '</button>' : '<p style="color:var(--bad)">' + T('Yeterli altının yok.', 'Not enough gold.') + '</p><button class="big pri" onclick="Shop.open()">🛒 ' + T('Dükkan', 'Shop') + '</button>') +
-      (G.T && G.T.moves >= 2 ? '<button class="big" onclick="closeMod();v20PactOk(\'moves\')">' + T('2 hamle harca', 'Spend 2 moves') + '<small style="display:block;opacity:.7">' + T('Kalan hamle: ', 'Moves left: ') + G.T.moves + '</small></button>' : '<button class="big" disabled>' + T('2 hamle harca (hamle yetmiyor)', 'Spend 2 moves (not enough)') + '</button>') +   // V105
+      '<p style="color:var(--tx2)">' + T('<b>' + nm(e) + '</b> ile ' + PACT_TURNS + ' tur boyunca birbirinize saldıramazsınız.', 'You and <b>' + nm(e) + '</b> cannot attack each other for ' + PACT_TURNS + ' turns.') + '<br>' + WCPay.costLine() + '</p>' +
+      WCPay.rows('v20PactGo') +
       '<button class="big" onclick="closeMod()">' + T('Vazgeç', 'Cancel') + '</button>');
   };
-  window.v20PactOk = function (how) {
+  window.v20PactGo = function (how) { closeMod(); v20PactOk(how); };
+  window.v20PactOk = function (how) {   // V119: 2 zar ya da reklam (altın yok)
     if (!is5() || G.ph != 'act' || !G.sel) return;
     var e = G.owner[G.sel]; if (typeof e != 'string' || e === G.pl) return;
     if (pacted(G.pl, e)) return;
-    if (how === 'moves') { if (!G.T || G.T.moves < 2) { toast(T('Yeterli hamle yok', 'Not enough moves')); return; } G.T.moves -= 2; }   // V105: 2 hamle karşılığı
-    else if (!window.Gold || !Gold.spend(pactCost(e), 'pact')) { toast(T('Yeterli altının yok', 'Not enough gold')); return; }
-    G.pacts = G.pacts || {}; G.pacts[key(G.pl, e)] = (G.T.turn || 0) + PACT_TURNS + 1;
-    G.sel = null; save(); render(); try { if (window.v23Fx) v23Fx('pact', e); } catch (x) { } toast('🤝 ' + nm(e) + ' — ' + T('saldırmazlık paktı imzalandı', 'pact signed'));
+    WCPay.spend(how, function () {
+      if (!is5() || G.ph != 'act' || pacted(G.pl, e)) return;
+      G.pacts = G.pacts || {}; G.pacts[key(G.pl, e)] = (G.T.turn || 0) + PACT_TURNS + 1;
+      G.sel = null; save(); render(); try { if (window.v23Fx) v23Fx('pact', e); } catch (x) { } toast('🤝 ' + nm(e) + ' — ' + T('saldırmazlık paktı imzalandı', 'pact signed'));
+    });
   };
 
   // ================= V20b: büyük ülkelerde (Rusya vb.) etiket kadrajdaki görünür kısma kayar =================
@@ -354,5 +353,5 @@
   }, 1000);
   window.addEventListener('load', function () { setTimeout(function () { try { sync(); } catch (e) { } }, 50); });
   function reTribute() { var m = $('mod'); if (TR && is5() && G.ph == 'v5ai' && m && m.style.display == 'none') tribute(TR.ai, TR.c); }
-  window.V20 = { reTribute: reTribute, run: run, after: after, plan: plan };
+  window.V20 = { reTribute: reTribute, run: run, after: after, plan: plan, seq: function () { return SEQ; } };   // V123: seq() → güvenlik garantisi zinciri (v123.js) kalan hamleyi okur/düşer
 })();

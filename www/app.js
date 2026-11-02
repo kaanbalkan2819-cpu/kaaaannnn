@@ -252,7 +252,7 @@ function closeBattle(){BSH=false;BT=null;OV={};FLASH=null;var b=$('bs');b.style.
  // Fetihten sonra yeni sahip olunan ülke seçili kalır; komşu hedefler kırmızı çerçeveyle görünür
  render();if(G.sel&&!G.over)focusSel();else if(!G.over)home()}
 function fmt(ms){var s=Math.floor(ms/1000),m=Math.floor(s/60);return m+':'+('0'+s%60).slice(-2)}
-function showOver(){var o=G.over,h='<h2>'+(G.P.length==1?(o.w==0?t('win'):t('lose')):t('wn')+': '+G.P[o.w].name)+'</h2><div class="row"><span>'+t('tm')+'</span><b>'+fmt(G.el+Date.now()-G.ts)+'</b></div>';
+function showOver(){var o=G.over,h='<h2>'+(G.P.length==1?(o.w==0?t('win'):((typeof L!='undefined'&&L=='en')?'Game Over 🌱':'Oyun Bitti 🌱')):t('wn')+': '+G.P[o.w].name)+'</h2><div class="row"><span>'+t('tm')+'</span><b>'+fmt(G.el+Date.now()-G.ts)+'</b></div>';
  G.st.forEach(function(s,i){h+=(G.P.length>1?'<b>'+G.P[i].name+'</b>':'')+'<div class="row"><span>'+t('ws')+'</span><b>'+s.w+'</b></div><div class="row"><span>'+t('ls')+'</span><b>'+s.l+'</b></div><div class="row"><span>'+t('cq')+'</span><b>'+s.c+'</b></div>'});
  modal(h+'<button class="big pri" onclick="G=null;menu()">'+t('menu')+'</button>')}
 

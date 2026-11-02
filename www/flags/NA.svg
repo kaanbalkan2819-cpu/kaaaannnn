@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 513 342"><path fill="#009a44" d="M0 0h513v342H0z"/><path fill="#002f6c" d="M0 342V0h513"/><path fill="#FFF" d="M513 67V0H412.5L0 275v67h100.5z"/><path fill="#c8102e" d="M513 0v40.2L60.3 342H0v-40.2L452.7 0z"/><path fill="#ffcd00" d="m188.1 104.1-22.8 10.7 12.2 22.1-24.8-4.8-3.1 25-17.3-18.4-17.2 18.4-3.1-25-24.8 4.8 12.2-22.1-22.8-10.7 22.8-10.7-12.2-22.1L112 76l3.1-25 17.2 18.4L149.6 51l3.1 25 24.8-4.7-12.2 22.1z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="0.00" y="0.00" width="513.00" height="342.00" viewBox="0 0 425.15 283.46" preserveAspectRatio="none">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.17 0 L 424.61 0 L 424.61 282.92 L 0.17 282.92 Z M 0.17 0 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(0%, 23.92%, 64.70%)" fill-opacity="1" d="M 0.17 282.93 L 0.17 0 L 424.61 0 Z M 0.17 282.93 "/>
+<path fill-rule="nonzero" fill="rgb(0%, 60.39%, 26.66%)" fill-opacity="1" d="M 0.17 282.93 L 424.61 282.93 L 424.61 0 Z M 0.17 282.93 "/>
+<path fill="none" stroke-width="94.48" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(100%, 100%, 100%)" stroke-opacity="1" stroke-miterlimit="10" d="M -212.62 -141.73 L 212.61 141.73 " transform="matrix(0.99, 0, 0, -0.99, 212.39, 141.46)"/>
+<path fill="none" stroke-width="70.86" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(72.94%, 4.70%, 18.42%)" stroke-opacity="1" stroke-miterlimit="10" d="M -212.62 -141.73 L 212.61 141.73 " transform="matrix(0.99, 0, 0, -0.99, 212.39, 141.46)"/>
+</g>
+<path fill-rule="nonzero" fill="rgb(100%, 78.03%, 17.25%)" fill-opacity="1" d="M 85.05 30.65 L 77.73 50.47 L 61.48 36.97 L 65.05 57.79 L 44.22 54.22 L 57.73 70.48 L 37.90 77.80 L 57.73 85.12 L 44.22 101.37 L 65.05 97.80 L 61.48 118.63 L 77.73 105.13 L 85.05 124.95 L 92.37 105.13 L 108.63 118.63 L 105.06 97.80 L 125.89 101.37 L 112.38 85.12 L 132.21 77.80 L 112.38 70.48 L 125.89 54.22 L 105.06 57.79 L 108.63 36.97 L 92.37 50.47 Z M 85.05 30.65 "/>
+<path fill-rule="evenodd" fill="rgb(0%, 23.92%, 64.70%)" fill-opacity="1" d="M 113.35 77.80 C 113.35 62.17 100.68 49.50 85.05 49.50 C 69.42 49.50 56.76 62.17 56.76 77.80 C 56.76 93.42 69.42 106.09 85.05 106.09 C 100.68 106.09 113.35 93.42 113.35 77.80 Z M 108.63 77.80 C 108.63 64.78 98.07 54.22 85.05 54.22 C 72.03 54.22 61.48 64.78 61.48 77.80 C 61.48 90.82 72.03 101.37 85.05 101.37 C 98.07 101.37 108.63 90.82 108.63 77.80 Z M 108.63 77.80 "/>
+</svg></svg>

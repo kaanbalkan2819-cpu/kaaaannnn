@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "World Conquest mobile app wrapper",
-  "engines": {
-    "node": ">=22.0.0"
-  },
+  "engines": { "node": ">=22.0.0" },
   "scripts": {
     "web:copy": "node -e \"console.log('Game files are stored in ./www')\"",
     "android:add": "cap add android",
@@ -18,8 +16,7 @@
   "dependencies": {
     "@capacitor/android": "^8.6.0",
     "@capacitor/core": "^8.6.0",
-    "cordova-plugin-purchase": "^13.13.1",
-    "@capacitor/app": "^8.0.0"
+    "cordova-plugin-purchase": "^13.13.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.6.0"

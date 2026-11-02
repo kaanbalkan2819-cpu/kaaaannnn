@@ -13,10 +13,12 @@
     var en = LANG() === 'en';
     ovEl = document.createElement('div');
     ovEl.id = 'v38over';
-    ovEl.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(5,8,16,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#fff;font-family:inherit;text-align:center;padding:24px';
-    ovEl.innerHTML = '<div style="font-size:34px;font-weight:800;letter-spacing:1px;color:' + (win ? '#f2c14e' : '#ff5a47') + '">' + (win ? (en ? 'VICTORY' : 'ZAFER') : (en ? 'GAME OVER' : 'OYUN BİTTİ')) + '</div>' +
-      '<div style="opacity:.85;max-width:320px">' + (win ? (en ? 'You conquered the world.' : 'Dünyayı fethettin.') : (en ? 'You lost your last territory.' : 'Son toprağını da kaybettin.')) + '</div>' +
-      '<button id="v38menu" style="padding:12px 26px;font-size:16px;border-radius:10px;border:0;background:#f2c14e;color:#1a1200;font-weight:700">' + (en ? 'Main menu' : 'Ana menü') + '</button>';
+    ovEl.style.cssText = 'position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at 50% 32%,#2c2552 0%,#14172e 62%,#0c0f20 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font-family:inherit;text-align:center;padding:24px';
+    /* V122: korkutucu kırmızı "OYUN BİTTİ" yerine yumuşak, cana yakın metin (abartısız) */
+    ovEl.innerHTML = '<div style="font-size:46px;line-height:1">' + (win ? '🌍' : '🌱') + '</div>' +
+      '<div style="font-size:30px;font-weight:700;letter-spacing:.3px;color:' + (win ? '#f2c14e' : '#ffd9a8') + '">' + (win ? (en ? 'Victory!' : 'Zafer!') : (en ? 'Game Over' : 'Oyun Bitti')) + '</div>' +
+      '<div style="opacity:.88;max-width:300px;line-height:1.45;font-size:15px">' + (win ? (en ? 'You conquered the world. Well played!' : 'Dünyayı fethettin. Harika oynadın!') : (en ? 'You lost your last territory, but that’s okay — every great ruler starts with a defeat.' : 'Son toprağını da kaybettin ama olsun — her büyük hükümdar bir yenilgiyle başlar.')) + '</div>' +
+      '<button id="v38menu" style="margin-top:6px;padding:12px 28px;font-size:16px;border-radius:14px;border:0;background:#ffd9a8;color:#2a1a00;font-weight:700">' + (en ? 'Main menu' : 'Ana menü') + '</button>';
     document.body.appendChild(ovEl);
     document.getElementById('v38menu').onclick = function () {
       try { ovEl.remove(); } catch (x) { } ovEl = null;
@@ -35,7 +37,7 @@
       if (!G.over) G.over = { w: end };
       G.ph = 'over'; G.busy = 0;
       try { localStorage.removeItem(SV); } catch (x) { }
-      if (typeof BSH !== 'undefined' && BSH) { if (!bsSince) bsSince = Date.now(); if (Date.now() - bsSince < 2500) return; }  // savaş ekranı kapansın; takılırsa 2,5 sn sonra yine de göster
+      if (typeof BSH !== 'undefined' && BSH) { if (!bsSince) bsSince = Date.now(); if (Date.now() - bsSince < 120000) return; }  // V122: oyuncu savaş sonucunu (6'dan sonraki zarı dahil) görüp 'Devam'a basana dek bekle; yalnızca takılırsa 2 dk sonra göster
       overlay(end === 0);
     } catch (x) { }
   }

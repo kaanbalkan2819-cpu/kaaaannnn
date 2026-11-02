@@ -1,1 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 513 342"><path fill="#00a95c" d="M0 0h513v342H0z"/><path fill="#d01c1f" d="M0 0h513v46H0zM0 296h513v46H0z"/><path fill="gold" d="M256 213.9c-46 0-84.3-32.3-93.8-75.4-1.4 6.6-2.2 13.5-2.2 20.6 0 53 43 96 96 96s96-43 96-96c0-7.1-.8-13.9-2.2-20.6-9.5 43.1-47.8 75.4-93.8 75.4z"/><path fill="gold" d="m256 87 8.9 27.5h29l-23.4 17 8.9 27.5-23.4-17-23.4 17 8.9-27.5-23.4-17h29z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 513 342"><svg x="0.00" y="0.00" width="513.00" height="342.00" viewBox="0 0 425.15 283.46" preserveAspectRatio="none">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0.17 0 L 424.61 0 L 424.61 282.92 L 0.17 282.92 Z M 0.17 0 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 0.17 42 L 424.61 42 L 424.61 241 L 0.17 241 Z M 0.17 42 "/>
+</clipPath>
+<clipPath id="clip-2">
+<path clip-rule="nonzero" d="M 120 23 L 304 23 L 304 207 L 120 207 Z M 120 23 "/>
+</clipPath>
+<clipPath id="clip-3">
+<path clip-rule="nonzero" d="M 303.94 115.13 C 303.94 64.57 262.96 23.57 212.39 23.57 C 161.83 23.57 120.83 64.57 120.83 115.13 C 120.83 165.69 161.83 206.69 212.39 206.69 C 262.96 206.69 303.94 165.69 303.94 115.13 Z M 303.94 115.13 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill-rule="nonzero" fill="rgb(78.43%, 6.27%, 18.03%)" fill-opacity="1" d="M 0.17 282.93 L 0.17 0 L 424.61 0 L 424.61 282.93 Z M 0.17 282.93 "/>
+</g>
+<g clip-path="url(#clip-1)">
+<path fill-rule="nonzero" fill="rgb(0%, 69.41%, 25.09%)" fill-opacity="1" d="M 0.17 240.49 L 0.17 42.43 L 424.61 42.43 L 424.61 240.49 Z M 0.17 240.49 "/>
+</g>
+<g clip-path="url(#clip-2)">
+<g clip-path="url(#clip-3)">
+<path fill-rule="evenodd" fill="rgb(99.21%, 85.48%, 14.50%)" fill-opacity="1" d="M 304.86 115.13 C 304.86 64.06 263.46 22.66 212.39 22.66 C 161.32 22.66 119.92 64.06 119.92 115.13 C 119.92 166.20 161.32 207.60 212.39 207.60 C 263.46 207.60 304.86 166.20 304.86 115.13 Z M 300.81 88.41 C 300.81 39.58 261.22 0 212.39 0 C 163.56 0 123.98 39.58 123.98 88.41 C 123.98 137.24 163.56 176.83 212.39 176.83 C 261.22 176.83 300.81 137.24 300.81 88.41 Z M 300.81 88.41 "/>
+</g>
+</g>
+<path fill-rule="nonzero" fill="rgb(99.21%, 85.48%, 14.50%)" fill-opacity="1" d="M 212.39 53.05 L 204.45 77.48 L 178.75 77.48 L 199.54 92.58 L 191.60 117.02 L 212.39 101.92 L 233.18 117.02 L 225.24 92.58 L 246.03 77.48 L 220.33 77.48 Z M 212.39 53.05 "/>
+</svg></svg>
