@@ -1,0 +1,8 @@
+/* V16: deniz hedefleri mavi tonda, kara hedefleri kırmızı kalır */
+path.hl.atk.sea{fill:#3fa9ff30!important;stroke:#7cc8ff!important;stroke-width:1.6px!important;stroke-dasharray:5 4!important}
+.tgi-sea .tgc{stroke:#7cc8ff!important;fill:#3fa9ff22!important}
+.tgi-sea .tgx,.tgi-sea .tgd{stroke:#9fd8ff!important;fill:#9fd8ff}
+.tgi-sea .tgx{fill:none}
+/* kara / deniz etiketleri */
+.tag.ok.v16land{background:#4a1d1d;color:#fca5a5}
+.tag.ok.v16sea{background:#0c3a5c;color:#9fd8ff}

@@ -1,0 +1,31 @@
+/* V28 — su, kıyı köpüğü, yüzen seçili ülke. Hepsi haritadan bağımsız/statik katmanlar; ülke yollarına sürekli animasyon yok. */
+#map{background:radial-gradient(120% 90% at 50% 30%,#14456b 0%,#0e2f52 45%,#071526 100%)}
+#wwater{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+#wwater i{position:absolute;left:-220px;top:-120px;width:calc(100% + 220px);height:calc(100% + 120px);opacity:.5;will-change:transform;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='120' viewBox='0 0 220 120'><g fill='none' stroke='%239fd8ff' stroke-width='1.6' stroke-linecap='round' opacity='.55'><path d='M10 20q12-9 24 0t24 0t24 0'/><path d='M120 70q12-9 24 0t24 0t24 0'/><path d='M40 100q10-7 20 0t20 0'/></g></svg>");
+ background-size:220px 120px;animation:wwA 46s linear infinite}
+#wwater i+i{left:0;top:0;width:calc(100% + 340px);height:calc(100% + 186px);opacity:.32;background-size:340px 186px;animation:wwB 70s linear infinite reverse}
+#wwater::after{content:'';position:absolute;inset:0;background:radial-gradient(60% 40% at 30% 25%,#7fd0ff22,transparent 70%),radial-gradient(50% 35% at 75% 70%,#7fd0ff18,transparent 70%);animation:wwC 18s ease-in-out infinite alternate;will-change:transform}
+@keyframes wwA{to{transform:translate3d(220px,120px,0)}}
+@keyframes wwB{from{transform:translate3d(0,0,0)}to{transform:translate3d(-340px,-186px,0)}}
+@keyframes wwC{from{transform:translate3d(-4%,0,0)}to{transform:translate3d(4%,3%,0)}}
+#map>svg{z-index:1}
+/* kıyı: koyu "yükselti gölgesi" + açık köpük (statik, yakınlaştırma bitince güncellenir) */
+path.wcs{fill:none;stroke:#02101f;stroke-opacity:.5;stroke-width:calc(var(--sw,1px)*9);stroke-linejoin:round;pointer-events:none}
+path.wcf{fill:none;stroke:#bfeaff;stroke-opacity:.34;stroke-width:calc(var(--sw,1px)*4.2);stroke-linejoin:round;pointer-events:none}
+.moving path.wcs,.moving path.wcf{display:none}
+/* seçili ülke suda hafifçe yükselip alçalır (tek öğe) */
+#map path.hl.sel{animation:none!important;filter:none!important}
+@keyframes wwBob{0%,100%{transform:translateY(calc(var(--sw,1px)*-2))}50%{transform:translateY(calc(var(--sw,1px)*-5))}}
+/* saldırılabilir hedeflerde su halkası */
+.tgc{transform-box:fill-box;transform-origin:center;animation:none}
+@keyframes wwPing{0%{transform:scale(.8);opacity:1}70%,100%{transform:scale(1.5);opacity:.35}}
+/* düşük efekt kalitesi / hareketi azalt */
+body.fxlow #wwater i,body.fxlow #wwater::after,body.rm #wwater i,body.rm #wwater::after{animation:none}
+body.fxlow path.wcs,body.fxlow path.wcf{display:none}
+body.fxlow #map path.hl.sel,body.rm #map path.hl.sel{animation:none!important;filter:none}
+body.fxlow .tgc,body.rm .tgc{animation:none}
+
+/* dokunmatik cihaz: su katmanları statik (sürekli animasyon haritayı her karede yeniden birleştiriyordu) */
+@media (pointer:coarse){#wwater i,#wwater::after{animation:none!important;will-change:auto}}
+@media (pointer:coarse){path.wcs,path.wcf{display:none}}

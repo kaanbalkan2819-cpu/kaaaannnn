@@ -1,0 +1,24 @@
+/* V29 — menü ve arayüz katmanı */
+.wb-wrap{justify-content:flex-start}.wb-wrap>:first-child{margin-top:auto}.wb-wrap>:last-child{margin-bottom:auto}
+.wb-wrap.cmp .wb-title small,.wb-wrap.cmp .wb-foot{display:none}.wb-wrap.cmp .wb-title b{font-size:26px}.wb-wrap.cmp .wb-title i{font-size:11px;margin-top:2px}
+.wb-wrap.still .wb-title,.wb-wrap.still .wb-panel{animation:none}
+.wb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 10px}
+.wb-stats div{border:1px solid #7a4f1a55;border-radius:6px;padding:7px 2px 6px;background:#7a4f1a14}
+.wb-stats b{display:block;font-size:22px;line-height:1.1;color:#7a1410;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wb-stats b i{font-style:normal;font-size:13px;color:#6b4a1f}
+.wb-stats small{display:block;font-size:10px;letter-spacing:.14em;color:#6b4a1f;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wb-msg{margin:6px 0 10px;font-size:16px;line-height:1.4;color:#3a2410}
+.wb-panel.wb-set{width:min(92vw,380px);padding:22px 18px 18px;text-align:left}
+.wb-set h3{text-align:center}
+.wb-sec{margin:10px 0 2px;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:#7a4f1a}
+.wb-set .set{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0;padding:9px 2px;border-top:1px solid #7a4f1a2e;font-size:16px;color:#3a2410}
+.wb-set .wb-sec+.set{border-top:0}
+.wb-set input[type=range]{accent-color:#7a1410;width:46%;min-height:28px}
+.wb-set input[type=checkbox]{-webkit-appearance:none;appearance:none;flex:none;width:46px;height:26px;border-radius:13px;background:#7a4f1a40;border:1px solid #7a4f1a88;position:relative;cursor:pointer;transition:background .2s;margin:0}
+.wb-set input[type=checkbox]::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#f4e8c4;box-shadow:0 1px 3px #0007;transition:left .2s}
+.wb-set input[type=checkbox]:checked{background:#7a1410;border-color:#4a0c08}.wb-set input[type=checkbox]:checked::after{left:22px}
+.wb-set select{font:inherit;font-size:15px;color:#3a2410;background:#f0dfae;border:1px solid #7a4f1a88;border-radius:6px;padding:6px 8px}
+.wb-set button.big{display:block;width:100%;margin:8px 0 0;padding:10px;font:inherit;font-size:16px;color:#3a2410;background:#7a4f1a14;border:1px solid #7a4f1a77;border-radius:6px;letter-spacing:.03em;cursor:pointer}
+.wb-set button.big:active{background:#7a4f1a33}
+.wb-set button.big.pri{margin-top:14px;background:#7a1410;color:#f6e9c0;border-color:#4a0c08;font-weight:700}
+@media (max-height:780px){.wb-set .set{padding:4px 2px;font-size:15px}.wb-set input[type=range]{min-height:22px}.wb-set button.big{padding:7px;margin-top:6px}.wb-set button.big.pri{margin-top:8px}.wb-sec{margin-top:6px}.wb-panel.wb-set{padding-top:16px;padding-bottom:14px}}

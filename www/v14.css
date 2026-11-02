@@ -1,0 +1,7 @@
+/* V14: seçili ülke vurgusu (animasyonsuz), birleşik sınır katmanı */
+path.hl.sel{fill:#00e5ff;fill-opacity:.55;stroke:#ffffff;stroke-width:2.4px;animation:none!important}
+.mk.sel .dot{fill:#00e5ff!important;stroke:#fff}
+path.c{stroke:var(--sk,none);stroke-width:var(--sw);stroke-opacity:1}
+path.bord{fill:none;stroke:#06102c;stroke-opacity:.95;stroke-width:var(--sw);stroke-linejoin:round;pointer-events:none}
+.moving path.c{stroke:none}
+.moving path.bord{stroke:none}

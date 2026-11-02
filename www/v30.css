@@ -1,0 +1,28 @@
+/* V30 — 3B küre görünümü */
+#g3d{position:absolute;inset:0;z-index:2;background:#02040a;touch-action:none}
+#g3d canvas{display:block;width:100%;height:100%}
+#map.v30on>svg,#map.v30on #wwater{visibility:hidden}
+#v30b{font-size:13px;font-weight:800;letter-spacing:.02em}
+#v30b.on{background:#f5b53ccc;color:#1a1204}
+#v30b.ld{opacity:.55;animation:v30p 1s ease-in-out infinite alternate}
+@keyframes v30p{to{opacity:.95}}
+
+#v30b{display:none!important}
+#intent24,#fact23.intent24{display:none!important}
+
+/* V96: yükleme sırasında yalnızca yıldızlı arka plan; sahte gezegen kaldırıldı. Gerçek küre (v30.js doIntro) uzaktan yaklaşır. */
+#g3d.v91cover{background:radial-gradient(ellipse at 50% 45%,#0b1226 0,#02040a 70%);overflow:hidden}
+#g3d.v91cover::before{content:'';position:absolute;inset:0;opacity:.9;animation:wcTw 2.6s ease-in-out infinite alternate;
+background-image:radial-gradient(1.6px 1.6px at 8% 18%,#fff 50%,transparent 52%),radial-gradient(1.2px 1.2px at 21% 71%,#cfe0ff 50%,transparent 52%),radial-gradient(1.8px 1.8px at 33% 34%,#fff 50%,transparent 52%),radial-gradient(1.2px 1.2px at 47% 86%,#fff 50%,transparent 52%),radial-gradient(1.5px 1.5px at 58% 12%,#ffe9b8 50%,transparent 52%),radial-gradient(1.2px 1.2px at 69% 63%,#fff 50%,transparent 52%),radial-gradient(1.8px 1.8px at 81% 27%,#cfe0ff 50%,transparent 52%),radial-gradient(1.3px 1.3px at 90% 79%,#fff 50%,transparent 52%),radial-gradient(1.1px 1.1px at 14% 47%,#fff 50%,transparent 52%),radial-gradient(1.4px 1.4px at 76% 91%,#ffe9b8 50%,transparent 52%),radial-gradient(1.1px 1.1px at 94% 8%,#fff 50%,transparent 52%),radial-gradient(1.3px 1.3px at 40% 55%,#cfe0ff 50%,transparent 52%)}
+@keyframes wcOut{from{opacity:.8}to{opacity:0}}
+/* V102: kapak artık boş değil — yıldızlar ileri doğru akar, ufukta bir ışık büyür (gerçek küre gelince yerini ona bırakır) */
+@keyframes wcFly{from{transform:scale(1)}to{transform:scale(1.6)}}
+@keyframes wcDawn{0%{opacity:0;transform:translate(-50%,-50%) scale(.15)}25%{opacity:.9}100%{opacity:.85;transform:translate(-50%,-50%) scale(1)}}
+#g3d.v91cover::before{animation:wcTw 2.6s ease-in-out infinite alternate,wcFly 4.5s cubic-bezier(.2,.6,.3,1) forwards}
+#g3d.v91cover::after{content:'';position:absolute;left:50%;top:45%;width:46vmin;height:46vmin;border-radius:50%;pointer-events:none;background:radial-gradient(circle,#cfe6ff 0,#5f93d6 8%,#1d3f7a 24%,rgba(20,40,90,.35) 48%,transparent 70%);animation:wcDawn 2.2s cubic-bezier(.2,.7,.3,1) forwards}
+#g3d.v95out::before{animation:wcOut .6s ease-out forwards,wcFly 4.5s cubic-bezier(.2,.6,.3,1) forwards}
+@keyframes wcDawnOut{from{opacity:.85}to{opacity:0}}
+#g3d.v95out::after{animation:wcDawnOut .45s ease-out forwards}
+body.rm #g3d.v91cover::after{animation:none;opacity:0}
+@keyframes wcTw{from{opacity:.55}to{opacity:1}}
+body.rm #g3d.v91cover::before{animation:none!important}

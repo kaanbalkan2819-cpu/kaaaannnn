@@ -1,0 +1,23 @@
+/* V58 (V57 yatay düzeltmesi yenilendi) — yatay telefonda diplomasi baloncuğu ekranın ortasına sabitlenir,
+   2 sütun olur, ekran yüksekliğini aşamaz (aşarsa kendi içinde kayar). Satır içi (inline) konumlar !important ile ezilir. */
+@media (orientation:landscape) and (max-height:520px){
+ #wdbub{position:fixed!important;top:calc(6px + env(safe-area-inset-top,var(--safe-area-inset-top,0px)))!important;bottom:auto!important;
+  left:calc(8px + env(safe-area-inset-left,var(--safe-area-inset-left,0px)))!important;right:calc(8px + env(safe-area-inset-right,var(--safe-area-inset-right,0px)))!important;
+  margin:0 auto!important;width:min(580px,calc(100vw - 24px - env(safe-area-inset-left,var(--safe-area-inset-left,0px)) - env(safe-area-inset-right,var(--safe-area-inset-right,0px))))!important;
+  max-height:calc(100vh - 12px)!important;max-height:calc(100dvh - 12px)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;
+  animation:none!important;transform:none!important;box-sizing:border-box!important;
+  display:grid!important;grid-template-columns:1fr 1fr;column-gap:6px;align-content:start;padding:6px!important}
+ #wdbub:after{display:none!important}
+ #wdbub .wd-h{grid-column:1/-1;padding:2px 6px 4px!important}
+ #wdbub .wd-r{margin:2px 0!important;padding:5px 8px!important;gap:6px!important;min-width:0}
+ #wdbub .wd-r.sm{grid-column:1/-1}
+ #wdbub .wd-i{font-size:18px!important;width:22px!important}
+ #wdbub .wd-t b{font-size:12.5px!important}
+ #wdbub .wd-t small{font-size:10px!important;line-height:1.2!important}
+ #wdbub .wd-r em{font-size:10.5px!important}
+ #mod .box{max-height:calc(100vh - 12px)!important;max-height:calc(100dvh - 12px)!important;overflow-y:auto!important;padding-top:8px!important;padding-bottom:8px!important}
+ #mod .box button.big{padding:7px 10px!important;min-height:0!important;font-size:13px!important;margin-top:4px!important}
+ #mod .box h3{margin:2px 0 4px!important;font-size:16px!important}
+ #mod .box p{margin:4px 0!important}
+}

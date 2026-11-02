@@ -1,0 +1,7 @@
+/* V102: Keşif sonrası ülke paneli (alttan açılan) uzayınca ekranı kaplıyor, kaydırılamıyor ve kapatma düğmesi erişilemiyordu.
+   Dikeyde panel en çok ekranın ~%68'i olur, içi yukarı-aşağı kaydırılır; kapatma (X) düğmesi kaydırırken üstte sabit kalır. */
+@media (orientation:portrait){
+  #panel{max-height:68vh!important;max-height:68dvh!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+  #panel .cls{position:sticky!important;top:0!important;right:auto!important;float:right;margin:0 0 0 8px!important;z-index:8;background:#0a1431!important;border-radius:8px}
+}
+#mod .box{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}

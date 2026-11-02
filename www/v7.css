@@ -1,0 +1,65 @@
+/* V7 — bayraklar, seçim paneli, savaş ekranı, tazminat ekranı */
+#map{background:#0b1d33}
+path.c{stroke:#06102c;stroke-opacity:.95}
+.hb.up{display:none!important}
+#v7end{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(14px + var(--safe-b));z-index:6;padding:12px 22px;border-radius:999px;font-size:15px;font-weight:800;box-shadow:0 6px 18px #000a}
+#v7end small{font-weight:600;opacity:.8}
+#panel .pk{display:block}
+.pkh{display:flex;gap:12px;align-items:flex-start}.pki{min-width:0}.pki .nm{font-size:18px;font-weight:800}
+.pki .hs{color:var(--tx2);font-size:12px;line-height:1.4;margin-top:3px;max-height:5.6em;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding-right:6px;scrollbar-width:thin;scrollbar-color:#6f86c9 transparent;outline:none}
+.pki .hs::-webkit-scrollbar{width:5px}.pki .hs::-webkit-scrollbar-thumb{background:#6f86c9;border-radius:3px}.pki .hs::-webkit-scrollbar-track{background:transparent}
+/* Kaydırılabilir açıklama: altta/üstte devam eden metin solma ile belli olur; sona gelince solma kalkar (metnin sonu açıkça anlaşılır) */
+.pki .hs.mb{-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 1.6em),transparent);mask-image:linear-gradient(180deg,#000 calc(100% - 1.6em),transparent)}
+.pki .hs.mt{-webkit-mask-image:linear-gradient(180deg,transparent,#000 1.6em);mask-image:linear-gradient(180deg,transparent,#000 1.6em)}
+.pki .hs.mt.mb{-webkit-mask-image:linear-gradient(180deg,transparent,#000 1.6em,#000 calc(100% - 1.6em),transparent);mask-image:linear-gradient(180deg,transparent,#000 1.6em,#000 calc(100% - 1.6em),transparent)}
+.pki .hs.sc:focus-visible{box-shadow:0 0 0 1px #6f86c9;border-radius:4px}
+.pkb{display:flex;align-items:center;gap:8px;margin:6px 0}.pkl{flex:1;min-width:0}
+.pr{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #243a7855;font-size:13px}.pr b{color:var(--acc2)}
+svg.rad{width:150px;height:150px;flex:none;overflow:visible}
+.rg{fill:none;stroke:#3a5bb0;stroke-opacity:.5;stroke-width:.7}.ra{stroke:#3a5bb0;stroke-opacity:.5;stroke-width:.7}
+.rv{fill:#f5b53a55;stroke:#ffcf6b;stroke-width:1.8;stroke-linejoin:round}
+.rt{fill:#cfd9ff;font:600 8.5px system-ui,sans-serif;text-anchor:middle}
+.pkf{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}.pkf button{padding:12px 8px;font-weight:700}
+/* Savaş ekranı: üstte harita, altta iki devlet */
+#bs.b7{max-height:60%;padding:8px 10px calc(10px + var(--safe-b))}
+.b7h{display:grid;grid-template-columns:1fr 84px 1fr;gap:4px;align-items:center}
+.s7{text-align:center;padding:6px 4px;border-radius:12px;background:#0a1330;border:1px solid var(--line);min-width:0;transition:.4s}
+.s7 .rl{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--tx2)}.s7.a .rl{color:#7fb2ff}.s7.d .rl{color:#ff9a8a}
+.s7 .fi.lg{width:74px;height:50px;margin:3px auto;display:block}
+.s7 .nm{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s7 .ln{font-size:11px;color:var(--tx2)}.s7 .ln b{color:#fff}
+.s7 .mx{color:var(--acc2);font-weight:800;margin-top:2px}.s7 .pt{font-size:10px;letter-spacing:.1em;color:var(--tx3)}.s7 .pt b{display:block;font-size:24px;color:#fff;letter-spacing:0}
+.s7.win{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok),0 0 16px #34d39955}.s7.lose{opacity:.6}.s7.lose .fi{filter:grayscale(.9)}
+.sx{width:84px;height:84px}.swd{width:100%;height:100%;overflow:visible}
+.swd .sl,.swd .sr{opacity:.9}.swd .sl{transform:translateX(-46px)}.swd .sr{transform:translateX(46px)}.swd .spk{opacity:0;transform:scale(.2)}
+.sx.go .sl{animation:swl .55s cubic-bezier(.6,0,.9,.5) forwards}.sx.go .sr{animation:swr .55s cubic-bezier(.6,0,.9,.5) forwards}
+.sx.hit .spk{animation:spk .45s ease-out forwards}
+@keyframes swl{to{transform:translateX(-3px) rotate(-6deg)}}@keyframes swr{to{transform:translateX(3px) rotate(6deg)}}
+@keyframes spk{0%{opacity:1;transform:scale(.3)}100%{opacity:0;transform:scale(1.6)}}
+#bs.b7{animation:none}#bs.shake .b7h{animation:shk .28s linear}@keyframes shk{20%{transform:translate(-3px,2px)}40%{transform:translate(3px,-2px)}60%{transform:translate(-2px,-1px)}80%{transform:translate(2px,1px)}}
+.dr{display:grid;grid-template-columns:1fr 1.3fr 1fr;align-items:center;margin:8px 0}.dc{display:flex;justify-content:center}
+.dm{text-align:center;font-size:12px;color:var(--tx2);min-height:34px}
+.d7{width:56px;height:56px;border-radius:13px;background:linear-gradient(145deg,#fffdf4,#e8e1cc);box-shadow:0 5px 0 #b3ab94,0 10px 16px #000a,inset 0 2px 3px #fff;padding:7px}
+.d7 svg{width:100%;height:100%;display:block}.d7 circle{fill:#14161d}
+.d7.rolling{animation:rl7 .45s infinite linear}.d7.hi{box-shadow:0 5px 0 #b3ab94,0 0 0 3px var(--ok),0 0 18px #34d39999}
+@keyframes rl7{0%{transform:translateY(-10px) rotate(0)}50%{transform:translateY(0) rotate(180deg) scale(1.06)}100%{transform:translateY(-10px) rotate(360deg)}}
+.sr7{display:grid;grid-template-columns:44px 1fr 44px;gap:6px;align-items:center;padding:3px 4px;border-radius:8px;opacity:.35;transition:.3s}.sr7.on{opacity:1}
+.sr7 .v{text-align:center;font-size:13px}.sr7 .v.up{color:var(--ok)}.sr7 .lbl{font-size:11px;color:var(--tx2)}
+.sr7 .bar{display:flex;height:7px;border-radius:4px;overflow:hidden;background:#0a1330}.sr7 .bar i{display:block;transition:width .4s}.sr7 .bar i.a{background:#4c8dff}.sr7 .bar i.d{background:#ff6a55}
+.sr7.a{background:#2f7bff1a}.sr7.d{background:#ff5a471a}.sr7.e .lbl::after{content:' =';color:var(--tx3)}
+.ul{font-size:11px;color:var(--tx2);text-align:center;margin:4px 0;min-height:14px}
+.rm .sx.go .sl,.rm .sx.go .sr{animation-duration:.01ms}.rm #bs.shake .b7h{animation:none}
+/* Tazminat / özellik kopyalama */
+.box.crbox{max-width:520px}.crh{text-align:center;font-size:12px;letter-spacing:.2em;color:var(--tx2);font-weight:800}
+.crf{display:flex;justify-content:center;align-items:center;gap:14px;margin:8px 0}.crf .arr{font-size:22px}.crf .lost{filter:grayscale(.85);opacity:.6}
+.crt{text-align:center;font-size:30px;font-weight:900;letter-spacing:.1em;color:#ffd067;text-shadow:0 0 18px #f5b53a88}
+.crs{text-align:center;margin:4px 0;color:var(--tx2)}.crs .w{color:var(--ok)}.crs .l{color:var(--bad)}.crc{font-size:12px;color:var(--tx2);margin:8px 0 6px;text-align:center}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cd{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;text-align:left;padding:10px;border-radius:12px;white-space:normal;position:relative}
+.cd{align-content:start}.cd .ci{font-size:20px;grid-row:1/span 5;align-self:start}.cd .cn{font-weight:800}.cd .cv{display:flex;justify-content:space-between;gap:6px;font-size:12px;grid-column:2}.cd .cv i{font-style:normal;color:var(--tx2)}.cd .cv.af b{color:var(--acc2)}
+.cd .dl{grid-column:2;font-size:11px;font-weight:700;color:var(--tx3)}.cd .dl.up{color:var(--ok)}.cd .dl.dn{color:var(--bad)}
+.cd.on{border-color:var(--acc);background:#2a2f5a;box-shadow:0 0 0 2px var(--acc),0 0 16px #f5b53a55}.cd.on::after{content:'✔';position:absolute;right:8px;top:6px;color:var(--acc2);font-weight:900}
+.cd:nth-child(5){grid-column:1/3}
+
+/* V9: v6 merkez bayrak rozeti (sabit boyutlu küçük dikdörtgen) kapatıldı; bayrak artık ülke geometrisine oturuyor (bkz. v7.js) */
+

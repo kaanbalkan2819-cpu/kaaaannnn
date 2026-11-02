@@ -1,0 +1,48 @@
+/* V113 — (1) Kahverengi/sarımsı üst bar + "Turu Bitir" + kontrol düğmeleri -> oyunun lacivert/altın temasına uyumlu, uzayda kaybolmayan renk.
+          (2) Keşiften sonra paneldeki SALDIRI / KEŞİF / ELÇİ GÖNDER / DİPLOMASİ düğmeleri altta SABİT: aşağı çekmeye gerek yok.
+   Geri almak için index.html'deki v113.css satırını sil. */
+
+/* ---- 1) Palet: kahve yerine koyu lacivert CAM + ince altın detay (arkası görünür) ---- */
+:root{
+  --bg0:#050a1c;--bg1:#0a1330;--bg2:#10204f;--bg3:#16296a;--line:#2f4a94;--line2:#4f6fc5;
+  --tx:#f1ecde;--tx2:#c9d3f0;--tx3:#8a9bc9;--acc:#f5b53a;--acc2:#ffcf6b;
+}
+html,body{background:radial-gradient(120% 80% at 50% 0%,#0b1a3d 0%,#050a1c 55%,#02040c 100%)}
+
+/* Üst bar tamamen şeffaf: arkada uzay/küre görünür, kahverengi bant yok */
+#hud{background:transparent!important;border:0!important;box-shadow:none!important}
+
+/* Cam hap/düğmeler: yarı saydam lacivert, ince altın çerçeve, iç parlama, yumuşak altın gölge */
+#hud .chip,.v15c,.v15m,#ctl button,#v99b{
+  background:linear-gradient(180deg,rgba(30,52,110,.62),rgba(8,16,40,.72))!important;
+  border:1px solid rgba(214,170,80,.62)!important;color:#f6efdc!important;
+  box-shadow:0 4px 14px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.35),0 0 12px rgba(214,170,80,.14),inset 0 1px 0 rgba(255,236,190,.22),inset 0 0 14px rgba(70,110,220,.14)!important}
+#hud .chip b,#hud .chip strong{color:#ffd067;text-shadow:0 0 8px rgba(245,181,58,.35)}
+#v99b.on{border-color:#ffcf6b!important;box-shadow:0 4px 14px rgba(0,0,0,.55),0 0 16px rgba(245,181,58,.4),inset 0 1px 0 rgba(255,236,190,.3)!important}
+#ctl button:active,#hud .chip:active,.v15m:active{filter:brightness(1.2)}
+
+/* "Turu Bitir": cam gövde + altın çerçeve + altın ikon karosu + hamle rozeti */
+#v7end.v45end{
+  background:linear-gradient(180deg,rgba(34,58,120,.72),rgba(7,14,36,.82))!important;
+  border:1px solid rgba(232,184,86,.85)!important;color:#fbf2dc!important;
+  box-shadow:0 6px 18px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.4),0 0 16px rgba(232,184,86,.2),inset 0 1px 0 rgba(255,236,190,.25),inset 0 0 0 3px rgba(7,14,36,.55),inset 0 0 0 4px rgba(232,184,86,.18)!important}
+#v7end .em{background:rgba(4,9,26,.65);border:1px solid rgba(232,184,86,.45);color:#ffd067}
+#v7end.done{background:linear-gradient(#f7bf4d,#e08a12)!important;border-color:#ffe29a!important;color:#241400!important;box-shadow:0 6px 18px rgba(0,0,0,.6),0 0 22px rgba(245,181,58,.55)!important}
+#v7end.done .em{background:#24140022;border-color:#24140055;color:#241400}
+
+.wdh .wdh-act button{background:linear-gradient(180deg,rgba(34,58,120,.7),rgba(8,16,40,.8));border-color:rgba(214,170,80,.55);color:#f6efdc}
+
+/* ---- 2) Alt panel: eylem düğmeleri her zaman görünür ---- */
+#panel .v15a{
+  position:sticky;bottom:0;z-index:7;
+  margin:8px 0 0;padding:8px 0 4px;
+  background:linear-gradient(180deg,rgba(10,20,49,.0) 0%,rgba(10,20,49,.92) 28%);
+  border-top:1px solid rgba(214,170,80,.28);gap:6px}
+#panel .v15a button{min-height:42px}
+/* Keşif satırları açıkken panel uzamasın: tarih notunu gizle, satırları sıkıştır */
+#panel .v15p:has(.v15r) .v15q{display:none}
+#panel .v15r{margin:2px 0;gap:6px}
+#panel .v15st{margin:6px 0 2px}
+/* Dikeyde panel yüksekliği biraz daha az -> harita görünür kalır */
+@media (orientation:portrait){#panel .v15a{margin:8px -12px 0;padding:8px 12px calc(10px + var(--safe-b))}
+#panel{max-height:62vh!important;max-height:62dvh!important;padding-bottom:0!important}}

@@ -1,0 +1,28 @@
+/* V116 — Üst bar: ZAR temalı + saydam, DÜZ (şişkin buton yok): ince fildişi çerçeve, çok hafif dolgu, köşelerde küçük zar noktaları.
+   Geri almak için index.html'deki v116.css satırını sil. */
+:root{--dz-ivory:255,246,224;--dz-pip:190,50,50}
+
+#hud{background:transparent!important;border:0!important;box-shadow:none!important}
+
+#hud #goldchip,#hud .chip,#hud .v15c,#hud .v15m,#hud .hb{
+  border-radius:10px!important;
+  background:
+    radial-gradient(circle at 6px 6px,rgba(var(--dz-pip),.75) 0 1.5px,transparent 2px),
+    radial-gradient(circle at calc(100% - 6px) calc(100% - 6px),rgba(var(--dz-pip),.75) 0 1.5px,transparent 2px),
+    rgba(var(--dz-ivory),.06)!important;
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  border:1px solid rgba(var(--dz-ivory),.38)!important;
+  color:#fff7e0!important;text-shadow:0 1px 2px rgba(0,0,0,.7);
+  box-shadow:none!important}
+#hud .chip b,#hud .chip strong{color:#ffe08a!important;text-shadow:0 1px 2px rgba(0,0,0,.7)}
+#hud .v15m svg,#hud .hb svg{color:#fff7e0;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7))}
+
+/* (+) düğmesi: küçük, düz altın nokta */
+#goldchip::after{background:#e8b030!important;color:#3a2000!important;box-shadow:none!important;text-shadow:none}
+
+#hud #goldchip:active,#hud .chip:active,#hud .v15m:active,#hud .hb:active{transform:none;opacity:.7;filter:none}
+
+/* Yazı: ince, zarif (oyunun başlık fontuyla aynı aile), kalın değil */
+#hud #goldchip,#hud .chip,#hud .v15c{font-family:Georgia,'Palatino Linotype',Palatino,'Times New Roman',serif!important;font-weight:400!important;letter-spacing:.04em;font-variant-numeric:lining-nums}
+#hud .chip b,#hud .chip strong,#goldchip b{font-weight:400!important}
+#goldchip::after{font-weight:400!important}

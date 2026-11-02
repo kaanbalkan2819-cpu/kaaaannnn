@@ -1,0 +1,11 @@
+/* V66 — savaşta 6 gelince yan yana en çok 3 zar */
+.dc{gap:6px;flex-wrap:wrap;align-items:center;justify-content:center}
+.dc.m2{gap:4px}.dc.m2 .d7{width:44px;height:44px;border-radius:11px;padding:6px}
+.dc.m3{gap:3px}.dc.m3 .d7{width:36px;height:36px;border-radius:9px;padding:5px}
+.dr .d7.six{box-shadow:inset 0 0 0 1.5px #fff0b0,inset 0 0 0 3.5px #07080d,0 5px 0 #05060a,0 0 16px #ffd067cc!important}
+.d7.wait{opacity:.9;animation:w66 .9s infinite ease-in-out}
+.d7.wait svg{visibility:hidden}
+.d7.wait::after{content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 22px system-ui,sans-serif;color:#e3b94f}
+.dsm{flex:0 0 100%;text-align:center;font:700 12px system-ui,sans-serif;color:#ffd067}
+.dsm:empty{display:none}
+@keyframes w66{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}

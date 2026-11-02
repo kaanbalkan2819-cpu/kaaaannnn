@@ -1,0 +1,8 @@
+#goldchip{cursor:pointer}
+#goldchip::after{content:'＋';margin-left:6px;padding:0 6px;border-radius:50%;background:#ffd24a;color:#3a2a00;font-weight:800}
+.shbal{text-align:center;font-size:18px;color:#ffd24a;margin:4px 0 10px}
+.shgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.shpk{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;border-radius:12px;border:1px solid #c9a24d88;background:#14224d;color:#fff}
+.shg{font-size:20px;font-weight:800;color:#ffe38a}
+.shp{font-size:13px;opacity:.85}
+.shnote{font-size:12px;color:var(--tx2);text-align:center;margin:0 0 8px}

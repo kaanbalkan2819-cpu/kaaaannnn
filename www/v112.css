@@ -1,0 +1,23 @@
+/* V112 — Bej (parşömen) paneller -> oyunun lacivert/altın temasına uyumlu koyu panel. Geri almak için index.html'deki v112.css satırını sil. */
+.wb-panel{color:#e9eeff;background:radial-gradient(130% 90% at 50% 0%,#1d3170 0%,#122252 55%,#0a1330 100%);clip-path:none;border-radius:18px;border:1px solid #2f4a94;box-shadow:inset 0 0 50px #060d2299,0 0 0 1px #f5b53a22;filter:drop-shadow(0 14px 22px #000b)}
+.wb-panel::before{opacity:0}
+.wb-panel h3{color:#f5b53a}
+.wb-orn,.wb-sec{color:#f5b53a}
+.wb-orn span{background:linear-gradient(90deg,transparent,#f5b53a88,transparent)}
+.wb-b,.wb-msg,.wb-set .set,.wb-set select,.wb-set button.big{color:#e9eeff}
+.wb-b.sm{color:#9fb0e0}
+.wb-b+.wb-b,.wb-set .set{border-top-color:#2f4a9488}
+.wb-b:hover,.wb-b:active{color:#ffcf6b;text-shadow:0 0 10px #f5b53a66}
+.wb-b:hover::before,.wb-b:active::before{color:#f5b53a}
+.wb-b:disabled{color:#e9eeff}
+.wb-b small,.wb-stats small,.wb-stats b i{color:#9fb0e0}
+.wb-stats div{border-color:#2f4a94;background:#16275a99}
+.wb-stats b{color:#ffcf6b}
+.wb-set input[type=range]{accent-color:#f5b53a}
+.wb-set input[type=checkbox]{background:#16275a;border-color:#2f4a94}
+.wb-set input[type=checkbox]::after{background:#e9eeff}
+.wb-set input[type=checkbox]:checked{background:#f5b53a;border-color:#c98a14}
+.wb-set select{background:#16275a;border-color:#2f4a94}
+.wb-set button.big{background:#16275a99;border-color:#2f4a94}
+.wb-set button.big:active{background:#243a78}
+.wb-set button.big.pri{background:linear-gradient(90deg,#f5b53a,#c98a14);color:#1a1204;border-color:#ffcf6b}

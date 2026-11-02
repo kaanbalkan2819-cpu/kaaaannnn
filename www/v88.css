@@ -1,0 +1,17 @@
+/* V88 — Savaş zarı: yüzler SVG (dice3d.js faceSvg). v24/v85 beyaz-siyah/obsidyen modelini ezer; EN SON yüklenir */
+.d3,.d3.at,.d3.df{--b1:#efe3c3;--b2:#d6c593;--b3:#d6c593}
+.d3 .f,.d3.at .f,.d3.df .f,.d3.hi .f,.d3.sv88 .f{display:block;padding:0;border-radius:9px;box-shadow:none}
+.d3 .f img{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none;user-select:none}
+.d3 .f::before,.d3.d80.landed .f.top::before{content:none}
+.d3 .f::after{border-radius:9px}
+.d3 .k{border-radius:9px;background:#d6c593;box-shadow:none}
+.d3 .sdw{background:#000a}
+.d3.d80 .f.top{filter:none}
+/* takım rengi / kazanan vurgusu: kenar yerine zarın dış parıltısı */
+.d3.at.landed{filter:drop-shadow(0 0 3px #3b82f6aa)}
+.d3.df.landed{filter:drop-shadow(0 0 3px #ef4444aa)}
+.d3.hi.landed,.d7[data-x3].hi>.d3.landed{filter:drop-shadow(0 0 9px #4fe0a0cc)}
+.d7[data-x3].six>.d3.landed{filter:drop-shadow(0 0 9px #ffd067cc)}
+.d7[data-x3].hi>.d3 .f{box-shadow:none}
+/* 'Zar At' düğmesi ikonu (v5.js, WCDice.faceUri ile) */
+.rb-die{width:38px;height:38px;display:block;border-radius:7px}

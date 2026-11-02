@@ -1,0 +1,14 @@
+/* V40 — Diplomasi balonu */
+#wdbub{position:fixed;z-index:60;background:linear-gradient(180deg,#2a1d10f2,#1a1109f7);border:1px solid #d9a441;border-radius:14px;box-shadow:0 10px 30px #000a;padding:8px;color:#f1e3c2;animation:wdIn .18s ease-out}
+#wdbub:after{content:"";position:absolute;left:50%;bottom:-7px;width:12px;height:12px;background:#1a1109;border-right:1px solid #d9a441;border-bottom:1px solid #d9a441;transform:translateX(-50%) rotate(45deg)}
+@keyframes wdIn{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
+#wdbub .wd-h{font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:12px;padding:4px 6px 8px;color:#efc16b}
+#wdbub .wd-h small{display:block;font-weight:400;text-transform:none;letter-spacing:0;opacity:.8;margin-top:2px}
+#wdbub .wd-r{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 10px;margin:3px 0;border-radius:10px;border:1px solid #d9a44155;background:#00000033;color:inherit;font:inherit;cursor:pointer}
+#wdbub .wd-r:hover{background:#d9a44122;border-color:#d9a441}
+#wdbub .wd-r[disabled]{opacity:.45;cursor:default}
+#wdbub .wd-i{font-size:20px;width:26px;text-align:center}
+#wdbub .wd-t{flex:1;min-width:0}#wdbub .wd-t b{display:block;font-size:13px}#wdbub .wd-t small{display:block;font-size:11px;opacity:.75;line-height:1.25}
+#wdbub .wd-r em{font-style:normal;font-size:11px;font-weight:700;color:#efc16b;white-space:nowrap}
+.wd-bar{height:6px;border-radius:4px;background:#0006;margin:4px 0 6px;overflow:hidden}.wd-bar i{display:block;height:100%;background:linear-gradient(90deg,#8fbf6a,#efc16b)}
+.wd-sts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.wd-st{font-size:12px;padding:3px 8px;border-radius:999px;background:#7f1d1d55;color:#fecaca}.wd-st.up{background:#2a7a4a55;color:#bff0d2}

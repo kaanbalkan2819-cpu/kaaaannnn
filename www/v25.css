@@ -1,0 +1,53 @@
+/* V25 — Osmanlı sancağı esinli görkemli ana menü: koyu kızıl sancak, altın işleme, hilâl + sekiz köşeli yıldız, altın saçak */
+.box.mm{
+  position:relative;max-width:min(94vw,540px)!important;width:100%;padding:34px 28px 0;border-radius:14px;border:2px solid #d9b560;color:#f6e7bd;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg fill='none' stroke='%23e3b94f' stroke-opacity='.16' stroke-width='1'%3E%3Crect x='12' y='12' width='32' height='32'/%3E%3Crect x='12' y='12' width='32' height='32' transform='rotate(45 28 28)'/%3E%3Ccircle cx='28' cy='28' r='5'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(ellipse 90% 60% at 50% 0%,#b01a2c 0%,#7a0e1c 45%,#3a060d 100%);
+  box-shadow:inset 0 0 0 7px #4a0811,inset 0 0 0 8px #d9b56099,inset 0 0 60px #000b,0 28px 80px #000e,0 0 70px #a01220aa;
+  animation:mmIn .55s cubic-bezier(.2,.9,.3,1.1) both;overflow-x:hidden;
+}
+.box.mm::before,.box.mm::after{content:'❖';position:absolute;top:12px;color:#e3b94f;font-size:16px;opacity:.85;pointer-events:none}
+.box.mm::before{left:16px}.box.mm::after{right:16px}
+@keyframes mmIn{from{opacity:0;transform:translateY(24px) scale(.92)}to{opacity:1;transform:none}}
+.mm-hero{margin-bottom:26px}
+.mm-hero.sm{margin-bottom:18px}
+.mm-crest{width:132px;height:132px;display:block;margin:0 auto 6px;filter:drop-shadow(0 0 14px #e3b94f88) drop-shadow(0 4px 6px #000a);animation:mmGlow 4s ease-in-out infinite}
+.mm-hero.sm .mm-crest{width:84px;height:84px}
+.mm-ring{transform-origin:70px 70px;animation:mmSpin 60s linear infinite}
+.mm-star{animation:mmTwinkle 3.2s ease-in-out infinite;transform-box:fill-box}
+.mm-hero h1{font-size:clamp(30px,8.6vw,44px);letter-spacing:.2em;font-weight:900;line-height:1.05;
+  background:linear-gradient(180deg,#fff6cc 0%,#f0c95c 45%,#b07a18 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 0 #3a060d) drop-shadow(0 0 14px #e3b94f55)}
+.mm-hero h1 span{font-size:clamp(14px,4vw,19px);letter-spacing:.62em;margin-top:6px;margin-right:-.62em;background:inherit;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.mm-hero.sm h1{font-size:clamp(22px,6vw,28px)}
+.mm-orn{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0 2px;color:#e3b94f}
+.mm-orn span{height:1px;flex:1;max-width:120px;background:linear-gradient(90deg,transparent,#e3b94f)}
+.mm-orn span:last-child{background:linear-gradient(270deg,transparent,#e3b94f)}
+.mm-orn b{font-size:15px;animation:mmTwinkle 3.2s ease-in-out infinite}
+.mm-sub{color:#e6c987;font-size:12.5px;letter-spacing:.24em}
+.mm-sub:before,.mm-sub:after{background:#e3b94f99}
+.mm-btns{gap:14px;position:relative;z-index:1}
+.mm-b{min-height:58px;border-radius:10px;font-size:17px;letter-spacing:.08em;font-weight:700;color:#f6e7bd;
+  background:linear-gradient(180deg,#5a0a15,#3a060d);border:1.5px solid #d9b560;box-shadow:inset 0 0 0 3px #3a060d,inset 0 0 0 4px #d9b56055,0 4px 10px #0008;text-shadow:0 1px 0 #000a;transition:transform .12s,box-shadow .2s,filter .2s}
+.mm-b:hover{filter:brightness(1.18);box-shadow:inset 0 0 0 3px #3a060d,inset 0 0 0 4px #d9b56099,0 0 18px #e3b94f66,0 4px 10px #0008}
+.mm-b.pri{background:linear-gradient(180deg,#f5d77a,#c9962a 55%,#9a6b12);color:#2a0508;border-color:#fff0b0;text-shadow:0 1px 0 #fff6;box-shadow:inset 0 0 0 3px #b58420,inset 0 0 0 4px #fff0b055,0 4px 14px #000a,0 0 22px #e3b94f55;position:relative;overflow:hidden}
+.mm-b.pri::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,#ffffff66,transparent);transform:skewX(-20deg);animation:mmShine 3.6s ease-in-out 1s infinite}
+.mm-b.pri:disabled::after{display:none}
+.mm-b.sm{font-size:15px;min-height:52px}
+.mm-b.ghost{background:transparent;border-color:#d9b56066;box-shadow:none;color:#e6c987}
+.mm-card{min-height:84px;padding:16px 18px;border-radius:12px;border:1.5px solid #d9b560;background:linear-gradient(180deg,#5a0a15,#3a060d);box-shadow:inset 0 0 0 3px #3a060d,inset 0 0 0 4px #d9b56055,0 4px 10px #0008}
+.mm-card b{font-size:19px;color:#ffe9a8;letter-spacing:.08em}
+.mm-card small{color:#e6c987;font-size:13px}
+.mm-card:hover{filter:brightness(1.15)}
+/* altın saçak (sancağın alt kenarı) */
+.mm-fringe{display:flex;justify-content:space-between;margin:26px -28px 0;padding:0 8px;height:34px;background:linear-gradient(180deg,#d9b560 0 5px,transparent 5px)}
+.mm-fringe i{display:block;flex:1;max-width:14px;height:100%;margin:5px 1px 0;border-radius:0 0 7px 7px;background:linear-gradient(90deg,#9a6b12,#f5d77a 50%,#9a6b12);transform-origin:50% 0;animation:mmSway 3.4s ease-in-out infinite}
+@keyframes mmGlow{0%,100%{filter:drop-shadow(0 0 10px #e3b94f66) drop-shadow(0 4px 6px #000a)}50%{filter:drop-shadow(0 0 22px #ffd96acc) drop-shadow(0 4px 6px #000a)}}
+@keyframes mmSpin{to{transform:rotate(360deg)}}
+@keyframes mmTwinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.8;transform:scale(1.08)}}
+@keyframes mmShine{0%{left:-60%}40%,100%{left:150%}}
+@keyframes mmSway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+body.rm .box.mm,body.rm .box.mm *{animation:none!important}
+@media (prefers-reduced-motion:reduce){.box.mm,.box.mm *{animation:none!important}}
+@media (max-height:700px){.mm-crest{width:96px;height:96px}.mm-hero{margin-bottom:16px}.mm-b{min-height:50px}.box.mm{padding-top:26px}}

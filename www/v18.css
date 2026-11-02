@@ -1,0 +1,9 @@
+#goldchip{flex:0 0 auto;white-space:nowrap;color:#ffd24a;font-weight:600}
+#goldchip b{color:#ffe38a}
+@media(max-width:520px){#goldchip .lab{display:none}#goldchip{padding:4px 7px}}
+
+.goldline{margin:6px 0;padding:3px 8px;border-radius:8px;background:rgba(255,210,74,.08);border:1px solid rgba(255,210,74,.3);text-align:center;color:#ffd24a;font-size:.78em}
+.goldline .gl1{font-size:1em;font-weight:600}
+.goldline .gl1 b{color:#ffe38a}
+.goldline .gl2{margin-top:1px;font-size:.95em;color:#ffe9b0;opacity:.85}
+.goldline .gl2 b{color:#fff}

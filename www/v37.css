@@ -1,0 +1,31 @@
+/* V37 — Çöl / bej / eskimiş tema */
+:root{
+  --bg0:#1d1710;--bg1:#2a2117;--bg2:#372b1d;--bg3:#463725;--line:#6b5535;--line2:#8a6f45;
+  --tx:#f3e7cf;--tx2:#d2bd94;--tx3:#a38d66;
+  --acc:#d9a441;--acc2:#efc16b;--ok:#8fbf6a;--bad:#d9674f;--blue:#6f9fb0;--sel:#f2c14e;--atk:#d9573f;
+}
+html,body{background:var(--bg0)}
+#map{background:radial-gradient(120% 90% at 50% 30%,#e3cfa3 0%,#d2b985 45%,#b79a64 100%)!important}
+#wwater i{opacity:.28!important;animation:none!important}#wwater::after{animation:none!important}
+#wwater::after{background:radial-gradient(60% 40% at 30% 25%,#fff3d433,transparent 70%),radial-gradient(50% 35% at 75% 70%,#8a6b3a22,transparent 70%)!important}
+/* ülkeler: solmuş, eskimiş boyama */
+#map>svg{filter:none!important}
+path.c{stroke:#4a3820!important;stroke-opacity:.85}
+path.wcs{stroke:#4a3820!important}
+path.wcf{stroke:#fff1cf!important;stroke-opacity:.4}
+path.hl.sel{fill:#f2c14e!important;fill-opacity:.5!important;stroke:#fff4d6!important}
+/* eskimiş kâğıt vinyeti + tane */
+#map::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 55%,#5a3d1a55 100%),
+  repeating-linear-gradient(45deg,#7a5a2a08 0 2px,transparent 2px 5px)}
+/* paneller ve düğmeler sıcak kahve tonu */
+#hud,#panel,.box,#bs,.chip,#ctl button{background-color:var(--bg1);border-color:var(--line);color:var(--tx)}
+button.big.pri,.pri{background:linear-gradient(#e0ae4a,#b98429);color:#2a1c08;border-color:#f0c872}
+text.lb{fill:#2b1d0c;stroke:#f1e2bd;paint-order:stroke}
+
+/* V40 — kaydırma/yakınlaştırma sırasında ağır katmanları kapat (v37 !important kuralları .moving optimizasyonunu eziyordu) */
+.moving path.c{stroke:none!important;stroke-opacity:0!important}
+.moving path.wcs,.moving path.wcf{display:none!important}
+.moving #wwater{display:none}
+.moving #map::before{display:none}
+body.fxlow path.wcs,body.fxlow path.wcf{display:none!important}

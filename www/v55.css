@@ -1,0 +1,5 @@
+/* V55 */
+#hud .v15c,#hud .chip.pl{cursor:pointer}
+#mod .polx{position:relative!important}
+#mod .polhd{padding-right:44px!important;min-height:36px}
+#mod .polcl{position:absolute!important;top:0!important;right:0!important;margin:0!important;flex:none!important;width:34px!important;height:34px!important;padding:0!important;display:flex;align-items:center;justify-content:center;z-index:3}

@@ -1,0 +1,37 @@
+/* V27 — parşömen ana menü (orta çağ savaş sahnesi esinli, özgün çizim) */
+#mod.wbm{background:#0b0f08;padding:0;align-items:stretch;justify-content:stretch;animation:wbFade .5s ease-out}
+@keyframes wbFade{from{opacity:0}to{opacity:1}}
+#mod.wbm .box{max-width:none;width:100%;height:100%;max-height:none;padding:0;border:0;border-radius:0;background:none;box-shadow:none;overflow:hidden;animation:none;position:relative}
+.wb-scene{position:absolute;inset:0;background:
+ radial-gradient(120% 70% at 70% 28%,#a9b08a 0%,#7d8660 28%,#4b5238 58%,#1d2316 100%),#1d2316}
+.wb-scene::before{content:'';position:absolute;inset:0;background:
+ radial-gradient(60% 40% at 20% 20%,#ffffff22,transparent 70%),
+ radial-gradient(50% 30% at 85% 55%,#ffffff18,transparent 70%);animation:wbMist 14s ease-in-out infinite alternate}
+@keyframes wbMist{from{transform:translateX(-3%)}to{transform:translateX(3%)}}
+.wb-scene svg{position:absolute;right:0;bottom:0;width:min(100%,900px);height:78%;opacity:.96}
+.wb-scene::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,#000a 100%);pointer-events:none}
+.wb-wrap{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px 16px calc(18px + var(--safe-b,0px));overflow:auto}
+.wb-title{text-align:center;font-family:Georgia,'Palatino Linotype',Palatino,serif;color:#f1e3b4;text-shadow:0 2px 0 #2b1c06,0 0 22px #000c;letter-spacing:.14em;font-weight:700;animation:wbIn .8s ease-out both}
+.wb-title small{display:block;font-size:12px;letter-spacing:.42em;color:#d9c48a;font-weight:400;margin-bottom:4px}
+.wb-title b{display:block;font-size:clamp(30px,9vw,52px);line-height:1}
+.wb-title i{display:block;font-style:normal;font-size:clamp(14px,4vw,20px);letter-spacing:.5em;margin-top:6px;color:#e6cf8a}
+@keyframes wbIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.wb-panel{position:relative;width:min(86vw,330px);padding:26px 22px 22px;color:#3a2410;font-family:Georgia,'Palatino Linotype',Palatino,serif;text-align:center;
+ background:radial-gradient(130% 90% at 50% 0%,#f0dfae 0%,#dcc58a 55%,#b99a5c 100%);
+ clip-path:polygon(0 2%,4% 0,12% 1.4%,25% 0,40% 1.2%,55% 0,70% 1.5%,86% 0,96% 1.2%,100% 0,99% 20%,100% 45%,98.8% 70%,100% 100%,88% 98.8%,70% 100%,52% 98.6%,35% 100%,18% 98.8%,6% 100%,0 98%,1.2% 70%,0 45%,1.2% 20%);
+ box-shadow:inset 0 0 60px #7a4f1a99;animation:wbRise .7s cubic-bezier(.2,.9,.3,1.1) .15s both;filter:drop-shadow(0 14px 22px #000b)}
+.wb-panel::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend-mode:multiply;
+ background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .3  0 0 0 0 .1  0 0 0 .9 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
+@keyframes wbRise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.wb-panel h3{margin:0 0 6px;font-size:13px;letter-spacing:.3em;font-weight:400;color:#6b4a1f}
+.wb-orn{display:flex;align-items:center;gap:8px;margin:2px 0 8px;color:#7a4f1a}.wb-orn span{flex:1;height:1px;background:linear-gradient(90deg,transparent,#7a4f1a,transparent)}
+.wb-b{display:block;width:100%;background:none;border:0;border-radius:0;padding:11px 6px;margin:0;font:inherit;font-size:clamp(19px,5.4vw,23px);color:#3a2410;letter-spacing:.04em;cursor:pointer;position:relative;transition:color .15s,letter-spacing .2s,text-shadow .2s}
+.wb-b+.wb-b{border-top:1px solid #7a4f1a33}
+.wb-b:hover,.wb-b:active{color:#7a1410;letter-spacing:.09em;text-shadow:0 0 10px #fff6}
+.wb-b:hover::before,.wb-b:active::before{content:'⚔';position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:15px;color:#7a1410}
+.wb-b:disabled{opacity:.38;cursor:default;letter-spacing:.04em;color:#3a2410}.wb-b:disabled::before{display:none}
+.wb-b.sm{font-size:clamp(16px,4.6vw,19px);color:#5a3a16}
+.wb-b small{display:block;font-size:12px;letter-spacing:.02em;color:#6b4a1f;font-style:italic;margin-top:2px}
+.wb-foot{font-family:Georgia,serif;font-size:11px;letter-spacing:.3em;color:#d9c48a99;text-align:center;animation:wbIn 1s ease-out .6s both}
+@media (min-width:900px){.wb-wrap{align-items:flex-start;padding-left:9vw}.wb-title{text-align:left}.wb-scene svg{height:92%}}
+body.rm .wb-scene::before,body.rm .wb-panel,body.rm .wb-title{animation:none}

@@ -1,0 +1,20 @@
+/* V122 — (1) Üst bar yazı tipi, alttaki panelle aynı (sans) olur. (2) Panel alt düğmeleri (Keşif / Elçi / Diplomasi / Saldır) taşmaz.
+   Geri almak için index.html'deki v121.css satırını sil. */
+#hud #goldchip,#hud .chip,#hud .chip *,#hud .v15c,#hud .v15c *,#hud button,#ctl button,#ctl .chip{
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif!important;
+  font-weight:500!important;letter-spacing:0!important;font-variant-numeric:normal!important}
+#hud .chip b,#hud .chip strong,#goldchip b{font-weight:700!important}
+
+/* Alt düğme çubuğu: 3 sütun (Keşif, Elçi, Diplomasi) + Saldır tam genişlikte altta */
+#panel .v15a{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;flex-wrap:initial!important}
+#panel .v15a>button,#panel .v15a>.pactbtn,#panel .v15a>.envbtn{
+  min-width:0!important;max-width:none!important;width:auto!important;flex:none!important;
+  white-space:normal!important;line-height:1.1!important;text-align:center;overflow:hidden;
+  font-size:12px!important;letter-spacing:0!important;padding:2px 4px!important;min-height:40px!important}
+#panel .v15a>button.pri{grid-column:1/-1!important;order:9!important;font-size:15px!important;min-height:44px!important;letter-spacing:.04em!important}
+
+/* V122 — Rank dışındaki TÜM paneller/pencereler aynı sans yazı tipini kullanır (Georgia/serif yok).
+   Rank ekranı (.wcr-box, #wcr-*) ve ana menü ekranı (#wcm) dokunulmaz. Geri almak için bu bloğu sil. */
+#panel,#panel *,#bs,#bs *,#ctl,#ctl *,#hint,#hint *,#toast,#fact23,#fact23 *,#wdbub,#wdbub *,#onbar,
+.pp76,.pp76 *,#mod .box:not(.wcr-box),#mod .box:not(.wcr-box) *{
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif!important}
