@@ -509,7 +509,8 @@
       /* V72: sahnede hiçbir şey değişmediyse (kamera/küre/yükselen ülke/animasyon yok) kareyi tekrar çizme; bulutlar için ~4 kare/sn yeter -> ülke seçiminde GPU/pil yükü ve kasma azalır */
       var q = globe.quaternion, k = camera.position.z.toFixed(4) + '|' + q.x.toFixed(4) + '|' + q.y.toFixed(4) + '|' + q.z.toFixed(4) + '|' + q.w.toFixed(4) + '|' + vo.toFixed(3) + '|' + window.innerWidth + 'x' + window.innerHeight;
       var _bsh = (typeof BSH !== 'undefined' && BSH && !window.v60Active);   /* V161: savaş paneli açıkken küre her karede çizilmez (eskiden BSH her kareyi zorluyordu -> panelde kasma) */
-      var busy = k !== lastRK || window.v60Active || anyMoving() || (now - lastRT) > (_bsh ? 1200 : (curPR > PRLO ? 1500 : 250)) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
+      var busy = k !== lastRK || window.v60Active || anyMoving() || (now - lastRT) > (_bsh ? 1e9 : (curPR > PRLO ? 1500 : 250)) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
+      if (window.__v163b && !_bsh) forceR = Math.max(forceR, 2); window.__v163b = _bsh;   /* V163: panel kapanınca küre bir kez tazelenir */
       var _mv = k !== lastRK || window.v60Active || anyMoving() || introStart;
       if (_mv) { idleSince = now; if (curPR !== PRLO) setPR(PRLO); busy = true; }
       else if (_bsh) { if (curPR !== PRLO) { setPR(PRLO); busy = true; } }   /* V161: panel açıkken yüksek çözünürlüğe geçip tuvali yeniden ayırma */

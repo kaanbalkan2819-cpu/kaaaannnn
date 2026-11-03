@@ -137,10 +137,14 @@
         alp[i] = lerp(p.a0, p.a1, k) * Math.min(1, k * 10); siz[i] = lerp(p.s0, p.s1, ke); rot[i] = p.r;
         i++;
       }
-      this.geo.setDrawRange(0, ps.length);
-      const a = this.geo.attributes; a.position.needsUpdate = a.pcolor.needsUpdate = a.alpha.needsUpdate = a.size.needsUpdate = a.rot.needsUpdate = true;
+      const n = ps.length; this.geo.setDrawRange(0, n);
+      /* V163: parçacık yokken tamponlar her karede GPU'ya yeniden yüklenmesin; varken de yalnızca kullanılan aralık yüklensin (eskiden tüm 1200-2200'lük tampon) */
+      if (n === 0 && this._was0) return; this._was0 = n === 0;
+      const a = this.geo.attributes, cnt = Math.max(n, 1);
+      const up = (at, st) => { if (at.addUpdateRange) { if (at.clearUpdateRanges) at.clearUpdateRanges(); at.addUpdateRange(0, cnt * st); } at.needsUpdate = true; };
+      up(a.position, 3); up(a.pcolor, 3); up(a.alpha, 1); up(a.size, 1); up(a.rot, 1);
     }
-    reset() { this.ps.length = 0; this.geo.setDrawRange(0, 0); }
+    reset() { this.ps.length = 0; this.geo.setDrawRange(0, 0); this._was0 = false; }
   }
 
   /* ---------------------------------------------------------------- v5 model altyapısı: dokular, yüz‑renkli geometri, birleştirme */

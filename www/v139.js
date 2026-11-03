@@ -182,7 +182,11 @@
 
   /* ================= D) HIZLI YZ TURU ================= */
   var FAST = false, rm0 = 0;
-  function wantFast() { try { return localStorage.getItem(FKEY) !== '0'; } catch (e) { return true; } }
+  /* V162: Hızlı YZ turu bir ÖDÜL: tek oyunculuda dünyayı fethedince (res='win') kalıcı açılır (localStorage wc_fastunl). */
+  var UKEY = 'wc_fastunl';
+  function fastUnlocked() { try { return localStorage.getItem(UKEY) === '1'; } catch (e) { return false; } }
+  function unlockFast() { if (fastUnlocked()) return false; try { localStorage.setItem(UKEY, '1'); localStorage.setItem(FKEY, '1'); } catch (e) { } return fastUnlocked(); }
+  function wantFast() { if (!fastUnlocked()) return false; try { return localStorage.getItem(FKEY) !== '0'; } catch (e) { return true; } }
   function fastOn() { if (FAST || !wantFast() || !window.SET || !on()) return; rm0 = SET.rm; SET.rm = 1; FAST = true; }
   function fastOff() { if (!FAST) return; try { SET.rm = rm0; } catch (e) { } FAST = false; }
   window.v139FastOff = fastOff;   /* V141: v141.js oyuncu saldırısında çağırır */
@@ -204,13 +208,14 @@
     var _st = settings; settings = function () { fastOff(); return _st.apply(this, arguments); }; settings.v139 = 1;
   }
   window.v139Fast = function () {
+    if (!fastUnlocked()) { say('🔒 ' + X('Hızlı YZ turu: tek oyunculu bir oyunda dünyayı fethedince açılır', 'Fast AI turn: unlocked by conquering the world in a single-player game')); return; }
     var v = wantFast() ? '0' : '1'; try { localStorage.setItem(FKEY, v); } catch (e) { } if (v === '0') fastOff();
     say('⚡ ' + (v === '1' ? X('Hızlı YZ turu: AÇIK', 'Fast AI turn: ON') : X('Hızlı YZ turu: KAPALI', 'Fast AI turn: OFF'))); fastBtn();
   };
   function fastBtn() {
     var ctl = document.getElementById('ctl'); if (!ctl) return;
     var b = document.getElementById('v139fast'); if (!b) { b = document.createElement('button'); b.id = 'v139fast'; b.type = 'button'; b.textContent = '⚡'; b.addEventListener('click', function (ev) { ev.stopPropagation(); window.v139Fast(); }); ctl.appendChild(b); }
-    b.title = X('Hızlı YZ turu', 'Fast AI turn'); b.style.opacity = wantFast() ? '' : '.45'; b.style.display = on() && !G.over ? '' : 'none';
+    var ul = fastUnlocked(); b.textContent = ul ? '⚡' : '🔒'; b.title = ul ? X('Hızlı YZ turu', 'Fast AI turn') : X('Hızlı YZ turu (ödül: dünyayı fethet)', 'Fast AI turn (reward: conquer the world)'); b.style.opacity = wantFast() ? '' : '.45'; b.style.display = on() && !G.over ? '' : 'none';
   }
 
   /* ================= D) HAMLE GÖSTERGESİ + SÜRE ================= */
@@ -309,14 +314,15 @@
       if (OVL) { try { OVL.remove(); } catch (e) { } }
       var m = summary(); OVLG = G;
       if (!s.rec) { s.rec = 1; var h = hist(); h.unshift(m); try { localStorage.setItem(HKEY, JSON.stringify(h.slice(0, CFG.HIST_MAX))); } catch (e) { } }
-      var win = m.res === 'win' || m.res === 'pts', conf = '';
+      var win = m.res === 'win' || m.res === 'pts', conf = '', rw162 = '';
+      if (m.res === 'win' && !G.mp && unlockFast()) rw162 = '<div class="sc">⚡ ' + X('Ödül açıldı: <b>Hızlı YZ turu</b>', 'Reward unlocked: <b>Fast AI turn</b>') + '</div>';   /* V162 */
       if (win) for (var i = 0; i < 18; i++) conf += '<i style="left:' + (i * 5.6 + 2) + '%;animation-delay:' + ((i % 6) * .35).toFixed(2) + 's;background:hsl(' + (i * 37 % 360) + ',80%,60%)"></i>';
       var cell = function (v, k) { return '<div><b>' + v + '</b><small>' + k + '</small></div>'; };
       OVL = document.createElement('div'); OVL.id = 'v139over'; OVL.className = win ? 'win' : 'lose';
       OVL.innerHTML = (win ? '<div class="cf">' + conf + '</div>' : '') + '<div class="in">' + (m.res === 'lose' ? '' : '<div class="ic">' + resIcon(m.res) + '</div>') + '<div class="fg">' + (m.res === 'lose' ? ballFlag(m.c) : fl(m.c)) + '</div><h2>' + resTitle(m.res) + '</h2><p>' + resLine(m.res, m) + '</p>' +
         '<div class="gr">' + cell(m.turns, X('TUR', 'TURNS')) + cell(mmss(m.sec), X('SÜRE', 'TIME')) + cell(m.lands + '<i>/' + m.total + '</i>', X('TOPRAK', 'LANDS')) + cell(m.max, X('EN ÇOK TOPRAK', 'PEAK LANDS')) +
         cell(m.w + ' / ' + m.l, X('SAVAŞ K / Y', 'WINS / LOSSES')) + cell(m.conq, X('FETİH', 'CONQUESTS')) + cell(m.pacts, X('PAKT', 'PACTS')) + cell(m.allies, X('İTTİFAK', 'ALLIANCES')) + '</div>' +
-        '<div class="sc">⭐ ' + X('Skor', 'Score') + ' <b>' + m.score + '</b></div>' +
+        '<div class="sc">⭐ ' + X('Skor', 'Score') + ' <b>' + m.score + '</b></div>' + rw162 +
         '<button class="pri" onclick="v139New()">🔁 ' + X('Yeni Ülkeyle Başla', 'Start With a New Country') + '</button><button onclick="v139Hist()">📜 ' + X('Oyun Geçmişi', 'Game History') + '</button><button class="gh" onclick="v139Menu()">' + X('Ana Menü', 'Main Menu') + '</button></div>';
       document.body.appendChild(OVL);
       try { var m2 = document.getElementById('mod'); if (m2) m2.style.display = 'none'; } catch (e) { }
@@ -346,7 +352,7 @@
   }
   function installMenu() {
     if (typeof menu !== 'function' || menu.v139) return;
-    var _m = menu; menu = function () { var r = _m.apply(this, arguments); try { histBtn(); } catch (e) { } return r; }; menu.v139 = 1;
+    var _m = menu; menu = function () { try { if (window.v5RollResume) v5RollResume(); } catch (e) { } /* V162: ana menüde 'Zar At' balonu kalmasın */ var r = _m.apply(this, arguments); try { histBtn(); } catch (e) { } return r; }; menu.v139 = 1;
   }
   setInterval(function () { try { if (document.hidden) return; if (!G) { if (OVL) hideFinal(); return; } showFinal(); } catch (e) { } }, 700);
 

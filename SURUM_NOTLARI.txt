@@ -510,3 +510,37 @@ V161 — SAVAŞ PANELİNDE KASMA (TEST EDİLMEDİ; node --check geçti)
 Neden: v30.js render döngüsünde savaş paneli (BSH) açıkken "busy" her karede true oluyordu; 3B küre panelin arkasında tam hızda çiziliyordu ve boşta yüksek çözünürlüğe geçip tuvali yeniden ayırıyordu.
 Çözüm: panel açıkken (3B savaş animasyonu yokken) küre yalnızca kamera/geçiş değişince veya ~1,2 sn'de bir (bulut) çizilir; çözünürlük düşük kalır. v7.css: dönen zar/sarsıntı için will-change:transform.
 GERİ ALMAK İÇİN: v30.js'te "V161" satırlarını eski haline getirin (BSH koşulunu busy/_mv'ye geri koyun).
+
+
+=================== V162 ===================
+V162 — HIZLI YZ = FETİH ÖDÜLÜ + ANA MENÜDE "ZAR AT" BALONU (TEST EDİLMEDİ; test yapılmadı)
+1) Hızlı YZ turu (⚡) artık kilitli bir ödül: tek oyunculu oyunda dünyayı fethedince (sonuç "Dünya Fethedildi!") kalıcı açılır (localStorage wc_fastunl), final ekranında "⚡ Ödül açıldı" satırı çıkar. Kilitliyken düğme 🔒 gösterir, dokununca nasıl açılacağını söyler; kilitliyken hızlı mod çalışmaz. Online oyunda zaten devre dışı. (v139.js)
+2) Oyuna girip ana menüye dönünce "Zar At" balonu kalıyordu: "Ana Menü" G=null yapıp menu() çağırıyor, render() çalışmadığı için balonu temizleyen v5RollResume tetiklenmiyordu. menu() sarmalayıcısı artık v5RollResume() çağırıyor (G yok -> balon silinir). (v139.js)
+GERİ ALMAK İÇİN: v139.js'te "V162" yazan yerleri geri alın.
+
+
+V162 (ek) — SAVAŞ PANELİ PÜRÜZLERİ (v162.js, yeni; TEST EDİLMEDİ, node --check geçti)
+1) closeBattle çift çağrı koruması (panel zaten kapalıysa yok sayılır; YZ sırası/kayıt/mesaj çiftlenmesi önlenir).
+2) showBattle kurulurken hata olursa BSH takılı kalıp oyun donmasın: hata yutulur, savaş kapatılır, oyun sürer.
+3) Ana menüye (oyun yokken) dönüşte takılı kalmış savaş paneli/BSH sıfırlanır (BSH takılırsa küre 1,2 sn'de bir çiziliyor, eylemler kilitleniyordu).
+GERİ ALMAK İÇİN: index.html'den v162.js bağlantısını silin.
+
+
+=================== V163 ===================
+V163 — SAVAŞ PANELİ GÖLGE/BLUR SADELEŞTİRME (TEST EDİLMEDİ; yalnızca CSS)
+1) app.css: #bs, #bs.vw, #bs.vl içindeki büyük box-shadow (0 -14px 40px + renkli parlama) kaldırıldı (box-shadow:none). Kazanma/kaybetme rengi border-top ile zaten görünür.
+2) v141.css: .wc141p kartındaki backdrop-filter:blur(6px) kapatıldı.
+GERİ ALMAK İÇİN: app.css 87/196/197. satırlardaki ve v141.css 15. satırdaki "V163" değişikliklerini eski değerlere döndürün (eski gölge: 0 -14px 40px #000a; vw: ,0 -2px 24px #34d39966; vl: ,0 -2px 24px #f8717144; blur(6px)).
+
+
+=================== V163 (ek) ===================
+V163 (ek) — SAVAŞ PANELİ AÇIKKEN KÜRE TAMAMEN DURUR (v30.js; TEST EDİLMEDİ, node --check geçti)
+Panel açıkken (3B savaş animasyonu yokken) küre artık 1,2 sn'de bir de çizilmez; yalnızca kamera/geçiş/animasyon değişirse çizilir. Panel kapanınca küre 2 kare zorla tazelenir.
+GERİ ALMAK İÇİN: v30.js'te "V163" satırını silin ve "1e9" değerini 1200 yapın.
+
+
+=================== V163 (ek 2) ===================
+V163 (ek 2) — wc_battle_fx.js PARÇACIK TAMPON YÜKLEMESİ (TEST EDİLMEDİ, node --check geçti). Model/gölge/parçacık sayısı AZALTILMADI.
+Bulgu: Particles.update her karede, parçacık olmasa bile, 3 sistemin 5'er tamponunu (toplam 5200 parçacık kapasitesi) tamamen GPU'ya yeniden yüklüyordu.
+Düzeltme: parçacık yokken yükleme atlanır; varken yalnızca kullanılan aralık (addUpdateRange, three r160) yüklenir. Görsel sonuç aynıdır.
+GERİ ALMAK İÇİN: wc_battle_fx.js'te "V163" yazan bloğu eski satıra döndürün: this.geo.setDrawRange(0, ps.length); const a = this.geo.attributes; a.position.needsUpdate = a.pcolor.needsUpdate = a.alpha.needsUpdate = a.size.needsUpdate = a.rot.needsUpdate = true;
