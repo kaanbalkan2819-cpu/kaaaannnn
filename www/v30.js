@@ -129,11 +129,11 @@
     try {
       if (!ov || !snapOk || document.hidden || document.body.classList.contains('wcm-on')) return;
       if (!(window.WCAllyTarget && WCAllyTarget())) return;
-      aPh = (aPh + 1.6 * LS) % 1e6;
+      aPh = (aPh + 2.5 * LS) % 1e6;   /* V133: tick 90->140 ms; adım orantılı büyütüldü, şerit hızı aynı */
       ov.globalAlpha = 1; ov.clearRect(0, 0, OW, OH); ov.drawImage(snapC, 0, 0); allyLines(aPh);
       ovTex.needsUpdate = true; forceR = 3;
     } catch (e) { }
-  }, 90);
+  }, 140);
   function allyLines(ph) {
     var T = window.WCAllyTarget && WCAllyTarget(); if (!T) return;
     var step = 16 * LS, i, sel = null, cen = {};
@@ -185,32 +185,47 @@
     }
     while (st.length) { var c2 = st.pop(), b2 = st.pop(), a2 = st.pop(); out.push(a2, b2, c2); }
   }
-  function buildEx(c) {
+  /* V127: önceden hesaplanmış üçgenleme (globe/tri.js). İmza = halka uzunlukları + koordinat toplamı; uymazsa earcut çalıştırılır. */
+  function triSig(outer, holes) { var h = outer.length + ':' + holes.length, s = 0, i, j; for (i = 0; i < outer.length; i += 7) s += outer[i][0] * 1.7 + outer[i][1] * 3.1; for (j = 0; j < holes.length; j++) { h += ':' + holes[j].length; for (i = 0; i < holes[j].length; i += 7) s += holes[j][i][0] * 1.7 + holes[j][i][1] * 3.1; } return h + '#' + s.toFixed(3); }
+  var GEN = {};   /* V127: yarım kalan (zaman dilimli) blok üretimleri */
+  function buildEx(c) { var g = GEN[c.id] || (GEN[c.id] = buildExG(c)), r; do { r = g.next(); } while (!r.done); delete GEN[c.id]; return EX[c.id]; }   /* eşzamanlı bitirme (nadir: üretilmemiş ülke ilk kez yükselirken) */
+  function* buildExG(c) {
     var e = EX[c.id] = { g: new THREE.Group(), cap: null, wall: null }; e.g.visible = false; globe.add(e.g);
     try {
       var R = 1 + H0, RB = 0.97, cp = [], wp = [], lp = [];
-      c.polys.forEach(function (rings) {
+      for (var pi = 0; pi < c.polys.length; pi++) {
+        var rings = c.polys[pi];
         var wrap = false, r0 = rings[0], a0 = 999, b0 = -999; r0.forEach(function (q) { if (q[0] < a0) a0 = q[0]; if (q[0] > b0) b0 = q[0]; });
         if (b0 - a0 > 200) { wrap = true; rings = rings.map(function (rg) { return rg.map(function (q) { return [q[0] < 0 ? q[0] + 360 : q[0], q[1]]; }); }); } // 180° boylamını aşan parça (Rusya/Çukotka): boylamı sürekli hale getir
-        var outer = dens(rings[0]); if (outer.length < 3) return;
-        var mn = 999, mx = -999; outer.forEach(function (q) { if (q[0] < mn) mn = q[0]; if (q[0] > mx) mx = q[0]; }); if (mx - mn > 200) return;
+        var outer = dens(rings[0]); if (outer.length < 3) continue;
+        var mn = 999, mx = -999; outer.forEach(function (q) { if (q[0] < mn) mn = q[0]; if (q[0] > mx) mx = q[0]; }); if (mx - mn > 200) continue;
         var holes = [], all = outer.slice(); for (var h = 1; h < rings.length; h++) { var hr = dens(rings[h]); if (hr.length >= 3) { holes.push(hr); all = all.concat(hr); } }
-        var fc = THREE.ShapeUtils.triangulateShape(outer.map(function (q) { return new THREE.Vector2(q[0], q[1]); }), holes.map(function (hr) { return hr.map(function (q) { return new THREE.Vector2(q[0], q[1]); }); }));
-        var T = []; fc.forEach(function (f) { tri(T, all[f[0]], all[f[1]], all[f[2]]); });
-        T.forEach(function (q) { var v = sph(q, R); cp.push(v[0], v[1], v[2]); });
-        [outer].concat(holes).forEach(function (rg) {
+        yield;
+        var pre = window.WC_TRI && WC_TRI[c.id] && WC_TRI[c.id][pi], fc = null;
+        if (pre && pre[0] === triSig(outer, holes)) { fc = []; for (var q3 = 0; q3 < pre[1].length; q3 += 3) fc.push([pre[1][q3], pre[1][q3 + 1], pre[1][q3 + 2]]); }
+        if (!fc) fc = THREE.ShapeUtils.triangulateShape(outer.map(function (q) { return new THREE.Vector2(q[0], q[1]); }), holes.map(function (hr) { return hr.map(function (q) { return new THREE.Vector2(q[0], q[1]); }); }));
+        yield;
+        var T = [], ly = 0; for (var fi = 0; fi < fc.length; fi++) { tri(T, all[fc[fi][0]], all[fc[fi][1]], all[fc[fi][2]]); if (T.length - ly > 1200) { ly = T.length; yield; } }
+        for (var ti = 0; ti < T.length; ti++) { var v = sph(T[ti], R); cp.push(v[0], v[1], v[2]); if ((ti & 2047) === 2047) yield; }
+        yield;
+        var rgs = [outer].concat(holes);
+        for (var ri = 0; ri < rgs.length; ri++) {
+          var rg = rgs[ri];
           for (var i = 0; i < rg.length; i++) {
             var A = rg[i], B = rg[(i + 1) % rg.length], At = sph(A, R), Bt = sph(B, R), Ab = sph(A, RB), Bb = sph(B, RB), Al = sph(A, R * 1.0006), Bl = sph(B, R * 1.0006);
             wp.push(At[0], At[1], At[2], Bt[0], Bt[1], Bt[2], Bb[0], Bb[1], Bb[2], At[0], At[1], At[2], Bb[0], Bb[1], Bb[2], Ab[0], Ab[1], Ab[2]);
             lp.push(Al[0], Al[1], Al[2], Bl[0], Bl[1], Bl[2]);
+            if ((i & 255) === 255) yield;
           }
-        });
-      });
+        }
+      }
       if (!cp.length) return e;
-      var gc = new THREE.BufferGeometry(); gc.setAttribute('position', new THREE.Float32BufferAttribute(cp, 3));
+      yield;
+      var gc = new THREE.BufferGeometry(); gc.setAttribute('position', new THREE.Float32BufferAttribute(cp, 3)); yield;
       var nn = new Float32Array(cp.length); for (var i = 0; i < cp.length; i += 3) { var l = Math.sqrt(cp[i] * cp[i] + cp[i + 1] * cp[i + 1] + cp[i + 2] * cp[i + 2]) || 1; nn[i] = cp[i] / l; nn[i + 1] = cp[i + 1] / l; nn[i + 2] = cp[i + 2] / l; }
       gc.setAttribute('normal', new THREE.BufferAttribute(nn, 3));
-      var gw = new THREE.BufferGeometry(); gw.setAttribute('position', new THREE.Float32BufferAttribute(wp, 3)); gw.computeVertexNormals();
+      yield;
+      var gw = new THREE.BufferGeometry(); gw.setAttribute('position', new THREE.Float32BufferAttribute(wp, 3)); yield; gw.computeVertexNormals(); yield;
       var gl = new THREE.BufferGeometry(); gl.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3));
       e.cap = new THREE.Mesh(gc, new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0x000000, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }));
       e.wall = new THREE.Mesh(gw, new THREE.MeshLambertMaterial({ color: 0x888888, side: THREE.DoubleSide }));
@@ -220,14 +235,30 @@
     return e;
   }
   /* V54: ülke blokları (üçgenleme) seçim anında değil, boş zamanda üretilir -> ilk seçimde kasma olmaz */
+  var WARMBIG = false;
+  function afterWarm(f) { var t0 = performance.now(); (function w() { if (WARMBIG || performance.now() - t0 > 4000) return f(); setTimeout(w, 80); })(); }   /* V132: en çok 4 sn bekler */
   function warmEx() {
-    var i = 0;
-    (function step() {
-      if (!C.length) return;
-      var t0 = performance.now();
-      while (i < C.length && performance.now() - t0 < 5) { var c = C[i++]; if (!EX[c.id]) { try { buildEx(c); } catch (e) { } } }
-      if (i < C.length) { (window.requestIdleCallback ? requestIdleCallback(step, { timeout: 600 }) : setTimeout(step, 40)); return; }
-      try { var e0 = EX[C[0].id]; if (e0 && renderer && ON) { var v = e0.g.visible; e0.g.visible = true; renderer.render(scene, camera); e0.g.visible = v; } } catch (e) { }
+    /* V127: blok üretimi zaman dilimli: her adımda ~4 ms, büyük ülkeler (RUS/CAN/AUS/USA) kare başına parça parça yapılır.
+       Eskiden tek parça 250+ ms sürüyor ve küre açılırken ~4 kare/sn takılma yapıyordu. Büyük ülkeler önce üretilir. */
+    var order = C.slice().sort(function (a, b) { return ((b.all[2] - b.all[0]) * (b.all[3] - b.all[1])) - ((a.all[2] - a.all[0]) * (a.all[3] - a.all[1])); });
+    var i = 0, cur = null, cc = null;
+    function later(f) { if (window.requestIdleCallback) requestIdleCallback(f, { timeout: 250 }); else setTimeout(f, 30); }
+    (function step(dl) {
+      if (!C.length || !ON && !READY) return;
+      var t0 = performance.now(), budget = (dl && dl.timeRemaining) ? Math.max(3, Math.min(8, dl.timeRemaining() - 1)) : 4;
+      while (performance.now() - t0 < budget) {
+        if (!cur) {
+          if (i >= order.length) break;
+          cc = order[i++]; if (EX[cc.id] && !GEN[cc.id]) continue;
+          cur = GEN[cc.id] || (GEN[cc.id] = buildExG(cc));
+        }
+        var r = cur.next(); if (r.done) { delete GEN[cc.id]; cur = null; }
+      }
+      if (!WARMBIG && !cur && i >= 10) WARMBIG = true;   /* V132: en büyük 10 ülke bloğu hazır */
+      if (cur || i < order.length) { later(step); return; }
+      WARMBIG = true;
+      /* tüm blok malzemelerinin shader'ları önceden derlenir (ilk yükselişte derleme takılması olmasın) */
+      try { if (renderer && scene && camera) renderer.compile(scene, camera); } catch (e) { }
     })();
   }
   function colorEx(c) {
@@ -260,14 +291,16 @@
   function loadImg(src) { if (_imgC[src]) return _imgC[src]; return _imgC[src] = new Promise(function (ok, no) { var im = new Image(); im.onload = function () { try { if (im.decode) { im.decode().then(function () { ok(im); }, function () { ok(im); }); return; } } catch (e) { } ok(im); }; im.onerror = function (e) { delete _imgC[src]; no(e); }; im.src = src; }); }
   function loadScript(src) { if (_scC[src]) return _scC[src]; return _scC[src] = new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function () { delete _scC[src]; no(new Error(src)); }; document.head.appendChild(s); }); }
   var _pre = false;
-  function preload() { if (_pre || READY || BAD) return; _pre = true; try { loadScript('globe/three.min.js').then(function () { return loadScript('globe/data.js'); }).then(function () { var T = window.WC_TEX || {}; for (var k in T) { try { loadImg(T[k]); } catch (e) { } } }).catch(function () { _pre = false; }); } catch (e) { } }
+  function preload() { if (_pre || READY || BAD) return; _pre = true; try { loadScript('globe/three.min.js').then(function () { return loadScript('globe/data.js'); }).then(function () { return loadScript('globe/tri.js').catch(function () { }); }).then(function () { var T = window.WC_TEX || {}; for (var k in T) { try { loadImg(T[k]); } catch (e) { } } }).catch(function () { _pre = false; }); } catch (e) { } }
   function build() {
     THREE = window.THREE; TEX = window.WC_TEX;
     ovC = mk(OW, OH); ov = ovC.getContext('2d'); liftC = mk(LW, LH); lift = liftC.getContext('2d'); reliefC = mk(LW, LH);
     nsmall = mk(NW, NH); nsx = nsmall.getContext('2d', { willReadFrequently: true }); nC = mk(NW, NH); nx = nC.getContext('2d'); nImg = nx.createImageData(NW, NH); topoH = new Float32Array(NW * NH);
     var coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches || document.body.classList.contains('fxlow');
     renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 2)); renderer.outputColorSpace = THREE.SRGBColorSpace;
+    /* V127: hareket sırasında düşük (akıcı), 260 ms durunca yüksek çözünürlük (net). Telefonda sabit 1.25 yüzünden küre bulanıktı. */
+    PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 2); PRHI = Math.min(window.devicePixelRatio || 1, coarse ? 1.85 : 2); curPR = PRLO; idleSince = performance.now();
+    renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace;
     stage.appendChild(renderer.domElement);
     scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200); camera.position.set(0, 0, camZ);
     var sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(3, 2, 4); scene.add(sun); scene.add(new THREE.AmbientLight(0x6b7fa8, 0.9));
@@ -286,7 +319,10 @@
       cloudM = new THREE.Mesh(new THREE.SphereGeometry(1.012, 96, 48), new THREE.MeshLambertMaterial({ map: clouds, transparent: true, opacity: 0.55, depthWrite: false })); globe.add(cloudM);
       scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),3.5);gl_FragColor=vec4(.35,.62,1.,1.)*clamp(i,0.,1.)*1.7;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));
       scene.add(new THREE.Mesh(new THREE.SphereGeometry(80, 32, 16), new THREE.MeshBasicMaterial({ map: sky, side: THREE.BackSide })));
-      bindInput(); resize(); READY = true; setTimeout(warmEx, 1800);
+      bindInput(); resize(); READY = true;
+      /* V132: shader derlemesi + ilk kare ve büyük ülke blokları perdenin altında hazırlanır (ilk dokunuşta/animasyonda takılma olmasın) */
+      try { renderer.compile(scene, camera); renderer.render(scene, camera); } catch (e) { }
+      warmEx();
     });
   }
 
@@ -360,7 +396,8 @@
       if (c) pickC(c.id); else if (G && !BSH && G.sel) { G.sel = null; render(); }
     }
   }
-  var fr = 0, lastRK = '', lastRT = 0, forceR = 0;
+  var fr = 0, lastRK = '', lastRT = 0, forceR = 0, PRLO = 1, PRHI = 1, curPR = 1, idleSince = 0;
+  function setPR(p) { if (!renderer || Math.abs(p - curPR) < .01) return; curPR = p; renderer.setPixelRatio(p); resize(); forceR = 3; }
   function anyMoving() { for (var i = 0; i < C.length; i++) if (C[i].h !== C[i].t) return true; return false; }
   /* ---------- V60: savaş animasyonları (v60.js) için küçük dış arayüz; oyun kurallarına dokunmaz ---------- */
   var FH = [];
@@ -389,7 +426,7 @@
     if (needPaint) { needPaint = false; forceR = 3; paintOverlay(); C.forEach(function (c) { if (EX[c.id]) colorEx(c); }); }
     for (var i = 0; i < C.length; i++) {
       var c = C[i]; if (c.h === c.t) continue;
-      var d = c.t - c.h; if (c.t > 0 && !EX[c.id]) buildEx(c);
+      var d = c.t - c.h; if (c.t > 0 && (!EX[c.id] || GEN[c.id])) buildEx(c);
       if (Math.abs(d) > 0.002) { var st = Math.max(Math.abs(d) * (1 - Math.exp(-dt * 5.5)), dt * 0.06); c.h += Math.sign(d) * Math.min(Math.abs(d), st); } else c.h = c.t;
       applyEx(c);
     }
@@ -397,6 +434,9 @@
       /* V72: sahnede hiçbir şey değişmediyse (kamera/küre/yükselen ülke/animasyon yok) kareyi tekrar çizme; bulutlar için ~4 kare/sn yeter -> ülke seçiminde GPU/pil yükü ve kasma azalır */
       var q = globe.quaternion, k = camera.position.z.toFixed(4) + '|' + q.x.toFixed(4) + '|' + q.y.toFixed(4) + '|' + q.z.toFixed(4) + '|' + q.w.toFixed(4) + '|' + vo.toFixed(3) + '|' + window.innerWidth + 'x' + window.innerHeight;
       var busy = k !== lastRK || window.v60Active || anyMoving() || (typeof BSH !== 'undefined' && BSH) || (now - lastRT) > 250 || forceR > 0;
+      var _mv = k !== lastRK || window.v60Active || anyMoving() || (typeof BSH !== 'undefined' && BSH) || introStart;
+      if (_mv) { idleSince = now; if (curPR !== PRLO) setPR(PRLO); busy = true; }
+      else if (PRHI > PRLO && curPR !== PRHI && now - idleSince > 260) { setPR(PRHI); busy = true; }
       if (forceR > 0) forceR--;
       if (busy) { lastRK = k; lastRT = now; renderer.render(scene, camera); }
     }   /* V60: savaş animasyonu kareleri; V63: savaş paneli açıkken küre seyrek çizilir */
@@ -436,7 +476,7 @@
     buildC();
     if (READY) return prepOnly === true ? prepDone() : show();
     LOADING = true; var b = $$('v30b'); if (b) b.classList.add('ld');
-    loadScript('globe/three.min.js').then(function () { return loadScript('globe/data.js'); }).then(build).then(function () { LOADING = false; if (b) b.classList.remove('ld'); if (prepOnly === true && menuUp()) { prepDone(); return; } show(); prepDone(); })   /* V102: menü zaten kapandıysa (yavaş cihaz, 9 sn aşıldı) küre hemen açılır */
+    loadScript('globe/three.min.js').then(function () { return loadScript('globe/data.js'); }).then(function () { return loadScript('globe/tri.js').catch(function () { }); }).then(build).then(function () { LOADING = false; if (b) b.classList.remove('ld'); if (prepOnly === true && menuUp()) { afterWarm(prepDone); return; } show(); prepDone(); })   /* V102: menü zaten kapandıysa (yavaş cihaz, 9 sn aşıldı) küre hemen açılır */
       .catch(function (e) {
       /* V91: ilk kurulum hatasında (telefonda geçici bellek/doku/ağ hatası) hemen 2B haritaya düşme; yarım kalan tuvali temizleyip bir kez daha dene. */
       if (!window.__v91retry) { window.__v91retry = 1; try { stage.querySelectorAll('canvas').forEach(function (c) { c.remove(); }); if (renderer && renderer.dispose) renderer.dispose(); } catch (x) { } renderer = null; READY = false; LOADING = false; try { stage.style.display = 'block'; stage.classList.add('v91cover'); } catch (x) { } setTimeout(window.v30Toggle, 1200); return; }

@@ -1,0 +1,42 @@
+/* V138 — sadeleştirilmiş diplomasi ekranı */
+body.d38on #panel .envbtn:not(.dipbtn){display:none!important}   /* tek "Diplomasi" düğmesi kalır */
+.d38{max-height:78vh;overflow:auto;-webkit-overflow-scrolling:touch;text-align:left}
+.d38 h3{text-align:center;margin:0 0 6px}
+.d38-hd{display:flex;justify-content:center;align-items:center;gap:10px;margin:6px 0}
+.d38-hd span{opacity:.7}
+.d38-rel{margin:6px 0 2px}
+.d38-bar{position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,#e0453a,#e0b050 35%,#c9c2a0 50%,#7bd96a 75%,#3ddc84)}
+.d38-bar i{position:absolute;top:-3px;width:6px;height:14px;margin-left:-3px;border-radius:3px;border:1px solid #000a}
+.d38-rl{display:flex;justify-content:space-between;font-size:12px;margin-top:4px}
+.d38-rl span{opacity:.7}
+.d38-why{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 8px;font-size:11px}
+.d38-why span{padding:2px 7px;border-radius:9px;background:#ffffff14}
+.d38-why .pos{color:#9be8b0}.d38-why .neg{color:#ffa79c}
+.d38-chips{display:flex;flex-wrap:wrap;gap:5px;margin:2px 0 6px}
+.d38-chip{font-size:11px;padding:2px 8px;border-radius:10px;background:#d9a44122;border:1px solid #d9a44166}
+.d38-dice{font-size:12px;opacity:.85;margin:2px 0 6px}
+.d38-r{display:flex;align-items:center;gap:10px;width:100%;margin:5px 0;padding:9px 10px;border-radius:12px;text-align:left;color:inherit;
+  background:linear-gradient(180deg,rgba(34,58,120,.55),rgba(8,16,40,.75));border:1px solid rgba(214,170,80,.5);cursor:pointer}
+.d38-r.off{opacity:.55;cursor:default}
+.d38-i{font-size:22px;flex:0 0 auto}
+.d38-t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
+.d38-t small{font-size:11px;opacity:.78;line-height:1.25;margin-top:1px}
+.d38-t .d38-no{color:#ffa79c;opacity:1}
+.d38-r em{font-style:normal;font-size:12px;font-weight:700;white-space:nowrap;color:#efc16b}
+.d38-more{margin:6px 0 8px}
+.d38-more summary,.d38-rules summary{cursor:pointer;font-size:12px;opacity:.85;padding:4px 2px}
+.d38-stats{display:flex;justify-content:space-around;gap:6px;font-size:12px;margin:4px 0}
+.d38-stats span{padding:4px 8px;border-radius:10px;background:#ffffff12}
+.d38-inc{font-size:12px;text-align:center;opacity:.9;margin:4px 0 2px}
+.d38-sec{font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:11px;color:#efc16b;margin:10px 0 4px}
+.d38-list{max-height:34vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.d38-c{display:flex;align-items:center;gap:8px;width:100%;margin:3px 0;padding:6px 8px;border-radius:10px;text-align:left;color:inherit;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);cursor:pointer}
+.d38-cn{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
+.d38-cn small{font-size:10.5px;opacity:.75}
+.d38-badge{font-size:11px;padding:2px 8px;border-radius:9px;white-space:nowrap;color:var(--c);border:1px solid var(--c);background:#00000030}
+.d38-badge i{font-style:normal;opacity:.7;margin-left:3px}
+.d38-empty{font-size:12px;opacity:.7;padding:6px 2px}
+.d38-q{width:100%;box-sizing:border-box;margin:4px 0}
+.d38-rules ul{margin:4px 0 0;padding-left:18px;font-size:11.5px;opacity:.88;line-height:1.35}
+.d38-rules li{margin:3px 0}

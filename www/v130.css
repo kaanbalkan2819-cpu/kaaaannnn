@@ -1,0 +1,44 @@
+/* V130 — Menü paketi (world-conquest-menu-pack) aktarımı: zemin ışığı + döşeme, başlık gölgesi, elmaslı ayraç,
+   paket ölçüleri (menü 12/16, alıntı 11), sağ alttaki dil butonu. Yalnızca #wcm.flat. Geri almak: index.html'den v130.css bağlantısını silin. */
+#wcm.flat .bgimg{transform:scale(1.14) translateY(-3%);transform-origin:50% 0}
+#wcm.flat .bgimg:after{background:linear-gradient(180deg,rgba(3,2,2,.3) 0,transparent 20%,transparent 52%,rgba(3,2,2,.22) 76%,rgba(3,2,2,.4) 100%)}
+#wcm.flat .floor{position:absolute;left:0;right:0;bottom:0;height:60%;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 30%);mask-image:linear-gradient(180deg,transparent 0,#000 30%)}
+#wcm.flat .floor:before{content:"";position:absolute;left:-40%;right:-40%;top:0;bottom:-30%;background:repeating-linear-gradient(90deg,rgba(184,151,90,.09) 0 1px,transparent 1px 90px),repeating-linear-gradient(0deg,rgba(184,151,90,.08) 0 1px,transparent 1px 70px),linear-gradient(180deg,rgba(40,32,24,.5),rgba(18,14,10,.2));transform:perspective(420px) rotateX(62deg);transform-origin:50% 0}
+#wcm.flat .floor:after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 75% 42% at 50% 62%,rgba(196,150,80,.2),transparent 70%),radial-gradient(ellipse 100% 28% at 50% 100%,rgba(110,70,35,.22),transparent 80%),radial-gradient(ellipse 60% 20% at 50% 8%,rgba(0,0,0,.45),transparent 80%)}
+#wcm.flat .vig{z-index:0}
+#wcm.flat .col{z-index:1}
+/* başlık okunabilirlik gölgesi (300x300 radyal) */
+#wcm.flat .seal{position:relative}
+#wcm.flat .seal:before{content:"";position:absolute;left:50%;top:-6px;width:300px;height:300px;margin-left:-150px;background:radial-gradient(circle,rgba(3,2,2,.72) 0,rgba(3,2,2,.35) 45%,transparent 70%);pointer-events:none}
+#wcm.flat .seal>*{position:relative}
+#wcm.flat h1{position:relative}
+/* elmaslı ayraç; eski çizgili ayracı gizle */
+#wcm.flat .quote:before{display:none}
+#wcm.flat .rule{position:relative;display:flex;align-items:center;gap:10px;margin:12px 44px 10px}
+#wcm.flat .rule i{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(184,151,90,.6))}
+#wcm.flat .rule i+i{transform:scaleX(-1)}
+#wcm.flat .rule b{width:6px;height:6px;background:#b8975a;transform:rotate(45deg)}
+#wcm.flat .quote{position:relative;margin-top:0;font-size:11px}
+#wcm.flat .quote b{font-size:9px}
+/* menü: paket ölçüleri, 44px dokunma alanı */
+#wcm.flat .menu{position:relative;gap:4px}
+#wcm.flat .mb,#wcm.flat .mb.rk,#wcm.flat .mb.pri{width:100%;min-height:44px!important;padding:0 16px!important;font-size:12px!important;align-items:center;opacity:0;animation:wcmItem .5s ease forwards}
+#wcm.flat .mb.pri{font-size:16px!important;padding:0 18px!important}
+#wcm.flat .mb[disabled]{opacity:.35!important}
+@keyframes wcmItem{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#wcm.flat .mb[disabled]{animation:none}
+/* dil butonu: sağ alt, görsel 26px, dokunma alanı 44px */
+#wcm.flat .lang{position:absolute;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:3;width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;background:rgba(3,2,2,.65);border:1px solid rgba(184,151,90,.55);border-radius:3px;color:#b8975a;font:600 9px 'Segoe UI',system-ui,Roboto,sans-serif;letter-spacing:.08em;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#wcm.flat .lang:after{content:"";position:absolute;left:-9px;right:-9px;top:-9px;bottom:-9px}
+#wcm.flat .lang:hover,#wcm.flat .lang:focus-visible{color:#fff3d2;border-color:#b8975a;outline:0}
+#wcm.flat .ver{z-index:2;pointer-events:none}
+@media (max-height:760px){#wcm.flat .mb,#wcm.flat .mb.pri{min-height:40px!important}}
+@media (orientation:landscape) and (max-height:520px){#wcm.flat .mb,#wcm.flat .mb.pri{min-height:34px!important;padding:0 12px!important}#wcm.flat .mb.pri{font-size:14px!important}#wcm.flat .seal:before,#wcm.flat .rule{display:none}}
+@media (prefers-reduced-motion:reduce){#wcm.flat .mb{animation:none!important;opacity:1!important}}
+/* V134: "CONQUEST" küçük ekranlarda ikiye bölünüyordu (CONQU/EST) — genişliğe göre ölçeklenir, satır kırılmaz */
+#wcm.flat h1 span{white-space:nowrap!important;font-size:min(46px,10.8vw)!important;letter-spacing:.14em!important;text-indent:.14em!important}
+#wcm.flat h1{white-space:nowrap}
+/* V134: "CONQUEST" başlığı dar ekranlarda CONQU/EST diye bölünüyordu -> tek satır, ekran genişliğine göre ölçek */
+#wcm.flat h1 span{white-space:nowrap!important;font-size:min(46px,calc((100vw - 56px) / 6.9))!important;letter-spacing:.14em!important;text-indent:.14em!important}
+@media (max-height:760px){#wcm.flat h1 span{font-size:min(38px,calc((100vw - 56px) / 6.9))!important}}
+@media (orientation:landscape) and (max-height:520px){#wcm.flat h1 span{font-size:min(30px,calc((100vw - 56px) / 6.9))!important}}

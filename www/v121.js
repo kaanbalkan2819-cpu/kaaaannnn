@@ -12,8 +12,8 @@
       '<p>Her tur başında zar atılır. <b>Zar = o turdaki hamle hakkın.</b> 6 gelirse zar tekrar atılır (en çok 3 zar).</p><ul><li>Saldırı: <b>1 hamle</b> (deniz aşırı: <b>2 hamle</b>)</li><li>Keşif: 1 hamle (tur başına 1 kez; rakibin değerlerini açar)</li><li>Diplomasi hamlesi: <b>2 hamle</b> (yetmezse ödüllü reklam izleyebilirsin)</li></ul><p>Hamlen yettiği kadar saldırabilirsin. Kullanılmayan hamleler sonraki tura taşınmaz.</p>',
       '<p>A die is rolled at the start of each turn. <b>The roll = your moves for the turn.</b> A 6 rolls again (up to 3 dice).</p><ul><li>Attack: <b>1 move</b> (overseas: <b>2 moves</b>)</li><li>Scout: 1 move (once per turn; reveals the rival\'s stats)</li><li>Diplomacy action: <b>2 moves</b> (or watch a rewarded ad)</li></ul><p>Attack as many times as your moves allow. Unused moves do not carry over.</p>'] },
     { ic: '📊', t: ['Beş Değer', 'The Five Stats'], b: [
-      '<ul><li>👥 <b>Nüfus</b> — savunma avantajı: savunanın nüfusu yüksekse tüm değerleri en çok +%8 artar.</li><li>🎖 <b>Ordu</b> — saldırı avantajı: saldıranın ordusu yüksekse tüm değerleri en çok +%8 artar.</li><li>💰 <b>Ekonomi</b> — her tur Ekonomi/200 (en çok %40) ihtimalle +1 hamle; olmazsa Ekonomi\'nin %0,5\'i kadar gelir. Savaş tazminatı da ekonomiden ödenir.</li><li>🔬 <b>Teknoloji</b> — rakipten %20 üstünsen zarına +1, %60 üstünsen +2 eklenir.</li><li>🕊 <b>Diplomasi</b> — savaşa katılan müttefiklerin katkısını artırır (en çok +%20) ve anlaşma tekliflerinin kabulünü kolaylaştırır.</li></ul>',
-      '<ul><li>👥 <b>Population</b> — defence edge: if the defender has more, all its stats get up to +8%.</li><li>🎖 <b>Army</b> — attack edge: if the attacker has more, all its stats get up to +8%.</li><li>💰 <b>Economy</b> — each turn a chance of Economy/200 (max 40%) for +1 move; otherwise income of 0.5% of Economy. War reparations are paid from Economy.</li><li>🔬 <b>Technology</b> — 20% ahead of the rival: die +1; 60% ahead: die +2.</li><li>🕊 <b>Diplomacy</b> — boosts allies\' contribution in war (up to +20%) and makes treaty offers easier to win.</li></ul>'] },
+      '<ul><li>👥 <b>Nüfus</b> — savunma avantajı: savunanın nüfusu yüksekse tüm değerleri en çok +%10 artar.</li><li>🎖 <b>Ordu</b> — saldırı avantajı: saldıranın ordusu yüksekse tüm değerleri en çok +%10 artar.</li><li>💰 <b>Ekonomi</b> — tur başında %6–%30 ihtimalle +1 hamle (seferberlik gideri hazineden ödenir); her tur gelir, bakım ve enflasyon uygulanır. Fetihte ele geçirilen toprak, kaybeden hazinenin toprak payı kadar kaynak taşır. Savaş tazminatı da ekonomiden ödenir.</li><li>🔬 <b>Teknoloji</b> — rakipten %20 üstünsen zarına +1, %60 üstünsen +2 eklenir.</li><li>🕊 <b>Diplomasi</b> — savaşa katılan müttefiklerin katkısını artırır (en çok +%20) ve anlaşma tekliflerinin kabulünü kolaylaştırır.</li></ul>',
+      '<ul><li>👥 <b>Population</b> — defence edge: if the defender has more, all its stats get up to +10%.</li><li>🎖 <b>Army</b> — attack edge: if the attacker has more, all its stats get up to +10%.</li><li>💰 <b>Economy</b> — a 6–30% chance per turn of +1 move (mobilization cost is paid from the treasury); turn income, upkeep and inflation apply every turn. A captured territory carries its share of the losing treasury. War reparations are paid from Economy.</li><li>🔬 <b>Technology</b> — 20% ahead of the rival: die +1; 60% ahead: die +2.</li><li>🕊 <b>Diplomacy</b> — boosts allies\' contribution in war (up to +20%) and makes treaty offers easier to win.</li></ul>'] },
     { ic: '⚔', t: ['Savaş Nasıl Kazanılır', 'How Wars Are Won'], b: [
       '<p>İki taraf zar atar. 5 değer tek tek karşılaştırılır; <b>5 satırdan 3\'ünü kazanan savaşı kazanır.</b></p><p><b>Zar sadece çarpan verir:</b> yüksek zar atan tarafın <u>tüm</u> değerleri <b>×(1 + 0,15 × zar farkı)</b> olur. Eşit zarda çarpan yoktur. Ekonomi/Teknoloji zarın kendisini değiştirmez; yalnızca Teknoloji, yukarıdaki +1/+2 ile zarı güçlendirir.</p><p>Önceki savaşı kazanma bonusu ×1,35 olabilir. Art arda savaşan ülke yorulur ve değerleri düşer.</p>',
       '<p>Both sides roll. The 5 stats are compared one by one; <b>whoever wins 3 of 5 rows wins the war.</b></p><p><b>The die only gives a multiplier:</b> the side with the higher die gets <b>×(1 + 0.15 × die difference)</b> on <u>all</u> stats. Equal dice give no multiplier. Economy/Technology never change the die itself; only Technology boosts it with the +1/+2 above.</p><p>A previous-win bonus of ×1.35 may apply. A country that fights repeatedly gets tired and its stats drop.</p>'] },
@@ -75,6 +75,17 @@
         '<button class="big pri" onclick="WCTut._yes()">' + X('Evet, haritada göster', 'Yes, show me on the map') + '</button>' +
         '<button class="big" onclick="WCTut._no()">' + (cb ? X('Hayır, oyuna başla', 'No, start the game') : X('Şimdilik geç', 'Maybe later')) + '</button>');
     },
+    /* V125: tek kişilik yeni oyun başladıktan SONRA sor. later(): bir sonraki newGame(1) bitince soru açılır. */
+    later: function () { pendingAsk = true; },
+    askInGame: function () {
+      try { if (!(window.G && !G.mp && G.mode == 1 && !G.over)) return; } catch (e) { return; }
+      modal('<h2>📖 ' + X('Öğretici ister misin?', 'Want a quick tutorial?') + '</h2>' +
+        '<p style="text-align:center;font-size:14px;line-height:1.45">' + X('Kuralları gerçek haritanın üzerinde, oynarken adım adım gösterelim mi? İstersen tek dokunuşla atlayabilirsin.', 'Want us to show the rules step by step on the real map while you play? You can skip with one tap.') + '</p>' +
+        '<button class="big pri" onclick="WCTut._yesIn()">' + X('Evet, haritada göster', 'Yes, show me on the map') + '</button>' +
+        '<button class="big" onclick="WCTut._noIn()">' + X('Hayır, oynayayım', 'No, let me play') + '</button>');
+    },
+    _yesIn: function () { seen(); try { closeMod(); } catch (e) { } if (window.WCTour) WCTour.arm(); },
+    _noIn: function () { seen(); try { closeMod(); } catch (e) { } },
     _yes: function () {
       var f = window.WCTut._cb; window.WCTut._cb = null; seen();
       if (window.WCTour) WCTour.arm();
@@ -93,7 +104,8 @@
       else if (n > 40) clearInterval(iv);
     }, 500);
   }
-  window.addEventListener('load', autoFirst);
+  /* V125: ilk açılışta menüde sorma — öğretici sorusu artık tek kişilik oyun BAŞLADIKTAN sonra sorulur */
+  // window.addEventListener('load', autoFirst);
 
   /* Ayarlar penceresine 📖 düğmesi */
   function hookSettings() {
@@ -111,6 +123,18 @@
       return r;
     };
     settings.wc121 = 1;
+  }
+  var pendingAsk = false;
+  if (typeof newGame === 'function') {
+    var _ng = newGame;
+    newGame = function (m) {
+      var r = _ng.apply(this, arguments);
+      if (pendingAsk) {
+        pendingAsk = false;
+        if (m == 1) { var n = 0, iv = setInterval(function () { n++; var md = document.getElementById('mod'); if (!(md && md.style.display === 'flex') || n > 8) { clearInterval(iv); if (!(md && md.style.display === 'flex')) WCTut.askInGame(); } }, 700); }
+      }
+      return r;
+    };
   }
   hookSettings(); window.addEventListener('load', hookSettings);
 })();

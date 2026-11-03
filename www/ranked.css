@@ -131,3 +131,28 @@
 .wcr-rays{animation:none!important}
 .wcr-m3d{animation:none!important;filter:none!important;transform:rotateY(-10deg) rotateX(3deg)!important}
 .wcr-badge,.wcr-wp,.wcr-title .wcr-ic,.wcr-div .wcr-ic{filter:none!important}
+
+/* ================= V127 — gerçekçi lig amblemleri (Figma) + sade/mat görünüm ================= */
+.wcr-medal-w{position:relative;display:inline-block;line-height:0;vertical-align:middle}
+.wcr-medal-w img{display:block;width:100%;height:100%;object-fit:contain}
+.wcr-dv{position:absolute;left:50%;bottom:1%;transform:translateX(-50%);min-width:50px;padding:2px 12px 3px;font:700 14px/1.2 Georgia,serif;letter-spacing:.2em;text-align:center;color:#e3d6b4;
+  background:linear-gradient(180deg,#2a1210,#0f0606);border:1px solid rgba(201,162,77,.7);border-radius:3px;box-shadow:0 3px 8px #000}
+/* sahne: ışın/kalkan/silah süsleri kalktı (amblemin içinde var), parıltı kısıldı */
+.wcr-stage{height:244px;margin:0 -6px}
+.wcr-stage:before{width:250px;height:250px;margin:-125px 0 0 -125px;opacity:.12}
+.wcr-m3d{transform:none!important}
+.wcr-lgn{text-shadow:0 2px 0 #000!important}
+.wcr-bar2 i{box-shadow:none}
+/* lig şeridi */
+.wcr-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:12px -2px 0}
+.wcr-st{display:block;padding:2px 0 5px;border-bottom:2px solid transparent;line-height:0}
+.wcr-st .wcr-mini,.wcr-st .wcr-medal-w{width:100%!important;height:auto!important}
+.wcr-st .wcr-medal-w img{height:auto}
+.wcr-st.cur{border-bottom-color:#c9a24d;background:linear-gradient(180deg,transparent,rgba(201,162,77,.12))}
+.wcr-st.nx img{filter:brightness(.28)}
+.wcr-st.lk img{filter:brightness(.12);opacity:.85}
+/* istatistik tablosu */
+.wcr-led{display:grid;grid-template-columns:repeat(4,1fr);margin:12px 0 4px;border:1px solid rgba(201,162,77,.35);border-radius:10px;background:rgba(255,255,255,.02)}
+.wcr-led div{padding:9px 0 7px;text-align:center}.wcr-led div+div{border-left:1px solid rgba(201,162,77,.25)}
+.wcr-led b{display:block;font:700 19px/1.1 Georgia,serif;color:#efe3c2}.wcr-led span{font-size:10.5px;color:#b9a77a;letter-spacing:.05em}.wcr-led .l b{color:#c4695a}
+@media (max-height:640px){.wcr-stage{height:196px}.wcr-m3d .wcr-medal-w{width:190px!important;height:190px!important}}

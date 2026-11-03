@@ -1,7 +1,7 @@
 /* V30 — 3B küre görünümü */
 #g3d{position:absolute;inset:0;z-index:2;background:#02040a;touch-action:none}
 #g3d canvas{display:block;width:100%;height:100%}
-#map.v30on>svg,#map.v30on #wwater{visibility:hidden}
+#map.v30on>svg,#map.v30on #wwater{display:none}/* V133: gizli 2B SVG artık düzen/stil hesabına girmez (visibility:hidden her seçimde ~10-40 ms düzen+stil yapıyordu) */
 #v30b{font-size:13px;font-weight:800;letter-spacing:.02em}
 #v30b.on{background:#f5b53ccc;color:#1a1204}
 #v30b.ld{opacity:.55;animation:v30p 1s ease-in-out infinite alternate}

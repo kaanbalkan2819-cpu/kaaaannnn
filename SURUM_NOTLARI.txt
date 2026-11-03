@@ -1,0 +1,301 @@
+=================== V122 ===================
+V122 — YAPILANLAR / YAPILMAYANLAR  (TEST EDİLMEDİ; yalnızca node --check söz dizimi denetimi)
+
+YAPILDI
+1) Hazır ad önerisi (www/ranked.js): Rank'a ilk girişte ad ekranı "Oyuncu4821" (EN: Player4821) gibi hazır bir adla açılır,
+   düzenlenebilir; "Başka Öner" düğmesi var. Öneri bir kez saklanır (wcr_nicksug). Google Play Games adı varsa
+   window.WCPlayGames.getDisplayName() ile otomatik doldurulur (oyuncu yazmaya başlamadıysa; geçersiz karakterler temizlenir).
+2) Hesap bağı (Google): Rank ekranında "Google ile Bağla". Anonim kimlik linkWithCredential ile bağlanır (uid ve puan değişmez).
+   Hesap daha önce bağlıysa (telefon değişimi) onayla o hesaba girilir, sunucudaki puan geri yüklenir.
+   Düğme YALNIZCA bir Google jeton kaynağı varsa görünür; yoksa "Google Play sürümüyle gelecek" notu gösterilir.
+3) Öğretici (www/v121.js, v35.js): her sayfada tek dokunuşla "Atla ✕"; ilk açılışta (kayıtlı sefer yoksa) bir kez otomatik;
+   "Yeni Oyun > tek kişilik" başlamadan önce "Öğretici ister misin?" sorusu. Online ve Rank yollarında öğretici/soru YOK.
+
+YAPILMADI / SENİN YAPMAN GEREKEN (Google Play bağlanınca)
+- Firebase Konsolu > Authentication > Sign-in method: Google'ı aç.
+- Google jetonu için bir Capacitor eklentisi kur (ör. @capgo/capacitor-social-login) + Web client ID ve SHA-1 ayarı;
+  ya da kendi native köpründe window.WCPlayGames = { getIdToken(), getDisplayName() } tanımla. Hangi eklentinin Capacitor 8 ile
+  uyumlu olduğunu doğrulamadım.
+- Rank cüzdanındaki altın (P.gold) yerel kalır, hesapla taşınmaz; telefon değişince altın yine sıfırlanır.
+- Gizlilik politikası ve Play Veri Güvenliği formuna "Google hesabı bağlama (e-posta/kimlik)" eklenmeli.
+- Öğretici "Bir daha sorma" seçeneği yok; her yeni tek kişilik oyundan önce sorar.
+
+==== V122 EK TURU (TEST EDİLMEDİ; node --check ile söz dizimi denetlendi) ====
+YAPILDI
+- Ana menü alıntıları (www/v35.js): yalnızca Il Principe değil; Discorsi, Savaş Sanatı, Floransa Tarihi, Mektuplar'dan esinli 12 yeni söz.
+  Her sözün altındaki kaynak yazısı kendi kaynağına göre değişir (SRC tablosu; QUOTES'a 3. eleman = kaynak no). Metinler serbest uyarlamadır, birebir alıntı değildir.
+- "Hazine" düğmesi ana menüden kaldırıldı (Shop kodu duruyor; altın yetmeyince çıkan "Dükkan" düğmeleri hâlâ oyun içinde var).
+- Sohbet düğmesi (www/online_chat.js): alt panel (#panel) açıkken düğme panelin hemen üstüne çıkar, panel kapanınca eski yerine döner.
+- Rank'ta YZ rakip adları: Mira/Gaming sıkıntısı giderildi — ~70 ad × ~28 ek × 8 farklı biçim; son 12 ad ve aynı ilk 4 harf art arda gelmez.
+- Rank "Ülkeyi Onayla (hemen başla)" düğmesi: iki taraf onaylarsa geri sayım beklenmez. YZ rakipte onay anında başlar. Onaydan sonra "Ülkeyi Değiştir" kapanır.
+  !! firestore.rules GÜNCELLENDİ (hok/gok alanları): Firebase Konsolu > Firestore > Kurallar'a yeniden yapıştırıp yayınla; yoksa onay rakibe iletilmez (geri sayım yine çalışır).
+- Deniz yolu (www/v16.js): tüm kara komşuları hem BÜYÜK (yüzölçümü) hem GÜÇLÜ (5 değer toplamı) — ikisi de en üst %25 — olan kıyı ülkeleri,
+  normal 4 deniz hedefine ek olarak ~1275 km menzilde en çok 6 deniz hedefi daha alır. Eşikler giants() içinde (0.75), menzil/adet BOX_RANGE / BOX_EXTRA.
+  Hangi ülkeler etkilendi: konsolda WC.seaReport().boxed
+- Rank YZ zorluğu: botLevel tavanı 1.0 → 0.5 (en üst lig bile yarım güç; 1000 puan ≈ çok kolay).
+- Rank ülke çifti: iki ülke merkezleri arası ≤ ~5700 km (0.9 rad) olacak şekilde seçilir; yoksa en yakın olan. Ülke değişiminde de rakibe yakınlık korunur (country_stats.js MAXD).
+YAPILMADI / DİKKAT
+- Deniz hedefi artışı iki yönlüdür (bağlantı hem o ülkeden hem karşı ülkeden geçerli) — savaş/toprak kaybı kodu böyle çalıştığı için.
+- Çok geniş sayıda ülke etkilenirse oyun dengesi değişebilir; BOX_EXTRA'yı düşürerek ayarla.
+
+==== V122 EK TURU 2 (TEST EDİLMEDİ; node --check ile söz dizimi denetlendi) ====
+YAPILDI
+- Oyun sonu katmanı (www/v38.js) ve oyun sonu penceresi başlığı (www/app.js showOver): kırmızı "OYUN BİTTİ" yerine yumuşak renkli "Oyun Bitti 🌱"
+  + "Son toprağını da kaybettin ama olsun — her büyük hükümdar bir yenilgiyle başlar." Zafer: "Zafer! 🌍 Harika oynadın!". Savaş içindeki "YENİLGİ" yazısı değişmedi.
+- Yenilgi müziği erken giriyordu: wc_audio.js savaş başlayınca 2,6 sn sonra kör bir zamanlayıcıyla win/lose çalıyordu (rakip 6 atıp "Dokun → yeni zar"
+  beklenirken bile). Bu zamanlayıcı kaldırıldı; müzik artık yalnızca v7.js finish() sonucu gerçekten açtığında çalıyor.
+- Oyun bitti katmanı da erken çıkıyordu (v38: savaş ekranı açıkken 2,5 sn sonra üstüne biniyordu). Artık savaş ekranı kapanana (Devam / Haritaya Dön) kadar bekler;
+  yalnızca takılırsa 2 dakika sonra gösterir.
+- Yeni zar sesi (wc_audio.js diceRoll): elde sallama tıkırtıları + masaya çarpıp sekme (aralıklar kısalır, ses söner) + yuvarlanma. Tüm zar atışlarında (savaş, tur zarı) kullanılır.
+YAPILMADI
+- Sesler tamamen sentezlenmiştir (ses dosyası yok); gerçek zar kaydı istersen ses dosyasıyla değiştirilebilir. Kulakla ayarı sen yapmalısın (clack/diceRoll içindeki süre ve ses seviyeleri).
+
+==== V122 EK TURU 3 — HARİTA ÜZERİNDE ÖĞRETİCİ (TEST EDİLMEDİ; node --check ile söz dizimi denetlendi) ====
+YAPILDI
+- Yeni dosya www/wc_tour.js (index.html'e eklendi): öğretici artık GERÇEK bir oyunun üstünde, haritada anlatılıyor. Oyun durumuna göre ilerleyen ipucu balonları + parlayan halka:
+  ülke seç (HUD) → radar/“Bu Ülkeyle Başla” (panel) → tur zarı → parlayan saldırılabilir komşular (kara 1 / deniz 2 hamle; halka en yakın hedefte) →
+  seçili ülke: Keşfet + Saldır, 5 değerden 3'ü → savaş ekranı (zar, 6 → dokun, 5 değer karşılaştırması) → Turu Bitir düğmesi → "Hazırsın" (Kural Rehberi / Kapat).
+- Oyuna engel olmaz: katman dokunuşları geçirir. Her balonda "Atla ✕" ve "Anladım ✓" var. Hata olursa sessizce kapanır.
+- Giriş noktaları (www/v121.js): (1) ilk açılışta kayıtlı sefer yoksa "Öğretici ister misin?" (Şimdilik geç = menüde kal); (2) tek kişilik Yeni Oyun'dan önceki soru:
+  Evet → oyun açılır ve öğretici haritada çalışır, Hayır → doğrudan oyun; (3) menüdeki "Nasıl Oynanır": yeni bir deneme seferi başlatır (kayıtlı sefer varsa silineceği uyarılır);
+  (4) oyun içinde Ayarlar ▸ 📖: mevcut oyunda öğreticiyi başlatır.
+- Eski sayfa sayfa anlatım "Kural Rehberi" olarak duruyor (öğreticinin son balonundaki düğmeden açılır).
+- Online ve Rank'ta öğretici görünmez (G.mp varsa ve G.mode != 1 ise çalışmaz).
+YAPILMADI / DİKKAT
+- Halka konumu ülke path'inin ekran dikdörtgenine dayanır; 3B küre görünümünde dikdörtgen geçersizse halka çizilmez, yalnızca balon görünür.
+- Diplomasi (Elçi) ve ittifaklar harita üzerinde adım adım gösterilmiyor; son balonda tek cümleyle anılıyor.
+- Savaş balonu üstte durur; savaş paneli yüksekse ilk satırların üstüne binebilir ("Anladım ✓" ile kapanır).
+
+==== V123 — GÜVENLİK GARANTİSİ ZİNCİRİ (TEST EDİLMEDİ; node --check ile söz dizimi denetlendi) ====
+YAPILDI
+- Yeni dosya www/v123.js (index.html'e eklendi): Güvenlik Garantisi aktifken bir YZ ülkesi sana saldırmak isterse önce garantör ülkeyle savaşır.
+  Saldıran kaybederse sana saldıramaz (hamlesi gider). Kazanırsa sana saldırmak için ek 1 hamle harcar; hamlesi kalmadıysa o tur saldırı olmaz.
+- Garantör ile saldıran birbirine ulaşabiliyorsa gerçek toprak savaşı (savaş ekranı çıkar); ulaşamıyorsa toprak değişmeyen zar savaşı + bilgi mesajı.
+- www/v20.js: V20.seq() eklendi (kalan hamle okunur). www/v23.js: Güvenlik Garantisi penceresine kural cümlesi eklendi (TR/EN).
+YAPILMADI / DİKKAT
+- Yalnızca tek kişilik oyun (G.mp varsa çalışmaz). "Koruma Talebi" (ortak savunma) değişmedi; eski davranış (garantör sonraki turlarda saldırgana yönelir) duruyor.
+
+=================== V125 ===================
+V125 — (yalnızca tarayıcıda otomatik ölçüldü; telefonda/elle oynanarak TEST EDİLMEDİ)
+
+YAPILDI
+1) Kazanamayan ülkeler (www/v16.js, "V124 kurtarma"): mevcut hedefleri (kara+deniz) içinde en iyi kazanma şansı %35'in altında olan ülkeler
+   (Butan, Nepal, Moğolistan, Sri Lanka, Kuzey Kore, Doğu Timor, Lüksemburg, Falkland, Lesotho, İrlanda, Brunei, Ekvador, Moldova... 15 ülke)
+   kazanma şansı en az %40 olan en yakın ülkelerden 3 tanesini ek hedef olarak alır (menzil kademeli: ~3500 / 5700 / 8300 km).
+   Ölçüm: en iyi şansı <%35 olan ülke 15 -> 0. Ek hedefler 'deniz' etiketlidir (2 hamle) ve çift yönlüdür.
+   Ayar: RESC_MIN, RESC_WIN, RESC_N, RESC_MAX. Liste: konsolda WC.seaReport().rescued
+2) İlk savaş koruması (www/v124.js, index.html'e eklendi): oyuncunun oyundaki ilk savaşında (saldırı veya savunma) 5 değeri ×1.15.
+   Yalnızca tek kişilik; savaş ekranında "İlk savaş desteği" satırı görünür. Ayar: FIRST_BONUS.
+   Örnek ölçüm (TUR vs ABD): kazanma %3 -> %11; yakın güçteki savaşlarda etkisi daha büyük.
+
+=================== V126 ===================
+V126 — (TEST EDİLMEDİ; yalnızca node --check söz dizimi denetimi)
+
+YAPILDI
+1) Oyun içi menüye "🏠 Ana Menü" düğmesi (www/v125.js): Ayarlar penceresinde (yalnızca oyundayken). "Oyundan çıkılsın mı?" sorar; Evet → kaydeder ve ana menüye döner (sayfa yenilenir). Online maçta kayıt yazılmaz.
+2) Öğretici sorusu artık tek kişilik oyun BAŞLADIKTAN sonra sorulur (www/v35.js, www/v121.js): Evet → harita üzerinde öğretici başlar, Hayır → oyun devam eder.
+   İlk açılışta ana menüde çıkan otomatik soru kapatıldı (autoFirst). Online/Rank'ta soru yok.
+3) Telefon GERİ tuşu (www/v125.js): tarayıcı geçmişine nöbetçi kayıt + 'popstate' ile çalışır (@capacitor/app eklentisi gerekmez).
+   - Açık pencere varsa: kapatma düğmesine (Kapat/Vazgeç/Geri/Hayır/Atla...) basar. Kapatma düğmesi olmayan zorunlu pencereler geri tuşunu yok sayar.
+   - Alt panel (seçili ülke) açıksa: seçimi kaldırır.
+   - Oyundaysa ve açık bir şey yoksa: "Oyundan çıkılsın mı?" sorusu.
+   - Savaş ekranında geri tuşu yok sayılır.
+   - Ana menü alt ekranındaysa bir adım geri; ana menü kökündeyse "Çıkmak için tekrar geri" uyarısı, ikinci basış uygulamayı kapatır.
+DİKKAT: Android cihazda denenmedi. Geri tuşu Capacitor'un webview geçmişi davranışına dayanır; çalışmazsa @capacitor/app eklentisi + backButton dinleyicisi gerekir.
+
+=================== V127 ===================
+V127 — (TEST EDİLMEDİ; yalnızca node --check söz dizimi denetimi)
+
+YAPILDI
+1) Rank Maçı ekranı yenilendi (www/ranked.js, ranked_art.js, ranked.css):
+   - Lig madalyaları artık çizim (SVG) değil, Figma'da üretilen gerçekçi savaş/fetih amblemleri: www/assets/ranked/lg0..lg5.webp
+     (Bronz, Gümüş, Altın, Platin, Elmas, Şampiyon). Siyah zemin saydam yapıldı; görseller ranked_art.js içinde medal() tarafından kullanılıyor,
+     bu yüzden liderlik tablosu, lobi, sonuç ve ilerleme çubuğu madalyaları da otomatik yenilendi.
+   - Kademe (I/II/III) büyük madalyanın altında rozet olarak gösterilir.
+   - Rank ekranına 6 ligli şerit (geçilen / sıradaki / kilitli) ve Maç-Galibiyet-Mağlubiyet-Başarı tablosu eklendi.
+   - Eski ışın / kalkan / silah süsleri sahneden kaldırıldı (amblemin içinde var); parıltılar kısıldı.
+GERİ ALMAK İÇİN: ranked.js, ranked_art.js ve ranked.css'in önceki sürümlerini geri koyun.
+
+=================== V129 ===================
+V129 — (TEST EDİLMEDİ; yalnızca node --check söz dizimi denetimi)
+
+YAPILDI
+- Ana menü yeni görselli tasarıma geçirildi: www/assets/menu/bg.webp + emblem.webp, www/v129.css, www/v35.js (flat modu), www/index.html (v129.css bağlantısı).
+- 3B küre / Three.js menüde artık kurulmaz (pil ve bellek tasarrufu). Menü mantığı (Yeni Fetih, Seferi Sürdür, Rank, Öğretici, Ayarlar, Dil, alt menüler) aynen korundu.
+GERİ ALMAK İÇİN: index.html'den v129.css bağlantısını silin ve v35.js'deki WC_MENU varsayılanlarını (bg:null, emblem:null, flat:false) yapın.
+
+=================== V130 ===================
+V130 — (TEST EDİLMEDİ; yalnızca node --check söz dizimi denetimi)
+
+YAPILDI (world-conquest-menu-pack aktarıldı)
+- Yeni menü düzeni: Yeni Fetih / Seferi Sürdür / Dereceli Mücadele / Nasıl Oynanır / Ayarlar. Dil butonu sağ alta (26px görsel, 44px dokunma alanı) taşındı.
+- Yeni Fetih alt menüsü: Dereceli Mücadele / Tek Oyunculu / Arkadaşınla Maç / Geri. (Kayıt varsa önce eski "silinsin mi" onayı çıkar, sonra bu menü.)
+- Paket görünümü: zemin ışığı + perspektifli döşeme, başlık arkası gölge, elmaslı ayraç, paket renk/ölçüleri (menü 12/16, alıntı 11), giriş animasyonu (100ms + 80ms*sıra).
+- Dosyalar: www/v35.js (yalnızca flat modda yeni düzen), www/v130.css (yeni), www/index.html (v130.css bağlantısı).
+- Görseller zaten aynıydı (bg.webp / crest = emblem.webp, birebir aynı dosya), tekrar kopyalanmadı.
+- Oyun mantığı (askNew, cont, WCRank, WCTut, WCOnline, ayarlar, dil) değişmedi.
+
+YAPILMADI / DİKKAT
+- Cihazda hiç test edilmedi.
+- Paketteki strings.json / tokens.json dosyaları doğrudan okunmuyor; metinler mevcut X() TR/EN yapısına yazıldı. Alıntılar oyunun kendi alıntı listesinden gelmeye devam ediyor (paketin 3 alıntısı eklenmedi).
+- Eski düzen (flat:false) aynen duruyor.
+GERİ ALMAK İÇİN: index.html'den v130.css bağlantısını silin ve v35.js yerine önceki sürümü kullanın.
+
+=================== V131 ===================
+V131 — (TEST EDİLMEDİ; yalnızca node --check söz dizimi denetimi)
+
+SORUN
+- Tank (ve piyade) bazı saldırılarda aşırı büyük görünüyordu. Neden: sahne ölçeği yalnızca SALDIRANIN ülke boyutuna göre
+  (sizeF, 0.5–3) büyüyordu; hedef küçükse veya saldıran çok büyükse (Rusya, Kanada, ABD...) tank ülkeden büyük kalıyordu.
+
+YAPILDI (yalnızca www/v60.js)
+- Yeni tankK() fonksiyonu: tank/piyade ölçeği artık ÜLKEYE GÖRE kısılıyor.
+  Tank uzunluğu, saldıran ile hedef ülkenin KÜÇÜĞÜNÜN yaklaşık %38'ini ve mutlak 0.16 rad (küre yarıçapı=1) sınırını geçmez.
+  Çarpan k: 1 (değişmez) ile 0.25 arası; küçük ülkelerde tank küçülür, normal ülkelerde görünüm AYNI kalır.
+- Uygulandığı yerler: kara sahnesi (tank+piyade, iki tank) ve yedek/ateş sahnesi (tank, piyade). Uçak/füze/gemi değişmedi.
+- Ayar sabitleri (v60.js, tankK üstü): TANK_FRAC (.38), TANK_MAXRAD (.16), TANK_MIN (.25).
+  Tank hâlâ büyük gelirse TANK_FRAC / TANK_MAXRAD'ı düşürün; çok küçük gelirse yükseltin.
+
+YAPILMADI / DİKKAT
+- Cihazda ve tarayıcıda hiç test edilmedi. Sabitler hesapla seçildi, gerçek görüntüde ince ayar gerekebilir.
+- Piyade de aynı çarpanla küçülür (tank-piyade oranı bozulmasın diye).
+GERİ ALMAK İÇİN: v60.js'deki tankK() çağrılarını ("* tk") silin veya önceki v60.js'yi kullanın.
+
+=================== V132 ===================
+V132 — (yalnızca node --check + başsız tarayıcıda yükleme denemesi; telefonda TEST EDİLMEDİ)
+
+SORUN
+- "Sefer Başlıyor" perdesi 9 sn sonra küre hazır olmasa da kalkıyordu; ayrıca büyük ülke blokları (Rusya ~150 ms, Kanada, Çin...) perde kalktıktan 1,8 sn sonra üretilmeye başlıyordu. Oyunun ilk saniyelerinde büyük bir ülkeye dokunulursa blok o anda tek seferde üretilir ve takılma olurdu.
+
+YAPILDI
+- www/v35.js: perde erken geçiş süresi 9 sn -> 40 sn (yalnızca takılma emniyeti). Perde zaten dokunmayı engelliyordu; artık küre hazır olmadan kalkmıyor.
+- www/v30.js: küre kurulunca shader derleme + ilk kare ve ülke bloklarının üretimi hemen, perdenin altında başlar (eskiden 1,8 sn gecikmeliydi). Perde, en büyük 10 ülke bloğu hazır olana kadar (en çok +4 sn) bekler.
+GERİ ALMAK İÇİN: v30.js'de "V132" yazan satırları eski haline getirin; v35.js'de 40000 -> 9000.
+
+=================== V133 ===================
+V133 — (yalnızca node --check + başsız tarayıcı denemesi; telefonda TEST EDİLMEDİ)
+
+İNCELEME (başsız Chromium, yazılımsal GL; JS süreleri güvenilir, GPU/FPS değil)
+- Ülke seçimi JS maliyeti küçük: pickC ~4-7 ms, paintOverlay ~1-3 ms, sahiplik değişiminde tam yeniden boyama ~9-14 ms. Seçimde blok üretimi artık gerekmiyor (V132).
+- Gizli 2B SVG (visibility:hidden) her seçimde düzen+stil hesabı yaptırıyordu: ~4-37 ms düzen, ~1-16 ms stil. display:none ile ~1 ms.
+- Müttefik şerit animasyonu: saniyede ~11 kez tam tuval yeniden çizimi + ~8 MB doku yükleme + küre yeniden çizimi (GPU yükü bu ortamda ölçülemedi).
+
+YAPILDI
+- www/v30.css: #map.v30on>svg ve #wwater: visibility:hidden -> display:none. (SVG absolute/inset:0 olduğu ve boyutlar #map'ten alındığı için düzen bozulmaz; 2B'ye dönünce geri gelir.)
+- www/v30.js: müttefik animasyonu 90 ms -> 140 ms, adım 1.6 -> 2.5 (görünen hız aynı, doku yükleme ~%35 az).
+GERİ ALMAK İÇİN: v30.css'te display:none -> visibility:hidden; v30.js'te 140 -> 90 ve 2.5 -> 1.6.
+
+=================== V134 ===================
+V134 — (node --check + başsız Chromium'da menü -> yeni oyun -> tur/AI/savaş aşamaları denendi, konsol hatası yok; telefonda TEST EDİLMEDİ)
+
+İNCELEME
+- Tüm .js dosyaları söz dizimi denetiminden geçti; index.html'deki tüm script/css bağlantıları mevcut; konsolda yalnızca three.js "deprecated" uyarısı var.
+- V133'ün display:none değişikliği güvenli: 2B SVG'ye bağlı bir ölçü okuma yok (app.js setup() #map'ten okuyor).
+
+YAPILDI (yalnızca gereksiz yoklama/yeniden kurma azaltıldı; oyun mantığı değişmedi)
+- www/online_chat.js: sohbet düğmesi yerleşimi (place) her 300 ms'de getComputedStyle + getBoundingClientRect (zorunlu düzen) çağırıyordu,
+  sohbet hiç açık değilken bile. Artık sekme gizliyken veya sohbet düğmesi yokken/gizliyken atlanır; aralık 400 ms. ui() yoklaması da gizli sekmede çalışmaz.
+- www/v99.js ("Ülkem" kartı): kart açıkken her 600 ms'de innerHTML yeniden kuruluyordu (boşa DOM işi, basılı dokunuşun kaybolması riski).
+  Artık içerik değişmediyse yeniden çizilmez; yoklama gizli sekmede durur.
+GERİ ALMAK İÇİN: V134 işaretli satırları eski haline getirin (online_chat.js, v99.js).
+
+DİKKAT / YAPILMADI
+- GPU/FPS ve gerçek cihaz ölçümü yapılamadı (yazılımsal GL). Müttefik şerit animasyonunun doku yükleme maliyeti (7 kez/sn, ~8 MB) cihazda ölçülmeli.
+- Ortamdaki 'Zar At' düğmesi Playwright ile tıklanamadı (yazılımsal GL'de ana iş parçacığı yoğun); JS .click() ile çalışıyor, oyun hatası olarak değerlendirilmedi.
+
+V134 EK — Arayüz (emülasyon) testi: 320x568, 360x640, 360x800+çentik, 393x851+çentik, 412x915+çentik, 768x1024 (yatay 800x360 yalnızca başlık için).
+- DÜZELTİLDİ: menü başlığı "CONQUEST" tüm dar ekranlarda CONQU/EST diye bölünüyordu -> www/v130.css sonuna eklenen kural (tek satır, genişliğe göre ölçek).
+- Çentik (üst 40-52px, alt 24-34px) simülasyonunda HUD, harita düğmeleri ve alt "Turu Bitir" çubuğu güvenli alanın içinde; yatay kaydırma yok.
+- GERÇEK ANDROID CİHAZ TESTİ YAPILMADI.
+
+V134 EK 2 — Savaş netliği + denge (TEST EDİLMEDİ: denge/simülasyon çalıştırılmadı; yalnızca node --check + tek yükleme/kart denemesi)
+YAPILDI
+- www/v134.js (yeni, index.html'de v125.js'ten sonra): (1) seçili keşfedilmiş rakip için panelde net "KAZANMA İHTİMALİ %" + beş değerin kaçında üstün olduğun
+  (keşfedilmemişse "keşfet" ipucu); (2) savaş sonucunda her zaman görünür "neden" satırı (hangi değerler kimde, zar çarpanı);
+  (3) kartopu freni: toprağın %25'inden fazlasına sahip saldıranın değerleri en çok %12 düşer (imparatorluk yorgunluğu);
+  %40+ toprağı olan saldıranın karşısında %10'un altına inmiş savunan ×1,05 direniş alır. Sabitler v134.js başında.
+- www/v102.js: Ordu/Nüfus avantaj tavanı %8 -> %10; Teknoloji zar avantajı eşikleri 1,2/1,6 -> 1,3/2,0; Ekonomi ekstra hamle olasılığı en çok %40 -> %30 (eco/250).
+- www/rules5.js: fetih bonusu (×1,10) 100'ü aşmaz; rakibin toplam gücü kendininkinin %40'ından azsa 5/5 üstünlükte bile bonus verilmez.
+- www/v121.js: yardım metinlerindeki +%8 -> +%10.
+DİKKAT: Sayılar akıl yürütmeyle seçildi, oyun içinde ölçülmedi; gerçek dengeyi yüzlerce yapay zekâ oyunu simüle ederek ayarlamak gerekir.
+GERİ ALMAK İÇİN: index.html'den v134.js bağlantısını silin; v102.js/rules5.js'teki "V134" satırlarını eski değerlere çevirin.
+
+=================== V135 ===================
+V135 — SAVAŞ SİSTEMİ SAĞLAMLAŞTIRMA (TEST EDİLMEDİ; yalnızca node --check söz dizimi denetimi)
+YAPILDI (yalnızca yeni www/v135.js; index.html'de v134.js'ten sonra yüklenir)
+1) Küçük ülkeler: tek toprak koruması KALDIRILDI (tek toprağı kalan ülke saldırıyı kaybederse oyun biter). Toprağı ≤2 olan savunan, ≥8 topraklı ve 4 kat büyük saldırana karşı ×1,05 direniş alır. (UNDER_MAX / UNDER_RATIO / UNDER_MIN_ATK / UNDER_BONUS)
+2) Deniz/kara ayrımı: deniz aşırı saldırıda saldıranın Ordu değeri ×0,95 (SEA_ARMY); savaş ekranında "🌊 Deniz harekâtı" notu.
+3) Bekleme: savaş ekranı zamanlayıcıları ×0,7; "6 geldi → dokun" 0,55 sn sonra otomatik atılır; varsayılan hız 1 → 1,5.
+4) Toprak devri: her savaştan sonra sahiplik tablosu doğrulanır (geçersiz sahip kendi ülkesine döner).
+5) Yok olan ülke: paktlar, garanti, haraç, keşif bilgisi, intikam kayıtları temizlenir.
+6) Ekonomi 1'in altına inemez; NaN/negatif değerler başlangıç değerine döner.
+7) Üst üste 2+ savaş kaybedince oyuncunun değerleri ×1,06 (4+ kayıpta ×1,10); kazanınca sıfırlanır. Mesajlar toast olarak çıkar.
+DİKKAT: Hiçbiri oyunda denenmedi; sabitler v135.js başında. Deniz çarpanı yalnızca gerçek savaşa uygulanır, panelde görünen kazanma yüzdesine yansımaz.
+GERİ ALMAK İÇİN: index.html'den v135.js bağlantısını silin.
+
+=================== V136 ===================
+V136 — BEŞ ÖZELLİĞİN DENGESİ (TEST EDİLMEDİ; yalnızca node --check söz dizimi denetimi)
+YAPILDI (yeni www/v136.js, index.html'de v135.js'ten sonra; v134.js ve v135.js'te yalnızca ownerOf'a "_e etiketi" satırı eklendi)
+1) Başlangıç dağılımı: veri tablosu olmayan 113 ülke hep aynı değerle (23/9/11/18/14) başlıyordu. DT2 tablosuyla hepsine yaklaşık nüfus/GSYH/savunma
+   harcaması verildi (oyuncunun başlangıç ülkesi listesi DEĞİŞMEDİ: v5 hâlâ yalnızca DT'deki 61 ülkeden seçer).
+2) Özellikler farklı sürücülerle hesaplanır: Nüfus=nüfus (düşük gelirde hafif iskonto); Ordu=savunma harcaması+insan gücü (nükleer ×1,1);
+   Ekonomi=GSYH+kişi başı gelir; Teknoloji=inovasyon endeksi+kişi başı gelir+GSYH; Diplomasi=taban+yumuşak güç+blok üyelikleri+arabuluculuk−dışlanmışlık
+   (eskiden Ekonomi ile %94 bağlıydı). V89'daki sıkıştırma (SQ_KNEE/SQ_TOP/SQ_POW) aynen uygulanır. Hata olursa eski genStats'a düşer.
+3) Savaşta: Ekonomi=lojistik (Ordu+Teknoloji en çok +%5); Teknoloji=silah kalitesi (Ordu en çok +%6, zar avantajı v102'de duruyor);
+   Diplomasi=uluslararası destek (savunan +%5, saldıran +%3; müttefik katkısı v102'de duruyor); Ordu: ordusu üstün savunan +%4 (saldıran +%10 v102'de).
+   Sabitler v136.js başında (ECO_CAP, TECH_CAP, DIP_DEF, DIP_ATK, ARMY_DEF). Savaş notlarında 'adv' satırı olarak görünür.
+4) Açıklama: savaş öncesi kazanma kartında ve savaş sonu Ayrıntı bölümünde "Özellikler savaşı nasıl etkiler?" açılır kutusu.
+DİKKAT: DT2 değerleri hafızadan yaklaşık verilerdir, kaynakla doğrulanmadı. Yeni değerlerin oyun dengesi ölçülmedi (yeni oyun gerekir; eski kayıtlar eski değerleri korur).
+GERİ ALMAK İÇİN: index.html'den v136.js bağlantısını silin.
+
+=================== V137 ===================
+V137 — EKONOMİ DENGESİ + KALKINMA (TEST EDİLMEDİ; istek gereği oyunda/tarayıcıda hiç çalıştırılmadı, yalnızca node --check söz dizimi denetimi)
+YAPILDI (yeni www/v137.js, index.html'de v136.js'ten sonra; www/v121.js'te yalnızca yardım metni güncellendi)
+1) Ekstra hamle maliyeti: eskiden Ekonomi/250 (en çok %30) ile BEDAVA geliyordu. Şimdi olasılık azalan getirili (%6 → %30), üst üste gelirse yarıya düşer,
+   uzun süre gelmezse +%3'er (en çok +%9) artar; kazanılınca hazinenin %3'ü (en az 0,5) seferberlik gideri olarak ödenir; ödenemezse (kalan <4) ekstra hamle gelmez. Kriz turunda (zar 1) yine yok.
+   v102'nin eski kararı (bedava +1 hamle / %0,5 gelir) tur başında GERİ ALINIR, yerine bu kural gelir (v102.js'e dokunulmadı).
+2) Zengin/zayıf dengesi: TÜM ülkeler (YZ dahil) her oyuncu turunda aynı ekonomi adımından geçer:
+   gelir 0,30 + hazine×%0,4 ; zayıf desteği (hazine<30) (30−hazine)×%2 ; bakım (toprak−4)×0,08 (en çok 2,5) ; enflasyon (hazine−80)×%12 ; üst sınır 130, alt sınır 1.
+3) Fetih kaynak aktarımı (savaş tazminatına EK; tazminat ve altın hesabı aynen duruyor): aktarılan = kalan hazine × (1/toprak sayısı) × %35, kazanan %70'ini alır (%30 savaş yıkımı).
+   Ülke tamamen yok olursa kalan hazinenin %60'ı el değiştirir. Kazanan tek seferde kendi hazinesinin %15'inden (en az 2) fazlasını alamaz. Saldıran kaybederse aynı kural ters yönde işler.
+   Savaş sonu ekranında "📦 Kaynak aktarımı" kartı + bildirim. Guarantör (v123) ara savaşları kapsam dışıdır.
+4) Birikme önleme: bakım + enflasyon + 130 üst sınır + Kalkınma menüsü. YZ'nin hazinesi 55'i aşarsa %40 ihtimalle (8 maliyetle) en zayıf değerine yatırım yapar.
+5) Kalkınma (🏗): Politikalar ekranının üstündeki düğme ve "Ülkem" kartındaki düğme. Halk Kalkınması / Silahlanma / Ar-Ge / Diplomatik Atılım (hepsinin yan etkisi var) + Ticaret Koridoru (kalıcı tur geliri).
+   Kazanç = 7×(1−değer/110) (en az 1); maliyet seviyeyle %25 artar (Sv. 6'ya kadar); tur başına tek yatırım; hamle harcamaz; onay ekranı var. Menüde "Ekonomi ve kaynak kuralları" açıklaması.
+Online (G.mp) oyunlarda v137 DEVRE DIŞI: eski v102 kuralı aynen çalışır.
+DİKKAT: Sayılar akıl yürütmeyle seçildi, ölçülmedi. Yeni oyun gerekmez ama eski kayıtlarda ilk turdan itibaren yeni kurallar işler. Sabitler v137.js başında (EX_*, INC_*, TR_*, DEV_*, AI_INV_*).
+GERİ ALMAK İÇİN: index.html'den v137.js bağlantısını silin (v121.js'teki yardım metnini eski haline getirmek isteğe bağlı).
+
+=================== V138 ===================
+V138 — DİPLOMASİ YENİDEN DÜZENLEME (TEST EDİLMEDİ; istek gereği oyunda/tarayıcıda hiç çalıştırılmadı, yalnızca node --check söz dizimi denetimi)
+YAPILDI (yeni www/v138.js + www/v138.css, index.html'de v137.js'ten sonra)
+1) Sadeleştirme: tek "🕊 Diplomasi" düğmesi (eski "Elçi Gönder" gizlenir) → tek ülke sayfası: İttifak / Saldırmazlık / Haraç, "Diğer işlemler" altında
+   Garanti, Koruma, Kışkırt, Paktı Boz, İttifaktan Çık. Diplomasi Merkezi: istatistik şeridi, aktif anlaşmalar, ülke listesi (tek dokunuş), kısa Kurallar kutusu.
+2) Görünür ilişki: -100…+100 puan, 7 kademe (Düşman…Sadık Dost), "neden" etiketleri. Ayrıca Güven (senin güvenilirliğin) ve İtibar (saldırganlık).
+3) İttifak: ilişki ≥ Nötr, güven ≥ 30; müttefik başına +0,2 tur geliri (en çok 3), pakt başına +0,1 (en çok 2); İtibar "Saldırgan"a (≥3) çıkınca gelir kesilir.
+   Süre bitmeden 2 tur önce uyarı + "Yenile" (2 zar). Bozulma: süre dolması cezasız; erken çıkış güven -5/ilişki -10; ihanet güven -25, ilişki -40, herkesle -4.
+4) Saldırmazlık: en çok 2 aktif pakt (2.si 3 zar); kabul şansı görünür; reddedilirse ücret yok. Paktı Boz: ilişki -30, güven -15, hedef intikam alır. YZ de zayıf partneri bırakabilir.
+5) Güvenlik garantisi: garantör yok olduysa ya da saldırganla müttefik/paktlıysa o saldırı için devre dışı; süresi biten/ölü kayıtlar tur başında temizlenir.
+6) Elçi: ilişki ≤ -60 ise kabul edilmez (rastgele değil, nedeni yazar).
+7) YZ tepkisi: teklifler ilişki/güven/itibardan etkilenir; ittifak kurunca rakip rahatsız olabilir; YZ ara sıra sana pakt/ittifak teklif eder (Kabul/Reddet).
+8) Savaş ↔ diplomasi: her saldırı ilişkiyi düşürür (hedef -20, onun müttefikleri -8), itibarı artırır; haraç talebi ilişkiyi -8 düşürür; kışkırtma %25 ihtimalle ortaya çıkar (-15).
+9) Zar bedeli işleme göre (v138.js başında COSTS): İttifak 3 (reddedilirse 1 iade), Pakt 2/3, Haraç 2, Garanti 3, Koruma 3, Kışkırt 3, Yenile 2.
+Online (G.mp) oyunlarda v138 DEVRE DIŞI: eski ekranlar aynen çalışır. Eski kayıtlar sorunsuz açılır (G.dip2 yoksa oluşturulur).
+DİKKAT: Sayılar akıl yürütmeyle seçildi, ölçülmedi. Elle deneme için senaryolar: DIPLOMASI_TEST_SENARYOLARI.md
+GERİ ALMAK İÇİN: index.html'den v138.js ve v138.css bağlantılarını silin.
+
+=================== V139 ===================
+V139 — DENGE + TEMPO + FİNAL/GEÇMİŞ (TEST EDİLMEDİ; istek gereği oyunda/tarayıcıda hiç çalıştırılmadı, yalnızca node --check söz dizimi denetimi)
+YAPILDI (yeni www/v139.js + www/v139.css, index.html'de v138'den sonra; ayarlar v139.js başındaki CFG)
+1) Küçük ülke (başlangıç gücü medyanın <%80'i): ilk 6 tur +1 hamle, ilk 2 tur YZ saldırısı engellenir, ilk 10 turda her fetih +2 ekonomi.
+2) Aşırı güçlenme: toprağın %30'u aşılınca tur başına -1 hamle; bonus hamleler dahil toplam en çok zar+2. Zayıf oyuncu (≤2 toprak, ortalamanın <%60'ı): 2 turda bir +1 hamle.
+3) YZ saldırı süzgeci (V5.attack'ın üstünde; hamle harcanır, saldırı yapılmaz): gerçek kazanma ihtimali <%30 → %80 vazgeç; hazine <6 → %50; hedefin ittifakı 1,4× güçlüyse %60;
+   aynı ülke 3+ kez vurulduysa %70 (kayıt turda 0,5 azalır); bir YZ tur başına en çok 2, tüm YZ'ler 3 YZ↔YZ saldırısı.
+4) Oyuncuya göre strateji: oyuncu >1,3× ortalama → 2 komşu YZ ona yönelir; <0,7× → oyuncuya yönelik baskı kalkar, saldırılar %50 vazgeçilir, YZ'ler birbirine yönelir. Tehdit altındaki 3 YZ'ye kadar Nüfus/Ordu +%2/tur.
+5) Tempo: ⚡ Hızlı YZ turu (harita sütununda aç/kapa): YZ↔YZ animasyonları atlanır, sana saldıranlar normal gösterilir. HUD'da hamle "N/zar"; 0'da yanıp söner, "Turu Bitir" vurgulanır.
+6) Süre: oynama sayacı (duraklatma/ayarlar sayılmaz); 20. dakikada "Sonucu Gör / +10 dk". Sonuçta en geniş devletsen ve toprakların ≥%8 ise "Üstünlükle Zafer".
+7) Kayıt: "Turu Bitir"de otomatik kayıt + 💾 göstergesi; arka plana geçince/kapanırken kayıt. (Duraklatma menüsü ve Kaydet zaten v29'da vardı.)
+8) Final: tam ekran sonuç (zafer/yenilgi/süre) + istatistikler + skor + "Yeni Ülkeyle Başla". Geçmiş: son 30 oyun (wc_hist139), ana ve duraklatma menüsünde "📜 Oyun Geçmişi".
+Online (G.mp) oyunlarda DEVRE DIŞI. DİKKAT: sayılar akıl yürütmeyle seçildi, ölçülmedi; gerçek denge için çok sayıda YZ oyunu simüle edilmeli.
+Bilinen sınırlar: YZ kararlarının SEÇİMİ v20.js içinde kapalı olduğundan "veto + eğilim (inc23)" yöntemi kullanıldı; veto edilen saldırıda YZ'nin hamlesi boşa gider. Duraklatma menüsü YZ turu sürerken açılırsa YZ penceresi üstüne binebilir (değişmedi).
+GERİ ALMAK İÇİN: index.html'den v139.js ve v139.css bağlantılarını silin.

@@ -33,58 +33,13 @@
     }
     return s;
   }
-  /* madalya: lg = WCRank.league() çıktısı ({i, div}), size = piksel genişlik */
+  /* V127: madalya = Figma'da üretilen gerçekçi lig amblemi (assets/ranked/lgN.webp, siyah zemin saydam yapılmış).
+     lg = WCRank.league() çıktısı ({i, div}), size = piksel (kare). Kademe (I/II/III) büyük madalyada rozet olarak çizilir. */
+  var IMGS = ['assets/ranked/lg0.webp', 'assets/ranked/lg1.webp', 'assets/ranked/lg2.webp', 'assets/ranked/lg3.webp', 'assets/ranked/lg4.webp', 'assets/ranked/lg5.webp'];
   function medal(lg, size) {
-    var i = lg.i, p = PAL[i] || PAL[0], id = 'wm' + (++uid), w = size || 120, h = Math.round(w * 1.2), d = lg.div || 0;
-    var rom = ['', 'I', 'II', 'III'][d] || '';
-    var s = '<svg class="wcr-medal" width="' + w + '" height="' + h + '" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>' +
-      '<linearGradient id="' + id + 'g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".45" stop-color="#e0b04a"/><stop offset="1" stop-color="#7a4d0c"/></linearGradient>' +
-      '<linearGradient id="' + id + 'q" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + p.hi + '"/><stop offset=".45" stop-color="' + p.mid + '"/><stop offset="1" stop-color="' + p.lo + '"/></linearGradient>' +
-      '<linearGradient id="' + id + 'qd" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + p.mid + '"/><stop offset="1" stop-color="' + p.lo + '"/></linearGradient>' +
-      '<linearGradient id="' + id + 'gd" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b88a3a"/><stop offset="1" stop-color="#4d3008"/></linearGradient>' +
-      '<radialGradient id="' + id + 'm" cx=".36" cy=".3" r=".9"><stop offset="0" stop-color="' + p.hi + '"/><stop offset=".5" stop-color="' + p.mid + '"/><stop offset="1" stop-color="' + p.lo + '"/></radialGradient>' +
-      '<linearGradient id="' + id + 'r" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="' + p.rb + '"/><stop offset=".5" stop-color="#c0392b"/><stop offset="1" stop-color="' + p.rb + '"/></linearGradient>' +
-      '<linearGradient id="' + id + 's" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7d8aa3"/><stop offset=".5" stop-color="#f4f7fc"/><stop offset="1" stop-color="#8d99b2"/></linearGradient>' +
-      '<linearGradient id="' + id + 'p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff8e2"/><stop offset="1" stop-color="#d6c593"/></linearGradient>' +
-      '<clipPath id="' + id + 'c"><circle cx="100" cy="128" r="84"/></clipPath></defs>';
-    /* kurdele kuyrukları */
-    s += '<path d="M58 4L96 4L128 90L92 90Z" fill="url(#' + id + 'r)" stroke="#2a0a08" stroke-width="1.4"/><path d="M142 4L104 4L72 90L108 90Z" fill="url(#' + id + 'r)" stroke="#2a0a08" stroke-width="1.4"/>' +
-      '<path d="M70 4L82 4L112 90L100 90Z" fill="#ffffff" opacity=".13"/>' +
-      '<circle cx="100" cy="44" r="9" fill="none" stroke="url(#' + id + 'g)" stroke-width="5"/>';
-    /* dişli altın kenar + iç halka */
-    s += '<path d="' + teeth(100, 128, 79, 88, 28) + '" fill="url(#' + id + 'q)" stroke="#3a2406" stroke-width="1.6" stroke-linejoin="round"/>' +
-      '<circle cx="100" cy="128" r="75" fill="url(#' + id + 'qd)" stroke="#fff3c4" stroke-width="1.2"/>' +
-      '<circle cx="100" cy="128" r="69" fill="none" stroke="#2f1d05" stroke-width="1.5"/>';
-    /* yakut taşlar */
-    [45, 135, 225, 315].forEach(function (a) {
-      var t = a * Math.PI / 180;
-      s += '<circle cx="' + f(100 + 83.5 * Math.cos(t)) + '" cy="' + f(128 + 83.5 * Math.sin(t)) + '" r="3.6" fill="#d23a2a" stroke="#4d0f08" stroke-width="1"/><circle cx="' + f(99 + 83.5 * Math.cos(t)) + '" cy="' + f(127 + 83.5 * Math.sin(t)) + '" r="1.1" fill="#ffd0c8"/>';
-    });
-    /* defne dalları */
-    s += laurel(100, 128, 62, 1, '#e7c15a', '#b88a2c') + laurel(100, 128, 62, -1, '#e7c15a', '#b88a2c');
-    /* madalya yüzü */
-    s += '<circle cx="100" cy="128" r="50" fill="url(#' + id + 'm)" stroke="' + p.lo + '" stroke-width="2"/><circle cx="100" cy="128" r="45" fill="none" stroke="' + p.hi + '" stroke-width="1.2" opacity=".8"/>' +
-      '<circle cx="100" cy="128" r="45" fill="none" stroke="' + p.lo + '" stroke-width=".8" stroke-dasharray="2 3.4" opacity=".7"/>';
-    /* çapraz kılıçlar */
-    function sword(rot) {
-      return '<g transform="translate(100 128) rotate(' + rot + ') scale(.8)"><path d="M0 -62L7 -50L7 24L-7 24L-7 -50Z" fill="url(#' + id + 's)" stroke="#3a4560" stroke-width="1.6"/><path d="M0 -58L0 22" stroke="#ffffff" stroke-width="1.2" opacity=".7"/>' +
-        '<rect x="-22" y="24" width="44" height="8" rx="3" fill="url(#' + id + 'g)" stroke="#4d3008" stroke-width="1.4"/><rect x="-4.5" y="32" width="9" height="20" rx="3" fill="#5e1a10" stroke="#2a0a08" stroke-width="1.2"/><circle cx="0" cy="56" r="6.5" fill="url(#' + id + 'g)" stroke="#4d3008" stroke-width="1.2"/></g>';
-    }
-    s += sword(-42) + sword(42);
-    /* kalkan + simge */
-    s += '<g transform="translate(100 128) scale(.8) translate(-100 -128)"><path d="M100 104L119 110L119 130Q119 144 100 153Q81 144 81 130L81 110Z" fill="url(#' + id + 'r)" stroke="url(#' + id + 'g)" stroke-width="3" stroke-linejoin="round"/>';
-    if (i === 5) s += '<path d="M88 138L88 122L94 130L100 118L106 130L112 122L112 138Z" fill="url(#' + id + 'g)" stroke="#4d3008" stroke-width="1"/><circle cx="100" cy="116" r="2.4" fill="#fff3c4"/>';
-    else if (i >= 3) s += '<path d="M100 114L111 126L100 142L89 126Z" fill="' + p.hi + '" stroke="' + p.lo + '" stroke-width="1.4"/><path d="M89 126L111 126M100 114L100 142" stroke="' + p.lo + '" stroke-width=".8" opacity=".7"/>';
-    else s += '<path d="' + star(100, 128, 12, 5) + '" fill="#fff0b0" stroke="#7a4d0c" stroke-width="1.2" stroke-linejoin="round"/>' + (i >= 1 ? '<path d="' + star(100, 128, 12, 5) + '" fill="none"/>' : '');
-    s += '</g>';
-    /* alt plaket (zar parşömeni): kademe */
-    s += '<path d="M44 190L156 190L148 204L156 218L44 218L52 204Z" fill="url(#' + id + 'p)" stroke="url(#' + id + 'gd)" stroke-width="3" stroke-linejoin="round"/>' +
-      '<path d="M44 190L28 198L36 204L28 214L44 218" fill="#c4a85f" stroke="#4d3008" stroke-width="1.6" stroke-linejoin="round"/><path d="M156 190L172 198L164 204L172 214L156 218" fill="#c4a85f" stroke="#4d3008" stroke-width="1.6" stroke-linejoin="round"/>' +
-      '<text x="100" y="212" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="22" fill="#3b2412" letter-spacing="3">' + (i === 5 ? '★' : rom) + '</text>';
-    /* parlama + kayan ışık */
-    s += '<path d="M40 112A62 62 0 0 1 112 62" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".45"/>' +
-      '<g clip-path="url(#' + id + 'c)"><rect x="-60" y="30" width="26" height="200" fill="#ffffff" opacity=".38" transform="rotate(24 100 128)"></rect></g>';
-    return s + '</svg>';
+    var i = Math.max(0, Math.min(IMGS.length - 1, (lg && lg.i) || 0)), w = size || 120, d = (lg && lg.div) || 0, rom = ['', 'I', 'II', 'III'][d] || '';
+    return '<span class="wcr-medal-w" style="width:' + w + 'px;height:' + w + 'px"><img class="wcr-medal" src="' + IMGS[i] + '" width="' + w + '" height="' + w + '" alt="" draggable="false" decoding="async">' +
+      (rom && w >= 100 ? '<b class="wcr-dv">' + rom + '</b>' : '') + '</span>';
   }
   /* küçük (liste/lobi) madalya */
   function mini(lg, size) { return '<span class="wcr-mini" style="width:' + (size || 22) + 'px">' + medal(lg, size || 22) + '</span>'; }

@@ -221,6 +221,17 @@
   function M_(txt) { return '<div style="text-align:center;padding:10px;color:var(--tx2)">' + txt + '</div>'; }
 
   function badge(lg, big) { return '<div class="wcr-badge' + (big ? ' big' : '') + '" style="--c:' + lg.c + '">' + art().medal(lg, big ? 132 : 56) + '</div>'; }
+  /* V127: lig şeridi + istatistik tablosu */
+  function strip(cur) {
+    var h = '', k, st;
+    for (k = 0; k < LG.length; k++) { st = k < cur ? 'got' : (k == cur ? 'cur' : (k == cur + 1 ? 'nx' : 'lk')); h += '<span class="wcr-st ' + st + '">' + art().mini({ i: k, div: 0 }, 46) + '</span>'; }
+    return '<div class="wcr-strip">' + h + '</div>';
+  }
+  function ledger() {
+    var g = +P.games || 0, w = +P.w || 0, l = +P.l || 0, r = g ? Math.round(w / g * 100) : 0;
+    return '<div class="wcr-led"><div><b>' + g + '</b><span>' + X('Maç', 'Games') + '</span></div><div><b>' + w + '</b><span>' + X('Galibiyet', 'Wins') + '</span></div>' +
+      '<div class="l"><b>' + l + '</b><span>' + X('Mağlubiyet', 'Losses') + '</span></div><div><b>' + X('%' + r, r + '%') + '</b><span>' + X('Başarı', 'Win rate') + '</span></div></div>';
+  }
   function hub() {
     clearT(); importGold();
     var A = art(), lg = league(P.rating), nx = lg.i < LG.length - 1 ? league(LG[lg.i + 1].min) : null,
@@ -229,14 +240,13 @@
       '<div class="wcr-corner c-tl">' + A.ic('rose', 26, 26) + '</div><div class="wcr-corner c-tr">' + A.ic('rose', 26, 26) + '</div><div class="wcr-corner c-bl">' + A.ic('rose', 26, 26) + '</div><div class="wcr-corner c-br">' + A.ic('rose', 26, 26) + '</div>' +
       '<div class="wcr-title">' + A.crossed(34) + '<h3>' + X('RANK MAÇI', 'RANKED MATCH') + '</h3>' + A.crossed(34) + '</div>' +
       '<div class="wcr-div"><i></i>' + A.ic('rose', 18, 18) + '<i></i></div>' +
-      '<div class="wcr-stage" style="--c:' + lg.c + '"><div class="wcr-rays"></div><div class="wcr-sh">' + A.ic('shield', 150, 180) + '</div>' +
-        '<div class="wcr-wp l">' + A.ic('axe', 44, 88) + A.ic('sword', 18, 90) + '</div><div class="wcr-wp r">' + A.ic('spear', 20, 104) + A.ic('sword', 18, 90) + '</div>' +
-        '<div class="wcr-m3d">' + A.medal(lg, 150) + '</div></div>' +
+      '<div class="wcr-stage" style="--c:' + lg.c + '"><div class="wcr-m3d">' + A.medal(lg, 230) + '</div></div>' +
       '<div class="wcr-plate"><b>' + esc(P.nick || '—') + '</b></div>' +
       '<div class="wcr-lgn" style="color:' + lg.c + '">' + esc(lg.label.toUpperCase()) + '</div>' +
       '<div class="wcr-rat">★ ' + P.rating + '</div>' +
       '<div class="wcr-prog"><span class="pm">' + A.mini(lg, 34) + '</span><div class="wcr-bar2"><i style="width:' + pct + '%"></i><em></em></div><span class="pm dim">' + (nx ? A.mini(nx, 34) : A.ic('rose', 30, 30)) + '</span></div>' +
       '<div class="wcr-sm">' + (lg.hi ? X('Sonraki lige ', 'To next league: ') + left + X(' puan', ' pts') : X('En üst lig', 'Top league')) + '</div>' +
+      strip(lg.i) + ledger() +
       (cfgOk() ? '' : '<div class="wcr-note">' + X('Firebase ayarlanmamış: gerçek rakip aranmaz, liderlik tablosu kapalı.', 'Firebase is not configured: no live opponents, leaderboard disabled.') + '</div>') +
       '<button class="big pri wcr-go" onclick="WCRank.find()">' + A.crossed(26) + '<span>' + X('Maç Bul', 'Find Match') + '</span>' + A.crossed(26) + '</button>' +
       '<div class="wcr-two"><button class="big" onclick="WCRank.board()">' + A.ic('shield', 18, 22) + '<span>' + X('Liderlik', 'Leaderboard') + '</span></button>' +

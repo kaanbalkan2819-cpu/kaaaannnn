@@ -2,7 +2,7 @@
    3B üretici kancası: window.WC_MENU = { bg:'assets/menu/bg.webp', emblem:'assets/menu/emblem.png', globeTex:'assets/menu/earth.webp' } */
 (function () {
   'use strict';
-  var CFG = window.WC_MENU = Object.assign({ bg: null, emblem: null, globeTex: null }, window.WC_MENU || {});
+  var CFG = window.WC_MENU = Object.assign({ bg: 'assets/menu/bg.webp', emblem: 'assets/menu/emblem.webp', globeTex: null, flat: true }, window.WC_MENU || {});   /* V129: flat:true = 3B küresiz, görselli ana menü; eski 3B menü için WC_MENU={flat:false,bg:null,emblem:null} */
   function X(tr, en) { return (typeof L !== 'undefined' && L === 'tr') ? tr : en; }
   function idle() { try { return !G || G.over || G.ph === 'over'; } catch (e) { return true; } }
   var root, cv, T3, renderer, scene, camera, globe, spin, rings, arcs = [], embers, stars, raf = 0, clock0 = 0, running = false, ready = false, loading = false, glFail = false;
@@ -59,11 +59,11 @@
   var CREST = '<svg class="crest" viewBox="0 0 140 140"><defs><linearGradient id="wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2b8"/><stop offset=".5" stop-color="#e3b94f"/><stop offset="1" stop-color="#9a6b12"/></linearGradient><mask id="wm"><rect width="140" height="140" fill="#fff"/><circle cx="76" cy="70" r="37" fill="#000"/></mask></defs><circle cx="70" cy="70" r="64" fill="none" stroke="url(#wg)" stroke-width="1.6" stroke-dasharray="2 5"/><circle cx="70" cy="70" r="58" fill="none" stroke="url(#wg)"/><circle cx="62" cy="70" r="42" fill="url(#wg)" mask="url(#wm)"/><g transform="translate(94 70)"><rect x="-11" y="-11" width="22" height="22" fill="url(#wg)"/><rect x="-11" y="-11" width="22" height="22" fill="url(#wg)" transform="rotate(45)"/><circle r="4" fill="#5e0b17"/></g></svg>';
   function letters(s, d0) { var o = ''; for (var i = 0; i < s.length; i++) o += '<i style="animation-delay:' + (d0 + i * 0.07).toFixed(2) + 's">' + s[i] + '</i>'; return o; }
   function btn(cls, n, label, sub, act, dis, i) {
-    return '<button class="mb ' + cls + '" style="animation-delay:' + (1.1 + i * 0.1).toFixed(2) + 's"' + (dis ? ' disabled' : '') + ' data-a="' + act + '"><em>' + n + '</em>' + label + (sub ? '<small>' + sub + '</small>' : '') + '</button>';
+    return '<button class="mb ' + cls + '" style="animation-delay:' + (CFG.flat ? (0.1 + i * 0.08) : (1.1 + i * 0.1)).toFixed(2) + 's"' + (dis ? ' disabled' : '') + ' data-a="' + act + '"><em>' + n + '</em>' + label + (sub ? '<small>' + sub + '</small>' : '') + '</button>';
   }
   function build() {
     if (!root) {
-      root = document.createElement('div'); root.id = 'wcm'; document.body.appendChild(root);
+      root = document.createElement('div'); root.id = 'wcm'; if (CFG.flat) root.className = 'flat'; document.body.appendChild(root);
       root.addEventListener('click', function (e) {
         var b = e.target.closest && e.target.closest('[data-a]'); if (!b || b.disabled) return;
         act(b.getAttribute('data-a'));
@@ -81,24 +81,27 @@
     var sv = saveInfo(), emb = CFG.emblem ? '<img class="crest" src="' + CFG.emblem + '" alt="" style="animation:none">' : CREST;
     var q = QUOTES[qi % QUOTES.length];
     mainHTML = ''; root.innerHTML =
-      (CFG.bg ? '<div class="bgimg" style="background-image:url(' + CFG.bg + ')"></div>' : '') +
+      (CFG.bg ? '<div class="bgimg" style="background-image:url(' + CFG.bg + ')"></div>' : '') + (CFG.flat ? '<div class="floor"></div>' : '') +
       '<canvas></canvas><div class="vig"></div><div class="grain"></div><div class="frame"></div>' +
       '<div class="tick">' + X('Divan toplantıda', 'The council convenes') + '<br><b>●</b> ' + X('Cihan masası açık', 'World table open') + '</div>' +
       '<div class="col"><div class="seal">' + emb + '<span>' + X('Cihan Hâkimiyeti Yolunda', 'The Road to World Dominion') + '</span></div>' +
       '<h1>' + letters('WORLD', 0.4) + '<span>' + letters('CONQUEST', 0.9) + '</span></h1>' +
-      '<div class="quote" id="wcq">' + X(q[0], q[1]) + '<b>' + who(q) + '</b></div>' +
+      (CFG.flat ? '<div class="rule"><i></i><b></b><i></i></div>' : '') + '<div class="quote" id="wcq">' + X(q[0], q[1]) + '<b>' + who(q) + '</b></div>' +
       (sv ? '<div class="stats"><div><small>' + X('Tur', 'Turn') + '</small><b>' + sv.turn + '</b></div><div><small>' + X('Fethedilen', 'Conquered') + '</small><b>' + sv.mine + '</b></div><div><small>' + X('Dünya', 'World') + '</small><b>' + Math.round(sv.mine / Math.max(1, sv.tot) * 100) + '%</b></div></div>' : '') +
       '<div class="menu">' +
       btn('pri', 'I', X('Yeni Fetih', 'New Conquest'), '', 'new', false, 0) +
-      btn('', 'II', X('Seferi Sürdür', 'Resume Campaign'), sv ? X('Tur ', 'Turn ') + sv.turn : '', 'cont', !sv, 1) +
-      (window.WCRank ? btn('rk', '★', X('Rank Maçı', 'Ranked Match'), X('Sıralamalı', 'Ladder'), 'rank', false, 2.5) : '') +
-      (window.WCTut ? btn('', '?', X('Nasıl Oynanır', 'How to Play'), X('Öğretici', 'Tutorial'), 'tut', false, 2.8) : '') +
-      '<div class="row">' + btn('', '⚙', X('Ayarlar', 'Settings'), '', 'set', false, 3) + btn('', '☉', X('Dil', 'Lang'), L === 'tr' ? 'TR' : 'EN', 'lang', false, 4) + '</div>' +
-      '</div></div><div class="ver">v35 · ' + X('Makyavelist Sürüm', 'Machiavellian Edition') + '</div>';
+      btn('', 'II', X('Seferi Sürdür', 'Resume Campaign'), sv && !CFG.flat ? X('Tur ', 'Turn ') + sv.turn : '', 'cont', !sv, 1) +
+      (window.WCRank ? (CFG.flat ? btn('', '★', X('Dereceli Mücadele', 'Ranked Struggle'), '', 'rank', false, 2) : btn('rk', '★', X('Rank Maçı', 'Ranked Match'), X('Sıralamalı', 'Ladder'), 'rank', false, 2.5)) : '') +
+      (window.WCTut ? btn('', '?', X('Nasıl Oynanır', 'How to Play'), CFG.flat ? '' : X('Öğretici', 'Tutorial'), 'tut', false, CFG.flat ? 3 : 2.8) : '') +
+      (CFG.flat ? btn('', '⚙', X('Ayarlar', 'Settings'), '', 'set', false, 4)
+        : '<div class="row">' + btn('', '⚙', X('Ayarlar', 'Settings'), '', 'set', false, 3) + btn('', '☉', X('Dil', 'Lang'), L === 'tr' ? 'TR' : 'EN', 'lang', false, 4) + '</div>') +
+      '</div></div>' +
+      (CFG.flat ? '<button class="lang" data-a="lang" aria-label="Language"><span>' + (L === 'tr' ? 'TR' : 'EN') + '</span></button>' : '') +
+      '<div class="ver">v35 · ' + X('Makyavelist Sürüm', 'Machiavellian Edition') + '</div>';
     cv = root.querySelector('canvas');
     clearInterval(qTimer);
     qTimer = setInterval(function () {
-      var el = document.getElementById('wcq'); if (!el || !running) return; qi++; var q2 = QUOTES[qi % QUOTES.length];
+      var el = document.getElementById('wcq'); if (!el || (!running && !CFG.flat)) return; qi++; var q2 = QUOTES[qi % QUOTES.length];
       el.classList.remove('sw'); void el.offsetWidth; el.innerHTML = X(q2[0], q2[1]) + '<b>' + who(q2) + '</b>'; el.classList.add('sw');
     }, 7500);
   }
@@ -108,7 +111,9 @@
   var mainHTML = '';
   function fixDelay(m) { [].forEach.call(m.querySelectorAll('.mb'), function (b) { b.style.animationDelay = '0s'; }); }
   function setMenu(html) { var m = root && root.querySelector('.menu'); if (!m) return false; if (!mainHTML) mainHTML = m.innerHTML; m.innerHTML = html; fixDelay(m); return true; }
-  function subModes() { setMenu(btn('pri', 'I', t('m1'), t('m1d'), 'm1', 0, 0) + (window.WCOnline ? btn('', '⇄', X('Online (2 kişi)', 'Online (2 players)'), X('Arkadaşına karşı', 'Versus a friend'), 'onl', 0, 0) : '') + btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0)); }
+  function subModes() {
+    if (CFG.flat) return setMenu((window.WCRank ? btn('', '★', X('Dereceli Mücadele', 'Ranked Struggle'), '', 'rank', 0, 0) : '') + btn('', 'I', X('Tek Oyunculu', 'Single Player'), '', 'm1', 0, 0) + (window.WCOnline ? btn('', '⇄', X('Arkadaşınla Maç', 'Match with a Friend'), '', 'onl', 0, 0) : '') + btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0));
+    setMenu(btn('pri', 'I', t('m1'), t('m1d'), 'm1', 0, 0) + (window.WCOnline ? btn('', '⇄', X('Online (2 kişi)', 'Online (2 players)'), X('Arkadaşına karşı', 'Versus a friend'), 'onl', 0, 0) : '') + btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0)); }
   function subNew() { if (!hasSave()) return subModes(); setMenu('<div class="subm">' + t('del') + '</div>' + btn('pri', '✓', t('yes'), '', 'yes', 0, 0) + btn('', '←', t('no'), '', 'back', 0, 0)); }
   function subBack() { var m = root && root.querySelector('.menu'); if (m && mainHTML) { m.innerHTML = mainHTML; mainHTML = ''; fixDelay(m); } }
   function live() { return idle() && root && root.classList.contains('on'); }
@@ -130,7 +135,7 @@
       launching = false; try { if (d.parentNode) d.parentNode.removeChild(d); root.classList.remove('go'); } catch (e) { } newGame(m);
     }
     setTimeout(function () { minOk = true; fin(); }, 1100);
-    setTimeout(function () { gOk = true; fin(); }, 9000);
+    setTimeout(function () { gOk = true; fin(); }, 40000);   /* V132: 9 sn'lik erken geçiş kaldırıldı; perde küre + büyük ülke blokları hazır olana kadar kalır (40 sn yalnızca takılma emniyeti) */
     setTimeout(function () { if (window.v30Prep) { try { dispose(); } catch (e) { } /* menü küresinin GPU belleğini oyun küresi kurulmadan ÖNCE boşalt (telefonda iki bağlam birden bellek yetmeyip kurulumu bozuyordu) */ try { v30Prep(function () { gOk = true; fin(); }); } catch (e) { gOk = true; fin(); } } else { gOk = true; fin(); } }, 650);
   }
   window.WCLaunch = function (m) { launch(m); };   // ONLINE: online.js menüyü bu kapıdan kapatıp oyunu başlatır
@@ -138,7 +143,7 @@
     try {
       if (a === 'yes') { subModes(); return; }
       if (a === 'back') { subBack(); return; }
-      if (a === 'm1') { if (window.WCTut && WCTut.ask) WCTut.ask(function () { launch(1); }); else launch(1); return; }   /* V122: yeni oyundan önce öğretici sorusu (yalnızca tek kişilik) */
+      if (a === 'm1') { if (window.WCTut && WCTut.later) WCTut.later(); launch(1); return; }   /* V125: öğretici sorusu oyun başladıktan sonra */
       if (a === 'onl') { if (window.WCOnline) WCOnline.open(); return; }
       if (a === 'rank') { if (window.WCRank) WCRank.open(); return; }
       if (a === 'tut') { if (window.WCTut) WCTut.open(); return; }
@@ -301,7 +306,7 @@
     // Menü zaten açıksa yeniden kurma (v20 bekçisi 600 ms'de bir menu() çağırır; yeniden kurmak animasyonları ve küreyi sıfırlıyordu)
     if (!force && root && root.classList.contains('on') && root.firstChild) return;
     build(); root.classList.add('on'); document.body.classList.add('wcm-on'); introT = performance.now();
-    if (glFail) return;
+    if (glFail || CFG.flat) return;   /* V129: flat menüde WebGL hiç kurulmaz (pil/bellek tasarrufu) */
     var go = function () {
       if (!root.classList.contains('on')) return;
       if (ready) { // doku/kayıt değişmiş olabilir: yeniden kur

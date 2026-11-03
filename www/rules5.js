@@ -102,7 +102,7 @@
     return { ok: ok, cmp: cmp, used: false };
   }
   // mevcut değer × 1,10; oyunun gösterim biçimine uygun olarak 1 ondalığa (yarım yukarı) yuvarlanır. 90 → 99
-  function bonusValue(v) { return Math.round(+v * 11) / 10; }
+  function bonusValue(v) { v = +v; var n = Math.round(v * 11) / 10; return v >= 100 ? v : Math.min(100, n); }   /* V134: bonus 100'ü aşmaz (kartopu etkisi) */
   // Bonusu uygula: yalnızca hak kazanıldıysa, yalnızca bir kez, oyuncunun seçtiği tek özelliğe.
   function claimBonus(state, playerKey, bonus, idx, usedIds) {
     if (!bonus || !bonus.ok) return { ok: false, why: 'noright' };
@@ -137,6 +137,7 @@
     var me = state.stats[playerKey];
     if (!me || !pend.foeSnap) return { mode: 'choose' };
     var b = bonusCheck(me, pend.foeSnap); b.id = pend.id; pend.bonus = b;
+    if (b.ok) { var sm = 0, sf = 0, q; for (q = 0; q < 5; q++) { sm += +me[q] || 0; sf += +pend.foeSnap[q] || 0; } if (sf < 0.4 * sm) { pend.done = true; pend.weak = true; return { mode: 'skip', bonus: b, weak: true }; } }   /* V134: toplam gücü kendinin %40'ından az olan rakipten fetih bonusu yok */
     if (!b.ok) {
       var hi = higherIdx(me, pend.foeSnap);
       if (!hi.length) { pend.done = true; pend.nohigher = true; return { mode: 'skip', bonus: b }; }   // rakip hiçbir özellikte yüksek değil: soru yok

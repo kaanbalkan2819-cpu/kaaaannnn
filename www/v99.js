@@ -27,7 +27,8 @@
     for (k in G.owner) if (G.owner[k] === id) owned++;
     var h = '<div class="h">' + (typeof fimg === 'function' ? fimg(id) : '') + '<div><b>' + M[id].name + '</b><small>' + X('Senin ülken', 'Your country') + ' · ' + owned + ' ' + X('toprak', 'territories') + '</small></div><button class="x" aria-label="close">✕</button></div>';
     for (var i = 0; i < 5; i++) h += '<div class="r"><span>' + SI[i] + '</span><span><em>' + S[i] + '</em><div class="bar"><i style="width:' + Math.max(3, Math.min(100, v[i])) + '%"></i></div></span><b>' + v1(v[i]) + '</b></div>';
-    card.innerHTML = h;
+    if (card.__h === h) return;   /* V134: içerik aynıysa DOM yeniden kurulmaz (600 ms yoklamada boşa iş + dokunma kaybı) */
+    card.__h = h; card.innerHTML = h;
     card.querySelector('.x').onclick = function (e) { e.stopPropagation(); toggle(false); };
   }
   function toggle(f) {
@@ -51,7 +52,7 @@
     document.body.appendChild(btn); document.body.appendChild(card);
     btn.addEventListener('click', function (e) { e.stopPropagation(); toggle(); });
     document.addEventListener('pointerdown', function (e) { if (open && !card.contains(e.target) && !btn.contains(e.target)) toggle(false); }, true);
-    setInterval(sync, 600); sync();
+    setInterval(function () { if (!document.hidden) sync(); }, 600); sync();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

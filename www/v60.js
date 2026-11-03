@@ -140,6 +140,18 @@
     var k = 1; try { k = Math.max(.05, Math.min(1, extRad(a, tg) * .3 / (5 * 1.9 * sc))); } catch (e) { k = 1; }
     f.projK = k; return k;
   }
+  /* V131: TANK ÖLÇEĞİ ÜLKEYE GÖRE — tank/piyade, saldıran ile hedef ülkenin KÜÇÜĞÜne ve mutlak bir üst sınıra göre kısılır.
+     (Eskiden yalnızca saldıranın boyutuna bakılıyordu: büyük ülke -> dev tank, küçük hedefte ülkeden büyük görünüyordu.)
+     Tank uzunluğu ≈ sc * 1.15 * 2.4 (küre yarıçapı = 1, radyan). k = 1 (değişmez) ile TANK_MIN arası. */
+  var TANK_LEN = 2.76, TANK_FRAC = .38, TANK_MAXRAD = .16, TANK_MIN = .25;
+  function tankK(a, ids, tg, sc) {
+    var k = 1;
+    try {
+      var len = Math.max(1e-6, sc * TANK_LEN), ext = Math.min(ownExt(a, ids), extRad(a, tg));
+      k = Math.min(1, ext * TANK_FRAC / len, TANK_MAXRAD / len);
+    } catch (e) { k = 1; }
+    return Math.max(TANK_MIN, Math.min(1, k));
+  }
   function toLL(v) { return [Math.atan2(-v.z, v.x) / DEG, Math.asin(Math.max(-1, Math.min(1, v.y / (v.length() || 1)))) / DEG]; }
   function frameAt(a, P, zdir) {
     var T = a.THREE(), z = zdir.clone().sub(P.clone().multiplyScalar(zdir.dot(P)));
@@ -376,7 +388,7 @@
     f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(xx, P, z));   // yerel Y = yüzey normali, yerel Z = hedefe doğru
     if (!f.root.parent) a.globe().add(f.root);
     f.root.scale.setScalar(pl.sc); f.root.position.copy(P); f.root.visible = true; f.clear(); f.timeScale = TS; fitProj(a, f, tg, pl.sc);   // V91
-    var M3 = window.WCBattleFX.models, win = !!r.win, dur = 0, V = function (x, y, zz) { return { x: x, y: y, z: zz }; };
+    var tk = tankK(a, o.ids, tg, pl.sc), M3 = window.WCBattleFX.models, win = !!r.win, dur = 0, V = function (x, y, zz) { return { x: x, y: y, z: zz }; };
     if (o.land) {
       /* V70: savunan tarafta kule/ev/gemi yok; yalnızca saldıranın tank + piyadesi hedef yönüne ateş eder */
       /* V71: isabet noktaları hedef ülkenin içinden seçilir (dünya koordinatında denetlenir); rastgele yere patlama yok */
@@ -387,13 +399,13 @@
         dur = dA && dA.duration || 9; air = true;
       } else if (kind === 'twoTank') {   // V124: iki tank
         var T1 = pickImpacts(a, pl.fr, pl.sc, tg, 2, -1.4, 5.6, 3.6, 10), T2 = pickImpacts(a, pl.fr, pl.sc, tg, 2, 1.4, 5.4, 3.6, 10);
-        var e1 = f.tankAttack({ from: V(-1.5, 0, -5.4), to: up(T1.pts[0], .3), tos: T1.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15, shots: 2, blast: win ? 1.7 : 1.2 });
-        var e2 = f.tankAttack({ from: V(1.6, 0, -5), to: up(T2.pts[0], .3), tos: T2.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15, shots: 2, gap: 1.4, blast: win ? 1.7 : 1.2 });
+        var e1 = f.tankAttack({ from: V(-1.5, 0, -5.4), to: up(T1.pts[0], .3), tos: T1.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15 * tk, shots: 2, blast: win ? 1.7 : 1.2 });
+        var e2 = f.tankAttack({ from: V(1.6, 0, -5), to: up(T2.pts[0], .3), tos: T2.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15 * tk, shots: 2, gap: 1.4, blast: win ? 1.7 : 1.2 });
         dur = Math.max(e1 && e1.duration || 8, e2 && e2.duration || 8);
       } else {   // tank + piyade (eski sahne)
         var I1 = pickImpacts(a, pl.fr, pl.sc, tg, 2, -1.2, 5.6, 3.6, 10), I2 = pickImpacts(a, pl.fr, pl.sc, tg, 1, 1.6, 5.4, 3.6, 10);
-        var d1 = f.tankAttack({ from: V(-1.5, 0, -5.4), to: up(I1.pts[0], .3), tos: I1.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15, shots: 2, blast: win ? 1.7 : 1.2 });
-        var d2 = f.infantryAttack({ from: V(1.7, 0, -4.8), to: up(I2.pts[0], .2), pool: I2.pool(1.1), color: o.color, count: 4, scale: 1.2, blast: win ? 1.4 : 1 });
+        var d1 = f.tankAttack({ from: V(-1.5, 0, -5.4), to: up(I1.pts[0], .3), tos: I1.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15 * tk, shots: 2, blast: win ? 1.7 : 1.2 });
+        var d2 = f.infantryAttack({ from: V(1.7, 0, -4.8), to: up(I2.pts[0], .2), pool: I2.pool(1.1), color: o.color, count: 4, scale: 1.2 * tk, blast: win ? 1.4 : 1 });
         dur = Math.max(d1 && d1.duration || 8, d2 && d2.duration || 8);
       }
     } else { return null; }   // V70: deniz aşırı → yedek sahne (savunan gemi animasyonu yok)
@@ -450,18 +462,18 @@
     f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(fr.x, P, fr.z));
     if (!f.root.parent) a.globe().add(f.root);
     f.root.scale.setScalar(sc); f.root.position.copy(P); f.root.visible = true; f.clear(); f.timeScale = TS; fitProj(a, f, tg, sc);   // V91
-    var win = !!r.win, V = function (x, y, zz) { return { x: x, y: y, z: zz }; };
+    var tk = tankK(a, o.ids, tg, sc), win = !!r.win, V = function (x, y, zz) { return { x: x, y: y, z: zz }; };
     var I = pickImpacts(a, fr, sc, tg, 3, 0, lc, Math.max(2, lc - 6), lc + 6), tos = I.pts.map(function (q) { return up(q, .15); });
     var air = false, dur;
     if (o.land && Math.random() < .4) {   // V124: yedek sahnede de bazen uçaklar
       var dA = f.planeAttack({ from: V(0, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2], tos[0]], color: o.color, scale: .95, planes: 2, bombs: 2, blast: win ? 1.9 : 1.3 });
       dur = dA && dA.duration || 9; air = true;
     } else {
-      var d1 = f.tankAttack({ from: V(-1.3, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2]], color: o.color, scale: 1.15, shots: 3, blast: win ? 1.9 : 1.3 });
-      var d2 = f.tankAttack({ from: V(1.3, 0, -1.4), to: tos[1], tos: [tos[1], tos[2], tos[0]], color: o.color, scale: 1.15, shots: 3, blast: win ? 1.9 : 1.3 });
+      var d1 = f.tankAttack({ from: V(-1.3, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2]], color: o.color, scale: 1.15 * tk, shots: 3, blast: win ? 1.9 : 1.3 });
+      var d2 = f.tankAttack({ from: V(1.3, 0, -1.4), to: tos[1], tos: [tos[1], tos[2], tos[0]], color: o.color, scale: 1.15 * tk, shots: 3, blast: win ? 1.9 : 1.3 });
       dur = Math.max(d1 && d1.duration || 8, d2 && d2.duration || 8);
       if (o.land) {   // V78: kara saldırısında yedek sahnede de piyade olsun (tank + piyade)
-        var d3 = f.infantryAttack({ from: V(.1, 0, -2.2), to: up(I.pts[2], .2), pool: I.pool(1.4), color: o.color, count: 4, scale: 1.2, blast: win ? 1.4 : 1 });
+        var d3 = f.infantryAttack({ from: V(.1, 0, -2.2), to: up(I.pts[2], .2), pool: I.pool(1.4), color: o.color, count: 4, scale: 1.2 * tk, blast: win ? 1.4 : 1 });
         dur = Math.max(dur, d3 && d3.duration || 8);
       }
     }

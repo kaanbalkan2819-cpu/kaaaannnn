@@ -33,14 +33,15 @@
   /* V122: sohbet düğmesi alt paneli (#panel) örtmesin — panel açıkken düğme panelin hemen üstüne çıkar */
   function place() {
     try {
-      var hb = $i('wcchb'); if (!hb) return;
+      if (document.hidden) return;   /* V134: sekme gizliyken düzen hesabı yapma */
+      var hb = $i('wcchb'); if (!hb || hb.style.display === 'none') return;   /* V134: sohbet kapalıyken getComputedStyle/getBoundingClientRect çağrılmaz */
       var p = $i('panel'), b = null;
       if (p && getComputedStyle(p).display !== 'none') { var r = p.getBoundingClientRect(); if (r.height > 0) b = Math.round(window.innerHeight - r.top) + 8; }
       hb.style.bottom = b == null ? '' : b + 'px';
       var pv = $i('wcchp'); if (pv) pv.style.bottom = b == null ? '' : (b + 4) + 'px';
     } catch (e) { }
   }
-  setInterval(place, 300);
+  setInterval(place, 400);
 
   // ---------- Info (sol alt) ----------
   function info(txt) {
@@ -112,5 +113,5 @@
   function onMsg(m) { if (m && typeof m.x === 'string') add(m.x.slice(0, 200), false); ui(); }
 
   window.WCChat = { onMsg: onMsg, devDiff: devDiff, info: info, _s: C };
-  setInterval(function () { try { ui(); } catch (e) { } }, 1000);
+  setInterval(function () { try { if (!document.hidden) ui(); } catch (e) { } }, 1000);   /* V134: gizli sekmede çalışmaz */
 })();
