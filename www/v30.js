@@ -65,7 +65,7 @@
         if (wind) { var sm = 0; for (k = 0; k < n; k++) sm += r[k][1]; pole = sm / n >= 0 ? 0 : H; }
         for (var sh = -2; sh <= 2; sh++) {
           var dx = sh * W; if (mx + dx < 0 || mn + dx > W) continue;
-          var px = 0, py = 0; for (k = 0; k < n; k++) { var qx = xs[k] + dx, qy = ys[k]; if (k) { if (k < n - 1 && Math.abs(qx - px) < 0.35 && Math.abs(qy - py) < 0.35) continue; ctx.lineTo(qx, qy); } else ctx.moveTo(qx, qy); px = qx; py = qy; }   /* V143: 0,35 px'ten yakın noktalar atlanır */
+          var px = 0, py = 0; for (k = 0; k < n; k++) { var qx = xs[k] + dx, qy = ys[k]; if (k) { if (k < n - 1 && Math.abs(qx - px) < (LOWQ ? 0.9 : 0.35) && Math.abs(qy - py) < (LOWQ ? 0.9 : 0.35)) continue; ctx.lineTo(qx, qy); } else ctx.moveTo(qx, qy); px = qx; py = qy; }   /* V143: 0,35 px'ten yakın noktalar atlanır */
           if (wind) { ctx.lineTo(xs[n - 1] + dx, pole); ctx.lineTo(xs[0] + dx, pole); }
           ctx.closePath();
         }
@@ -173,7 +173,7 @@
     ov.restore();
   }
   /* ---------- Gerçek 3B blok: ülke çokgeni yüzey dikeyinde kaldırılır (keskin kenar, ışık hesabı yok) ---------- */
-  var EX = {}, H0 = 0.055, DEN = 2, SUBD = 2.2;
+  var EX = {}, H0 = 0.055, DEN = 2, SUBD = LOWQ ? 4 : 2.2;   /* V148: telefonda ~3x az üçgen (Rusya/Kanada/ABD/Çin) */
   function sph(p, r) { var la = p[1] * DEG, lo = p[0] * DEG; return [r * Math.cos(la) * Math.cos(lo), r * Math.sin(la), -r * Math.cos(la) * Math.sin(lo)]; }
   function mid(a, b) { return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; }
   function dens(ring) {
@@ -317,7 +317,7 @@
   function build() {
     THREE = window.THREE; TEX = window.WC_TEX;
     var _c = performance.now(); function CP(l) { PF('build:' + l, _c); _c = performance.now(); }
-    ovC = mk(OW, OH); ov = ovC.getContext('2d'); liftC = mk(LW, LH); lift = liftC.getContext('2d'); reliefC = mk(LW, LH);
+    ovC = mk(OW, OH); ov = ovC.getContext('2d'); liftC = mk(LW, LH); lift = liftC.getContext('2d'); reliefC = mk(LW, LH); var YLD = function () { return new Promise(function (r) { setTimeout(r, 24); }); };   /* V149: ağır adımlar arasında ana iş parçacığı serbest bırakılır */
     nsmall = mk(NW, NH); nsx = nsmall.getContext('2d', { willReadFrequently: true }); nC = mk(NW, NH); nx = nC.getContext('2d'); nImg = nx.createImageData(NW, NH); topoH = new Float32Array(NW * NH);
     var coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches || document.body.classList.contains('fxlow');
     renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: false });
@@ -329,31 +329,36 @@
     var sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(3, 2, 4); scene.add(sun); scene.add(new THREE.AmbientLight(0x6b7fa8, 0.9));
     globe = new THREE.Group(); scene.add(globe);
     ovTex = new THREE.CanvasTexture(ovC); ovTex.colorSpace = THREE.SRGBColorSpace; ovTex.anisotropy = 8; if (LOWQ) { ovTex.generateMipmaps = false; ovTex.minFilter = THREE.LinearFilter; ovTex.anisotropy = 1; }   /* V142: telefonda her seçimde 2048x1024 kaplamanın mipmap'i yeniden üretilmesin (seçim anı takılması) */ liftTex = new THREE.CanvasTexture(liftC); normTex = new THREE.CanvasTexture(nC);
-    return Promise.all([loadImg(TEX.marble), loadImg(TEX.topo), loadImg(TEX.water), loadImg(TEX.sky), loadImg(TEX.clouds)]).then(function (im) {
-      var marble = new THREE.Texture(im[0]); marble.colorSpace = THREE.SRGBColorSpace; marble.anisotropy = 4; marble.needsUpdate = true;
-      var water = new THREE.Texture(im[2]); water.needsUpdate = true; var sky = new THREE.Texture(im[3]); sky.colorSpace = THREE.SRGBColorSpace; sky.needsUpdate = true; var cmC = mk(im[4].width || 1024, im[4].height || 512), cmX = cmC.getContext('2d'); cmX.drawImage(im[4], 0, 0, cmC.width, cmC.height); cmX.globalCompositeOperation = 'destination-out'; var cg = cmX.createLinearGradient(0, 0, 0, cmC.height); cg.addColorStop(0, 'rgba(0,0,0,1)'); cg.addColorStop(0.24, 'rgba(0,0,0,1)'); cg.addColorStop(0.36, 'rgba(0,0,0,0.6)'); cg.addColorStop(0.5, 'rgba(0,0,0,0)'); cg.addColorStop(0.64, 'rgba(0,0,0,0.6)'); cg.addColorStop(0.76, 'rgba(0,0,0,1)'); cg.addColorStop(1, 'rgba(0,0,0,1)'); cmX.fillStyle = cg; cmX.fillRect(0, 0, cmC.width, cmC.height); var clouds = new THREE.CanvasTexture(cmC);
+    var marble, water, sky, clouds, geo; return Promise.all([loadImg(TEX.marble), loadImg(TEX.topo), loadImg(TEX.water), loadImg(TEX.sky), loadImg(TEX.clouds)]).then(function (im) {
+      marble = new THREE.Texture(im[0]); marble.colorSpace = THREE.SRGBColorSpace; marble.anisotropy = 4; marble.needsUpdate = true;
+      water = new THREE.Texture(im[2]); water.needsUpdate = true; sky = new THREE.Texture(im[3]); sky.colorSpace = THREE.SRGBColorSpace; sky.needsUpdate = true; var cmC = mk(im[4].width || 1024, im[4].height || 512), cmX = cmC.getContext('2d', { willReadFrequently: true }); cmX.drawImage(im[4], 0, 0, cmC.width, cmC.height); cmX.globalCompositeOperation = 'destination-out'; var cg = cmX.createLinearGradient(0, 0, 0, cmC.height); cg.addColorStop(0, 'rgba(0,0,0,1)'); cg.addColorStop(0.24, 'rgba(0,0,0,1)'); cg.addColorStop(0.36, 'rgba(0,0,0,0.6)'); cg.addColorStop(0.5, 'rgba(0,0,0,0)'); cg.addColorStop(0.64, 'rgba(0,0,0,0.6)'); cg.addColorStop(0.76, 'rgba(0,0,0,1)'); cg.addColorStop(1, 'rgba(0,0,0,1)'); cmX.fillStyle = cg; cmX.fillRect(0, 0, cmC.width, cmC.height); clouds = new THREE.CanvasTexture(cmC);
       nsx.drawImage(im[1], 0, 0, NW, NH); var td = nsx.getImageData(0, 0, NW, NH).data; for (var q = 0; q < NW * NH; q++) topoH[q] = td[q * 4] / 255;
-      var rx = reliefC.getContext('2d'); rx.drawImage(im[1], 0, 0, LW, LH); var rd = rx.getImageData(0, 0, LW, LH), p;
+      var rx = reliefC.getContext('2d', { willReadFrequently: true }); rx.drawImage(im[1], 0, 0, LW, LH); var rd = rx.getImageData(0, 0, LW, LH), p;
       for (p = 0; p < LW * LH; p++) { var v = Math.round((0.55 + 0.45 * rd.data[p * 4] / 255) * 255); rd.data[p * 4] = rd.data[p * 4 + 1] = rd.data[p * 4 + 2] = v; rd.data[p * 4 + 3] = 255; } rx.putImageData(rd, 0, 0);
       CP('img+topo'); updateNormals(); CP('normals');
-      var geo = coarse ? new THREE.SphereGeometry(1, 192, 96) : new THREE.SphereGeometry(1, 320, 160);
+    }).then(YLD).then(function () {   /* V149 */
+      geo = coarse ? new THREE.SphereGeometry(1, 192, 96) : new THREE.SphereGeometry(1, 320, 160);
       earth = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ map: marble, specularMap: water, specular: new THREE.Color(0x445566), shininess: 28, normalMap: normTex, normalScale: new THREE.Vector2(1, 1) })); globe.add(earth);
       var cover = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: ovTex, transparent: true, depthWrite: false, emissive: new THREE.Color(0xffffff), emissiveMap: ovTex, emissiveIntensity: 0.35, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); cover.scale.setScalar(1.0015); globe.add(cover);
       cloudM = new THREE.Mesh(new THREE.SphereGeometry(1.012, 96, 48), new THREE.MeshLambertMaterial({ map: clouds, transparent: true, opacity: 0.55, depthWrite: false })); globe.add(cloudM);
       scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),3.5);gl_FragColor=vec4(.35,.62,1.,1.)*clamp(i,0.,1.)*1.7;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));
       scene.add(new THREE.Mesh(new THREE.SphereGeometry(80, 32, 16), new THREE.MeshBasicMaterial({ map: sky, side: THREE.BackSide })));
-      CP('meshes'); bindInput(); resize(); READY = true;
+      CP('meshes');
+    }).then(YLD).then(function () {   /* V149 */
+      var cA = null; bindInput(); resize(); READY = true;
       /* V132: shader derlemesi + ilk kare ve büyük ülke blokları perdenin altında hazırlanır (ilk dokunuşta/animasyonda takılma olmasın) */
       try {   /* V140: ülke bloklarının shader'ları (Lambert + çizgi) küre kurulurken, perdenin altında derlenir; ilk seçimde derleme takılması/donması olmasın */
         var dgm = new THREE.BufferGeometry(); dgm.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 1.3, .01, 0, 1.3, 0, .01, 1.3], 3)); dgm.setAttribute('normal', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1], 3));
         var dg2 = new THREE.BufferGeometry(); dg2.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 1.3, .01, 0, 1.3], 3));
         var pre = window.__v140pre = [new THREE.Mesh(dgm, new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0x000000, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 })), new THREE.Mesh(dgm, new THREE.MeshLambertMaterial({ color: 0x888888, side: THREE.DoubleSide })), new THREE.LineSegments(dg2, new THREE.LineBasicMaterial({ color: 0xfff0b4, transparent: true, opacity: .85 }))];
         pre.forEach(function (m) { m.frustumCulled = false; globe.add(m); });
-        CP('pre'); renderer.compile(scene, camera); CP('compile1'); renderer.render(scene, camera); CP('render1');
-        pre.forEach(function (m) { globe.remove(m); });   /* malzemeler dispose EDİLMEZ: derlenen programlar önbellekte kalır */
+        CP('pre'); cA = renderer.compileAsync ? renderer.compileAsync(scene, camera) : (renderer.compile(scene, camera), null);   /* V149: paralel shader derlemesi (ana iş parçacığı bloklanmaz) */
       } catch (e) { }
-      try { renderer.compile(scene, camera); renderer.render(scene, camera); } catch (e) { } CP('render2');
-      warmEx();
+      return Promise.resolve(cA).catch(function () { }).then(YLD).then(function () {
+        try { CP('compile1'); renderer.render(scene, camera); CP('render1'); (window.__v140pre || []).forEach(function (m) { globe.remove(m); }); } catch (e) { }   /* malzemeler dispose EDİLMEZ: derlenen programlar önbellekte kalır */
+        try { renderer.compile(scene, camera); renderer.render(scene, camera); } catch (e) { } CP('render2');
+        warmEx();
+      });
     });
   }
 
@@ -453,7 +458,12 @@
   function loop(now) {
     if (!ON) { rafId = 0; return; } rafId = requestAnimationFrame(loop);
     if (menuUp()) { last = now; return; }   /* V90: ana menü üstteyken gizli küreyi çizme */
-    var dt = Math.min(0.05, (now - last) / 1000); last = now; cloudM.rotation.y += dt * 0.004;
+    var _raw = now - last, dt = Math.min(0.05, _raw / 1000); last = now;
+    /* V148: uyarlanabilir çözünürlük (yalnızca telefon): hareket/animasyon sırasında kareler uzun sürerse çözünürlük 0.25 kademe düşer (en az 0.75) */
+    if (LOWQ && renderer && READY && _raw > 8 && _raw < 400 && performance.now() - (window.__v148t || 0) > 2500) {
+      window.__v148e = (window.__v148e || 16) * 0.9 + _raw * 0.1;
+      if (window.__v148e > 38 && PRLO > 0.76) { PRLO = Math.max(0.75, PRLO - 0.25); PRHI = PRLO; window.__v148t = performance.now(); window.__v148e = 16; setPR(PRLO); try { window.WCPERF && WCPERF('  PR->' + PRLO); } catch (x) { } }
+    } cloudM.rotation.y += dt * 0.004;
     if (needPaint) { needPaint = false; forceR = 3; var _p0 = performance.now(); paintOverlay(); PF('paintOverlay', _p0); _p0 = performance.now(); C.forEach(function (c) { if (EX[c.id]) colorEx(c); }); PF('colorEx', _p0); }
     if (baseJob) { var _b0 = performance.now(); stepBase(); PF('baseStep', _b0); }
     SLICE_LEFT = 6; var _s0 = performance.now();   /* V140: kare başına blok üretim bütçesi (ms) */

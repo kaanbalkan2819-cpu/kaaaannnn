@@ -386,3 +386,21 @@ YAPILMADI / AÇIK
 - Yeni oyun sonrası 9.0-9.9 sn arasında 323/189/379 ms DONMA var, kaynağı bilinmiyor.
 GERİ ALMAK İÇİN: v30.js'te "V147" yazan satırı eski haline getirin (PRHI = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2)).
 V147 (ek) — v143.js: long-animation-frame ölçümü eklendi. Donma satırlarının yanında "LOAF <ms> <script ms> <tür> <dosya>:<fonksiyon>" yazılır. Yeni video çekilince 2 sn'lik donmanın dosya/fonksiyonu görülecek.
+
+
+=================== V148 ===================
+V148 — RUSYA/BÜYÜK ÜLKE KASMASI (yalnızca dokunmatik cihaz; v30.js; telefonda denenmedi, node --check geçti)
+1) SUBD 2.2 -> 4: büyük ülke bloklarında ~3 kat az üçgen (DEN değişmedi, tri.js imzası bozulmaz).
+2) Kaplama çiziminde yol noktası süzgeci 0.35 -> 0.9 px (Rusya sınırı çok noktalı; dolgu/çizgi daha hızlı).
+3) Uyarlanabilir çözünürlük: hareket sırasında kare süresi ortalaması 38 ms'yi geçerse çözünürlük 1.25 -> 1.0 -> 0.75'e iner (2.5 sn aralıkla; geri artmaz). Sayaçta "PR->x" yazar.
+GERİ ALMAK İÇİN: v30.js'te "V148" yazan üç yeri eski haline getirin.
+
+
+=================== V149 ===================
+V149 — OYUN BAŞLARKEN DONMA (v30.js build(); sandbox'ta Chromium + yazılımla çizimle ölçüldü, gerçek telefonda DENENMEDİ)
+ÖLÇÜM (v146, sandbox): build:img+topo 2140 ms, build:renderer 4022 ms (WebGL bağlamı), build:render1 1016 ms.
+1) img+topo: relief ve bulut tuvalleri willReadFrequently:true (GPU geri okuma beklemesi kalktı). Sonuç: 2140 ms -> ~110 ms.
+2) build() üç aşamaya bölündü (doku/normaller | küre ağları | derleme+ilk çizim); aralarda 24 ms ana iş parçacığı serbest (YLD). Tek parça uzun görev bölündü.
+3) Shader derlemesi renderer.compileAsync ile (paralel derleme; varsa). Sonuç: compile1 48 ms.
+KALAN (sandbox'ta yazılım çizim yüzünden anlamsız): build:renderer ve ilk render; telefonda GPU ile çok daha kısa olması beklenir.
+GERİ ALMAK İÇİN: v30.js'te "V149" yazan yerleri eski haline getirin.
