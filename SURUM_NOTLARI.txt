@@ -1,3 +1,6 @@
+=================== V145 ===================
+Ölçüm sürümü: v30.js içine PF() süre ölçümleri (paintOverlay, baseStep, lift/sliceBuild, gl.render, setPR, warm:ÜLKE) eklendi; v143 sayacı bunları 30 ms üstünde yazar.
+
 =================== V144 (TEST EDİLMEDİ; ölçüme göre düzeltme) ===================
 Telefon ölçümü (v143 sayacı): oyun başlarken ~2 sn'lik 300-566 ms donmalar; Rusya seçiminde tek karede 982 ms; seçim sonrası 150 ms'lik kareler.
 1) V142'deki çözünürlük değişikliği GERİ ALINDI (seçimde animasyon yüksek çözünürlükte ~150 ms/kare çiziliyordu). Yüksek çözünürlük 1.85 -> 1.5; yüksek çözünürlükte boşta yeniden çizim 250 -> 1500 ms.

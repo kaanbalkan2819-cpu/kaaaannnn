@@ -13,6 +13,7 @@
   var introStart = 0, introDur = 3000, introShown = false, introFrom = 3.4, introNext = false, vo = 0, vel = { x: 0, y: 0 }, focusQ = null, camZ = 3.4, zoomT = 3.4, ptrs = {}, down = null, pinch0 = 0, pinchA = null, pinchM = { x: 0, y: 0 };
   function X(tr, en) { return (typeof L !== 'undefined' && L == 'tr') ? tr : en; }
   function $$(i) { return document.getElementById(i); }
+  function PF(l, t0) { var d = performance.now() - t0; if (d > 30 && window.WCPERF) window.WCPERF('  ' + l + ' ' + Math.round(d) + 'ms'); }   /* V145: ölçüm (v143.js açıkken) */
 
   /* ---------- Ülke verisi: oyunun R listesinden ---------- */
   function buildC() {
@@ -264,7 +265,7 @@
     (function step(dl) {
       if (!C.length || !ON && !READY) return;
       if (down || anyMoving()) { later(step); return; }   /* V140: dokunma/animasyon sırasında blok üretimi ana iş parçacığını meşgul etmez */
-      var t0 = performance.now(), budget = (dl && dl.timeRemaining) ? Math.max(3, Math.min(8, dl.timeRemaining() - 1)) : 4;
+      var _w0 = performance.now(), t0 = performance.now(), budget = (dl && dl.timeRemaining) ? Math.max(3, Math.min(8, dl.timeRemaining() - 1)) : 4;
       while (performance.now() - t0 < budget) {
         if (!cur) {
           if (i >= order.length) break;
@@ -273,6 +274,7 @@
         }
         var r = cur.next(); if (r.done) { delete GEN[cc.id]; cur = null; }
       }
+      PF('warm:' + (cc ? cc.id : ''), _w0);
       if (!WARMBIG && !cur && i >= 10) WARMBIG = true;   /* V132: en büyük 10 ülke bloğu hazır */
       if (cur || i < order.length) { later(step); return; }
       WARMBIG = true;
@@ -424,7 +426,7 @@
     }
   }
   var fr = 0, lastRK = '', lastRT = 0, forceR = 0, PRLO = 1, PRHI = 1, curPR = 1, idleSince = 0;
-  function setPR(p) { if (!renderer || Math.abs(p - curPR) < .01) return; curPR = p; renderer.setPixelRatio(p); resize(); forceR = 3; }
+  function setPR(p) { if (!renderer || Math.abs(p - curPR) < .01) return; var _q0 = performance.now(); curPR = p; renderer.setPixelRatio(p); resize(); forceR = 3; PF('setPR', _q0); }
   function anyMoving() { for (var i = 0; i < C.length; i++) if (C[i].h !== C[i].t) return true; return false; }
   /* ---------- V60: savaş animasyonları (v60.js) için küçük dış arayüz; oyun kurallarına dokunmaz ---------- */
   var FH = [];
@@ -450,16 +452,17 @@
     if (!ON) { rafId = 0; return; } rafId = requestAnimationFrame(loop);
     if (menuUp()) { last = now; return; }   /* V90: ana menü üstteyken gizli küreyi çizme */
     var dt = Math.min(0.05, (now - last) / 1000); last = now; cloudM.rotation.y += dt * 0.004;
-    if (needPaint) { needPaint = false; forceR = 3; paintOverlay(); C.forEach(function (c) { if (EX[c.id]) colorEx(c); }); }
-    if (baseJob) stepBase();
-    SLICE_LEFT = 6;   /* V140: kare başına blok üretim bütçesi (ms) */
+    if (needPaint) { needPaint = false; forceR = 3; var _p0 = performance.now(); paintOverlay(); PF('paintOverlay', _p0); _p0 = performance.now(); C.forEach(function (c) { if (EX[c.id]) colorEx(c); }); PF('colorEx', _p0); }
+    if (baseJob) { var _b0 = performance.now(); stepBase(); PF('baseStep', _b0); }
+    SLICE_LEFT = 6; var _s0 = performance.now();   /* V140: kare başına blok üretim bütçesi (ms) */
     for (var i = 0; i < C.length; i++) {
       var c = C[i]; if (c.h === c.t) continue;
       var d = c.t - c.h; if (c.t > 0 && (!EX[c.id] || GEN[c.id]) && !sliceBuild(c)) continue;   /* V140: blok hazır değilse bu karede atla (ana iş parçacığı kilitlenmez) */
       if (Math.abs(d) > 0.002) { var st = Math.max(Math.abs(d) * (1 - Math.exp(-dt * 5.5)), dt * 0.06); c.h += Math.sign(d) * Math.min(Math.abs(d), st); } else c.h = c.t;
       applyEx(c);
     }
-    stepCamera(dt); for (var _fi = 0; _fi < FH.length; _fi++) { try { FH[_fi](dt); } catch (x) { } } if (!(window.v60Skip && window.v60Skip())) {
+    PF('lift/sliceBuild', _s0); _s0 = performance.now();
+    stepCamera(dt); PF('stepCamera', _s0); for (var _fi = 0; _fi < FH.length; _fi++) { try { FH[_fi](dt); } catch (x) { } } if (!(window.v60Skip && window.v60Skip())) {
       /* V72: sahnede hiçbir şey değişmediyse (kamera/küre/yükselen ülke/animasyon yok) kareyi tekrar çizme; bulutlar için ~4 kare/sn yeter -> ülke seçiminde GPU/pil yükü ve kasma azalır */
       var q = globe.quaternion, k = camera.position.z.toFixed(4) + '|' + q.x.toFixed(4) + '|' + q.y.toFixed(4) + '|' + q.z.toFixed(4) + '|' + q.w.toFixed(4) + '|' + vo.toFixed(3) + '|' + window.innerWidth + 'x' + window.innerHeight;
       var busy = k !== lastRK || window.v60Active || anyMoving() || (typeof BSH !== 'undefined' && BSH) || (now - lastRT) > (curPR > PRLO ? 1500 : 250) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
@@ -467,7 +470,7 @@
       if (_mv) { idleSince = now; if (curPR !== PRLO) setPR(PRLO); busy = true; }
       else if (PRHI > PRLO && curPR !== PRHI && now - idleSince > 300) { setPR(PRHI); busy = true; }
       if (forceR > 0) forceR--;
-      if (busy) { lastRK = k; lastRT = now; renderer.render(scene, camera); }
+      if (busy) { lastRK = k; lastRT = now; var _r0 = performance.now(); renderer.render(scene, camera); PF('gl.render(PR' + curPR.toFixed(2) + ')', _r0); }
     }   /* V60: savaş animasyonu kareleri; V63: savaş paneli açıkken küre seyrek çizilir */
   }
 
