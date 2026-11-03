@@ -64,7 +64,7 @@
         if (wind) { var sm = 0; for (k = 0; k < n; k++) sm += r[k][1]; pole = sm / n >= 0 ? 0 : H; }
         for (var sh = -2; sh <= 2; sh++) {
           var dx = sh * W; if (mx + dx < 0 || mn + dx > W) continue;
-          for (k = 0; k < n; k++) { if (k) ctx.lineTo(xs[k] + dx, ys[k]); else ctx.moveTo(xs[k] + dx, ys[k]); }
+          var px = 0, py = 0; for (k = 0; k < n; k++) { var qx = xs[k] + dx, qy = ys[k]; if (k) { if (k < n - 1 && Math.abs(qx - px) < 0.35 && Math.abs(qy - py) < 0.35) continue; ctx.lineTo(qx, qy); } else ctx.moveTo(qx, qy); px = qx; py = qy; }   /* V143: 0,35 px'ten yakın noktalar atlanır */
           if (wind) { ctx.lineTo(xs[n - 1] + dx, pole); ctx.lineTo(xs[0] + dx, pole); }
           ctx.closePath();
         }
@@ -92,12 +92,14 @@
     /* v40: saldırılabilir ülkeler sarı boyanmaz; sadece yükselir (c.t = .45). Seçilince yukarıdaki G.sel sarısı geçerli. */
     return null;
   }
-  function paintBase() {
+  /* V143: taban kaplaması (197 ülke dolgu + çizgi) tek karede 300-500 ms donma yapıyordu; artık kare başına ~9 ms'lik dilimlerle çizilir. */
+  var baseJob = null;
+  function* baseGen() {
     if (!baseC) { baseC = mk(OW, OH); base = baseC.getContext('2d'); }
-    base.clearRect(0, 0, OW, OH); base.globalAlpha = .5;
-    C.forEach(function (c) { base.beginPath(); trace(base, c, OW, OH); base.fillStyle = ownCol(c); base.fill('evenodd'); });
+    base.clearRect(0, 0, OW, OH); base.globalAlpha = .5; var i, c;
+    for (i = 0; i < C.length; i++) { c = C[i]; base.beginPath(); trace(base, c, OW, OH); base.fillStyle = ownCol(c); base.fill('evenodd'); yield; }
     base.globalAlpha = 1; base.lineWidth = 1.4 * LS; base.lineJoin = 'round'; base.strokeStyle = 'rgba(255,255,255,.38)';
-    C.forEach(function (c) { base.beginPath(); trace(base, c, OW, OH); base.stroke(); });
+    for (i = 0; i < C.length; i++) { base.beginPath(); trace(base, C[i], OW, OH); base.stroke(); yield; }
     /* V81: çok küçük ülkeler uzaktan görünmüyordu; merkezlerine ince bir halka çizilir */
     base.lineWidth = 1.2 * LS; base.strokeStyle = 'rgba(255,230,160,.75)';
     C.forEach(function (c) {
@@ -106,13 +108,19 @@
       base.beginPath(); base.arc(x, y, rad, 0, 6.2832); base.stroke();
     });
   }
+  function stepBase() {
+    if (!baseJob) return; var t0 = performance.now(), r;
+    do { r = baseJob.next(); } while (!r.done && performance.now() - t0 < 9);
+    if (r.done) { baseJob = null; try { C.forEach(colorEx); } catch (e) { } needPaint = true; forceR = 3; }
+  }
   function paintOverlay() {
-    var sg = ownSig(); if (!baseC || sg !== baseSig) { baseSig = sg; paintBase(); try { C.forEach(colorEx); } catch (e) { } }   /* V50: 3B blok renkleri de sahiplik değişince yenilenir */
+    var sg = ownSig(); if (!baseC || sg !== baseSig) { baseSig = sg; baseJob = baseGen(); stepBase(); }
+    if (baseJob) { needPaint = true; return; }   /* V143: taban hazır olana kadar kaplama çizilmez (kare başına dilim ilerler) */   /* V50: 3B blok renkleri de sahiplik değişince yenilenir */
     ov.globalAlpha = 1; ov.clearRect(0, 0, OW, OH); ov.drawImage(baseC, 0, 0);
     C.forEach(function (c) {
       var st = style(c); if (!st) return;
-      ov.save(); ov.beginPath(); trace(ov, c, OW, OH); ov.clip('evenodd'); ov.clearRect(0, 0, OW, OH);
-      ov.globalAlpha = st.a; ov.fillStyle = st.col; ov.fillRect(0, 0, OW, OH); ov.restore();
+      ov.save(); ov.beginPath(); trace(ov, c, OW, OH); ov.globalCompositeOperation = 'destination-out'; ov.globalAlpha = 1; ov.fillStyle = '#000'; ov.fill('evenodd');
+      ov.globalCompositeOperation = 'source-over'; ov.globalAlpha = st.a; ov.fillStyle = st.col; ov.fill('evenodd'); ov.restore();   /* V143: clip yerine doğrudan dolgu (Rusya gibi karmaşık ülkede clip ~1 sn sürüyordu) */
       ov.globalAlpha = 1; ov.lineWidth = 1.6 * LS; ov.beginPath(); trace(ov, c, OW, OH); ov.strokeStyle = (G && G.sel === c.id) ? 'rgba(255,240,180,.95)' : 'rgba(255,255,255,.5)'; ov.stroke();
     });
     try { snapAlly(); allyLines(0); } catch (e) { }   /* V109: seçili ülkenin müttefiklerinin üzerinden akan kırmızı şerit */
@@ -310,7 +318,7 @@
     var coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches || document.body.classList.contains('fxlow');
     renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: false });
     /* V127: hareket sırasında düşük (akıcı), 260 ms durunca yüksek çözünürlük (net). Telefonda sabit 1.25 yüzünden küre bulanıktı. */
-    PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 2); PRHI = Math.min(window.devicePixelRatio || 1, coarse ? 1.85 : 2); curPR = PRLO; idleSince = performance.now();
+    PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 2); PRHI = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2); curPR = PRLO; idleSince = performance.now();
     renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace;
     stage.appendChild(renderer.domElement);
     scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200); camera.position.set(0, 0, camZ);
@@ -443,6 +451,7 @@
     if (menuUp()) { last = now; return; }   /* V90: ana menü üstteyken gizli küreyi çizme */
     var dt = Math.min(0.05, (now - last) / 1000); last = now; cloudM.rotation.y += dt * 0.004;
     if (needPaint) { needPaint = false; forceR = 3; paintOverlay(); C.forEach(function (c) { if (EX[c.id]) colorEx(c); }); }
+    if (baseJob) stepBase();
     SLICE_LEFT = 6;   /* V140: kare başına blok üretim bütçesi (ms) */
     for (var i = 0; i < C.length; i++) {
       var c = C[i]; if (c.h === c.t) continue;
@@ -453,12 +462,10 @@
     stepCamera(dt); for (var _fi = 0; _fi < FH.length; _fi++) { try { FH[_fi](dt); } catch (x) { } } if (!(window.v60Skip && window.v60Skip())) {
       /* V72: sahnede hiçbir şey değişmediyse (kamera/küre/yükselen ülke/animasyon yok) kareyi tekrar çizme; bulutlar için ~4 kare/sn yeter -> ülke seçiminde GPU/pil yükü ve kasma azalır */
       var q = globe.quaternion, k = camera.position.z.toFixed(4) + '|' + q.x.toFixed(4) + '|' + q.y.toFixed(4) + '|' + q.z.toFixed(4) + '|' + q.w.toFixed(4) + '|' + vo.toFixed(3) + '|' + window.innerWidth + 'x' + window.innerHeight;
-      var busy = k !== lastRK || window.v60Active || anyMoving() || (typeof BSH !== 'undefined' && BSH) || (now - lastRT) > 250 || forceR > 0;
+      var busy = k !== lastRK || window.v60Active || anyMoving() || (typeof BSH !== 'undefined' && BSH) || (now - lastRT) > (curPR > PRLO ? 1500 : 250) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
       var _mv = k !== lastRK || window.v60Active || anyMoving() || (typeof BSH !== 'undefined' && BSH) || introStart;
-      var _usr = !!down || Object.keys(ptrs).length > 0 || Math.abs(vel.x) > 0.6 || Math.abs(vel.y) > 0.6 || introStart || window.v60Active || (typeof BSH !== 'undefined' && BSH);
-      /* V142: çözünürlük yalnızca parmakla sürükleme/yakınlaştırma/sinematik/savaşta düşer. Dokunup ülke seçince (yükselme + odaklanma) tuval yeniden boyutlanmaz: eskiden seçimde iki kez (düş + geri çık) yeniden boyutlanıp takılıyordu. */
-      if (_mv) { idleSince = now; if (_usr && curPR !== PRLO) setPR(PRLO); busy = true; }
-      else if (PRHI > PRLO && curPR !== PRHI && now - idleSince > 350) { setPR(PRHI); busy = true; }
+      if (_mv) { idleSince = now; if (curPR !== PRLO) setPR(PRLO); busy = true; }
+      else if (PRHI > PRLO && curPR !== PRHI && now - idleSince > 300) { setPR(PRHI); busy = true; }
       if (forceR > 0) forceR--;
       if (busy) { lastRK = k; lastRT = now; renderer.render(scene, camera); }
     }   /* V60: savaş animasyonu kareleri; V63: savaş paneli açıkken küre seyrek çizilir */
