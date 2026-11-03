@@ -299,3 +299,47 @@ YAPILDI (yeni www/v139.js + www/v139.css, index.html'de v138'den sonra; ayarlar 
 Online (G.mp) oyunlarda DEVRE DIŞI. DİKKAT: sayılar akıl yürütmeyle seçildi, ölçülmedi; gerçek denge için çok sayıda YZ oyunu simüle edilmeli.
 Bilinen sınırlar: YZ kararlarının SEÇİMİ v20.js içinde kapalı olduğundan "veto + eğilim (inc23)" yöntemi kullanıldı; veto edilen saldırıda YZ'nin hamlesi boşa gider. Duraklatma menüsü YZ turu sürerken açılırsa YZ penceresi üstüne binebilir (değişmedi).
 GERİ ALMAK İÇİN: index.html'den v139.js ve v139.css bağlantılarını silin.
+
+
+=================== V140 ===================
+V140 — MENÜ + BAYRAK + DONMA/KASMA (TEST EDİLMEDİ; istek gereği oyunda/tarayıcıda hiç çalıştırılmadı, yalnızca node --check söz dizimi denetimi)
+YAPILDI
+1) "CONQUEST" yazısının T harfi sığmıyordu (www/v140.css, www/v35.js fitTitle): yazı genişliği gerçek sütun genişliğine göre hesaplanır; ayrıca açılışta/yeniden boyutlamada
+   gerçek genişlik ölçülüp sığana kadar küçültülür (cihaz yazı tipine bağlı değil).
+2) Ana menü yana kaydırılamıyor: yatay taşma kapalı (#wcm .col overflow-x:hidden), dokunma yalnızca dikey (touch-action:pan-y), yakınlaştırma yok. (Eski kayma: taşan başlık sütunu yatay kaydırılabilir yapıyordu.)
+3) Bayraklar (www/flags/*.svg + www/flags.js yeniden üretildi): 197 bayraktan 110'u 3:2 bayrak alanını doldurmuyordu (Ermenistan gibi 2:1 olanlar üst/altta boşluklu,
+   İsviçre/Norveç/Nepal gibi dar olanlar yanlarda boşluklu). Hepsi alanı tam dolduracak biçimde gerildi (preserveAspectRatio="none"; hiçbir parça kesilmez).
+   Not: oranı 3:2'den çok farklı bayraklar (İsviçre 1:1, Katar 28:11) biraz gerilmiş görünür.
+4) "Sefer Başlıyor" perdesi (v140.css): eskiden arka plan + genişlik animasyonu ana iş parçacığında çalışıyordu, küre kurulurken takılıyordu. Şimdi yalnızca opacity/transform
+   (GPU) kullanır; altında sürekli dönen ince bir ışık vardır (ekran donmuş görünmez).
+5) İlk ülke seçiminde donma/kasma (www/v30.js):
+   a) Seçilen ülkenin 3B bloğu hazır değilse eskiden buildEx() tek seferde (üçgenleme dahil, yüzlerce ms) üretiyordu -> ana iş parçacığı kilitlenir, "yanıt vermiyor".
+      Şimdi sliceBuild(): kare başına en çok ~6 ms ilerler, hazır olunca ülke yükselir (seçim vurgusu anında görünür; yükselme birkaç kare gecikebilir).
+   b) Ülke blokları (Lambert + çizgi) shader'ları ilk seçimde derleniyordu (telefonda 100-1000 ms donma). Şimdi küre kurulurken, perdenin altında sahte bir blokla önceden derlenir.
+   c) Arka plandaki blok ısıtma (warmEx), kullanıcı küreyi çevirirken/animasyon sırasında beklemeye alındı.
+GERİ ALMAK İÇİN: index.html'den v140.css bağlantısını silin; v30.js ve v35.js'de "V140" yazan yerleri eski haline getirin; bayraklar için önceki flags/ ve flags.js.
+DİKKAT: Donmanın KESİN nedeni cihazda ölçülemedi; yukarıdakiler kod okumayla bulunan en olası üç kaynaktır. Yine de donarsa: cihaz modeli + hangi ülke + ne kadar sonra olduğu not edilirse
+   v30.js içine ölçüm (performance.now) eklenebilir.
+
+
+=================== V141 ===================
+V141 — SALDIRI ANİMASYONU + OYUN İÇİ MENÜ + ANA MENÜ + YENİLGİ EKRANI (TEST EDİLMEDİ; istek gereği oyunda/tarayıcıda hiç çalıştırılmadı, yalnızca node --check söz dizimi denetimi)
+YAPILDI
+1) Saldırı animasyonları çoğu zaman çalışmıyordu (www/v139.js, www/v141.js, www/v60.js):
+   a) EN OLASI NEDEN (kod okumayla bulundu): v139 "Hızlı YZ turu" YZ turunda SET.rm=1 yapar, oyuncu turu başlayınca geri alırdı. Ama v5.js bazı yollarda
+      startPlayerTurn()'ü doğrudan çağırır (V5.start sarmalayıcısı atlanır) -> SET.rm=1 oyuncunun turunda da açık kalıyor, v60 "hareketi azalt" sanıp TÜM animasyonu atlıyordu.
+      Düzeltme: v139.js'e 200 ms'lik bekçi (oyuncu hamle aşamasına geçince hızlı modu zorla kapatır) + v141.js'te oyuncu saldırısında showBattle öncesi kapatma.
+   b) v60.js: 3 hatadan sonra animasyon OTURUM BOYUNCA kalıcı kapanıyordu (bad=true). Artık 20 sn sonra yeniden dener.
+   c) Füze atan araç sahnesi: "çok küçük ülke" ölçütü 7 derece idi (Belçika, İsviçre, Danimarka vb. dahil) ve o durumda HER ZAMAN füze çıkıyordu.
+      Şimdi eşik 4 derece ve füze sahnesi yalnızca %50 olasılıkla; kalanında tank/piyade/uçak yedek (ateş) sahnesi çalışır. (v60.js: TINY, MISSILE_P)
+2) Alttaki "Makyavelist Sürüm" yazısı kaldırıldı (v35.js).
+3) "Seferi Sürdür" yazısı diğerlerinin soluna kayıyordu: ana menüde tüm düğme yazıları ortalandı, küçük alt yazı soldan itmesin, hover/odak süs işaretleri (sol-sağ asimetrik görünebiliyordu) flat modda kapatıldı (v141.css). Kesin neden cihazda doğrulanmadı.
+4) Oyun içi menü artık ana menüye benzemiyor: oyunun üstünde, arkası görünen yarı saydam KART (Duraklatıldı: tur/toprak/hamle özeti, Oyuna Dön, Kaydet, Ayarlar, Oyun Geçmişi, Dil, Yeni Oyun).
+   Karartılmış alana dokununca oyuna döner. Ayarlar ve "Yeni Oyun" onayı da oyun içindeyken başlık/savaş sahnesi olmadan aynı şekilde üstte açılır. (www/v141.js + v141.css)
+5) "İmparatorluk Düştü": yaprak simgesi kaldırıldı; ülke bayrağı çok büyütüldü (yaklaşık 240 px) ve countryball gibi yuvarlak: iki göz, üzgün kaşlar, akan gözyaşı, hafif sallanma. (v139.js ballFlag + v141.css)
+   Diğer sonuç ekranları (zafer, süre doldu) aynen kaldı.
+GERİ ALMAK İÇİN: index.html'den v141.js ve v141.css bağlantılarını silin; v35.js, v60.js ve v139.js'te "V141" yazan yerleri eski haline getirin.
+YAPILMADI / BİLİNEN SINIRLAR
+- Animasyonların hâlâ çalışmadığı durum olursa nedenler arasında: 2B harita modu, "Hareketi azalt" ayarı açık, animasyon hızı 0, saldıran toprağın küre verisinde olmaması. Cihazda ölçülmedi.
+- Bayrak yuvarlak kırpıldığı için bayrağın kenar kısımları görünmez (countryball'da olduğu gibi).
+- Oyun içi menü kartının görünümü ve ana menü hizası gerçek cihazda görülmedi.

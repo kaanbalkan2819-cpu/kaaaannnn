@@ -10,7 +10,8 @@
   var SC = 0.046;        // birim ölçeği (küre yarıçapı = 1): büyütürsen modeller büyür
   var ZOOM = 3.5;        // V71: başlangıç kamera uzaklığı biraz artırıldı (eski 2.7). Küçük = daha yakın; 1.5 en yakın. Sonra serbest
   var ZMIN = 3.0;        // V71: en yakın başlangıç uzaklığı (eski 2.2)
-  var TINY = 7;        // V71: hedefin ana kara parçasının sınır kutusu (derece; max(genişlik, yükseklik*1.3)) bundan küçükse FÜZE ATAR sahnesi
+  var TINY = 4;   // V141: eski 7 -> 4. Küçük ülkelerin çoğu artık tank/piyade/uçak sahnesi alır; füze yalnızca gerçekten minik ülkelerde ve bazen
+  var MISSILE_P = .5;   // V141: çok küçük hedefte füze sahnesi olasılığı (gerisi tank/uçak yedek sahnesi)        // V71: hedefin ana kara parçasının sınır kutusu (derece; max(genişlik, yükseklik*1.3)) bundan küçükse FÜZE ATAR sahnesi
   var SHIP_S = 0.85;     // V84: gemi ölçeği (eski 1.25; küçültüldü). Gemi yerleşim denetimi de bu değere göre yapılır
   var FORCE_SEA = false;   // V101: deniz sahnesi son çare: en az hatalı konumda yine de kurulur
   var MIDPT = true;      // V99: kara/ateş/füze sahneleri saldıran ve savunan ülkelerin MERKEZLERİNİN tam ortasında kurulur (false = eski sınır noktası yerleşimi)
@@ -541,14 +542,15 @@
     var a = A(), r = args[0], po = args[1], tg = args[3], att = args[5];
     var ids = (Array.isArray(att) ? att : []).filter(function (i) { return a.has(i); });
     if (!ids.length) return;   // V68: hedef küre verisinde olmasa da yedek sahne denenir
-    var T = a.THREE(), scenes = [], tiny = false;
+    var T = a.THREE(), scenes = [], tiny = false, missile = false;
     try { tiny = isTiny(a, tg); } catch (e) { tiny = false; }
+    missile = tiny && Math.random() < MISSILE_P;   // V141: füze her seferinde değil
     var oList = origins(a, po, ids, tg);
     oList.forEach(function (o, i) {
-      if (tiny && i > 0) return;   // V71: füze atar sahnesinde tek taraf
+      if (missile && i > 0) return;   // V71: füze atar sahnesinde tek taraf
       var f = i === 0 ? ensureFx() : ensureFx2(), s = null;
-      if (tiny && i === 0) { try { s = buildMissileScene(a, f, o, tg, r); } catch (e0) { s = null; try { console.error(e0); } catch (e1) { } } }   // V71: çok küçük hedef → füze atar
-      if (!s) { try { s = buildScene(a, f, o, tg, r); } catch (e) { s = null; } }
+      if (missile && i === 0) { try { s = buildMissileScene(a, f, o, tg, r); } catch (e0) { s = null; try { console.error(e0); } catch (e1) { } } }   // V71: çok küçük hedef → füze atar
+      if (!s && !tiny) { try { s = buildScene(a, f, o, tg, r); } catch (e) { s = null; } }   // V141: minik hedefte füze değilse doğrudan ateş (tank/uçak) sahnesi
       if (!s && !o.land && !tiny) { try { s = buildSeaScene(a, f, o.ids, o.from, tg, o.color, RED, !!r.win); } catch (e4) { s = null; try { console.error(e4); } catch (e5) { } } }   // V79: kara sınırı yok → gemi + torpido
       if (!s && i === 0) { try { s = buildFireScene(a, f, o, tg, r); } catch (e2) { s = null; try { console.error(e2); } catch (e3) { } } }   // V68: yerleşim bulunamadıysa saldıran topraktan hedef yönüne ateş
       if (!s && i === 0 && !tiny) { try { FORCE_SEA = true; s = buildSeaScene(a, f, o.ids, o.from, tg, o.color, RED, !!r.win); } catch (e6) { s = null; } FORCE_SEA = false; }   /* V101: hiçbir sahne kurulamadıysa animasyon atlanmaz */
@@ -592,9 +594,9 @@
           begin(q.args);
           if (play) fails = 0;
           if (!play) showPanel();   // sahne kurulamadıysa panel hemen geri gelsin
-        } catch (x) { fails++; bad = fails >= 3; try { console.error('v60', x); } catch (y) { } cancelAll(); try { if (fx) { fx.clear(); fx.root.visible = false; } } catch (y) { } }
+        } catch (x) { fails++; bad = fails >= 3; if (bad) setTimeout(function () { bad = false; fails = 0; }, 20000); try { console.error('v60', x); } catch (y) { } cancelAll(); try { if (fx) { fx.clear(); fx.root.visible = false; } } catch (y) { } }
       }, function () { dropPend(); });   // V72: dosya yüklenemediyse kalıcı kapatma yok, sonraki savaşta yeniden denenir
-    } catch (x) { fails++; bad = fails >= 3; dropPend(); showPanel(); }
+    } catch (x) { fails++; bad = fails >= 3; if (bad) setTimeout(function () { bad = false; fails = 0; }, 20000); dropPend(); showPanel(); }   // V141: kalıcı kapanma yok, 20 sn sonra yeniden dener
   }
 
   // Sonuç (zafer/yenilgi) yazısı ve "Devam" düğmesi savaş panelinde belirdiğinde zamanlayıcıyı kur

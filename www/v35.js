@@ -61,6 +61,15 @@
   function btn(cls, n, label, sub, act, dis, i) {
     return '<button class="mb ' + cls + '" style="animation-delay:' + (CFG.flat ? (0.1 + i * 0.08) : (1.1 + i * 0.1)).toFixed(2) + 's"' + (dis ? ' disabled' : '') + ' data-a="' + act + '"><em>' + n + '</em>' + label + (sub ? '<small>' + sub + '</small>' : '') + '</button>';
   }
+  /* V140: "CONQUEST" yazısı cihaz yazı tipine göre genişliyordu (T harfi taşıp kesiliyor, menü yana kayıyordu). Gerçek genişlik ölçülür, sığana kadar küçülür. */
+  function fitTitle() {
+    try {
+      var s = root && root.querySelector('h1 span'); if (!s) return;
+      s.style.removeProperty('font-size');
+      var lim = s.clientWidth - 2, fs = parseFloat(getComputedStyle(s).fontSize) || 40, g = 0;
+      while (lim > 20 && s.scrollWidth > lim && fs > 16 && g++ < 40) { fs -= 1; s.style.setProperty('font-size', fs + 'px', 'important'); }
+    } catch (e) { }
+  }
   function build() {
     if (!root) {
       root = document.createElement('div'); root.id = 'wcm'; if (CFG.flat) root.className = 'flat'; document.body.appendChild(root);
@@ -76,6 +85,7 @@
       });
       window.addEventListener('pointerup', function () { drag.on = false; });
       window.addEventListener('resize', fit);
+      window.addEventListener('resize', fitTitle); window.addEventListener('orientationchange', function () { setTimeout(fitTitle, 250); });
       document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else if (root.classList.contains('on')) start(); });
     }
     var sv = saveInfo(), emb = CFG.emblem ? '<img class="crest" src="' + CFG.emblem + '" alt="" style="animation:none">' : CREST;
@@ -97,8 +107,9 @@
         : '<div class="row">' + btn('', '⚙', X('Ayarlar', 'Settings'), '', 'set', false, 3) + btn('', '☉', X('Dil', 'Lang'), L === 'tr' ? 'TR' : 'EN', 'lang', false, 4) + '</div>') +
       '</div></div>' +
       (CFG.flat ? '<button class="lang" data-a="lang" aria-label="Language"><span>' + (L === 'tr' ? 'TR' : 'EN') + '</span></button>' : '') +
-      '<div class="ver">v35 · ' + X('Makyavelist Sürüm', 'Machiavellian Edition') + '</div>';
+      '';   /* V141: alttaki "Makyavelist Sürüm" yazısı kaldırıldı */
     cv = root.querySelector('canvas');
+    fitTitle(); try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitle); } catch (e) { } setTimeout(fitTitle, 120);
     clearInterval(qTimer);
     qTimer = setInterval(function () {
       var el = document.getElementById('wcq'); if (!el || (!running && !CFG.flat)) return; qi++; var q2 = QUOTES[qi % QUOTES.length];

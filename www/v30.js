@@ -188,7 +188,17 @@
   /* V127: önceden hesaplanmış üçgenleme (globe/tri.js). İmza = halka uzunlukları + koordinat toplamı; uymazsa earcut çalıştırılır. */
   function triSig(outer, holes) { var h = outer.length + ':' + holes.length, s = 0, i, j; for (i = 0; i < outer.length; i += 7) s += outer[i][0] * 1.7 + outer[i][1] * 3.1; for (j = 0; j < holes.length; j++) { h += ':' + holes[j].length; for (i = 0; i < holes[j].length; i += 7) s += holes[j][i][0] * 1.7 + holes[j][i][1] * 3.1; } return h + '#' + s.toFixed(3); }
   var GEN = {};   /* V127: yarım kalan (zaman dilimli) blok üretimleri */
-  function buildEx(c) { var g = GEN[c.id] || (GEN[c.id] = buildExG(c)), r; do { r = g.next(); } while (!r.done); delete GEN[c.id]; return EX[c.id]; }   /* eşzamanlı bitirme (nadir: üretilmemiş ülke ilk kez yükselirken) */
+  function buildEx(c) { var g = GEN[c.id] || (GEN[c.id] = buildExG(c)), r; do { r = g.next(); } while (!r.done); delete GEN[c.id]; return EX[c.id]; }
+  /* V140: seçilen ülkenin bloğu hazır değilse ana iş parçacığı KİLİTLENMEZ: üretim kare başına en çok SLICE_LEFT ms ilerler, bitince ülke yükselir.
+     (Eskiden loop() içinde buildEx() tek seferde bitiriyordu; büyük/karmaşık ülkede ilk seçimde donma yapabiliyordu.) */
+  var SLICE_LEFT = 6;
+  function sliceBuild(c) {
+    var g = GEN[c.id] || (GEN[c.id] = buildExG(c)), t0 = performance.now(), budget = Math.max(2, SLICE_LEFT), r;
+    do { r = g.next(); } while (!r.done && performance.now() - t0 < budget);
+    SLICE_LEFT -= performance.now() - t0;
+    if (r.done) { delete GEN[c.id]; return true; }
+    return false;
+  }   /* eşzamanlı bitirme (nadir: üretilmemiş ülke ilk kez yükselirken) */
   function* buildExG(c) {
     var e = EX[c.id] = { g: new THREE.Group(), cap: null, wall: null }; e.g.visible = false; globe.add(e.g);
     try {
@@ -245,6 +255,7 @@
     function later(f) { if (window.requestIdleCallback) requestIdleCallback(f, { timeout: 250 }); else setTimeout(f, 30); }
     (function step(dl) {
       if (!C.length || !ON && !READY) return;
+      if (down || anyMoving()) { later(step); return; }   /* V140: dokunma/animasyon sırasında blok üretimi ana iş parçacığını meşgul etmez */
       var t0 = performance.now(), budget = (dl && dl.timeRemaining) ? Math.max(3, Math.min(8, dl.timeRemaining() - 1)) : 4;
       while (performance.now() - t0 < budget) {
         if (!cur) {
@@ -321,6 +332,14 @@
       scene.add(new THREE.Mesh(new THREE.SphereGeometry(80, 32, 16), new THREE.MeshBasicMaterial({ map: sky, side: THREE.BackSide })));
       bindInput(); resize(); READY = true;
       /* V132: shader derlemesi + ilk kare ve büyük ülke blokları perdenin altında hazırlanır (ilk dokunuşta/animasyonda takılma olmasın) */
+      try {   /* V140: ülke bloklarının shader'ları (Lambert + çizgi) küre kurulurken, perdenin altında derlenir; ilk seçimde derleme takılması/donması olmasın */
+        var dgm = new THREE.BufferGeometry(); dgm.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 1.3, .01, 0, 1.3, 0, .01, 1.3], 3)); dgm.setAttribute('normal', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1], 3));
+        var dg2 = new THREE.BufferGeometry(); dg2.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 1.3, .01, 0, 1.3], 3));
+        var pre = window.__v140pre = [new THREE.Mesh(dgm, new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0x000000, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 })), new THREE.Mesh(dgm, new THREE.MeshLambertMaterial({ color: 0x888888, side: THREE.DoubleSide })), new THREE.LineSegments(dg2, new THREE.LineBasicMaterial({ color: 0xfff0b4, transparent: true, opacity: .85 }))];
+        pre.forEach(function (m) { m.frustumCulled = false; globe.add(m); });
+        renderer.compile(scene, camera); renderer.render(scene, camera);
+        pre.forEach(function (m) { globe.remove(m); });   /* malzemeler dispose EDİLMEZ: derlenen programlar önbellekte kalır */
+      } catch (e) { }
       try { renderer.compile(scene, camera); renderer.render(scene, camera); } catch (e) { }
       warmEx();
     });
@@ -424,9 +443,10 @@
     if (menuUp()) { last = now; return; }   /* V90: ana menü üstteyken gizli küreyi çizme */
     var dt = Math.min(0.05, (now - last) / 1000); last = now; cloudM.rotation.y += dt * 0.004;
     if (needPaint) { needPaint = false; forceR = 3; paintOverlay(); C.forEach(function (c) { if (EX[c.id]) colorEx(c); }); }
+    SLICE_LEFT = 6;   /* V140: kare başına blok üretim bütçesi (ms) */
     for (var i = 0; i < C.length; i++) {
       var c = C[i]; if (c.h === c.t) continue;
-      var d = c.t - c.h; if (c.t > 0 && (!EX[c.id] || GEN[c.id])) buildEx(c);
+      var d = c.t - c.h; if (c.t > 0 && (!EX[c.id] || GEN[c.id]) && !sliceBuild(c)) continue;   /* V140: blok hazır değilse bu karede atla (ana iş parçacığı kilitlenmez) */
       if (Math.abs(d) > 0.002) { var st = Math.max(Math.abs(d) * (1 - Math.exp(-dt * 5.5)), dt * 0.06); c.h += Math.sign(d) * Math.min(Math.abs(d), st); } else c.h = c.t;
       applyEx(c);
     }

@@ -185,6 +185,10 @@
   function wantFast() { try { return localStorage.getItem(FKEY) !== '0'; } catch (e) { return true; } }
   function fastOn() { if (FAST || !wantFast() || !window.SET || !on()) return; rm0 = SET.rm; SET.rm = 1; FAST = true; }
   function fastOff() { if (!FAST) return; try { SET.rm = rm0; } catch (e) { } FAST = false; }
+  window.v139FastOff = fastOff;   /* V141: v141.js oyuncu saldırısında çağırır */
+  /* V141: v5.js startPlayerTurn() doğrudan çağrılabildiği için (V5.start sarmalayıcısı atlanır) hızlı mod kapanmayıp SET.rm=1 kalıyordu:
+     oyuncunun turunda TÜM saldırı animasyonları (ve zar/savaş animasyonu) atlanıyordu. Oyuncu hamle aşamasına geçince zorla kapat. */
+  setInterval(function () { try { if (FAST && G && (G.ph === 'act' || G.ph === 'v5pick' || (!G.aiBusy && G.ph !== 'v5ai' && G.ph !== 'v5battle'))) fastOff(); } catch (e) { } }, 200);
   function installFast() {
     if (!window.V20 || typeof V20.run !== 'function' || typeof V20.after !== 'function') return false;
     if (V20.run.v139) return true;
@@ -285,6 +289,17 @@
     if (r === 'time') return X('Süre doldu ve en geniş devlet sen değildin. Bir dahaki sefere daha atak ol!', 'Time ran out and yours was not the largest state. Be bolder next time!');
     return X('Son toprağını kaybettin ama her büyük hükümdar bir yenilgiyle öğrenir. Yeni bir ülkeyle dene!', 'You lost your last land, yet every great ruler learns from defeat. Try a new country!');
   }
+  /* V141: "İmparatorluk Düştü" — yaprak simgesi kaldırıldı; bayrak büyük yuvarlak bir countryball: gözler, kaşlar (üzgün) ve gözyaşı. Çizim v141.css'te. */
+  function ballFlag(e) {
+    try {
+      var im = fimg(e, 'cbf');
+      var eye = function (cx) { return '<ellipse cx="' + cx + '" cy="53" rx="11.5" ry="13.5" fill="#fff" stroke="#111" stroke-width="1.6"/><circle cx="' + (cx - 1) + '" cy="59" r="6" fill="#111"/><circle cx="' + (cx - 3) + '" cy="56.5" r="1.9" fill="#fff"/>'; };
+      var brow = function (d) { return '<path d="' + d + '" stroke="#fff" stroke-width="9" stroke-linecap="round" fill="none" opacity=".9"/><path d="' + d + '" stroke="#111" stroke-width="5" stroke-linecap="round" fill="none"/>'; };
+      var tear = function (x, c) { return '<path class="tr ' + c + '" d="M' + x + ' 71 C' + (x - 4) + ' 77 ' + (x - 4) + ' 82 ' + x + ' 82 C' + (x + 4) + ' 82 ' + (x + 4) + ' 77 ' + x + ' 71 Z" fill="#8fd0ff" stroke="#2c7fc0" stroke-width="1.1"/>'; };
+      return '<div class="cb139">' + im + '<svg class="cbe" viewBox="0 0 100 100" aria-hidden="true">' +
+        eye(34) + eye(66) + brow('M19 38 L45 26') + brow('M81 38 L55 26') + tear(27, 'a') + tear(73, 'b') + '</svg><i class="cbs"></i></div>';
+    } catch (x) { return fl(e); }
+  }
   var OVL = null, OVLG = null;
   function showFinal() {
     try {
@@ -298,7 +313,7 @@
       if (win) for (var i = 0; i < 18; i++) conf += '<i style="left:' + (i * 5.6 + 2) + '%;animation-delay:' + ((i % 6) * .35).toFixed(2) + 's;background:hsl(' + (i * 37 % 360) + ',80%,60%)"></i>';
       var cell = function (v, k) { return '<div><b>' + v + '</b><small>' + k + '</small></div>'; };
       OVL = document.createElement('div'); OVL.id = 'v139over'; OVL.className = win ? 'win' : 'lose';
-      OVL.innerHTML = (win ? '<div class="cf">' + conf + '</div>' : '') + '<div class="in"><div class="ic">' + resIcon(m.res) + '</div><div class="fg">' + fl(m.c) + '</div><h2>' + resTitle(m.res) + '</h2><p>' + resLine(m.res, m) + '</p>' +
+      OVL.innerHTML = (win ? '<div class="cf">' + conf + '</div>' : '') + '<div class="in">' + (m.res === 'lose' ? '' : '<div class="ic">' + resIcon(m.res) + '</div>') + '<div class="fg">' + (m.res === 'lose' ? ballFlag(m.c) : fl(m.c)) + '</div><h2>' + resTitle(m.res) + '</h2><p>' + resLine(m.res, m) + '</p>' +
         '<div class="gr">' + cell(m.turns, X('TUR', 'TURNS')) + cell(mmss(m.sec), X('SÜRE', 'TIME')) + cell(m.lands + '<i>/' + m.total + '</i>', X('TOPRAK', 'LANDS')) + cell(m.max, X('EN ÇOK TOPRAK', 'PEAK LANDS')) +
         cell(m.w + ' / ' + m.l, X('SAVAŞ K / Y', 'WINS / LOSSES')) + cell(m.conq, X('FETİH', 'CONQUESTS')) + cell(m.pacts, X('PAKT', 'PACTS')) + cell(m.allies, X('İTTİFAK', 'ALLIANCES')) + '</div>' +
         '<div class="sc">⭐ ' + X('Skor', 'Score') + ' <b>' + m.score + '</b></div>' +
