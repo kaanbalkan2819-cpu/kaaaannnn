@@ -70,6 +70,18 @@
       while (lim > 20 && s.scrollWidth > lim && fs > 16 && g++ < 40) { fs -= 1; s.style.setProperty('font-size', fs + 'px', 'important'); }
     } catch (e) { }
   }
+  /* V152: alıntı kutusunun yüksekliği SABİT (CSS); metin uzunsa yazı küçülür. Böylece alıntı değişince amblem/başlık/düğmeler hiçbir koşulda kaymaz. */
+  function fitQuote() {
+    try {
+      var el = document.getElementById('wcq'); if (!el || !el.offsetParent) return;
+      el.style.removeProperty('font-size'); var fs = parseFloat(getComputedStyle(el).fontSize) || 11, g = 0;
+      while (el.scrollHeight > el.clientHeight + 1 && fs > 7.5 && g++ < 24) { fs -= 0.5; el.style.setProperty('font-size', fs + 'px', 'important'); }
+    } catch (e) { }
+  }
+  /* V152: ana düğme bloğunun yüksekliği kilitlenir; alt menüler (Yeni Fetih seçenekleri, onay) farklı sayıda düğmeyle açılınca üstteki amblem kaymaz. */
+  function lockMenu() {
+    try { var m = root && root.querySelector('.menu'); if (!m || mainHTML) return; m.style.minHeight = ''; m.style.minHeight = m.offsetHeight + 'px'; } catch (e) { }
+  }
   function build() {
     if (!root) {
       root = document.createElement('div'); root.id = 'wcm'; if (CFG.flat) root.className = 'flat'; document.body.appendChild(root);
@@ -97,7 +109,7 @@
       '<div class="col"><div class="seal">' + emb + '<span>' + X('Cihan Hâkimiyeti Yolunda', 'The Road to World Dominion') + '</span></div>' +
       '<h1>' + letters('WORLD', 0.4) + '<span>' + letters('CONQUEST', 0.9) + '</span></h1>' +
       (CFG.flat ? '<div class="rule"><i></i><b></b><i></i></div>' : '') + '<div class="quote" id="wcq">' + X(q[0], q[1]) + '<b>' + who(q) + '</b></div>' +
-      (sv ? '<div class="stats"><div><small>' + X('Tur', 'Turn') + '</small><b>' + sv.turn + '</b></div><div><small>' + X('Fethedilen', 'Conquered') + '</small><b>' + sv.mine + '</b></div><div><small>' + X('Dünya', 'World') + '</small><b>' + Math.round(sv.mine / Math.max(1, sv.tot) * 100) + '%</b></div></div>' : '') +
+      (sv ? '<div class="stats"><div><small>' + X('Tur', 'Turn') + '</small><b>' + sv.turn + '</b></div><div><small>' + X('Fethedilen', 'Conquered') + '</small><b>' + sv.mine + '</b></div><div><small>' + X('Dünya', 'World') + '</small><b>' + Math.round(sv.mine / Math.max(1, sv.tot) * 100) + '%</b></div></div>' : '<div class="stats" style="visibility:hidden" aria-hidden="true"><div><small>-</small><b>0</b></div><div><small>-</small><b>0</b></div><div><small>-</small><b>0</b></div></div>') +   /* V152: kayıt yokken de aynı yükseklik ayrılır; amblem/başlık kayıtlı-kayıtsız yer değiştirmez */
       '<div class="menu">' +
       btn('pri', 'I', X('Yeni Fetih', 'New Conquest'), '', 'new', false, 0) +
       btn('', 'II', X('Seferi Sürdür', 'Resume Campaign'), sv && !CFG.flat ? X('Tur ', 'Turn ') + sv.turn : '', 'cont', !sv, 1) +
@@ -109,11 +121,11 @@
       (CFG.flat ? '<button class="lang" data-a="lang" aria-label="Language"><span>' + (L === 'tr' ? 'TR' : 'EN') + '</span></button>' : '') +
       '';   /* V141: alttaki "Makyavelist Sürüm" yazısı kaldırıldı */
     cv = root.querySelector('canvas');
-    fitTitle(); try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitle); } catch (e) { } setTimeout(fitTitle, 120);
+    fitTitle(); try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { fitTitle(); fitQuote(); lockMenu(); }); } catch (e) { } setTimeout(fitTitle, 120); fitQuote(); lockMenu(); setTimeout(function () { fitQuote(); lockMenu(); }, 300);   /* V152 */
     clearInterval(qTimer);
     qTimer = setInterval(function () {
       var el = document.getElementById('wcq'); if (!el || (!running && !CFG.flat)) return; qi++; var q2 = QUOTES[qi % QUOTES.length];
-      el.classList.remove('sw'); void el.offsetWidth; el.innerHTML = X(q2[0], q2[1]) + '<b>' + who(q2) + '</b>'; el.classList.add('sw');
+      el.classList.remove('sw'); void el.offsetWidth; el.innerHTML = X(q2[0], q2[1]) + '<b>' + who(q2) + '</b>'; el.classList.add('sw'); fitQuote();   /* V152 */
     }, 7500);
   }
   qi = Math.floor(Math.random() * QUOTES.length);
@@ -126,7 +138,7 @@
     if (CFG.flat) return setMenu((window.WCRank ? btn('', '★', X('Dereceli Mücadele', 'Ranked Struggle'), '', 'rank', 0, 0) : '') + btn('', 'I', X('Tek Oyunculu', 'Single Player'), '', 'm1', 0, 0) + (window.WCOnline ? btn('', '⇄', X('Arkadaşınla Maç', 'Match with a Friend'), '', 'onl', 0, 0) : '') + btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0));
     setMenu(btn('pri', 'I', t('m1'), t('m1d'), 'm1', 0, 0) + (window.WCOnline ? btn('', '⇄', X('Online (2 kişi)', 'Online (2 players)'), X('Arkadaşına karşı', 'Versus a friend'), 'onl', 0, 0) : '') + btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0)); }
   function subNew() { if (!hasSave()) return subModes(); setMenu('<div class="subm">' + t('del') + '</div>' + btn('pri', '✓', t('yes'), '', 'yes', 0, 0) + btn('', '←', t('no'), '', 'back', 0, 0)); }
-  function subBack() { var m = root && root.querySelector('.menu'); if (m && mainHTML) { m.innerHTML = mainHTML; mainHTML = ''; fixDelay(m); } }
+  function subBack() { var m = root && root.querySelector('.menu'); if (m && mainHTML) { m.innerHTML = mainHTML; mainHTML = ''; fixDelay(m); setTimeout(lockMenu, 0); } }
   function live() { return idle() && root && root.classList.contains('on'); }
   var _ask35 = askNew, _modes35 = modes;
   askNew = function () { if (live()) return subNew(); return _ask35.apply(this, arguments); };

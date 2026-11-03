@@ -287,6 +287,31 @@
   function preUp(e) {   /* V150: büyük ülke bloğunun köşe tamponları GPU'ya perde altında (tuval gizliyken) yüklenir; ilk seçimde (Rusya) 117-147 ms'lik yükleme karesi olmasın */
     try { if (!e || !e.cap || !scene) return; e.g.visible = true; e.g.scale.setScalar(0.0001); renderer.render(scene, camera); e.g.visible = false; } catch (x) { try { e.g.visible = false; } catch (y) { } }
   }
+  /* V158: küre Türkiye'ye yaklaşırken (oyuncu daha dokunamazken) Türkiye ve çevresindeki ülkelerin 3B blokları üretilir ve GPU'ya yüklenir;
+     ilk ülke seçiminde blok üretimi / tampon yükleme karesi kalmaz. Dokunma veya animasyon varken beklenir, kare başına en çok ~4 ms çalışır. */
+  var HW = null;
+  function warmHome() {
+    try {
+      if (HW || !READY || !cMap.TUR || !renderer) return;
+      var t = cMap.TUR, tx = (t.bb[0] + t.bb[2]) / 2, ty = (t.bb[1] + t.bb[3]) / 2, list = [t];
+      C.forEach(function (c) {
+        if (c === t) return; var cx = (c.bb[0] + c.bb[2]) / 2, cy = (c.bb[1] + c.bb[3]) / 2, dx = Math.abs(cx - tx); if (dx > 180) dx = 360 - dx;
+        var d = Math.sqrt(dx * dx + (cy - ty) * (cy - ty)); if (d < 28) { c._hd = d; list.push(c); }
+      });
+      list.sort(function (a, b) { return (a._hd || 0) - (b._hd || 0); }); list = list.slice(0, 14);
+      var i = 0, cur = null, cc = null; HW = true;
+      (function step() {
+        if (!ON || !READY) { HW = null; return; }
+        if (down || anyMoving()) { setTimeout(step, 80); return; }
+        var t0 = performance.now();
+        while (performance.now() - t0 < 4) {
+          if (!cur) { if (i >= list.length) { HW = 'done'; return; } cc = list[i++]; if (EX[cc.id] && !GEN[cc.id]) { if (EX[cc.id].cap) preUp(EX[cc.id]); continue; } cur = GEN[cc.id] || (GEN[cc.id] = buildExG(cc)); }
+          var r = cur.next(); if (r.done) { delete GEN[cc.id]; cur = null; if (EX[cc.id] && EX[cc.id].cap) { preUp(EX[cc.id]); break; } }
+        }
+        setTimeout(step, 24);
+      })();
+    } catch (e) { HW = null; }
+  }
   function colorEx(c) {
     var e = EX[c.id]; if (!e || !e.cap) return; var st = style(c), col = st ? st.col : ownCol(c), k;
     try { k = new THREE.Color(); k.setStyle(col); } catch (x) { k = new THREE.Color(0xcccccc); }
@@ -345,7 +370,7 @@
       earth = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ map: marble, specularMap: water, specular: new THREE.Color(0x445566), shininess: 28, normalMap: normTex, normalScale: new THREE.Vector2(1, 1) })); globe.add(earth);
       var cover = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: ovTex, transparent: true, depthWrite: false, emissive: new THREE.Color(0xffffff), emissiveMap: ovTex, emissiveIntensity: 0.35, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); cover.scale.setScalar(1.0015); globe.add(cover);
       cloudM = new THREE.Mesh(new THREE.SphereGeometry(1.012, 96, 48), new THREE.MeshLambertMaterial({ map: clouds, transparent: true, opacity: 0.55, depthWrite: false })); globe.add(cloudM);
-      scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),3.5);gl_FragColor=vec4(.35,.62,1.,1.)*clamp(i,0.,1.)*1.7;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));
+      scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),4.2);gl_FragColor=vec4(.35,.6,.95,1.)*clamp(i,0.,1.)*0.75;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));
       scene.add(new THREE.Mesh(new THREE.SphereGeometry(80, 32, 16), new THREE.MeshBasicMaterial({ map: sky, side: THREE.BackSide })));
       CP('meshes');
     }).then(YLD).then(function () {   /* V149 */
@@ -483,9 +508,11 @@
     stepCamera(dt); PF('stepCamera', _s0); for (var _fi = 0; _fi < FH.length; _fi++) { try { FH[_fi](dt); } catch (x) { } } if (!(window.v60Skip && window.v60Skip())) {
       /* V72: sahnede hiçbir şey değişmediyse (kamera/küre/yükselen ülke/animasyon yok) kareyi tekrar çizme; bulutlar için ~4 kare/sn yeter -> ülke seçiminde GPU/pil yükü ve kasma azalır */
       var q = globe.quaternion, k = camera.position.z.toFixed(4) + '|' + q.x.toFixed(4) + '|' + q.y.toFixed(4) + '|' + q.z.toFixed(4) + '|' + q.w.toFixed(4) + '|' + vo.toFixed(3) + '|' + window.innerWidth + 'x' + window.innerHeight;
-      var busy = k !== lastRK || window.v60Active || anyMoving() || (typeof BSH !== 'undefined' && BSH) || (now - lastRT) > (curPR > PRLO ? 1500 : 250) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
-      var _mv = k !== lastRK || window.v60Active || anyMoving() || (typeof BSH !== 'undefined' && BSH) || introStart;
+      var _bsh = (typeof BSH !== 'undefined' && BSH && !window.v60Active);   /* V161: savaş paneli açıkken küre her karede çizilmez (eskiden BSH her kareyi zorluyordu -> panelde kasma) */
+      var busy = k !== lastRK || window.v60Active || anyMoving() || (now - lastRT) > (_bsh ? 1200 : (curPR > PRLO ? 1500 : 250)) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
+      var _mv = k !== lastRK || window.v60Active || anyMoving() || introStart;
       if (_mv) { idleSince = now; if (curPR !== PRLO) setPR(PRLO); busy = true; }
+      else if (_bsh) { if (curPR !== PRLO) { setPR(PRLO); busy = true; } }   /* V161: panel açıkken yüksek çözünürlüğe geçip tuvali yeniden ayırma */
       else if (PRHI > PRLO && curPR !== PRHI && now - idleSince > 300) { setPR(PRHI); busy = true; }
       if (forceR > 0) forceR--;
       if (busy) { lastRK = k; lastRT = now; var _r0 = performance.now(); renderer.render(scene, camera); PF('gl.render(PR' + curPR.toFixed(2) + ')', _r0); }
@@ -500,7 +527,7 @@
       introShown = true; try { stage.classList.remove('v95out'); stage.classList.add('v91cover'); } catch (e) { }   /* V101: yıldızlı arka plan her zaman konur */
       var rm = document.body && document.body.classList.contains('rm');
       introDur = rm ? 1 : 3000; introFrom = rm ? zoomT : zoomT * 5.5; camZ = introFrom; introStart = performance.now();   /* V101: boş bekleme yok */
-      if (G && G.ph === 'v7pick') { zoomT = 3.4; globe.quaternion.identity(); focusQ = null; setTimeout(function () { try { if (ON && G && G.ph === 'v7pick' && !G.sel && cMap.TUR) focusOn(cMap.TUR, false); } catch (e) { } }, rm ? 300 : 1500); }   /* önce dünya yerine oturur, sonra Türkiye */
+      if (G && G.ph === 'v7pick') { zoomT = 3.4; globe.quaternion.identity(); focusQ = null; setTimeout(warmHome, 200);   /* V158 */ setTimeout(function () { try { if (ON && G && G.ph === 'v7pick' && !G.sel && cMap.TUR) focusOn(cMap.TUR, false); } catch (e) { } }, rm ? 300 : 1500); }   /* önce dünya yerine oturur, sonra Türkiye */
       var cvs = renderer && renderer.domElement; if (!cvs) { try { stage.classList.remove('v91cover'); } catch (e) { } return; }
       cvs.style.transition = 'none'; cvs.style.opacity = '0'; try { camera.position.z = camZ * (window.innerWidth > window.innerHeight ? 0.7 : 1); renderer.render(scene, camera); } catch (e) { } /* V150: tampon uzak kamerayla doldurulur; eski yakın kare solarak görünmez */ void cvs.offsetWidth;
       cvs.style.transition = 'opacity .25s ease-out'; cvs.style.opacity = '1'; try { stage.classList.add('v95out'); } catch (e) { }   /* V101: küre anında görünür */

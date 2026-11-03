@@ -8,7 +8,14 @@
   function T(tr, en) { return (typeof L !== 'undefined' && L === 'en') ? en : tr; }
   function nm(e) { return (M[e] && M[e].name) || e; }
   function tn() { return (G && G.T && G.T.turn) || 0; }
-  function fd() { if (!G.fat || G.fat.t !== tn()) G.fat = { t: tn(), s: {} }; return G.fat; }
+  /* V160: tur değişince yorgunluk SIFIRLANMAZ; her yeni turda (sen veya YZ turu bitince) herkesin yorgunluğu 1 seviye düşer (en çok 4 seviyeden). */
+  function decay() {
+    var f = G.fat; if (!f) return false;
+    var d = Math.max(1, tn() - (f.t | 0)), k, v, ns = {};
+    for (k in f.s) { v = Math.min(FAT_MAX, +f.s[k] || 0) - d; if (v > 0) ns[k] = v; }
+    G.fat = { t: tn(), s: ns }; return true;
+  }
+  function fd() { if (!G.fat) G.fat = { t: tn(), s: {} }; else if (G.fat.t !== tn()) decay(); return G.fat; }
   function fac(e) { return 1 - FAT_STEP * Math.min(FAT_MAX, fd().s[e] || 0); }
   function mul(a, f) { return a.map(function (v) { return v * f; }); }
   /* V84: İMPARATORLUK YÜKÜ — çok toprağı olan devletin savaş değerleri düşer (kazanan ardı ardına her yeri fethetmesin).
@@ -40,7 +47,7 @@
       if (!fatEl) { fatEl = document.createElement('div'); fatEl.className = 'wfat'; fatEl.setAttribute('role', 'status'); document.body.appendChild(fatEl); }
       var pips = ''; for (var i = 0; i < FAT_MAX; i++) pips += '<i' + (i < m.lvl ? ' class="f"' : '') + '></i>';
       fatEl.innerHTML = '<div class="wf-i">😮‍💨</div><div class="wf-b"><div class="wf-t">' + T('Savaş yorgunluğu', 'War fatigue') + (m.lvl >= FAT_MAX ? ' · ' + T('en yüksek', 'max') : '') + '</div>'
-        + '<div class="wf-d">' + T('Bu tur sonraki savaşlarında değerlerin <b>−%' + m.pct + '</b>', 'Your stats are <b>−' + m.pct + '%</b> in further battles this turn') + '</div><div class="wf-p">' + pips + '</div></div>';
+        + '<div class="wf-d">' + T('Sonraki savaşlarında değerlerin <b>−%' + m.pct + '</b> (her tur 1 seviye düşer)', 'Your stats are <b>−' + m.pct + '%</b> in further battles (drops 1 level per turn)') + '</div><div class="wf-p">' + pips + '</div></div>';
       void fatEl.offsetWidth; fatEl.classList.add('on');
       clearTimeout(fatT); fatT = setTimeout(function () { if (fatEl) fatEl.classList.remove('on'); }, 3600);
     } catch (e) { }
@@ -54,10 +61,24 @@
       clearTimeout(fatT); fatT = setTimeout(function () { if (fatEl) fatEl.classList.remove('on'); }, 3600);
     } catch (e) { }
   }
+  function showDrop(lv) {   // V160: yorgunluk 1 seviye düştü ama bitmedi
+    try {
+      injectCss();
+      if (!fatEl) { fatEl = document.createElement('div'); fatEl.className = 'wfat'; fatEl.setAttribute('role', 'status'); document.body.appendChild(fatEl); }
+      var pips = ''; for (var i = 0; i < FAT_MAX; i++) pips += '<i' + (i < lv ? ' class="f"' : '') + '></i>';
+      fatEl.innerHTML = '<div class="wf-i">😮‍💨</div><div class="wf-b"><div class="wf-t">' + T('Savaş yorgunluğu 1 seviye düştü', 'War fatigue dropped one level') + '</div>'
+        + '<div class="wf-d">' + T('Değerlerin hâlâ <b>−%' + Math.round(FAT_STEP * lv * 100) + '</b>', 'Your stats are still <b>−' + Math.round(FAT_STEP * lv * 100) + '%</b>') + '</div><div class="wf-p">' + pips + '</div></div>';
+      void fatEl.offsetWidth; fatEl.classList.add('on');
+      clearTimeout(fatT); fatT = setTimeout(function () { if (fatEl) fatEl.classList.remove('on'); }, 3600);
+    } catch (e) { }
+  }
   function checkEnd() {
     try {
       if (!G || G.v5 !== 1 || typeof G.pl !== 'string' || !G.fat || BSH || G.busy) return;
-      if (G.fat.t !== tn()) { var had = (G.fat.s[G.pl] || 0) > 0; G.fat = { t: tn(), s: {} }; if (had) setTimeout(showEnd, 500); }
+      if (G.fat.t !== tn()) {
+        var had = Math.min(FAT_MAX, G.fat.s[G.pl] || 0); decay(); var now = G.fat.s[G.pl] || 0;
+        if (had > 0 && now <= 0) setTimeout(showEnd, 500); else if (had > 0) setTimeout(function () { showDrop(now); }, 500);
+      }
     } catch (e) { }
   }
   var _rn73 = render;
@@ -68,11 +89,12 @@
     var r = _pn73.apply(this, arguments);
     try {
       var old = document.getElementById('wfatE'); if (old) old.remove();
-      if (!G || G.v5 !== 1 || !G.sel || G.over || BSH || !G.fat || G.fat.t !== tn()) return r;
+      if (!G || G.v5 !== 1 || !G.sel || G.over || BSH || !G.fat) return r;
+      fd();   // V160: bayat kayıt varsa önce 1 seviye düşür
       var e = G.owner[G.sel], lv = Math.min(FAT_MAX, (G.fat.s[e] || 0)), el = document.getElementById('panel');
       if (typeof e !== 'string' || e === G.pl || !lv || !el || el.style.display === 'none') return r;
       var d = document.createElement('div'); d.id = 'wfatE'; d.style.cssText = 'margin:6px 0;padding:6px 10px;border:1px solid rgba(255,150,90,.45);border-radius:10px;background:rgba(80,40,20,.35);color:#ffd2b0;font-size:12px';
-      d.innerHTML = '😮‍💨 ' + T(nm(e) + ' savaş yorgunu: değerleri <b>−%' + Math.round(FAT_STEP * lv * 100) + '</b> (bu tur)', nm(e) + ' is war-weary: stats <b>−' + Math.round(FAT_STEP * lv * 100) + '%</b> (this turn)');
+      d.innerHTML = '😮‍💨 ' + T(nm(e) + ' savaş yorgunu: değerleri <b>−%' + Math.round(FAT_STEP * lv * 100) + '</b> (her tur 1 seviye düşer)', nm(e) + ' is war-weary: stats <b>−' + Math.round(FAT_STEP * lv * 100) + '%</b> (drops 1 level per turn)');
       var f = el.firstElementChild; if (f && f.nextSibling) el.insertBefore(d, f.nextSibling); else el.appendChild(d);
     } catch (x) { }
     return r;

@@ -48,3 +48,10 @@ body.wc141-ig .wb-panel.wb-set,body.wc141-ig .wb-panel.wb-ask{max-height:88vh;ov
 @keyframes cb141{0%,100%{transform:rotate(-2.2deg) translateY(0)}50%{transform:rotate(2.2deg) translateY(3px)}}
 @media (prefers-reduced-motion:reduce),(max-height:300px){#v139over .cb139,#v139over .cb139 .tr{animation:none}}
 body.rm #v139over .cb139,body.rm #v139over .cb139 .tr{animation:none}
+
+/* ===== V152 ===== */
+/* Seferi Sürdür (kayıt yokken disabled): animation:none olunca taban transform:translateX(-30px) kalıyordu -> sola kayıyordu */
+#wcm .mb:disabled,#wcm .mb[disabled],#wcm.flat .mb[disabled]{transform:none!important;animation:none!important;opacity:.35!important}
+/* Alıntı kutusu SABİT yükseklik: metin değişince amblem/başlık/düğmeler kaymaz (taşan metin v35.js fitQuote ile küçülür) */
+#wcm.flat .quote{flex:none!important;box-sizing:border-box!important;height:70px!important;min-height:70px!important;max-height:70px!important;overflow:hidden!important}
+@media (orientation:landscape) and (max-height:520px){#wcm.flat .quote{height:2.8em!important;min-height:2.8em!important;max-height:2.8em!important}}

@@ -120,7 +120,7 @@
   window.v5EndAsk = function () {
     if (!is5() || G.ph != 'act' || G.busy || BSH || G.endLock) return;
     var left = G.T.moves, hasT = Object.keys(targets(G.pl, G.owner)).length > 0;
-    if (left > 0 && hasT) {
+    if (false && left > 0 && hasT) {   /* V155: hamle kalsa da uyarı yok, tur doğrudan biter */
       modal('<h3>' + T5('Turu bitir?', 'End turn?') + '</h3><p style="color:var(--tx2)">' +
         T5('Hâlâ <b>' + left + '</b> hamle hakkın var. Turu bitirirsen kalan hamleler kullanılamaz ve sıra rakibe geçer.',
           'You still have <b>' + left + '</b> move(s). Ending the turn forfeits them and passes play to the rival.') + '</p>' +

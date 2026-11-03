@@ -1,0 +1,68 @@
+/* V156 — duraklatma kartı "Siper Defteri" görünümü (v141.css'in üstüne biner). Geri almak için index.html'den bu dosyanın bağlantısını silin. */
+
+/* karartılmış alan: lacivert yerine sıcak taş tonu; oyun arkada görünmeye devam eder */
+body.wc141-ig #mod.wbm.wc156{background:rgba(26,21,14,.62)!important}
+
+.wc141p.wc156{position:relative!important;overflow:hidden!important;width:min(92vw,380px)!important;padding:26px 20px 20px!important;border-radius:4px!important;
+  background:linear-gradient(180deg,#3d352b,#2a251e)!important;border:2px solid #8f7b4c!important;color:#f3e8c8!important;
+  font-family:Georgia,'Times New Roman',serif;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.wc141-ig .wb-panel.wc156{box-shadow:0 18px 50px #000b!important}
+/* soluk küre motifi + iç ince çerçeve */
+.wc141p.wc156::before{display:block!important;content:"";position:absolute;left:50%;top:-34px;width:340px;height:340px;transform:translateX(-50%) rotate(-14deg);opacity:.13;pointer-events:none;
+  background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 440 440' fill='none' stroke='%23B9A066'%3E%3Ccircle cx='220' cy='220' r='196' stroke-width='2.2'/%3E%3Ccircle cx='220' cy='220' r='208'/%3E%3Cpath d='M220 24V416'/%3E%3Cellipse cx='220' cy='220' rx='173' ry='196'/%3E%3Cellipse cx='220' cy='220' rx='110' ry='196'/%3E%3Cellipse cx='220' cy='90' rx='147' ry='23'/%3E%3Cellipse cx='220' cy='150' rx='183' ry='29'/%3E%3Cellipse cx='220' cy='220' rx='196' ry='31'/%3E%3Cellipse cx='220' cy='290' rx='183' ry='29'/%3E%3Cellipse cx='220' cy='350' rx='147' ry='23'/%3E%3C/svg%3E") center/contain no-repeat}
+.wc141p.wc156::after{content:"";position:absolute;inset:6px;border:1px solid rgba(143,123,76,.35);pointer-events:none}
+.wc141p.wc156>*{position:relative;z-index:1}
+.wc141p.wc156>.k156{position:absolute;z-index:1;width:34px;height:34px;color:#cdb06a;pointer-events:none}
+.wc141p.wc156>.k156 svg{display:block;width:100%;height:100%}
+.k156.k1{top:8px;left:8px}.k156.k2{top:8px;right:8px;transform:scaleX(-1)}.k156.k3{bottom:8px;left:8px;transform:scaleY(-1)}.k156.k4{bottom:8px;right:8px;transform:scale(-1,-1)}
+
+/* amblem + başlık */
+.wc141p.wc156 .e156{display:block;width:78px;height:auto;margin:0 auto 2px;color:#cdb06a}
+.wc141p.wc156 .kick156{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.32em;padding-left:.32em;text-transform:uppercase;color:#cdb06a}
+.wc141p.wc156 .c141h{margin:0}
+.wc141p.wc156 .c141h .p{display:none}
+.wc141p.wc156 h3{font-family:Georgia,'Times New Roman',serif!important;font-size:clamp(22px,7vw,28px)!important;font-weight:700!important;letter-spacing:.24em!important;padding-left:.24em;color:#f3e8c8!important;text-shadow:0 2px 6px rgba(0,0,0,.8)}
+.wc141p.wc156 .d156{display:flex;align-items:center;gap:8px;width:min(260px,82%);margin:12px auto 12px}
+.wc141p.wc156 .d156 i{flex:1;height:1px;background:linear-gradient(to right,transparent,#8f7b4c)}
+.wc141p.wc156 .d156 i:last-child{background:linear-gradient(to left,transparent,#8f7b4c)}
+.wc141p.wc156 .d156 b{width:8px;height:8px;background:#cdb06a;transform:rotate(45deg);flex:none}
+.wc141p.wc156 .d156 s{width:4px;height:4px;border:1px solid #a8935c;transform:rotate(45deg);flex:none}
+
+/* sayaçlar: etiket üstte, değer altta; aralarında ince dikey çizgi */
+.wc141p.wc156 .c141s{display:flex;justify-content:center;gap:0;margin:0 0 14px}
+.wc141p.wc156 .c141s div{flex:0 1 auto;display:flex;flex-direction:column-reverse;align-items:center;gap:2px;background:none;border:0;border-radius:0;padding:0 clamp(12px,5vw,22px)}
+.wc141p.wc156 .c141s div+div{border-left:1px solid #8f7b4c}
+.wc141p.wc156 .c141s b{font-family:Georgia,'Times New Roman',serif;font-size:21px;color:#f3e8c8}
+.wc141p.wc156 .c141s b i{opacity:.6}
+.wc141p.wc156 .c141s small{font-size:10px;letter-spacing:.18em;color:#a8935c;opacity:1;text-transform:uppercase}
+
+/* menü: kutusuz, ortalanmış büyük harfli yazılar */
+.wc141p.wc156 .c141g{display:flex;flex-direction:column;align-items:stretch;gap:2px}
+.wc141p.wc156 .c141b{position:relative;justify-content:center;gap:12px;width:100%;min-height:46px;padding:0 12px;border:0!important;border-radius:2px;background:none!important;
+  font:600 15px Georgia,'Times New Roman',serif;letter-spacing:.2em;text-transform:uppercase;color:#cfc4a4;text-shadow:0 2px 4px rgba(0,0,0,.8)}
+.wc141p.wc156 .c141b .ic{display:none}
+.wc141p.wc156 .c141b .lb{padding-left:.2em}
+.wc141p.wc156 .c141b::before,.wc141p.wc156 .c141b::after{content:"";width:6px;height:6px;background:transparent;transform:rotate(45deg);flex:none;order:0}
+.wc141p.wc156 .c141b::after{order:2}.wc141p.wc156 .c141b .lb{order:1}
+.wc141p.wc156 .c141b:active,.wc141p.wc156 .c141b:focus-visible{background:rgba(205,176,106,.12)!important;color:#f3e8c8;outline:0}
+.wc141p.wc156 .c141b:active::before,.wc141p.wc156 .c141b:active::after,.wc141p.wc156 .c141b:focus-visible::before,.wc141p.wc156 .c141b:focus-visible::after{background:#cdb06a}
+@media (hover:hover){.wc141p.wc156 .c141b:hover{color:#f3e8c8}.wc141p.wc156 .c141b:hover::before,.wc141p.wc156 .c141b:hover::after{background:#cdb06a}}
+/* "Oyuna Dön": büyük ve parlak, iki yanında altın baklava */
+.wc141p.wc156 .c141b.pri{grid-column:auto;min-height:54px;padding:0 12px;font-size:19px;font-weight:700;color:#f3e8c8;background:none!important;border:0!important}
+.wc141p.wc156 .c141b.pri::before,.wc141p.wc156 .c141b.pri::after{background:#cdb06a}
+.wc141p.wc156 .c141b.warn{color:#c07a6c}
+.wc141p.wc156 .c141b.warn:active,.wc141p.wc156 .c141b.warn:focus-visible{color:#e0998a}
+.wc141p.wc156 .c141b.warn:active::before,.wc141p.wc156 .c141b.warn:active::after{background:#c07a6c}
+.wc141p.wc156 .c141b.warn{margin-top:6px}
+
+/* yatay/kısa ekran: amblem gizlenir, menü iki sütun */
+@media (max-height:520px){
+  .wc141p.wc156{width:min(94vw,520px)!important;padding:16px 18px 14px!important}
+  .wc141p.wc156 .e156,.wc141p.wc156 .kick156{display:none}
+  .wc141p.wc156 .c141g{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
+  .wc141p.wc156 .c141b.pri{grid-column:1/-1;min-height:44px}
+  .wc141p.wc156 .c141b{min-height:38px;font-size:13px}
+  .wc141p.wc156 .d156{margin:6px auto}
+  .wc141p.wc156 .c141s{margin-bottom:8px}
+}
+@media (prefers-reduced-motion:reduce){.wc141p.wc156 *{transition:none!important}}

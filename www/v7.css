@@ -63,3 +63,5 @@ svg.rad{width:150px;height:150px;flex:none;overflow:visible}
 
 /* V9: v6 merkez bayrak rozeti (sabit boyutlu küçük dikdörtgen) kapatıldı; bayrak artık ülke geometrisine oturuyor (bkz. v7.js) */
 
+/* V161: savaş paneli kasma — zar/sarsıntı kendi katmanında (GPU) döner, panel yeniden boyanmaz */
+.d7.rolling,#bs.shake .b7h,.sx.go .sl,.sx.go .sr{will-change:transform}

@@ -1,0 +1,8 @@
+/* V159 — Ana menü "Seferi Sürdür" sola kayması (kök neden temizliği)
+   v35.css her .mb düğmesinin taban haline translateX(-30px) koyuyor; düğme yalnızca animasyon bitince yerine geliyordu.
+   Animasyon gecikir/durur/uygulanmazsa (telefonda 300-900 ms'lik takılmalar, pasif düğmede animation:none) düğme 30 px solda kalıyordu.
+   Düz (flat) menüde taban hali artık kaymasız; giriş animasyonu (wcmItem) yalnızca dikey kayma + solma yapar (önemsiz kural: animasyonu ezmez). */
+#wcm.flat .mb{transform:none;translate:none;left:0;right:auto}
+/* Pasif düğme (kayıt yokken Seferi Sürdür): animasyonsuz, kaymasız, tıklanmaz */
+#wcm.flat .mb[disabled],#wcm.flat .mb:disabled{transform:none!important;translate:none!important;left:0!important;margin-left:0!important;margin-right:0!important;opacity:.35!important;animation:none!important;pointer-events:none}
+#wcm.flat .menu .mb{justify-content:center!important;text-align:center!important}

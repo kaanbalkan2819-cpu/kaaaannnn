@@ -1,3 +1,52 @@
+=================== V160 ===================
+V160 — SAVAŞ YORGUNLUĞU/DİPLOMASİ/KEŞİF/POLİTİKA SEVİYE DÜŞÜŞÜ + ZAR/SAVAŞ SESİ + FETHEDİLEN TOPRAKTA POLİTİKA (TEST EDİLMEDİ; yalnızca node --check)
+1) Tur sonunda seviye düşüşü (sen veya YZ turu bitince = her yeni turda):
+   - Savaş yorgunluğu (v73.js): artık sıfırlanmaz, her turda 1 seviye düşer (en çok 4 seviyeden). Düşünce/bitince bildirim çıkar.
+   - Diplomasi (v160.js): tüm devletlerle ilişki puanı -1 (G.dip.fr). Ayar: FR_DROP.
+   - Keşif (v160.js): keşfettiğin her ülkenin bilinen değerlerinden biri rastgele yeniden gizlenir (G.kn). Ayar: KN_DROP.
+   - Politika (v17.js): etki her zarda bir seviye düşer (%100 -> 75 -> 50 -> 25); kalıcılaşan bonus da o seviyeyle orantılı.
+   Online oyunda v160 devre dışı.
+2) Politika menüsü fethedilen topraklarda da açılır (v17.js, v23.js): toprağı seç -> "📜 Politikalar". Politika o topraka bağlıdır, toprak başına zar başına 1 politika,
+   aynı anda en çok 3 aktif (MAXACT), bir değerde en çok +%30 geçici bonus (MAXSTACK). Toprak elden çıkarsa o topraktaki politika silinir (prune). Eski kayıtlar çalışır.
+3) Ses: zar ve savaş sesleri (top, patlama, tüfek, füze, davul, boru) scripts/gen_sfx.py ile üretilen örneklerden çalar (www/wc_sfx_data.js, ~320 KB; telifsiz, kendi sentezimiz).
+   Örnekler yüklenemezse eski WebAudio sentezleyicisi devreye girer. Sesleri değiştirmek için gen_sfx.py'yi düzenleyip yeniden çalıştırın. KULAKLA DİNLENMEDİ.
+4) Duraklatma menüsünde "Ana Menü" (V153'ten beri vardı) Oyuna Dön'ün hemen altına alındı.
+GERİ ALMAK İÇİN: index.html'den v160.js ve wc_sfx_data.js bağlantılarını silin; v17.js/v73.js/v23.js/v141.js/wc_audio.js'te "V160" yazan yerleri geri alın.
+
+
+=================== V159 ===================
+V159 — ANA MENÜ "SEFERİ SÜRDÜR" SOLA KAYMASI (kök neden temizliği; TELEFONDA DENENMEDİ; masaüstü Chromium'da 5 ekran boyutu x kayıtlı/kayıtsız ölçüldü)
+1) www/v159.css (yeni): v35.css her menü düğmesinin taban haline translateX(-30px) koyuyordu, düğme ancak giriş animasyonu bitince yerine geliyordu. Animasyon gecikir/durur/uygulanmazsa düğme 30 px solda kalıyordu. Düz menüde taban hali artık kaymasız (giriş animasyonu aynen duruyor); pasif düğme (kayıt yokken) ayrıca sabitlendi.
+2) index.html: v159.css, v156.css'in arkasına eklendi.
+NOT: Bu ortamda kayma yeniden üretilemedi (menü her denemede ortalı çıktı); düzeltme olası nedeni kaldırıyor. Sürerse kayan ekranın ekran görüntüsünü ve telefonun yazı boyutu / animasyon ayarını paylaşın.
+GERİ ALMAK İÇİN: index.html'den v159.css bağlantısını silin.
+
+=================== V158 ===================
+V158 — ALT GEZİNME ÇUBUĞU BUTONLARI ÖRTÜYORDU (Samsung S25 FE / Android 15-16 uçtan uca ekran; TELEFONDA DENENMEDİ)
+1) scripts/fix_android_insets.js (yeni): android/.../MainActivity.java'ya, gezinme/hareket çubuğu kadar boşluğu uygulamanın alt ve yan kenarına ekleyen kod yazar. Saldır, Keşif vb. alt butonlar artık çubuğun üstünde kalır.
+2) build_debug_apk.bat ve scripts/release_setup.js bu betiği otomatik çalıştırır (tekrar çalıştırmak zararsız).
+KULLANIM: build_debug_apk.bat'ı çalıştırıp APK'yı yeniden kurun (www dosyaları değişmedi, yalnızca Android tarafı).
+GERİ ALMAK İÇİN: MainActivity.java.bak158 dosyasını MainActivity.java üzerine kopyalayın.
+V158 (ek) — DÜNYA ETRAFINDAKİ MAVİ PARLAMA + İLK ÜLKE SEÇİMİ KASMASI (TELEFONDA DENENMEDİ; node --check geçti)
+1) v30.js: atmosfer parlaması şiddeti 1.7 -> 0.75, kenar daralması 3.5 -> 4.2, renk biraz soluk. Daha fazla azaltmak için fragmentShader'daki "*0.75" değerini küçültün (örn. 0.5).
+2) v30.js warmHome() (yeni): küre Türkiye'ye yaklaşırken Türkiye ve ~28 derece çevresindeki en çok 14 ülkenin 3B blokları üretilir ve GPU'ya yüklenir (kare başına en çok ~4 ms; dokunma/animasyon varken bekler). İlk seçimde blok üretimi / yükleme karesi kalmaz.
+GERİ ALMAK İÇİN: v30.js'te "V158" yazan blokları silin; shader satırında 4.2 -> 3.5 ve 0.75 -> 1.7 yapın.
+V158 (ek 2) — ANA MENÜ KÜRE AMBLEMİNE DOKUNUNCA DÖNME (TELEFONDA DENENMEDİ; node --check geçti)
+www/v158.js (yeni): ana menüdeki küre amblemine (.crest) her dokunuşta ~108° (bir turun %30'u) yumuşak yavaşlayarak döner; art arda dokunuşta ekler. index.html'de v156.js'in arkasına eklendi. Açıyı değiştirmek için v158.js'te "ang += 108".
+GERİ ALMAK İÇİN: index.html'den v158.js bağlantısını silin.
+V158 (ek 3) — UYGULAMA LOGOSU (Figma'da tasarlandı; telefonda DENENMEDİ)
+Defne dallı taç + kılıçlı küre amblemi (ana menüdeki amblemin renkleri: altın, lacivert, koyu kırmızı). resources/android altındaki tüm ic_launcher, ic_launcher_round ve ic_launcher_foreground dosyaları (mdpi-xxxhdpi) yenilendi; release_setup.js bunları otomatik uygular (arka plan rengi #0A1B45 değişmedi). Play Store için 512 px kare ikon: WorldConquest_Logo klasörü. Figma: https://www.figma.com/design/7Qo2K6k16JhP1ykosyxfa9
+Eski simgeye dönmek için v156 zip'indeki resources/android klasörünü geri koyun.
+
+
+
+
+=================== V156 ===================
+Oyun içi duraklatma kartı "Siper Defteri" görünümüne geçirildi (TEST EDİLMEDİ; yalnızca node --check ile sözdizimi denetlendi).
+1) www/v156.js (yeni): v141'in duraklatma kartına defne dallı amblem, "World Conquest" üst başlığı, köşe işlemeleri ve süslü ayırıcı ekler. İşlevler değişmedi.
+2) www/v156.css (yeni): sıcak taş zemin, altın çift çerçeve, soluk küre motifi, kutusuz büyük harfli menü yazıları (Georgia/serif), etiket üstte-değer altta sayaçlar; yatay ekranda iki sütun.
+3) index.html: v156.js (v141.js'in arkasına) ve v156.css (v141.css'in arkasına) eklendi. Geri almak için bu iki bağlantıyı silin.
+
 =================== V146 ===================
 1) Telefonda müttefik şeridi animasyonu kapatıldı (v30.js, LOWQ): seçili Rusya'da şerit her 140 ms'de kaplamayı yeniden çizip 8 MB dokuyu GPU'ya yüklüyordu (Rusya takılmasının ana nedeni).
 2) Ölçüm: v143.js artık en başta yüklenir; zamanlayıcı/rAF/gözlemci/olay dinleyici işlerinden 40 ms üstü olanları adıyla yazar; küre kurulumu (build:...) aşama süreleri yazılır.
@@ -427,3 +476,37 @@ V150 (ek) — v143.js: yeşil donma sayacı kapatıldı (ON=false). Tekrar görm
 
 =================== V151 ===================
 V151 — V150 değişiklikleri (kod içinde "V150" etiketli yerler) bu sürüm numarasıyla kaydedildi; ek kod değişikliği yok.
+
+
+=================== V152 ===================
+V152 — PES ET + ANA MENÜ KAYMASI + SEFERİ SÜRDÜR (TEST EDİLMEDİ; yalnızca node --check)
+1) Oyun içi menüye "Pes Et" (v141.js): onay sorar; evet -> sefer yenilgiyle biter, kayıt silinir, "İmparatorluk Düştü" ekranı açılır. Online oyunda gösterilmez.
+2) Ana menü kaymasının nedenleri (v35.js, v141.css):
+   a) Alıntı kutusu değişken yükseklikteydi, sütun alttan hizalı olduğu için amblem/başlık yukarı-aşağı kayıyordu. Artık sabit yükseklik (70 px; yatay kısa ekranda 2,8 em); uzun metin kutuya sığana kadar küçülür (fitQuote).
+   b) Kayıt varken görünen "Tur/Fethedilen/Dünya" bloğu kayıt yokken yoktu; şimdi yer tutucu (görünmez) ayrılır.
+   c) Alt menüler (Yeni Fetih seçenekleri/onay) farklı sayıda düğmeyle açılınca yükseklik değişiyordu; ana düğme bloğunun yüksekliği kilitlenir (lockMenu).
+3) "Seferi Sürdür" sola kayması: kayıt yokken düğme disabled; v130.css disabled'a animation:none verince taban kuraldaki transform:translateX(-30px) kalıyordu. v141.css'te disabled için transform:none.
+GERİ ALMAK İÇİN: v35.js, v141.js, v141.css'te "V152" yazan yerleri silin.
+
+
+=================== V153 ===================
+V153 — Duraklatma menüsüne "Ana Menü" (v141.js; test edilmedi, node --check geçti). Sefer kaydedilir, oyun kapanır, ana menü açılır; "Seferi Sürdür" ile kaldığın yerden devam edilir. Online oyunda gösterilmez.
+GERİ ALMAK İÇİN: v141.js'te "V153" yazan bloğu ve homeBtn() satırını silin.
+
+
+=================== V154 ===================
+V154 — OYUNCU SAVAŞI SONRASI OTOMATİK KAYIT (v141.js closeBattle sarmalayıcı; test edilmedi, node --check geçti)
+Oyuncunun her savaşı kapandıktan 0,7 sn sonra save() çağrılır ve "💾 Kaydedildi" etiketi görünür. YZ savaşlarında, oyun bittiyse ve online oyunda kaydetmez.
+GERİ ALMAK İÇİN: v141.js'te "V154" yazan bloğu silin.
+
+
+=================== V155 ===================
+V155 — Hamle hakkı kalmışken "Turu bitir?" uyarısı kaldırıldı (v5.js v5EndAsk): Turu Bitir doğrudan turu bitirir. (test edilmedi, node --check geçti)
+GERİ ALMAK İÇİN: v5.js'te "V155" yazan satırdaki "false && " ifadesini silin.
+
+
+=================== V161 ===================
+V161 — SAVAŞ PANELİNDE KASMA (TEST EDİLMEDİ; node --check geçti)
+Neden: v30.js render döngüsünde savaş paneli (BSH) açıkken "busy" her karede true oluyordu; 3B küre panelin arkasında tam hızda çiziliyordu ve boşta yüksek çözünürlüğe geçip tuvali yeniden ayırıyordu.
+Çözüm: panel açıkken (3B savaş animasyonu yokken) küre yalnızca kamera/geçiş değişince veya ~1,2 sn'de bir (bulut) çizilir; çözünürlük düşük kalır. v7.css: dönen zar/sarsıntı için will-change:transform.
+GERİ ALMAK İÇİN: v30.js'te "V161" satırlarını eski haline getirin (BSH koşulunu busy/_mv'ye geri koyun).

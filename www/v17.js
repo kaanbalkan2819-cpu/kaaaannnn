@@ -33,7 +33,27 @@
     if (!o.act) o.act = {}; if (!o.last) o.last = {}; return o; }
   function SN(i) { return ((typeof t == 'function' && t('S')) || R5.STAT_NAMES)[i] || R5.STAT_NAMES[i]; }
   function statTxt(p) { return p.st.map(SN).join(' + '); }
-  function counts() { var c = [0, 0, 0, 0, 0]; if (!is5()) return c; var a = pol().act; for (var k in a) { var p = P(k); if (p) p.st.forEach(function (i) { c[i] += (a[k].f || 1); }); } return c; }
+  /* V160: TOPRAK BAŞINA POLİTİKA. Anahtar: oyuncunun ana ülkesi için eski gibi 'id'; sonradan fethedilen toprak için 'TOPRAK|id'.
+   Etki her zarda bir seviye düşer: rem 3 -> %100, 2 -> %75, 1 -> %50, 0 -> %25. Toprak elden çıkarsa o topraktaki politika silinir. */
+  var MAXACT = 3, MAXSTACK = 3;   // <<< AYAR: aynı anda en çok 3 aktif politika; bir değerde en çok +%30 geçici bonus
+  function parse(k) { k = String(k); var i = k.indexOf('|'); return i < 0 ? { land: G.pl, id: k } : { land: k.slice(0, i), id: k.slice(i + 1) }; }
+  function mkKey(land, id) { return land === G.pl ? id : land + '|' + id; }
+  function fade(a) { return (Math.max(0, a.rem | 0) + 1) / (DICE + 1); }
+  function eff(a) { return (a.f || 1) * fade(a); }
+  function qs(x) { return String(x).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+  function lname(l) { try { return M[l].name; } catch (e) { return String(l); } }
+  function prune() {
+    try {
+      if (!is5() || !G.owner) return;
+      var o = pol(), a = o.act, k, ps, p;
+      for (k in a) {
+        ps = parse(k);
+        if (G.owner[ps.land] !== G.pl) { p = P(ps.id); delete a[k]; delete o.last[k]; note('🏳 ' + T(lname(ps.land) + ' elden çıktı: ' + (p ? p.tr : ps.id) + ' politikası kalktı', lname(ps.land) + ' was lost: ' + (p ? p.en : ps.id) + ' policy removed')); }
+      }
+    } catch (e) { }
+  }
+  function landActive(land) { var n = 0, a = pol().act, k; for (k in a) if (parse(k).land === land) n++; return n; }
+  function counts() { var c = [0, 0, 0, 0, 0]; if (!is5()) return c; prune(); var a = pol().act; for (var k in a) { var p = P(parse(k).id); if (p) { var e = eff(a[k]); p.st.forEach(function (i) { c[i] += e; }); } } for (var j = 0; j < 5; j++) if (c[j] > MAXSTACK) c[j] = MAXSTACK; return c; }
 
   // ---- geçici bonus: yalnızca okuma anında (temel değere dokunmaz) ----
   var _st = st;
@@ -57,22 +77,23 @@
   var Q = [];
   function note(m) { Q.push(m); }
   var _rd = render;
-  render = function () { var r = _rd.apply(this, arguments); try { if (Q.length && !BSH && !G.busy) { var m = Q.join('  •  '); Q = []; setTimeout(function () { toast(m); }, 300); } } catch (e) { } return r; };
+  render = function () { var r = _rd.apply(this, arguments); try { prune(); if (Q.length && !BSH && !G.busy) { var m = Q.join('  •  '); Q = []; setTimeout(function () { toast(m); }, 300); } } catch (e) { } return r; };
 
   // ---- sonuçlandırma ----
   function resolve(win) {
     var pl = pol(), ids = Object.keys(pl.act); if (!ids.length) return;
-    ids.forEach(function (id) {
-      var p = P(id), af = (pl.act[id] && pl.act[id].f) || 1; delete pl.act[id];                       // önce aktiften çıkar: kalıcılaştırma tek sefer
+    ids.forEach(function (key) {
+      var ps = parse(key), p = P(ps.id), af = pl.act[key] ? eff(pl.act[key]) : 1; delete pl.act[key];     // önce aktiften çıkar: kalıcılaştırma tek sefer
       if (!p) return;
+      var where = ps.land === G.pl ? '' : ' [' + lname(ps.land) + ']';
       if (win) {
         var raw = _st(G.pl).slice(); G.es = G.es || {}; G.ed = G.ed || {};
         p.st.forEach(function (i) { raw[i] = raw[i] * (1 + PCT * af); });
-        G.es[G.pl] = raw; G.ed[G.pl] = 0; pl.last[id] = 'ok';
-        note('✅ ' + T(p.tr + ' başarılı: %10 bonus kalıcı oldu (' + statTxt(p) + ')', p.en + ' succeeded: +10% is now permanent (' + statTxt(p) + ')'));
+        G.es[G.pl] = raw; G.ed[G.pl] = 0; pl.last[key] = 'ok';
+        note('✅ ' + T(p.tr + where + ' başarılı: bonus kalıcı oldu (' + statTxt(p) + ')', p.en + where + ' succeeded: bonus is now permanent (' + statTxt(p) + ')'));
       } else {
-        pl.last[id] = 'fail';
-        note('❌ ' + T(p.tr + ' başarısız: savaş kaybedildi, geçici bonus kaldırıldı', p.en + ' failed: battle lost, temporary bonus removed'));
+        pl.last[key] = 'fail';
+        note('❌ ' + T(p.tr + where + ' başarısız: savaş kaybedildi, geçici bonus kaldırıldı', p.en + where + ' failed: battle lost, temporary bonus removed'));
       }
     });
   }
@@ -100,7 +121,7 @@
         if (is5()) {
           var pl = pol();
           Object.keys(pl.act).forEach(function (id) {
-            var a = pl.act[id], p = P(id);
+            var a = pl.act[id], p = P(parse(id).id);
             if (a.rem <= 0) { delete pl.act[id]; pl.last[id] = 'exp'; note('⌛ ' + T((p ? p.tr : id) + ': 3 zar içinde savaş sonucu oluşmadı → SONUÇSUZ; bonus kalktı, kalıcı bonus verilmedi', (p ? p.en : id) + ': no battle within 3 dice → INCONCLUSIVE; bonus removed, nothing made permanent')); }
             else a.rem--;
           });
@@ -117,9 +138,9 @@
     try {
       if (!is5() || !G.sel || G.over || BSH) return;
       var el = $('panel'), bx = el && (el.querySelector('.v15a') || el.querySelector('.px')); if (!bx || el.querySelector('.polbtn')) return;
-      if (G.sel === G.pl) {
-        var n = Object.keys(pol().act).length;
-        bx.insertAdjacentHTML('afterbegin', '<button class="polbtn" style="flex:1 1 100%" onclick="polMenu()">📜 ' + T('Politikalar', 'Policies') + (n ? ' (' + n + ')' : '') + '</button>');
+      if (G.owner && G.owner[G.sel] === G.pl) {   // V160: fethedilen topraklarda da Politikalar
+        var n = landActive(G.sel);
+        bx.insertAdjacentHTML('afterbegin', '<button class="polbtn" style="flex:1 1 100%" onclick="polMenu(\'' + qs(G.sel) + '\')">📜 ' + T('Politikalar', 'Policies') + (n ? ' (' + n + ')' : '') + '</button>');
       }
     } catch (e) { }
   };
@@ -132,49 +153,57 @@
     return '<span class="tag">' + T('Hazır', 'Ready') + '</span>';
   }
   var POL_MOVES = 2, POL_GOLD = 35;   // <<< AYAR: her politika 2 hamle ya da (hamle yetmezse) altınla alınır. V104: bir zar atışında (turda) yalnızca 1 politika
-  function usedNow() { return !!(G && G.T && pol().usedTurn === G.T.turn); }   // V104: bu tur politika kullanıldı mı
+  function usedNow(land) { if (!(G && G.T)) return false; var o = pol(); land = land || G.pl; return (o.ut && o.ut[land] === G.T.turn) || (land === G.pl && o.usedTurn === G.T.turn); }   // V160: toprak başına   // V104: bu tur politika kullanıldı mı
   var PIC = ['👥', '🎖', '💰', '🔬', '🕊'], PCL = ['#4aa3ff', '#ff6b5a', '#ffd24a', '#8a7bff', '#4fe0a0'];
   function gold() { return window.Gold ? Gold.get() : 0; }
-  window.polMenu = function () {
+  window.polMenu = function (land) {
     if (!is5()) return;
+    land = (typeof land === 'string' && G.owner && G.owner[land] === G.pl) ? land : ((G.sel && G.owner && G.owner[G.sel] === G.pl) ? G.sel : G.pl);
+    var nAct = Object.keys(pol().act).length;
     var can = G.ph == 'act' && !G.busy && !BSH && !G.endLock, mv = (G.T && G.T.moves) || 0, g = gold();
-    var h = '<div class="polx"><div class="polhd"><b>📜 ' + T('Politikalar', 'Policies') + '</b><span class="polsub">' + M[G.pl].name + '</span>' +
+    var h = '<div class="polx"><div class="polhd"><b>📜 ' + T('Politikalar', 'Policies') + '</b><span class="polsub">' + lname(land) + '</span>' +
       '<button class="polcl" onclick="closeMod()" aria-label="close">✕</button></div>' +
       '<div class="polbar"><span>🎲 ' + T('Hamle', 'Moves') + ': <b>' + mv + '</b></span><span>🪙 ' + T('Altın', 'Gold') + ': <b>' + g + '</b></span></div>' +
-      '<div class="polinfo">' + T('Her politika <b>' + POL_MOVES + ' hamle</b> harcar; hamlen yetmezse <b>' + POL_GOLD + ' 🪙</b> ile alınır. Bir zar atışında yalnızca <b>1</b> politika uygulanabilir. +%10 bonus 3 zar sürer; ilk savaş kazanılırsa kalıcı olur.', 'Each policy costs <b>' + POL_MOVES + ' moves</b>, or <b>' + POL_GOLD + ' 🪙</b> if you lack moves. Only <b>1</b> policy per dice roll. The +10% lasts 3 dice and becomes permanent after a won battle.') + '</div>' +
+      '<div class="polinfo">' + T('Her politika <b>' + POL_MOVES + ' hamle</b> harcar; hamlen yetmezse <b>' + POL_GOLD + ' 🪙</b> ile alınır. Bir zar atışında her toprakta yalnızca <b>1</b> politika uygulanabilir (aynı anda en çok ' + MAXACT + ' aktif). +%10 bonus 3 zar sürer, her zarda bir seviye zayıflar (%100→75→50→25); ilk savaş kazanılırsa kalıcı olur. Toprak elden çıkarsa o topraktaki politikalar kalkar.', 'Each policy costs <b>' + POL_MOVES + ' moves</b>, or <b>' + POL_GOLD + ' 🪙</b> if you lack moves. Only <b>1</b> policy per land per roll (max ' + MAXACT + ' active). The +10% lasts 3 dice, fades one step each roll (100→75→50→25%) and becomes permanent after a won battle. If the land is lost, its policies are removed.') + '</div>' +
       '<div class="polscroll">';
     POL.forEach(function (p, ix) {
-      var a = pol().act[p.id], c = PCL[p.st[0]], ic = p.st.map(function (i) { return PIC[i]; }).join('');
+      var key = mkKey(land, p.id), a = pol().act[key], c = PCL[p.st[0]], ic = p.st.map(function (i) { return PIC[i]; }).join('');
       var btn;
       if (a) btn = '<button class="polgo on" disabled>🟢 ' + T('Aktif', 'Active') + '</button>';
       else if (!can) btn = '<button class="polgo" disabled>' + T('Kendi turunda', 'On your turn') + '</button>';
-      else if (usedNow()) btn = '<button class="polgo" disabled>⛔ ' + T('Bu zarda kullanıldı', 'Used this roll') + '</button>';
-      else if (mv >= POL_MOVES) btn = '<button class="polgo" onclick="polAsk(\'' + p.id + '\',\'moves\')">🎲 ' + T('Uygula', 'Apply') + ' · ' + POL_MOVES + ' ' + T('hamle', 'moves') + '</button>';
-      else if (g >= POL_GOLD) btn = '<button class="polgo gold" onclick="polAsk(\'' + p.id + '\',\'gold\')">🪙 ' + T('Satın al', 'Buy') + ' · ' + POL_GOLD + '</button>';
+      else if (!a && nAct >= MAXACT) btn = '<button class="polgo" disabled>⛔ ' + T('En çok ' + MAXACT + ' aktif politika', 'Max ' + MAXACT + ' active policies') + '</button>';
+      else if (usedNow(land)) btn = '<button class="polgo" disabled>⛔ ' + T('Bu zarda kullanıldı', 'Used this roll') + '</button>';
+      else if (mv >= POL_MOVES) btn = '<button class="polgo" onclick="polAsk(\'' + p.id + '\',\'moves\',\'' + qs(land) + '\')">🎲 ' + T('Uygula', 'Apply') + ' · ' + POL_MOVES + ' ' + T('hamle', 'moves') + '</button>';
+      else if (g >= POL_GOLD) btn = '<button class="polgo gold" onclick="polAsk(\'' + p.id + '\',\'gold\',\'' + qs(land) + '\')">🪙 ' + T('Satın al', 'Buy') + ' · ' + POL_GOLD + '</button>';
       else btn = '<button class="polgo shop" onclick="Shop.open()">🛒 ' + T('Altın yetersiz — Dükkan', 'Not enough gold — Shop') + '</button>';
-      h += '<div class="pcard' + (a ? ' act' : '') + '" style="--pc:' + c + ';animation-delay:' + (ix * 0.05) + 's"><div class="pic">' + ic + '</div><div class="pbd"><div class="ptt"><b>' + T(p.tr, p.en) + '</b> ' + stTxt(p.id) + '</div>' +
-        '<div class="pds">' + T(p.dtr, p.den) + '</div><div class="pst"><span class="pchip">' + statTxt(p) + ' <b>+%10</b></span>' + (a ? '<span class="pchip">⏳ ' + (a.rem > 0 ? a.rem : T('son tur', 'last turn')) + '</span>' : '') + '</div>' + btn + '</div></div>';
+      h += '<div class="pcard' + (a ? ' act' : '') + '" style="--pc:' + c + ';animation-delay:' + (ix * 0.05) + 's"><div class="pic">' + ic + '</div><div class="pbd"><div class="ptt"><b>' + T(p.tr, p.en) + '</b> ' + stTxt(key) + '</div>' +
+        '<div class="pds">' + T(p.dtr, p.den) + '</div><div class="pst"><span class="pchip">' + statTxt(p) + ' <b>+%10</b></span>' + (a ? '<span class="pchip">⏳ ' + (a.rem > 0 ? a.rem : T('son tur', 'last turn')) + '</span><span class="pchip">⚡ %' + Math.round(fade(a) * 100) + '</span>' : '') + '</div>' + btn + '</div></div>';
     });
     modal(h + '</div><button class="big polfoot" onclick="closeMod()">' + T('Kapat', 'Close') + '</button></div>');
     if (!can) toast(T('Politika yalnızca kendi turunda uygulanır', 'Policies can only be applied on your turn'));
   };
-  window.polAsk = function (id, how) {
-    var p = P(id); if (!p || !is5() || pol().act[id]) return;
-    if (usedNow()) { toast(T('Bu zar atışında zaten bir politika kullandın', 'You already used a policy on this roll')); return; }   // V104
+  window.polAsk = function (id, how, land) {
+    land = land || G.pl;
+    var p = P(id); if (!p || !is5() || pol().act[mkKey(land, id)]) return;
+    if (Object.keys(pol().act).length >= MAXACT) { toast(T('En çok ' + MAXACT + ' politika aynı anda aktif olabilir', 'At most ' + MAXACT + ' policies can be active at once')); return; }
+    if (usedNow(land)) { toast(T('Bu zar atışında zaten bir politika kullandın', 'You already used a policy on this roll')); return; }   // V104
     var pay = how == 'gold' ? POL_GOLD + ' 🪙' : POL_MOVES + ' ' + T('hamle', 'moves');
     modal('<div class="polx"><div class="polhd"><b>' + T(p.tr, p.en) + '</b></div><p class="polinfo">' + T('Bu politika <b>' + pay + '</b> karşılığında uygulanacak. Turun bitmez. Onaylıyor musun?', 'This policy costs <b>' + pay + '</b>. Your turn does not end. Confirm?') + '</p>' +
-      '<button class="big pri" onclick="polApply(\'' + id + '\',\'' + how + '\')">' + T('Evet, uygula', 'Yes, apply') + '</button><button class="big" onclick="polMenu()">' + T('Vazgeç', 'Cancel') + '</button></div>');
+      '<button class="big pri" onclick="polApply(\'' + id + '\',\'' + how + '\',\'' + qs(land) + '\')">' + T('Evet, uygula', 'Yes, apply') + '</button><button class="big" onclick="polMenu(\'' + qs(land) + '\')">' + T('Vazgeç', 'Cancel') + '</button></div>');
   };
-  window.polApply = function (id, how) {
+  window.polApply = function (id, how, land) {
+    land = land || G.pl;
     var p = P(id); closeMod();
     if (!p || !is5() || G.ph != 'act' || G.busy || BSH || G.endLock) return;
-    var pl = pol(); if (pl.act[id]) return;                    // aynı politika üst üste uygulanamaz
-    if (usedNow()) { toast(T('Bu zar atışında zaten bir politika kullandın', 'You already used a policy on this roll')); return; }   // V104
+    if (G.owner && G.owner[land] !== G.pl) { toast(T('Bu toprak artık senin değil', 'You no longer own this land')); return; }
+    var pl = pol(), key = mkKey(land, id); if (pl.act[key]) return;                    // aynı politika aynı toprakta üst üste uygulanamaz
+    if (Object.keys(pl.act).length >= MAXACT) { toast(T('En çok ' + MAXACT + ' politika aynı anda aktif olabilir', 'At most ' + MAXACT + ' policies can be active at once')); return; }
+    if (usedNow(land)) { toast(T('Bu zar atışında zaten bir politika kullandın', 'You already used a policy on this roll')); return; }   // V104
     if (how == 'gold') { if (!window.Gold || !Gold.spend(POL_GOLD, 'policy')) { toast(T('Yeterli altının yok', 'Not enough gold')); return; } }
     else { if (!G.T || G.T.moves < POL_MOVES) { toast(T('Yeterli hamle yok', 'Not enough moves')); return; } G.T.moves -= POL_MOVES; }
-    pl.act[id] = { rem: DICE, f: areaF(G.pl) }; pl.usedTurn = G.T.turn;   // V104: bu zarda bir daha politika yok
+    pl.act[key] = { rem: DICE, f: areaF(G.pl), land: land }; pl.ut = pl.ut || {}; pl.ut[land] = G.T.turn; if (land === G.pl) pl.usedTurn = G.T.turn;   // V104: bu zarda bir daha politika yok
     save(); render();
-    toast('📜 ' + T(p.tr + ' uygulandı: ' + statTxt(p) + ' +%10 (3 zar)', p.en + ' applied: ' + statTxt(p) + ' +10% (3 dice)') + ' · 🌍×' + areaF(G.pl).toFixed(2));
+    toast('📜 ' + T(p.tr + ' (' + lname(land) + ') uygulandı: ' + statTxt(p) + ' +%10 (3 zar)', p.en + ' applied: ' + statTxt(p) + ' +10% (3 dice)') + ' · 🌍×' + areaF(G.pl).toFixed(2));
   };
   window.WC = window.WC || {}; window.WC.policies = function () { return JSON.parse(JSON.stringify(G && (G.mp ? (G.polBy || {})[G.pl] : G.pol) || null)); };
 })();

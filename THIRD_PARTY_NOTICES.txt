@@ -2,6 +2,7 @@ World Conquest — Üçüncü taraf bileşenler / Third-party notices
 
 MÜZİK VE SES EFEKTLERİ / MUSIC AND SFX
   www/wc_audio.js — tamamı kodla üretilir (WebAudio osilatör + gürültü). Hazır ses dosyası, örnek veya başkasının müziği YOKTUR.
+  www/wc_sfx_data.js — zar/savaş ses örnekleri scripts/gen_sfx.py ile BİZ üretiriz (matematiksel sentez, MP3'e çevrilmiş). Üçüncü taraf kaydı YOKTUR; telif/lisans yükümlülüğü yoktur.
   Melodi ve akor dizisi bu proje için yazılmış özgün bir bestedir. Telif/lisans yükümlülüğü yoktur.
 
 KÜTÜPHANELER / LIBRARIES (hepsi izin verici lisans / all permissive)

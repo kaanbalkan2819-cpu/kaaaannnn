@@ -16,9 +16,31 @@
       comp = c.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 5; comp.connect(c.destination);
       mg = c.createGain(); mg.connect(comp); mu = c.createGain(); mu.connect(mg); sf = c.createGain(); sf.connect(mg);
       var n = c.sampleRate * 2; nbuf = c.createBuffer(1, n, c.sampleRate); var d = nbuf.getChannelData(0); for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-      vol(); if (!loopT) loopT = setInterval(loop, 90);
+      vol(); loadSamples(); if (!loopT) loopT = setInterval(loop, 90);
     } catch (e) { c = null; }
   }
+  /* V160: ÖRNEKLER — zar ve savaş sesleri artık scripts/gen_sfx.py ile üretilmiş gerçekçi örneklerden (wc_sfx_data.js) çalar.
+     Örnekler çözülemezse / dosya yoksa eski sentezleyici otomatik devreye girer (aşağıdaki işlevler her zaman geri düşer). */
+  var bufs = {}, smpLoading = false;
+  function b64buf(s) { var b = atob(s), n = b.length, u = new Uint8Array(n); for (var i = 0; i < n; i++) u[i] = b.charCodeAt(i); return u.buffer; }
+  function loadSamples() {
+    if (smpLoading || !c || !window.WC_SFX) return; smpLoading = true;
+    Object.keys(window.WC_SFX).forEach(function (k) {
+      bufs[k] = [];
+      window.WC_SFX[k].forEach(function (str) {
+        try { var pr = c.decodeAudioData(b64buf(str), function (ab) { bufs[k].push(ab); }, function () { }); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { }
+      });
+    });
+  }
+  function smp(k, t, g, rate) {
+    var a = bufs[k]; if (!c || !a || !a.length) return false;
+    try {
+      var s = c.createBufferSource(), e = c.createGain();
+      s.buffer = a[Math.floor(Math.random() * a.length)]; s.playbackRate.value = rate || R(.95, 1.05); e.gain.value = g;
+      s.connect(e); e.connect(sf); s.start(t); return true;
+    } catch (x) { return false; }
+  }
+  function hornS(t, rate, g) { return smp('horn', t, g, rate); }
   function vol() { if (!c) return; var s = S(); mg.gain.value = s.vol; mu.gain.value = s.musOn ? s.mus * .55 : 0; sf.gain.value = s.sfxOn ? s.sfx : 0; }
 
   /* ---------- temel sesler ---------- */
@@ -36,11 +58,11 @@
     e.gain.setValueAtTime(g, t); e.gain.exponentialRampToValueAtTime(.0001, t + d);
     s.connect(fl); fl.connect(e); e.connect(dst || sf); s.start(t, Math.random() * 1.5); s.stop(t + d + .05);
   }
-  function drum(t, g, f) { tone(f || 120, t, .5, 'sine', g, sf, { to: (f || 120) * .36, a: .004 }); nz(t, .12, g * .5, 'lowpass', 400, 120); }
-  function cannon(t, g) { nz(t, .9, g, 'lowpass', 1400, 70, sf, .7); tone(95, t, .7, 'sine', g * .9, sf, { to: 32, a: .004 }); }
-  function boom(t, g) { nz(t, 1.6, g, 'lowpass', 900, 45, sf, .6); tone(70, t, 1.3, 'sine', g, sf, { to: 24, a: .005 }); }
-  function rifle(t, n, g) { for (var i = 0; i < n; i++) nz(t + i * R(.05, .09), .07, g * R(.5, 1), 'highpass', 1800, 900); }
-  function whoosh(t, d, g, up) { nz(t, d, g, 'bandpass', up ? 250 : 2600, up ? 2600 : 250, sf, 1.4); }
+  function drum(t, g, f) { if (smp('drum', t, Math.min(1, g), f ? Math.max(.8, Math.min(1.15, f / 110)) : 1)) return; tone(f || 120, t, .5, 'sine', g, sf, { to: (f || 120) * .36, a: .004 }); nz(t, .12, g * .5, 'lowpass', 400, 120); }
+  function cannon(t, g) { if (smp('cannon', t, Math.min(1, g * 1.25))) return; nz(t, .9, g, 'lowpass', 1400, 70, sf, .7); tone(95, t, .7, 'sine', g * .9, sf, { to: 32, a: .004 }); }
+  function boom(t, g) { if (smp('boom', t, Math.min(1, g * 1.15))) return; nz(t, 1.6, g, 'lowpass', 900, 45, sf, .6); tone(70, t, 1.3, 'sine', g, sf, { to: 24, a: .005 }); }
+  function rifle(t, n, g) { if (smp('rifle', t, Math.min(1, g * 1.6))) return; for (var i = 0; i < n; i++) nz(t + i * R(.05, .09), .07, g * R(.5, 1), 'highpass', 1800, 900); }
+  function whoosh(t, d, g, up) { if (up && smp('whoosh', t, Math.min(1, g * 2.2))) return; nz(t, d, g, 'bandpass', up ? 250 : 2600, up ? 2600 : 250, sf, 1.4); }
   function horn(t, f, d, g) { [0, 7].forEach(function (dt) { tone(f, t, d, 'sawtooth', g, sf, { a: .12, det: dt, lp: 1100 }); }); }
 
   /* ---------- efektler ---------- */
@@ -50,6 +72,7 @@
     tone(f * .26 * R(.92, 1.08), t, .07, 'triangle', g * .75, sf, { to: f * .14, a: .002 });   // gövde tınısı
   }
   function diceRoll(t) {
+    if (smp('dice', t, .95, R(.97, 1.03))) return;   // V160: gerçekçi örnek
     var i, g = .5;
     for (i = 0; i < 7; i++) clack(t + i * .042 + R(0, .014), .14 + R(0, .07), R(1500, 2300));   // elde sallama
     [.33, .45, .56, .66, .75, .83, .9, .96].forEach(function (o) { clack(t + o + R(-.008, .008), g, R(1800, 2700)); g *= .72; });   // sekmeler
@@ -65,12 +88,12 @@
         case 'notify': tone(988, t, .16, 'sine', .1); tone(1319, t + .09, .22, 'sine', .08); break;
         case 'ping': tone(1200, t, .5, 'sine', .14, sf, { to: 1180 }); tone(1200, t + .55, .5, 'sine', .07, sf, { to: 1180 }); break;
         case 'coin': tone(1568, t, .09, 'square', .1, sf, { lp: 4000 }); tone(2093, t + .08, .3, 'square', .09, sf, { lp: 4000 }); break;
-        case 'attack': drum(t, .9, 110); drum(t + .22, .7, 110); drum(t + .44, .9, 90); horn(t + .1, 196, .9, .12); horn(t + .1, 293.7, .9, .08); break;
+        case 'attack': drum(t, .9, 110); drum(t + .22, .7, 110); drum(t + .44, .9, 90); if (!hornS(t + .1, 1, .2)) { horn(t + .1, 196, .9, .12); horn(t + .1, 293.7, .9, .08); } break;
         case 'cannon': cannon(t, .8); break;
         case 'boom': boom(t, .9); break;
-        case 'rifle': cannon(t, .35); break;
+        case 'rifle': if (!smp('rifle', t, .6)) cannon(t, .35); break;
         case 'missile': whoosh(t, 1.4, .35, true); tone(80, t, 1.4, 'sawtooth', .12, sf, { to: 200, lp: 500, a: .2 }); break;
-        case 'horn': horn(t, 130.8, 1.6, .16); horn(t, 196, 1.6, .1); break;
+        case 'horn': if (!hornS(t, .667, .22)) { horn(t, 130.8, 1.6, .16); horn(t, 196, 1.6, .1); } break;
         case 'win': [392, 494, 587, 784].forEach(function (f, j) { tone(f, t + j * .13, .5, 'triangle', .3, sf, { lp: 3000 }); tone(f / 2, t + j * .13, .5, 'sine', .2); }); drum(t, .7, 100); break;
         case 'lose': [330, 311, 262, 196].forEach(function (f, j) { tone(f, t + j * .24, .6, 'sawtooth', .16, sf, { lp: 900 }); }); drum(t, .8, 70); break;
         case 'conq': [262, 330, 392].forEach(function (f) { tone(f, t, .9, 'square', .1, sf, { lp: 1800 }); }); tone(523, t + .15, .9, 'triangle', .28); drum(t, .8, 100); drum(t + .3, .8, 100); break;
