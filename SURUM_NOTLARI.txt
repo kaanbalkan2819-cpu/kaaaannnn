@@ -1,3 +1,7 @@
+=================== V146 ===================
+1) Telefonda müttefik şeridi animasyonu kapatıldı (v30.js, LOWQ): seçili Rusya'da şerit her 140 ms'de kaplamayı yeniden çizip 8 MB dokuyu GPU'ya yüklüyordu (Rusya takılmasının ana nedeni).
+2) Ölçüm: v143.js artık en başta yüklenir; zamanlayıcı/rAF/gözlemci/olay dinleyici işlerinden 40 ms üstü olanları adıyla yazar; küre kurulumu (build:...) aşama süreleri yazılır.
+
 =================== V145 ===================
 Ölçüm sürümü: v30.js içine PF() süre ölçümleri (paintOverlay, baseStep, lift/sliceBuild, gl.render, setPR, warm:ÜLKE) eklendi; v143 sayacı bunları 30 ms üstünde yazar.
 
@@ -371,3 +375,14 @@ YAPILMADI / BİLİNEN SINIRLAR
 - Animasyonların hâlâ çalışmadığı durum olursa nedenler arasında: 2B harita modu, "Hareketi azalt" ayarı açık, animasyon hızı 0, saldıran toprağın küre verisinde olmaması. Cihazda ölçülmedi.
 - Bayrak yuvarlak kırpıldığı için bayrağın kenar kısımları görünmez (countryball'da olduğu gibi).
 - Oyun içi menü kartının görünümü ve ana menü hizası gerçek cihazda görülmedi.
+
+
+=================== V147 ===================
+V147 — TELEFONDA ÇÖZÜNÜRLÜK DEĞİŞİMİ KAPATILDI (ölçüm: videodaki v143 sayacı)
+YAPILDI (www/v30.js, build() içinde tek satır)
+- Dokunmatik cihazda PRHI = PRLO (1.25). Eskiden küre durunca 1.5'e, dokununca 1.25'e geçiliyordu; her geçiş tuvali yeniden ayırıyordu (setPR 238 ms, ardından DONMA 260 ms / KARE 266 ms).
+YAPILMADI / AÇIK
+- Videoda ~8. sn "Sefer Başlıyor" sırasında 2043 ms'lik tek donma var; v143 sayacı bunu hiçbir adıma (build:*, timer, raf, event) atfedemedi => Promise/script çalıştırma kısmında olabilir. Kesin kaynak için ayrı ölçüm gerekir.
+- Yeni oyun sonrası 9.0-9.9 sn arasında 323/189/379 ms DONMA var, kaynağı bilinmiyor.
+GERİ ALMAK İÇİN: v30.js'te "V147" yazan satırı eski haline getirin (PRHI = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2)).
+V147 (ek) — v143.js: long-animation-frame ölçümü eklendi. Donma satırlarının yanında "LOAF <ms> <script ms> <tür> <dosya>:<fonksiyon>" yazılır. Yeni video çekilince 2 sn'lik donmanın dosya/fonksiyonu görülecek.

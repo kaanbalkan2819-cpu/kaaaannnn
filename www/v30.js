@@ -137,6 +137,7 @@
   setInterval(function () {   /* V109: yalnızca müttefik şeridi yeniden çizilir (tüm ülkeler değil) */
     try {
       if (!ov || !snapOk || document.hidden || document.body.classList.contains('wcm-on')) return;
+      if (LOWQ) return;   /* V146: telefonda müttefik şeridi hareket etmez (sabit kalır). Rusya gibi büyük ülkede her 140 ms'de kaplama yeniden çiziliyor + 8 MB doku yükleniyordu */
       if (!(window.WCAllyTarget && WCAllyTarget())) return;
       aPh = (aPh + 2.5 * LS) % 1e6;   /* V133: tick 90->140 ms; adım orantılı büyütüldü, şerit hızı aynı */
       ov.globalAlpha = 1; ov.clearRect(0, 0, OW, OH); ov.drawImage(snapC, 0, 0); allyLines(aPh);
@@ -315,14 +316,15 @@
   function preload() { if (_pre || READY || BAD) return; _pre = true; try { Promise.all([loadScript('globe/three.min.js'), loadScript('globe/data.js'), loadScript('globe/tri.js').catch(function () { })]).then(function () { var T = window.WC_TEX || {}; for (var k in T) { try { loadImg(T[k]); } catch (e) { } } }).catch(function () { _pre = false; }); } catch (e) { } }
   function build() {
     THREE = window.THREE; TEX = window.WC_TEX;
+    var _c = performance.now(); function CP(l) { PF('build:' + l, _c); _c = performance.now(); }
     ovC = mk(OW, OH); ov = ovC.getContext('2d'); liftC = mk(LW, LH); lift = liftC.getContext('2d'); reliefC = mk(LW, LH);
     nsmall = mk(NW, NH); nsx = nsmall.getContext('2d', { willReadFrequently: true }); nC = mk(NW, NH); nx = nC.getContext('2d'); nImg = nx.createImageData(NW, NH); topoH = new Float32Array(NW * NH);
     var coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches || document.body.classList.contains('fxlow');
     renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: false });
     /* V127: hareket sırasında düşük (akıcı), 260 ms durunca yüksek çözünürlük (net). Telefonda sabit 1.25 yüzünden küre bulanıktı. */
-    PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 2); PRHI = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2); curPR = PRLO; idleSince = performance.now();
+    PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 2); PRHI = coarse ? PRLO : Math.min(window.devicePixelRatio || 1, 2);   /* V147: telefonda çözünürlük değişimi yok (setPR 238-266 ms donma + 1.5x karede ~150 ms) */ curPR = PRLO; idleSince = performance.now();
     renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace;
-    stage.appendChild(renderer.domElement);
+    stage.appendChild(renderer.domElement); CP('renderer');
     scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200); camera.position.set(0, 0, camZ);
     var sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(3, 2, 4); scene.add(sun); scene.add(new THREE.AmbientLight(0x6b7fa8, 0.9));
     globe = new THREE.Group(); scene.add(globe);
@@ -333,24 +335,24 @@
       nsx.drawImage(im[1], 0, 0, NW, NH); var td = nsx.getImageData(0, 0, NW, NH).data; for (var q = 0; q < NW * NH; q++) topoH[q] = td[q * 4] / 255;
       var rx = reliefC.getContext('2d'); rx.drawImage(im[1], 0, 0, LW, LH); var rd = rx.getImageData(0, 0, LW, LH), p;
       for (p = 0; p < LW * LH; p++) { var v = Math.round((0.55 + 0.45 * rd.data[p * 4] / 255) * 255); rd.data[p * 4] = rd.data[p * 4 + 1] = rd.data[p * 4 + 2] = v; rd.data[p * 4 + 3] = 255; } rx.putImageData(rd, 0, 0);
-      updateNormals();
+      CP('img+topo'); updateNormals(); CP('normals');
       var geo = coarse ? new THREE.SphereGeometry(1, 192, 96) : new THREE.SphereGeometry(1, 320, 160);
       earth = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ map: marble, specularMap: water, specular: new THREE.Color(0x445566), shininess: 28, normalMap: normTex, normalScale: new THREE.Vector2(1, 1) })); globe.add(earth);
       var cover = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: ovTex, transparent: true, depthWrite: false, emissive: new THREE.Color(0xffffff), emissiveMap: ovTex, emissiveIntensity: 0.35, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); cover.scale.setScalar(1.0015); globe.add(cover);
       cloudM = new THREE.Mesh(new THREE.SphereGeometry(1.012, 96, 48), new THREE.MeshLambertMaterial({ map: clouds, transparent: true, opacity: 0.55, depthWrite: false })); globe.add(cloudM);
       scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),3.5);gl_FragColor=vec4(.35,.62,1.,1.)*clamp(i,0.,1.)*1.7;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));
       scene.add(new THREE.Mesh(new THREE.SphereGeometry(80, 32, 16), new THREE.MeshBasicMaterial({ map: sky, side: THREE.BackSide })));
-      bindInput(); resize(); READY = true;
+      CP('meshes'); bindInput(); resize(); READY = true;
       /* V132: shader derlemesi + ilk kare ve büyük ülke blokları perdenin altında hazırlanır (ilk dokunuşta/animasyonda takılma olmasın) */
       try {   /* V140: ülke bloklarının shader'ları (Lambert + çizgi) küre kurulurken, perdenin altında derlenir; ilk seçimde derleme takılması/donması olmasın */
         var dgm = new THREE.BufferGeometry(); dgm.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 1.3, .01, 0, 1.3, 0, .01, 1.3], 3)); dgm.setAttribute('normal', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1], 3));
         var dg2 = new THREE.BufferGeometry(); dg2.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 1.3, .01, 0, 1.3], 3));
         var pre = window.__v140pre = [new THREE.Mesh(dgm, new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide, emissive: 0x000000, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 })), new THREE.Mesh(dgm, new THREE.MeshLambertMaterial({ color: 0x888888, side: THREE.DoubleSide })), new THREE.LineSegments(dg2, new THREE.LineBasicMaterial({ color: 0xfff0b4, transparent: true, opacity: .85 }))];
         pre.forEach(function (m) { m.frustumCulled = false; globe.add(m); });
-        renderer.compile(scene, camera); renderer.render(scene, camera);
+        CP('pre'); renderer.compile(scene, camera); CP('compile1'); renderer.render(scene, camera); CP('render1');
         pre.forEach(function (m) { globe.remove(m); });   /* malzemeler dispose EDİLMEZ: derlenen programlar önbellekte kalır */
       } catch (e) { }
-      try { renderer.compile(scene, camera); renderer.render(scene, camera); } catch (e) { }
+      try { renderer.compile(scene, camera); renderer.render(scene, camera); } catch (e) { } CP('render2');
       warmEx();
     });
   }
