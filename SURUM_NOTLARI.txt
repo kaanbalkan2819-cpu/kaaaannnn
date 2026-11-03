@@ -1,3 +1,6 @@
+=================== V143 ===================
+TEST AMAÇLI donma sayacı (www/v143.js): ekranın altında DONMA/KARE/ULKE SEC süreleri yazar. Kapatmak: v143.js içinde ON=false veya index.html'den satırı silin.
+
 =================== V142 ===================
 V142 — TEST EDİLMEDİ (istek gereği); yalnızca node --check söz dizimi denetimi
 
