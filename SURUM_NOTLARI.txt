@@ -404,3 +404,22 @@ V149 — OYUN BAŞLARKEN DONMA (v30.js build(); sandbox'ta Chromium + yazılıml
 3) Shader derlemesi renderer.compileAsync ile (paralel derleme; varsa). Sonuç: compile1 48 ms.
 KALAN (sandbox'ta yazılım çizim yüzünden anlamsız): build:renderer ve ilk render; telefonda GPU ile çok daha kısa olması beklenir.
 GERİ ALMAK İÇİN: v30.js'te "V149" yazan yerleri eski haline getirin.
+
+
+=================== V150 ===================
+V150 — 7-8. SANİYE "DÜNYA BELİRİP YOK OLUYOR" + İLK ÜLKE SEÇİMİ KASMASI (videodan okundu; node --check geçti; telefonda DENENMEDİ)
+VİDEODAN OKUNAN
+- ~7,7 sn: perde kalkınca tam boy küre BİR KARE görünüyor, sonra küçülüp uzaktan yaklaşıyor, ~8,2 sn'de kayboluyor, ~9,1 sn'de (dokunuşla) geri geliyor.
+- ~8,2 sn'de "Öğretici ister misin?" penceresi tam o sırada ortada açılıyor; uzaktaki küçük küre pencerenin ARKASINDA kalıyor.
+- İlk seçim (Rusya): pointerup 64 ms + DONMA 66 + KARE 117/133 + LOAF 138-147 (script yalnızca 9-26 ms => GPU/yükleme) + hemen ardından "PR->1" (çözünürlük düşürme = tuval yeniden ayırma).
+YAPILDI
+1) v30.js build(): tuval gizli (opacity 0) kurulur. Eskiden build içindeki ön çizim (kamera 3.4) perde kalkınca tam boy küre olarak görünüyordu. show()'da yaklaşma animasyonu yoksa tuval açılır; 1,5 sn güvenlik ağı var.
+2) v30.js doIntro(): tuval görünür olmadan ÖNCE uzak kamerayla bir kare çizilir (yeni oyunda eski yakın karenin solarak görünmesi biter).
+3) v30.js + v121.js: window.v30IntroBusy(); öğretici sorusu küre yaklaşma animasyonu (3 sn) bitene kadar bekler, küreyi örtmez.
+4) v30.js loop(): ülke seçimi/yaklaşma sırasında uyarlanabilir çözünürlük sayacı sıfırlanır (tek seferlik takılma "PR->1" tetiklemesin).
+5) v30.js paintOverlay(): ülke yolu Path2D olarak bir kez çıkarılır (Rusya gibi çok noktalı ülkede seçim başına 3 kez JS döngüsü yok).
+6) v30.js warmEx(): perde altında (küre henüz gösterilmemişken) ilk 6 büyük ülke bloğunun köşe tamponları GPU'ya yüklenir (preUp).
+YAPILMADI / AÇIK
+- Seçim karesinin GPU maliyeti (faz + normal haritalı küre + kaplama + bulut + atmosfer) cihazda ölçülmedi. Yine kasarsa yeni videoda "LOAF" satırları ve PR->x yazısı bakılacak.
+GERİ ALMAK İÇİN: v30.js ve v121.js'te "V150" yazan yerleri eski haline getirin.
+V150 (düzeltme) — V148'in çözünürlük/detay düşürmeleri GERİ ALINDI: SUBD 2.2, kaplama yol süzgeci 0.35 px, uyarlanabilir çözünürlük (PR->x) kapalı. Telefonda çözünürlük sabit 1.25. Yalnızca ilk seçim kasması düzeltmeleri (Path2D, perde altı GPU yükleme) kaldı.

@@ -131,7 +131,7 @@
       var r = _ng.apply(this, arguments);
       if (pendingAsk) {
         pendingAsk = false;
-        if (m == 1) { var n = 0, iv = setInterval(function () { n++; var md = document.getElementById('mod'); if (!(md && md.style.display === 'flex') || n > 8) { clearInterval(iv); if (!(md && md.style.display === 'flex')) WCTut.askInGame(); } }, 700); }
+        if (m == 1) { var n = 0, iv = setInterval(function () { n++; try { if (window.v30IntroBusy && v30IntroBusy() && n < 12) return; } catch (e) { } /* V150: küre yaklaşırken (3 sn) soru açılıp küreyi örtmesin */ var md = document.getElementById('mod'); if (!(md && md.style.display === 'flex') || n > 8) { clearInterval(iv); if (!(md && md.style.display === 'flex')) WCTut.askInGame(); } }, 700); }
       }
       return r;
     };

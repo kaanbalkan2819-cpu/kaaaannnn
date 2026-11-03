@@ -65,7 +65,7 @@
         if (wind) { var sm = 0; for (k = 0; k < n; k++) sm += r[k][1]; pole = sm / n >= 0 ? 0 : H; }
         for (var sh = -2; sh <= 2; sh++) {
           var dx = sh * W; if (mx + dx < 0 || mn + dx > W) continue;
-          var px = 0, py = 0; for (k = 0; k < n; k++) { var qx = xs[k] + dx, qy = ys[k]; if (k) { if (k < n - 1 && Math.abs(qx - px) < (LOWQ ? 0.9 : 0.35) && Math.abs(qy - py) < (LOWQ ? 0.9 : 0.35)) continue; ctx.lineTo(qx, qy); } else ctx.moveTo(qx, qy); px = qx; py = qy; }   /* V143: 0,35 px'ten yakın noktalar atlanır */
+          var px = 0, py = 0; for (k = 0; k < n; k++) { var qx = xs[k] + dx, qy = ys[k]; if (k) { if (k < n - 1 && Math.abs(qx - px) < 0.35 && Math.abs(qy - py) < 0.35) continue; ctx.lineTo(qx, qy); } else ctx.moveTo(qx, qy); px = qx; py = qy; }   /* V143: 0,35 px'ten yakın noktalar atlanır */
           if (wind) { ctx.lineTo(xs[n - 1] + dx, pole); ctx.lineTo(xs[0] + dx, pole); }
           ctx.closePath();
         }
@@ -114,15 +114,16 @@
     do { r = baseJob.next(); } while (!r.done && performance.now() - t0 < 9);
     if (r.done) { baseJob = null; try { C.forEach(colorEx); } catch (e) { } needPaint = true; forceR = 3; }
   }
+  function pathOf(c) { if (typeof Path2D !== 'function') return null; if (!c._p2 || c._p2w !== OW) { try { var p = new Path2D(); trace(p, c, OW, OH); c._p2 = p; c._p2w = OW; } catch (e) { c._p2 = null; return null; } } return c._p2; }   /* V150: yol bir kez çıkarılır (Rusya gibi çok noktalı ülkede seçim başına 3x JS döngüsü yoktu) */
   function paintOverlay() {
     var sg = ownSig(); if (!baseC || sg !== baseSig) { baseSig = sg; baseJob = baseGen(); stepBase(); }
     if (baseJob) { needPaint = true; return; }   /* V143: taban hazır olana kadar kaplama çizilmez (kare başına dilim ilerler) */   /* V50: 3B blok renkleri de sahiplik değişince yenilenir */
     ov.globalAlpha = 1; ov.clearRect(0, 0, OW, OH); ov.drawImage(baseC, 0, 0);
     C.forEach(function (c) {
-      var st = style(c); if (!st) return;
-      ov.save(); ov.beginPath(); trace(ov, c, OW, OH); ov.globalCompositeOperation = 'destination-out'; ov.globalAlpha = 1; ov.fillStyle = '#000'; ov.fill('evenodd');
-      ov.globalCompositeOperation = 'source-over'; ov.globalAlpha = st.a; ov.fillStyle = st.col; ov.fill('evenodd'); ov.restore();   /* V143: clip yerine doğrudan dolgu (Rusya gibi karmaşık ülkede clip ~1 sn sürüyordu) */
-      ov.globalAlpha = 1; ov.lineWidth = 1.6 * LS; ov.beginPath(); trace(ov, c, OW, OH); ov.strokeStyle = (G && G.sel === c.id) ? 'rgba(255,240,180,.95)' : 'rgba(255,255,255,.5)'; ov.stroke();
+      var st = style(c); if (!st) return; var P = pathOf(c);   /* V150 */
+      ov.save(); if (!P) { ov.beginPath(); trace(ov, c, OW, OH); } ov.globalCompositeOperation = 'destination-out'; ov.globalAlpha = 1; ov.fillStyle = '#000'; if (P) ov.fill(P, 'evenodd'); else ov.fill('evenodd');
+      ov.globalCompositeOperation = 'source-over'; ov.globalAlpha = st.a; ov.fillStyle = st.col; if (P) ov.fill(P, 'evenodd'); else ov.fill('evenodd'); ov.restore();
+      ov.globalAlpha = 1; ov.lineWidth = 1.6 * LS; ov.strokeStyle = (G && G.sel === c.id) ? 'rgba(255,240,180,.95)' : 'rgba(255,255,255,.5)'; if (P) ov.stroke(P); else { ov.beginPath(); trace(ov, c, OW, OH); ov.stroke(); }
     });
     try { snapAlly(); allyLines(0); } catch (e) { }   /* V109: seçili ülkenin müttefiklerinin üzerinden akan kırmızı şerit */
     ovTex.needsUpdate = true;
@@ -173,7 +174,7 @@
     ov.restore();
   }
   /* ---------- Gerçek 3B blok: ülke çokgeni yüzey dikeyinde kaldırılır (keskin kenar, ışık hesabı yok) ---------- */
-  var EX = {}, H0 = 0.055, DEN = 2, SUBD = LOWQ ? 4 : 2.2;   /* V148: telefonda ~3x az üçgen (Rusya/Kanada/ABD/Çin) */
+  var EX = {}, H0 = 0.055, DEN = 2, SUBD = 2.2;   /* V148: telefonda ~3x az üçgen (Rusya/Kanada/ABD/Çin) */
   function sph(p, r) { var la = p[1] * DEG, lo = p[0] * DEG; return [r * Math.cos(la) * Math.cos(lo), r * Math.sin(la), -r * Math.cos(la) * Math.sin(lo)]; }
   function mid(a, b) { return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; }
   function dens(ring) {
@@ -273,7 +274,7 @@
           cc = order[i++]; if (EX[cc.id] && !GEN[cc.id]) continue;
           cur = GEN[cc.id] || (GEN[cc.id] = buildExG(cc));
         }
-        var r = cur.next(); if (r.done) { delete GEN[cc.id]; cur = null; }
+        var r = cur.next(); if (r.done) { delete GEN[cc.id]; cur = null; if (!ON && renderer && (window.__v150up = (window.__v150up || 0) + 1) <= 6) preUp(EX[cc.id]); }   /* V150 */
       }
       PF('warm:' + (cc ? cc.id : ''), _w0);
       if (!WARMBIG && !cur && i >= 10) WARMBIG = true;   /* V132: en büyük 10 ülke bloğu hazır */
@@ -282,6 +283,9 @@
       /* tüm blok malzemelerinin shader'ları önceden derlenir (ilk yükselişte derleme takılması olmasın) */
       try { if (renderer && scene && camera) renderer.compile(scene, camera); } catch (e) { }
     })();
+  }
+  function preUp(e) {   /* V150: büyük ülke bloğunun köşe tamponları GPU'ya perde altında (tuval gizliyken) yüklenir; ilk seçimde (Rusya) 117-147 ms'lik yükleme karesi olmasın */
+    try { if (!e || !e.cap || !scene) return; e.g.visible = true; e.g.scale.setScalar(0.0001); renderer.render(scene, camera); e.g.visible = false; } catch (x) { try { e.g.visible = false; } catch (y) { } }
   }
   function colorEx(c) {
     var e = EX[c.id]; if (!e || !e.cap) return; var st = style(c), col = st ? st.col : ownCol(c), k;
@@ -324,7 +328,7 @@
     /* V127: hareket sırasında düşük (akıcı), 260 ms durunca yüksek çözünürlük (net). Telefonda sabit 1.25 yüzünden küre bulanıktı. */
     PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 2); PRHI = coarse ? PRLO : Math.min(window.devicePixelRatio || 1, 2);   /* V147: telefonda çözünürlük değişimi yok (setPR 238-266 ms donma + 1.5x karede ~150 ms) */ curPR = PRLO; idleSince = performance.now();
     renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace;
-    stage.appendChild(renderer.domElement); CP('renderer');
+    stage.appendChild(renderer.domElement); try { renderer.domElement.style.opacity = '0'; } catch (e) { } /* V150: build() içindeki ön çizim (kamera 3.4, tam boy küre) perde kalkınca bir an görünüyordu; tuval doIntro/show açana kadar gizli */ CP('renderer');
     scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200); camera.position.set(0, 0, camZ);
     var sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(3, 2, 4); scene.add(sun); scene.add(new THREE.AmbientLight(0x6b7fa8, 0.9));
     globe = new THREE.Group(); scene.add(globe);
@@ -437,6 +441,7 @@
   function anyMoving() { for (var i = 0; i < C.length; i++) if (C[i].h !== C[i].t) return true; return false; }
   /* ---------- V60: savaş animasyonları (v60.js) için küçük dış arayüz; oyun kurallarına dokunmaz ---------- */
   var FH = [];
+  window.v30IntroBusy = function () { return !!introStart; };   /* V150: öğretici sorusu, küre yaklaşırken açılıp küreyi örtmesin */
   window.v30API = {
     ready: function () { return !!(ON && READY && scene && globe && renderer && THREE); },
     THREE: function () { return THREE; }, globe: function () { return globe; }, camera: function () { return camera; }, renderer: function () { return renderer; },
@@ -460,7 +465,8 @@
     if (menuUp()) { last = now; return; }   /* V90: ana menü üstteyken gizli küreyi çizme */
     var _raw = now - last, dt = Math.min(0.05, _raw / 1000); last = now;
     /* V148: uyarlanabilir çözünürlük (yalnızca telefon): hareket/animasyon sırasında kareler uzun sürerse çözünürlük 0.25 kademe düşer (en az 0.75) */
-    if (LOWQ && renderer && READY && _raw > 8 && _raw < 400 && performance.now() - (window.__v148t || 0) > 2500) {
+    var _sk = (G && G.sel) || ''; if (_sk !== window.__v150sel || introStart) { window.__v150sel = _sk; window.__v148t = performance.now(); window.__v148e = 16; }   /* V150: ülke seçimi/yaklaşma anındaki tek seferlik takılma çözünürlüğü düşürmesin (setPR = tuval yeniden ayırma = ikinci takılma) */
+    if (false && LOWQ && renderer && READY && _raw > 8 && _raw < 400 && performance.now() - (window.__v148t || 0) > 2500) {
       window.__v148e = (window.__v148e || 16) * 0.9 + _raw * 0.1;
       if (window.__v148e > 38 && PRLO > 0.76) { PRLO = Math.max(0.75, PRLO - 0.25); PRHI = PRLO; window.__v148t = performance.now(); window.__v148e = 16; setPR(PRLO); try { window.WCPERF && WCPERF('  PR->' + PRLO); } catch (x) { } }
     } cloudM.rotation.y += dt * 0.004;
@@ -496,13 +502,13 @@
       introDur = rm ? 1 : 3000; introFrom = rm ? zoomT : zoomT * 5.5; camZ = introFrom; introStart = performance.now();   /* V101: boş bekleme yok */
       if (G && G.ph === 'v7pick') { zoomT = 3.4; globe.quaternion.identity(); focusQ = null; setTimeout(function () { try { if (ON && G && G.ph === 'v7pick' && !G.sel && cMap.TUR) focusOn(cMap.TUR, false); } catch (e) { } }, rm ? 300 : 1500); }   /* önce dünya yerine oturur, sonra Türkiye */
       var cvs = renderer && renderer.domElement; if (!cvs) { try { stage.classList.remove('v91cover'); } catch (e) { } return; }
-      cvs.style.transition = 'none'; cvs.style.opacity = '0'; void cvs.offsetWidth;
+      cvs.style.transition = 'none'; cvs.style.opacity = '0'; try { camera.position.z = camZ * (window.innerWidth > window.innerHeight ? 0.7 : 1); renderer.render(scene, camera); } catch (e) { } /* V150: tampon uzak kamerayla doldurulur; eski yakın kare solarak görünmez */ void cvs.offsetWidth;
       cvs.style.transition = 'opacity .25s ease-out'; cvs.style.opacity = '1'; try { stage.classList.add('v95out'); } catch (e) { }   /* V101: küre anında görünür */
       setTimeout(function () { try { stage.classList.remove('v91cover'); stage.classList.remove('v95out'); } catch (e) { } }, 900);
     } catch (e) { try { stage.classList.remove('v91cover'); } catch (x) { } }
   }
   function show() {
-    ON = true; var _doI = (introNext || !introShown);   /* V101: yaklaşma animasyonu kapak sınıfına bağlı değil */ if (!_doI) { try { stage.classList.remove('v91cover'); } catch (e) { } } setBtn(); $$('map').classList.add('v30on'); stage.style.display = 'block'; resize(); lastSig = ''; refresh(); focusHome(true);
+    ON = true; var _doI = (introNext || !introShown);   /* V101: yaklaşma animasyonu kapak sınıfına bağlı değil */ if (!_doI) { try { stage.classList.remove('v91cover'); } catch (e) { } try { var _cv0 = renderer && renderer.domElement; if (_cv0) { _cv0.style.transition = 'none'; _cv0.style.opacity = '1'; } } catch (e) { } } /* V150 */ setTimeout(function () { try { var _cv1 = renderer && renderer.domElement; if (_cv1 && _cv1.style.opacity === '0') { _cv1.style.transition = 'none'; _cv1.style.opacity = '1'; } } catch (e) { } }, 1500); /* V150: güvenlik ağı: tuval hiçbir koşulda gizli kalmaz */ setBtn(); $$('map').classList.add('v30on'); stage.style.display = 'block'; resize(); lastSig = ''; refresh(); focusHome(true);
     if (introNext || _doI) { introNext = false; doIntro(); }
     last = performance.now(); if (!rafId) rafId = requestAnimationFrame(loop);
   }
