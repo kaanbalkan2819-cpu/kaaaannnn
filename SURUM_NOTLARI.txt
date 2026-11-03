@@ -423,3 +423,7 @@ YAPILMADI / AÇIK
 - Seçim karesinin GPU maliyeti (faz + normal haritalı küre + kaplama + bulut + atmosfer) cihazda ölçülmedi. Yine kasarsa yeni videoda "LOAF" satırları ve PR->x yazısı bakılacak.
 GERİ ALMAK İÇİN: v30.js ve v121.js'te "V150" yazan yerleri eski haline getirin.
 V150 (düzeltme) — V148'in çözünürlük/detay düşürmeleri GERİ ALINDI: SUBD 2.2, kaplama yol süzgeci 0.35 px, uyarlanabilir çözünürlük (PR->x) kapalı. Telefonda çözünürlük sabit 1.25. Yalnızca ilk seçim kasması düzeltmeleri (Path2D, perde altı GPU yükleme) kaldı.
+V150 (ek) — v143.js: yeşil donma sayacı kapatıldı (ON=false). Tekrar görmek için ON=true yapın.
+
+=================== V151 ===================
+V151 — V150 değişiklikleri (kod içinde "V150" etiketli yerler) bu sürüm numarasıyla kaydedildi; ek kod değişikliği yok.

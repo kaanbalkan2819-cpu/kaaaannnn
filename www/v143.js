@@ -2,7 +2,7 @@
    Kapatmak için: aşağıdaki ON değerini false yapın ya da index.html'den v143.js satırını silin. */
 (function () {
   'use strict';
-  var ON = true;
+  var ON = false;   /* V150: yeşil donma sayacı kapatıldı */
   if (!ON) return;
   var t0 = performance.now(), lines = [], box = null;
   function ts() { return ((performance.now() - t0) / 1000).toFixed(1) + 's'; }
