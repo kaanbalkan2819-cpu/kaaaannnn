@@ -12,9 +12,9 @@
   function askExit() {
     if (!inGame()) return;
     var mp = !!G.mp;
-    modal('<span data-wcexit="1"></span><h2>🚪 ' + X('Oyundan çıkılsın mı?', 'Leave the game?') + '</h2>' +
+    modal('<span data-wcexit="1"></span><h2>🚪 ' + X('Oyundan çıkmak istiyor musunuz?', 'Do you want to leave the game?') + '</h2>' +
       '<p style="text-align:center;font-size:14px;line-height:1.45">' + (mp ? X('Online maçtan ayrılırsın.', 'You will leave the online match.') : X('İlerlemen kaydedilir; ana menüden devam edebilirsin.', 'Your progress is saved; you can continue from the main menu.')) + '</p>' +
-      '<button class="big pri" onclick="WC125.exit()">' + X('Evet, ana menüye dön', 'Yes, go to main menu') + '</button>' +
+      '<button class="big pri" onclick="WC125.exit()">' + X('Evet, çık (ana menü)', 'Yes, leave (main menu)') + '</button>' +
       '<button class="big" onclick="closeMod()">' + X('Hayır, oyuna dön', 'No, keep playing') + '</button>');
   }
   function exitGame() {
@@ -23,13 +23,19 @@
   }
 
   // ---- geri tuşu ----
+  /* V142: Android WebView/Chromium, KULLANICI ETKİLEŞİMİ olmadan eklenen geçmiş kayıtlarını geri tuşunda atlar ("history manipulation intervention").
+     Eski sürüm nöbetçiyi yalnızca 'load' ve 'pointerdown' anında koyuyordu; dokunmada pointerdown etkileşim sayılmaz -> nöbetçi atlanıyor, geri tuşu doğrudan uygulamayı kapatıyordu.
+     Artık nöbetçi dokunma BİTİŞİNDE (pointerup/touchend/click) ve tuşta konur; ayrıca @capacitor/app eklentisi varsa 'backButton' olayı da dinlenir. */
   function ensure() { try { if (!(history.state && history.state.wc125)) history.pushState({ wc125: 1 }, ''); } catch (e) { } }
   function findClose() {
     var bs = $('box') ? $('box').querySelectorAll('button') : [], re = /^\s*(✕\s*)?(kapat|close|vazgeç|cancel|geri|back|iptal|hayır|no\b|atla|skip|tamam|ok\b)/i;
     for (var i = 0; i < bs.length; i++) { if (!bs[i].disabled && re.test(bs[i].textContent.replace(/^[^A-Za-zÇĞİÖŞÜçğıöşü✕]+/, ''))) return bs[i]; }
     return null;
   }
-  function onBack() {
+  var lastBack = 0, rootAt = 0;
+  function appPlugin() { try { return (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.App) || null; } catch (e) { return null; } }
+  function onBack(fromPlugin) {
+    var now = Date.now(); if (now - lastBack < 250) { ensure(); return; } lastBack = now;   // çift tetiklenme koruması
     try {
       if (window.G && window.BSH) { ensure(); return; }                       // savaş ekranı: geri tuşu yok sayılır
       if (modalOpen()) {
@@ -38,17 +44,25 @@
         ensure(); return;
       }
       if (inGame()) {
-        var p = $('panel'); if (p && p.style.display === 'block' && G.sel) { deselect(); ensure(); return; }   // alt panel → seçimi kaldır
-        askExit(); ensure(); return;
+        var p = $('panel'); if (p && p.style.display === 'block' && G.sel) { try { deselect(); } catch (e) { G.sel = null; try { render(); } catch (e2) { } } ensure(); return; }   // alt panel → seçimi kaldır
+        askExit(); ensure(); return;                                           // oyundayken: "Oyundan çıkmak istiyor musun?"
       }
-      var back = document.querySelector('#wcm [data-a="back"]');               // ana menü alt ekranı → geri
+      var back = document.querySelector('#wcm [data-a="back"]');               // ana menü alt ekranı → bir adım geri
       if (back && menuOn()) { back.click(); ensure(); return; }
-      toast(X('Çıkmak için tekrar geri tuşuna bas', 'Press back again to exit'));   // ana menü: nöbetçi yeniden konmaz, ikinci geri uygulamayı kapatır
+      var ap = appPlugin();                                                    // ana menü kökü: iki kez geri = çıkış
+      if (ap && ap.exitApp) {
+        if (now - rootAt < 2200) { ap.exitApp(); return; }
+        rootAt = now; toast(X('Çıkmak için tekrar geri tuşuna bas', 'Press back again to exit')); ensure(); return;
+      }
+      toast(X('Çıkmak için tekrar geri tuşuna bas', 'Press back again to exit'));   // eklenti yok: nöbetçi yeniden konmaz, ikinci geri uygulamayı kapatır
     } catch (e) { ensure(); }
   }
-  window.addEventListener('popstate', onBack);
+  window.addEventListener('popstate', function () { onBack(false); });
+  try { var _ap = appPlugin(); if (_ap && _ap.addListener) _ap.addListener('backButton', function () { onBack(true); }); } catch (e) { }
+  document.addEventListener('backbutton', function (e) { try { e.preventDefault(); } catch (x) { } onBack(true); }, false);   // Cordova tarzı
   window.addEventListener('load', ensure);
-  document.addEventListener('pointerdown', ensure, true);
+  ['pointerup', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, ensure, true); });   // gerçek kullanıcı etkileşimi = nöbetçi atlanmaz
+  window.WC125_back = function () { onBack(true); };
 
   // ---- Ayarlar'a "Ana Menü" düğmesi (yalnızca oyun içinde) ----
   function hookSettings() {

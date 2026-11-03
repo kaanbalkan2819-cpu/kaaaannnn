@@ -246,7 +246,7 @@
   }
   /* V54: ülke blokları (üçgenleme) seçim anında değil, boş zamanda üretilir -> ilk seçimde kasma olmaz */
   var WARMBIG = false;
-  function afterWarm(f) { var t0 = performance.now(); (function w() { if (WARMBIG || performance.now() - t0 > 4000) return f(); setTimeout(w, 80); })(); }   /* V132: en çok 4 sn bekler */
+  function afterWarm(f) { var t0 = performance.now(); (function w() { if (WARMBIG || performance.now() - t0 > 1200) return f(); setTimeout(w, 60);   /* V142: 4 sn -> 1,2 sn */ })(); }   /* V132: en çok 4 sn bekler */
   function warmEx() {
     /* V127: blok üretimi zaman dilimli: her adımda ~4 ms, büyük ülkeler (RUS/CAN/AUS/USA) kare başına parça parça yapılır.
        Eskiden tek parça 250+ ms sürüyor ve küre açılırken ~4 kare/sn takılma yapıyordu. Büyük ülkeler önce üretilir. */
@@ -302,7 +302,7 @@
   function loadImg(src) { if (_imgC[src]) return _imgC[src]; return _imgC[src] = new Promise(function (ok, no) { var im = new Image(); im.onload = function () { try { if (im.decode) { im.decode().then(function () { ok(im); }, function () { ok(im); }); return; } } catch (e) { } ok(im); }; im.onerror = function (e) { delete _imgC[src]; no(e); }; im.src = src; }); }
   function loadScript(src) { if (_scC[src]) return _scC[src]; return _scC[src] = new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function () { delete _scC[src]; no(new Error(src)); }; document.head.appendChild(s); }); }
   var _pre = false;
-  function preload() { if (_pre || READY || BAD) return; _pre = true; try { loadScript('globe/three.min.js').then(function () { return loadScript('globe/data.js'); }).then(function () { return loadScript('globe/tri.js').catch(function () { }); }).then(function () { var T = window.WC_TEX || {}; for (var k in T) { try { loadImg(T[k]); } catch (e) { } } }).catch(function () { _pre = false; }); } catch (e) { } }
+  function preload() { if (_pre || READY || BAD) return; _pre = true; try { Promise.all([loadScript('globe/three.min.js'), loadScript('globe/data.js'), loadScript('globe/tri.js').catch(function () { })]).then(function () { var T = window.WC_TEX || {}; for (var k in T) { try { loadImg(T[k]); } catch (e) { } } }).catch(function () { _pre = false; }); } catch (e) { } }
   function build() {
     THREE = window.THREE; TEX = window.WC_TEX;
     ovC = mk(OW, OH); ov = ovC.getContext('2d'); liftC = mk(LW, LH); lift = liftC.getContext('2d'); reliefC = mk(LW, LH);
@@ -316,7 +316,7 @@
     scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200); camera.position.set(0, 0, camZ);
     var sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(3, 2, 4); scene.add(sun); scene.add(new THREE.AmbientLight(0x6b7fa8, 0.9));
     globe = new THREE.Group(); scene.add(globe);
-    ovTex = new THREE.CanvasTexture(ovC); ovTex.colorSpace = THREE.SRGBColorSpace; ovTex.anisotropy = 8; liftTex = new THREE.CanvasTexture(liftC); normTex = new THREE.CanvasTexture(nC);
+    ovTex = new THREE.CanvasTexture(ovC); ovTex.colorSpace = THREE.SRGBColorSpace; ovTex.anisotropy = 8; if (LOWQ) { ovTex.generateMipmaps = false; ovTex.minFilter = THREE.LinearFilter; ovTex.anisotropy = 1; }   /* V142: telefonda her seçimde 2048x1024 kaplamanın mipmap'i yeniden üretilmesin (seçim anı takılması) */ liftTex = new THREE.CanvasTexture(liftC); normTex = new THREE.CanvasTexture(nC);
     return Promise.all([loadImg(TEX.marble), loadImg(TEX.topo), loadImg(TEX.water), loadImg(TEX.sky), loadImg(TEX.clouds)]).then(function (im) {
       var marble = new THREE.Texture(im[0]); marble.colorSpace = THREE.SRGBColorSpace; marble.anisotropy = 4; marble.needsUpdate = true;
       var water = new THREE.Texture(im[2]); water.needsUpdate = true; var sky = new THREE.Texture(im[3]); sky.colorSpace = THREE.SRGBColorSpace; sky.needsUpdate = true; var cmC = mk(im[4].width || 1024, im[4].height || 512), cmX = cmC.getContext('2d'); cmX.drawImage(im[4], 0, 0, cmC.width, cmC.height); cmX.globalCompositeOperation = 'destination-out'; var cg = cmX.createLinearGradient(0, 0, 0, cmC.height); cg.addColorStop(0, 'rgba(0,0,0,1)'); cg.addColorStop(0.24, 'rgba(0,0,0,1)'); cg.addColorStop(0.36, 'rgba(0,0,0,0.6)'); cg.addColorStop(0.5, 'rgba(0,0,0,0)'); cg.addColorStop(0.64, 'rgba(0,0,0,0.6)'); cg.addColorStop(0.76, 'rgba(0,0,0,1)'); cg.addColorStop(1, 'rgba(0,0,0,1)'); cmX.fillStyle = cg; cmX.fillRect(0, 0, cmC.width, cmC.height); var clouds = new THREE.CanvasTexture(cmC);
@@ -455,8 +455,10 @@
       var q = globe.quaternion, k = camera.position.z.toFixed(4) + '|' + q.x.toFixed(4) + '|' + q.y.toFixed(4) + '|' + q.z.toFixed(4) + '|' + q.w.toFixed(4) + '|' + vo.toFixed(3) + '|' + window.innerWidth + 'x' + window.innerHeight;
       var busy = k !== lastRK || window.v60Active || anyMoving() || (typeof BSH !== 'undefined' && BSH) || (now - lastRT) > 250 || forceR > 0;
       var _mv = k !== lastRK || window.v60Active || anyMoving() || (typeof BSH !== 'undefined' && BSH) || introStart;
-      if (_mv) { idleSince = now; if (curPR !== PRLO) setPR(PRLO); busy = true; }
-      else if (PRHI > PRLO && curPR !== PRHI && now - idleSince > 260) { setPR(PRHI); busy = true; }
+      var _usr = !!down || Object.keys(ptrs).length > 0 || Math.abs(vel.x) > 0.6 || Math.abs(vel.y) > 0.6 || introStart || window.v60Active || (typeof BSH !== 'undefined' && BSH);
+      /* V142: çözünürlük yalnızca parmakla sürükleme/yakınlaştırma/sinematik/savaşta düşer. Dokunup ülke seçince (yükselme + odaklanma) tuval yeniden boyutlanmaz: eskiden seçimde iki kez (düş + geri çık) yeniden boyutlanıp takılıyordu. */
+      if (_mv) { idleSince = now; if (_usr && curPR !== PRLO) setPR(PRLO); busy = true; }
+      else if (PRHI > PRLO && curPR !== PRHI && now - idleSince > 350) { setPR(PRHI); busy = true; }
       if (forceR > 0) forceR--;
       if (busy) { lastRK = k; lastRT = now; renderer.render(scene, camera); }
     }   /* V60: savaş animasyonu kareleri; V63: savaş paneli açıkken küre seyrek çizilir */
@@ -496,7 +498,7 @@
     buildC();
     if (READY) return prepOnly === true ? prepDone() : show();
     LOADING = true; var b = $$('v30b'); if (b) b.classList.add('ld');
-    loadScript('globe/three.min.js').then(function () { return loadScript('globe/data.js'); }).then(function () { return loadScript('globe/tri.js').catch(function () { }); }).then(build).then(function () { LOADING = false; if (b) b.classList.remove('ld'); if (prepOnly === true && menuUp()) { afterWarm(prepDone); return; } show(); prepDone(); })   /* V102: menü zaten kapandıysa (yavaş cihaz, 9 sn aşıldı) küre hemen açılır */
+    Promise.all([loadScript('globe/three.min.js'), loadScript('globe/data.js'), loadScript('globe/tri.js').catch(function () { })]).then(build)   /* V142: üç dosya paralel indirilir/çözülür */.then(function () { LOADING = false; if (b) b.classList.remove('ld'); if (prepOnly === true && menuUp()) { afterWarm(prepDone); return; } show(); prepDone(); })   /* V102: menü zaten kapandıysa (yavaş cihaz, 9 sn aşıldı) küre hemen açılır */
       .catch(function (e) {
       /* V91: ilk kurulum hatasında (telefonda geçici bellek/doku/ağ hatası) hemen 2B haritaya düşme; yarım kalan tuvali temizleyip bir kez daha dene. */
       if (!window.__v91retry) { window.__v91retry = 1; try { stage.querySelectorAll('canvas').forEach(function (c) { c.remove(); }); if (renderer && renderer.dispose) renderer.dispose(); } catch (x) { } renderer = null; READY = false; LOADING = false; try { stage.style.display = 'block'; stage.classList.add('v91cover'); } catch (x) { } setTimeout(window.v30Toggle, 1200); return; }
@@ -523,7 +525,7 @@
       function _go() { if (_done) return; _done = true; try { if (_mo) _mo.disconnect(); } catch (e) { } if (!BAD) { try { stage.style.display = 'block'; stage.classList.add('v91cover'); } catch (e) { } } setTimeout(window.v30Toggle, 0); setTimeout(function () { if (!READY && !BAD) { try { stage.classList.remove('v91cover'); stage.style.display = 'none'; } catch (e) { } } }, 9000); }
       function _chk() { if (menuUp()) { _seen = true; return; } if (_seen) _go(); }
       if (window.MutationObserver && document.body) { _mo = new MutationObserver(_chk); _mo.observe(document.body, { attributes: true, attributeFilter: ['class'] }); }
-      var _t0 = Date.now(); (function wait() { if (_done) return; if (_seen && menuUp() && Date.now() - _t0 > 1500) { if (window.requestIdleCallback) requestIdleCallback(preload, { timeout: 2000 }); else preload(); } _chk(); if (_done) return; if (!_seen && Date.now() - _t0 >= 3000) return _go(); setTimeout(wait, 250); })();
+      var _t0 = Date.now(); (function wait() { if (_done) return; if (_seen && menuUp() && Date.now() - _t0 > 500) { if (window.requestIdleCallback) requestIdleCallback(preload, { timeout: 700 }); else preload(); }   /* V142: menü açılır açılmaz (0,5 sn) önyükleme; eskiden 1,5 sn + boşta bekleme */ _chk(); if (_done) return; if (!_seen && Date.now() - _t0 >= 3000) return _go(); setTimeout(wait, 250); })();
     }
   }
   /* V101: menü her kapandığında (Yeni Fetih / Seferi Sürdür, oturumda defalarca) dünya uzaktan yaklaşır */

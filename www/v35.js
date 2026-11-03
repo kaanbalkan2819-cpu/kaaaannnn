@@ -145,9 +145,9 @@
       if (fired || !(minOk && gOk)) return; fired = true;
       launching = false; try { if (d.parentNode) d.parentNode.removeChild(d); root.classList.remove('go'); } catch (e) { } newGame(m);
     }
-    setTimeout(function () { minOk = true; fin(); }, 1100);
-    setTimeout(function () { gOk = true; fin(); }, 40000);   /* V132: 9 sn'lik erken geçiş kaldırıldı; perde küre + büyük ülke blokları hazır olana kadar kalır (40 sn yalnızca takılma emniyeti) */
-    setTimeout(function () { if (window.v30Prep) { try { dispose(); } catch (e) { } /* menü küresinin GPU belleğini oyun küresi kurulmadan ÖNCE boşalt (telefonda iki bağlam birden bellek yetmeyip kurulumu bozuyordu) */ try { v30Prep(function () { gOk = true; fin(); }); } catch (e) { gOk = true; fin(); } } else { gOk = true; fin(); } }, 650);
+    setTimeout(function () { minOk = true; fin(); }, 800);   /* V142: 1100 -> 800 */
+    setTimeout(function () { gOk = true; fin(); }, 20000);   /* V132: 9 sn'lik erken geçiş kaldırıldı; perde küre + büyük ülke blokları hazır olana kadar kalır (40 sn yalnızca takılma emniyeti) */
+    setTimeout(function () { if (window.v30Prep) { try { dispose(); } catch (e) { } /* menü küresinin GPU belleğini oyun küresi kurulmadan ÖNCE boşalt (telefonda iki bağlam birden bellek yetmeyip kurulumu bozuyordu) */ try { v30Prep(function () { gOk = true; fin(); }); } catch (e) { gOk = true; fin(); } } else { gOk = true; fin(); } }, 120);   /* V142: 650 -> 120 ms; düz menüde dispose edilecek GL yok, küre kurulumu hemen başlar */
   }
   window.WCLaunch = function (m) { launch(m); };   // ONLINE: online.js menüyü bu kapıdan kapatıp oyunu başlatır
   function act(a) {

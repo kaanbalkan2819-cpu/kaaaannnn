@@ -1,3 +1,18 @@
+=================== V142 ===================
+V142 — TEST EDİLMEDİ (istek gereği); yalnızca node --check söz dizimi denetimi
+
+YAPILDI
+1) Geri tuşu (www/v125.js): Android, kullanıcı etkileşimi olmadan eklenen geçmiş kayıtlarını geri tuşunda atlıyordu; nöbetçi kayıt yalnızca 'load' ve 'pointerdown'da konuyordu
+   (dokunmada pointerdown etkileşim sayılmaz) -> geri tuşu doğrudan uygulamayı kapatıyordu. Nöbetçi artık pointerup/touchend/click/keydown'da konur.
+   Oyundayken geri = "Oyundan çıkmak istiyor musunuz?" (Evet/Hayır); alt panel açıksa önce seçim kalkar. Menüdeyse bir adım geri; ana menü kökünde iki kez geri = çıkış.
+   @capacitor/app eklentisi kurulursa 'backButton' olayı da aynı işleyiciye bağlanır (çift tetikleme korumalı).
+2) "Sefer Başlıyor" süresi (www/v35.js, www/v30.js): küre dosyaları (three/data/tri) paralel yüklenir; menü açılır açılmaz (0,5 sn) önyüklenir (eskiden 1,5 sn + boşta bekleme);
+   perde altındaki küre kurulumu 650 -> 120 ms'de başlar; en az perde süresi 1,1 -> 0,8 sn; büyük ülke bloklarını bekleme sınırı 4 -> 1,2 sn; güvenlik sınırı 40 -> 20 sn.
+3) İlk ülke seçimi kasması (www/v30.js): (a) telefonda kaplama dokusunun mipmap'i her seçimde yeniden üretilmiyor; (b) çözünürlük (pixelRatio) yalnızca sürükleme/yakınlaştırma/sinematik/savaşta düşer,
+   dokunup seçince tuval iki kez yeniden boyutlanmıyor; yüksek çözünürlüğe dönüş 260 -> 350 ms.
+GERİ ALMAK: bu üç dosyadaki "V142" işaretli satırlar.
+NOT: Telefonda gerçek ölçüm yapılmadı; kasma sürerse bir sonraki adım Chrome uzak hata ayıklayıcıda (chrome://inspect) Performance kaydı almaktır.
+
 =================== V122 ===================
 V122 — YAPILANLAR / YAPILMAYANLAR  (TEST EDİLMEDİ; yalnızca node --check söz dizimi denetimi)
 
