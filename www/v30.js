@@ -97,8 +97,9 @@
   var baseJob = null;
   function* baseGen() {
     if (!baseC) { baseC = mk(OW, OH); base = baseC.getContext('2d'); }
-    base.clearRect(0, 0, OW, OH); base.globalAlpha = .5; var i, c;
-    for (i = 0; i < C.length; i++) { c = C[i]; base.beginPath(); trace(base, c, OW, OH); base.fillStyle = ownCol(c); base.fill('evenodd'); yield; }
+    baseValid = false; ovValid = false; ovDirty = null; var nb = {};   /* V176: tam yeniden çizim başladı; kısmi güncelleme tamamlanana kadar kapalı */
+    base.clearRect(0, 0, OW, OH); base.globalAlpha = .5; var i, c, cl;
+    for (i = 0; i < C.length; i++) { c = C[i]; base.beginPath(); trace(base, c, OW, OH); cl = ownCol(c); nb[c.id] = cl; base.fillStyle = cl; base.fill('evenodd'); yield; }
     base.globalAlpha = 1; base.lineWidth = 1.4 * LS; base.lineJoin = 'round'; base.strokeStyle = 'rgba(255,255,255,.38)';
     for (i = 0; i < C.length; i++) { base.beginPath(); trace(base, C[i], OW, OH); base.stroke(); yield; }
     /* V81: çok küçük ülkeler uzaktan görünmüyordu; merkezlerine ince bir halka çizilir */
@@ -108,16 +109,85 @@
       var x = ((b[0] + b[2]) / 2 + 180) / 360 * OW, y = (90 - (b[1] + b[3]) / 2) / 180 * OH, rad = Math.max(4 * LS, sp / 360 * OW * .9 + 3 * LS);
       base.beginPath(); base.arc(x, y, rad, 0, 6.2832); base.stroke();
     });
+    basePrev = nb; baseValid = true;   /* V176 */
   }
+  var hvLF = 0, hvStep = -1, hvPaint = false;   /* V178: kare sayacı / bu karede taban dilimi ve kaplama boyaması yapıldı mı */
   function stepBase() {
-    if (!baseJob) return; var t0 = performance.now(), r;
+    if (!baseJob) return; hvStep = hvLF; var t0 = performance.now(), r;
     do { r = baseJob.next(); } while (!r.done && performance.now() - t0 < 9);
     if (r.done) { baseJob = null; try { C.forEach(colorEx); } catch (e) { } needPaint = true; forceR = 3; }
   }
   function pathOf(c) { if (typeof Path2D !== 'function') return null; if (!c._p2 || c._p2w !== OW) { try { var p = new Path2D(); trace(p, c, OW, OH); c._p2 = p; c._p2w = OW; } catch (e) { c._p2 = null; return null; } } return c._p2; }   /* V150: yol bir kez çıkarılır (Rusya gibi çok noktalı ülkede seçim başına 3x JS döngüsü yoktu) */
+  /* V176: KISMİ KAPLAMA GÜNCELLEMESİ (yalnızca telefon). Seçim / savaş hedefi / tek-iki ülkenin sahiplik değişimi artık 2048x1024 kaplamanın TAMAMINI silip
+     ~8 MB dokuyu GPU'ya yüklemez: yalnızca değişen ülkelerin kutusu yeniden çizilir ve yalnızca o dikdörtgen copyTextureToTexture ile yüklenir.
+     Tarih değişim çizgisini aşan ülke (Rusya, ABD, Antarktika...), müttefik şeridi, >8 değişen ülke ya da büyük alan -> eski tam yol. Hata olursa da eski tam yol. */
+  var baseValid = false, basePrev = {}, ovValid = false, ovPrev = {}, ovDirty = null, ovAlly = false, ovPC = null, ovSrc = null;
+  function cext(c) {
+    if (c._ox) return c._ox; var a = 1e9, b = 1e9, d = -1e9, e = -1e9;
+    c.polys.forEach(function (rg) { rg[0].forEach(function (q) { if (q[0] < a) a = q[0]; if (q[0] > d) d = q[0]; if (q[1] < b) b = q[1]; if (q[1] > e) e = q[1]; }); });
+    return c._ox = { x0: (a + 180) / 360 * OW, x1: (d + 180) / 360 * OW, y0: (90 - e) / 180 * OH, y1: (90 - b) / 180 * OH, wrap: (d - a) > 180 };
+  }
+  function rectOf(list, R) {   /* ülke listesi (+ varsa önceki kirli dikdörtgen) -> birleşik, tam sayıya yuvarlanmış dikdörtgen; olmazsa null */
+    var PAD = 5 * LS + 2, x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, i, e;
+    for (i = 0; i < list.length; i++) { e = cext(list[i]); if (e.wrap) return null; if (e.x0 < x0) x0 = e.x0; if (e.y0 < y0) y0 = e.y0; if (e.x1 > x1) x1 = e.x1; if (e.y1 > y1) y1 = e.y1; }
+    if (R) { if (R.x < x0 + PAD) x0 = Math.min(x0, R.x + PAD); if (R.y < y0 + PAD) y0 = Math.min(y0, R.y + PAD); x1 = Math.max(x1, R.x + R.w - PAD); y1 = Math.max(y1, R.y + R.h - PAD); }
+    if (x0 > x1 || y0 > y1) return null;
+    x0 = Math.max(0, Math.floor(x0 - PAD)); y0 = Math.max(0, Math.floor(y0 - PAD)); x1 = Math.min(OW, Math.ceil(x1 + PAD)); y1 = Math.min(OH, Math.ceil(y1 + PAD));
+    var r = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }; if (r.w < 2 || r.h < 2 || r.w * r.h > OW * OH * 0.4) return null; return r;
+  }
+  function hits(c, r) { var e = cext(c), P = 5 * LS + 2; if (e.wrap) return true; return !(e.x1 + P < r.x || e.x0 - P > r.x + r.w || e.y1 + P < r.y || e.y0 - P > r.y + r.h); }
+  function baseQuick() {   /* sahiplik değişti: yalnızca rengi değişen ülkelerin kutusunu taban katmanda yeniden çiz; true = tam yeniden üretim gerekmez */
+    if (!LOWQ || !baseValid || !baseC || !ovValid) return false;
+    try {
+      var cur = {}, ch = [], i, c, k; for (i = 0; i < C.length; i++) { c = C[i]; k = ownCol(c); cur[c.id] = k; if (basePrev[c.id] !== k) ch.push(c); }
+      if (!ch.length) { basePrev = cur; return true; }
+      if (ch.length > 8) return false;
+      var R = rectOf(ch, null); if (!R) return false;
+      base.save(); base.beginPath(); base.rect(R.x, R.y, R.w, R.h); base.clip(); base.clearRect(R.x, R.y, R.w, R.h);
+      base.globalAlpha = .5; for (i = 0; i < C.length; i++) { c = C[i]; if (!hits(c, R)) continue; base.beginPath(); trace(base, c, OW, OH); base.fillStyle = cur[c.id]; base.fill('evenodd'); }
+      base.globalAlpha = 1; base.lineWidth = 1.4 * LS; base.lineJoin = 'round'; base.strokeStyle = 'rgba(255,255,255,.38)';
+      for (i = 0; i < C.length; i++) { c = C[i]; if (!hits(c, R)) continue; base.beginPath(); trace(base, c, OW, OH); base.stroke(); }
+      base.lineWidth = 1.2 * LS; base.strokeStyle = 'rgba(255,230,160,.75)';
+      C.forEach(function (c) {
+        var b = c.bb, sp = Math.max(b[2] - b[0], b[3] - b[1]); if (sp >= 2.2 || !hits(c, R)) return;
+        var x = ((b[0] + b[2]) / 2 + 180) / 360 * OW, y = (90 - (b[1] + b[3]) / 2) / 180 * OH, rad = Math.max(4 * LS, sp / 360 * OW * .9 + 3 * LS);
+        base.beginPath(); base.arc(x, y, rad, 0, 6.2832); base.stroke();
+      });
+      base.restore(); basePrev = cur;
+      ovDirty = ovDirty ? { x: Math.min(ovDirty.x, R.x), y: Math.min(ovDirty.y, R.y), w: Math.max(ovDirty.x + ovDirty.w, R.x + R.w) - Math.min(ovDirty.x, R.x), h: Math.max(ovDirty.y + ovDirty.h, R.y + R.h) - Math.min(ovDirty.y, R.y) } : R;
+      return true;
+    } catch (e) { try { base.restore(); } catch (x) { } baseValid = false; return false; }
+  }
+  function styleKey(c) { var st = style(c); return st ? st.col + '|' + st.a + '|' + ((G && G.sel === c.id) ? 1 : 0) : ''; }
+  function drawStyled(c, st) {   /* seçili / savaş hedefi / flaş ülkesinin dolgusu + çizgisi (tam yol ile aynı çizim) */
+    var P = pathOf(c);
+    ov.save(); if (!P) { ov.beginPath(); trace(ov, c, OW, OH); } ov.globalCompositeOperation = 'destination-out'; ov.globalAlpha = 1; ov.fillStyle = '#000'; if (P) ov.fill(P, 'evenodd'); else ov.fill('evenodd');
+    ov.globalCompositeOperation = 'source-over'; ov.globalAlpha = st.a; ov.fillStyle = st.col; if (P) ov.fill(P, 'evenodd'); else ov.fill('evenodd'); ov.restore();
+    ov.globalAlpha = 1; ov.lineWidth = 1.6 * LS; ov.strokeStyle = (G && G.sel === c.id) ? 'rgba(255,240,180,.95)' : 'rgba(255,255,255,.5)'; if (P) ov.stroke(P); else { ov.beginPath(); trace(ov, c, OW, OH); ov.stroke(); }
+  }
+  function ovQuick() {
+    if (!LOWQ || !ovValid || ovAlly || !renderer || !ovTex || ovTex.generateMipmaps || !G || !THREE) return false;
+    try {
+      if (window.WCAllyTarget && WCAllyTarget()) return false;
+      var cur = {}, ch = [], i, c, k; for (i = 0; i < C.length; i++) { c = C[i]; k = styleKey(c); cur[c.id] = k; if ((ovPrev[c.id] || '') !== k) ch.push(c); }
+      var D = ovDirty; if (!ch.length && !D) return true;
+      if (ch.length > 8) return false;
+      var R = rectOf(ch, D); if (!R) return false;
+      ov.save(); ov.beginPath(); ov.rect(R.x, R.y, R.w, R.h); ov.clip(); ov.globalAlpha = 1; ov.globalCompositeOperation = 'source-over';
+      ov.clearRect(R.x, R.y, R.w, R.h); ov.drawImage(baseC, R.x, R.y, R.w, R.h, R.x, R.y, R.w, R.h);
+      for (i = 0; i < C.length; i++) { c = C[i]; if (!cur[c.id] || !hits(c, R)) continue; var st = style(c); if (st) drawStyled(c, st); }
+      ov.restore();
+      if (!ovPC) ovPC = document.createElement('canvas'); ovPC.width = R.w; ovPC.height = R.h;
+      ovPC.getContext('2d').drawImage(ovC, R.x, R.y, R.w, R.h, 0, 0, R.w, R.h);
+      if (!ovSrc) ovSrc = new THREE.Texture(ovPC); ovSrc.image = ovPC;
+      renderer.copyTextureToTexture(new THREE.Vector2(R.x, OH - R.y - R.h), ovSrc, ovTex);   /* doku dikey çevrik (flipY): satır konumu alttan sayılır */
+      ovPrev = cur; ovDirty = null; forceR = 3; return true;
+    } catch (e) { try { ov.restore(); } catch (x) { } ovValid = false; ovDirty = null; return false; }
+  }
   function paintOverlay() {
-    var sg = ownSig(); if (!baseC || sg !== baseSig) { baseSig = sg; baseJob = baseGen(); stepBase(); }
-    if (baseJob) { needPaint = true; return; }   /* V143: taban hazır olana kadar kaplama çizilmez (kare başına dilim ilerler) */   /* V50: 3B blok renkleri de sahiplik değişince yenilenir */
+    var sg = ownSig(); if (!baseC || sg !== baseSig) { baseSig = sg; if (!baseQuick()) { baseJob = baseGen(); stepBase(); } }
+    if (baseJob) { needPaint = true; return; }
+    if (ovQuick()) return;   /* V176 */   /* V143: taban hazır olana kadar kaplama çizilmez (kare başına dilim ilerler) */   /* V50: 3B blok renkleri de sahiplik değişince yenilenir */
     ov.globalAlpha = 1; ov.clearRect(0, 0, OW, OH); ov.drawImage(baseC, 0, 0);
     C.forEach(function (c) {
       var st = style(c); if (!st) return; var P = pathOf(c);   /* V150 */
@@ -127,6 +197,7 @@
     });
     try { snapAlly(); allyLines(0); } catch (e) { }   /* V109: seçili ülkenin müttefiklerinin üzerinden akan kırmızı şerit */
     ovTex.needsUpdate = true;
+    try { var _pv = {}; for (var _i = 0; _i < C.length; _i++) _pv[C[_i].id] = styleKey(C[_i]); ovPrev = _pv; ovAlly = !!snapOk; ovDirty = null; ovValid = true; } catch (e) { ovValid = false; }   /* V176 */
   }
   var snapC = null, snapOk = false, aPh = 0;
   function snapAlly() {
@@ -432,6 +503,7 @@
   function bindInput() {
     var el = renderer.domElement, ray = new THREE.Raycaster(), m2 = new THREE.Vector2(); el.style.touchAction = 'none';
     el.addEventListener('pointerdown', function (e) {
+      if (LOWQ && typeof BSH !== 'undefined' && BSH && !window.v60Active) return;   /* V179: savaş paneli açıkken üstteki harita kilitli (dokunma/sürükleme/yakınlaştırma yok) */
       el.setPointerCapture(e.pointerId); ptrs[e.pointerId] = { x: e.clientX, y: e.clientY }; focusQ = null; vel.x = vel.y = 0;
       if (Object.keys(ptrs).length === 1) down = { x: e.clientX, y: e.clientY, t: performance.now(), moved: 0 };
       else { down = null; var a = Object.keys(ptrs).map(function (k) { return ptrs[k]; }); pinch0 = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); pinchA = Math.atan2(a[1].y - a[0].y, a[1].x - a[0].x); pinchM = { x: (a[0].x + a[1].x) / 2, y: (a[0].y + a[1].y) / 2 }; }
@@ -488,6 +560,9 @@
   function loop(now) {
     if (!ON) { rafId = 0; return; } rafId = requestAnimationFrame(loop);
     if (menuUp()) { last = now; return; }   /* V90: ana menü üstteyken gizli küreyi çizme */
+    if (pauseUp()) { pzW = true; last = now; return; }   /* V177: duraklatma kartı açıkken küre çizilmez / hareket etmez (kart açılış-kapanış karelerine GPU işi binmesin) */
+    if (pzW) { pzW = false; forceR = 3; }   /* V177: kart kapandı -> ilk karede küre bir kez tazelenir */
+    hvLF++; hvPaint = false;   /* V178 */
     var _raw = now - last, dt = Math.min(0.05, _raw / 1000); last = now;
     /* V148: uyarlanabilir çözünürlük (yalnızca telefon): hareket/animasyon sırasında kareler uzun sürerse çözünürlük 0.25 kademe düşer (en az 0.75) */
     var _sk = (G && G.sel) || ''; if (_sk !== window.__v150sel || introStart) { window.__v150sel = _sk; window.__v148t = performance.now(); window.__v148e = 16; }   /* V150: ülke seçimi/yaklaşma anındaki tek seferlik takılma çözünürlüğü düşürmesin (setPR = tuval yeniden ayırma = ikinci takılma) */
@@ -505,9 +580,9 @@
         } else if (_q.off && now - _q.t > 2500) { _q.off = 0; _q.hi = 0; _q.e = 16; cloudM.visible = true; if (atmM) atmM.visible = true; forceR = 3; }
       }
     } catch (e) { }
-    if (needPaint) { needPaint = false; forceR = 3; var _p0 = performance.now(); paintOverlay(); PF('paintOverlay', _p0); _p0 = performance.now(); C.forEach(function (c) { if (EX[c.id]) colorEx(c); }); PF('colorEx', _p0); }
-    if (baseJob) { var _b0 = performance.now(); stepBase(); PF('baseStep', _b0); }
-    SLICE_LEFT = 6; var _s0 = performance.now();   /* V140: kare başına blok üretim bütçesi (ms) */
+    if (needPaint) { needPaint = false; forceR = 3; hvPaint = LOWQ; var _p0 = performance.now(); paintOverlay(); PF('paintOverlay', _p0); _p0 = performance.now(); C.forEach(function (c) { if (EX[c.id]) colorEx(c); }); PF('colorEx', _p0); }
+    if (baseJob && !(LOWQ && hvStep === hvLF)) { var _b0 = performance.now(); stepBase(); PF('baseStep', _b0); }   /* V178: paintOverlay bu karede zaten bir taban dilimi çalıştırdıysa ikincisi sonraki kareye */
+    SLICE_LEFT = (LOWQ && hvPaint) ? 2 : 6;   /* V178: bu karede kaplama boyandıysa 3B blok üretimi en az bütçeyle (yine ilerler, takılmaz) */ var _s0 = performance.now();   /* V140: kare başına blok üretim bütçesi (ms) */
     for (var i = 0; i < C.length; i++) {
       var c = C[i]; if (c.h === c.t) continue;
       var d = c.t - c.h; if (c.t > 0 && (!EX[c.id] || GEN[c.id]) && !sliceBuild(c)) continue;   /* V140: blok hazır değilse bu karede atla (ana iş parçacığı kilitlenmez) */
@@ -519,7 +594,7 @@
       /* V72: sahnede hiçbir şey değişmediyse (kamera/küre/yükselen ülke/animasyon yok) kareyi tekrar çizme; bulutlar için ~4 kare/sn yeter -> ülke seçiminde GPU/pil yükü ve kasma azalır */
       var q = globe.quaternion, k = camera.position.z.toFixed(4) + '|' + q.x.toFixed(4) + '|' + q.y.toFixed(4) + '|' + q.z.toFixed(4) + '|' + q.w.toFixed(4) + '|' + vo.toFixed(3) + '|' + window.innerWidth + 'x' + window.innerHeight;
       var _bsh = (typeof BSH !== 'undefined' && BSH && !window.v60Active);   /* V161: savaş paneli açıkken küre her karede çizilmez (eskiden BSH her kareyi zorluyordu -> panelde kasma) */
-      var busy = k !== lastRK || window.v60Active || anyMoving() || (now - lastRT) > (_bsh ? 1200 : (curPR > PRLO ? 1500 : 250)) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
+      var busy = k !== lastRK || window.v60Active || anyMoving() || (now - lastRT) > (_bsh ? (LOWQ ? 1e9 : 1200) : (curPR > PRLO ? 1500 : (LOWQ ? 1000 : 250))) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
       var _mv = k !== lastRK || window.v60Active || anyMoving() || introStart;
       if (_mv) { idleSince = now; if (curPR !== PRLO) setPR(PRLO); busy = true; }
       else if (_bsh) { idleSince = now + 900; if (curPR !== PRLO) { setPR(PRLO); busy = true; } }   /* panel kapanınca PRHI'ye ~1,2 sn sonra geç: tuval yeniden ayırma kapanış geçişiyle çakışmasın */   /* V161: panel açıkken yüksek çözünürlüğe geçip tuvali yeniden ayırma */
@@ -608,6 +683,8 @@
     arm();
   })();
   function menuUp() { return !!(document.body && document.body.classList.contains('wcm-on')); }
+  var pzW = false;
+  function pauseUp() { try { var m = document.getElementById('mod'); return !!(m && m.style.display === 'flex' && document.querySelector('#box .wc141p')); } catch (e) { return false; } }   /* V177 */
   if (document.readyState === 'complete') setTimeout(addBtn, 0); else window.addEventListener('load', function () { setTimeout(addBtn, 0); });
   try { var _ngI = window.newGame || newGame; newGame = function () { var r = _ngI.apply(this, arguments); try { if (ON && stage) doIntro(); else introNext = true; } catch (e) { } return r; }; } catch (e) { }
 })();

@@ -599,3 +599,53 @@ Neden: dice3d.js pose() her karede 6 yüzün --sh (gölge) değişkenini yazıyo
 www/v156.css sonu — dönerken yüz gölgesi geçişi ve filtre kapalı, küp/gölge katmanı will-change ile GPU'ya alınır, zemin gölgesindeki blur filtresi kaldırıldı.
 Görsel fark: uçuş sırasında yüz karartması biraz daha seyrek güncellenir; inişte tam doğru görünür.
 GERİ ALMAK İÇİN: dice3d.js'te "V175" bloğunu eski pose() döngüsüyle değiştirin; v156.css'teki V175 bloğunu silin.
+
+
+=================== V176 ===================
+V176 — KASMA GİDERME 1/3: KAPLAMA (OVERLAY) KISMİ GÜNCELLEME (TEST EDİLMEDİ; node --check geçti; telefonda DENENMEDİ)
+Neden (ekran kaydı analizi): ülke seçiminde (~13 kare/sn, 120-270 ms boşluklar) ve savaş sonucunda (584 ms'ye kadar) paintOverlay() her seferinde 2048x1024 kaplamayı silip taban görseli kopyalıyor ve ~8 MB dokuyu GPU'ya tümden yüklüyordu; sahiplik değişince de 197 ülkelik taban katman baştan çiziliyordu.
+Çözüm (yalnızca telefon / LOWQ): www/v30.js
+  - ovQuick(): seçim, savaş hedefi (BT) ve flaş değişince yalnızca değişen ülkelerin kutusu kaplamada yeniden çizilir; o dikdörtgen renderer.copyTextureToTexture ile yüklenir (needsUpdate ile tüm doku yüklenmez).
+  - baseQuick(): sahiplik değişince rengi değişen ülkelerin (en çok 8) kutusu taban katmanda yeniden çizilir; hiçbir renk değişmediyse yeniden üretim hiç yapılmaz. Kirli dikdörtgen kaplamaya da aktarılır.
+  - Eski tam yola otomatik dönüş: tarih değişim çizgisini aşan ülke (Rusya, ABD, Antarktika, Fiji...), müttefik şeridi açıkken, 8'den çok değişen ülke, alan %40'tan büyükse ya da herhangi bir hata olursa.
+  - Masaüstü (LOWQ değil) davranışı AYNEN eski.
+Beklenen görsel fark: yok (aynı piksel çıktısı hedeflenir). Olası risk: dokuda seçili ülke çevresinde dikdörtgen izi / yanlış yerde güncelleme görülürse (copyTextureToTexture satır konumu) aşağıdaki geri alma ile eski davranışa dönün.
+GERİ ALMAK İÇİN: www/v30.js'te ovQuick() ve baseQuick() fonksiyonlarının ilk satırına "return false;" ekleyin (eski tam yol aynen çalışır).
+
+
+=================== V177 ===================
+V177 — KASMA GİDERME 2/3: DURAKLATMA KARTI + BOŞTA KÜRE ÇİZİMİ (TEST EDİLMEDİ; node --check geçti; telefonda DENENMEDİ)
+Neden (ekran kaydı analizi): duraklatma kartı açılırken/kapanırken 165-265 ms'lik kare boşlukları vardı. Kartın kendisi hafif (v141.js open() yalnızca HTML basıyor); asıl sorun, kartın altında küre WebGL tuvalinin yaşamaya devam etmesiydi: boştayken her 250 ms'de bir tam kare çiziliyordu (bulut kayması için) ve bu çizimler kartın açılış/kapanış karelerine denk gelebiliyordu. Aynı 250 ms'lik nabız, kayıttaki 6-8. saniyedeki düzenli ~270 ms boşluklarla da örtüşüyor.
+Çözüm: www/v30.js
+  - pauseUp(): "#mod" açık ve içinde duraklatma kartı (.wc141p) varsa loop() küreyi hiç çizmez ve hareket ettirmez (ana menüdeki menuUp() ile aynı mantık); kart kapanınca ilk karede küre bir kez tazelenir (pzW/forceR).
+  - Boşta çizim aralığı yalnızca telefonda (LOWQ) 250 ms -> 1000 ms. Bulut kayması saniyede ~0,23° olduğundan görsel fark yok; boşta ana iş parçacığı yükü ~4 kat azalır. Dokunma/hareket/seçim değişince çizim yine anında olur (k imzası, forceR, anyMoving).
+Masaüstü (LOWQ değil) boşta aralığı AYNEN 250 ms.
+GERİ ALMAK İÇİN: v30.js'te "V177" yazan iki satırı (pauseUp kullanan iki satır + pauseUp/pzW tanımı) silin; "(LOWQ ? 1000 : 250)" ifadesini "250" yapın.
+
+
+=================== V178 ===================
+V178 — KASMA GİDERME 3/3: ÜLKE SEÇİMİNDE İŞ YAYMA + DUMAN/PARÇACIK YÜKÜ (TEST EDİLMEDİ; node --check geçti; telefonda DENENMEDİ)
+Neden (ekran kaydı analizi, madde 3 ve 4): ülke seçiminde kaplama boyama, 3B blok üretimi ve (sahiplik değişince) taban katman dilimi aynı karede üst üste biniyordu. Savaş sonrası duman/ateş/toz parçacıkları telefonda dolum hızını (büyük, yarı saydam noktalar) zorluyordu.
+Bilgi: seçimde kamera hareketi ve panel zaten v26.js ile ayrı karelere yayılı (panel -> boyama -> 2 kare sonra kamera). Kart içeriği kamera bitene kadar BEKLETİLMEDİ (panel anında dolar; kullanıcıya gecikme gibi görünür).
+Çözüm (yalnızca telefon / LOWQ):
+  www/v30.js
+    - Bir karede kaplama boyandıysa 3B blok üretim bütçesi 6 ms -> 2 ms (üretim yine ilerler, bir sonraki karelerde tamamlanır; yükselme birkaç kare gecikebilir).
+    - paintOverlay() içinde zaten bir taban dilimi (stepBase, ~9 ms) çalıştıysa aynı karede ikinci dilim çalışmaz (sonraki kareye kalır).
+  www/wc_battle_fx.js
+    - Telefonda (pointer:coarse): parçacık üst sınırları kıvılcım 2200 -> 1300, alev 1200 -> 700, duman 1800 -> 1000; hız bazlı salımlar (duman sütunu, yangın, gemi izi) %40 azaltıldı; nokta sprite'ı en çok 256 -> 150 px (dolum yükü).
+    - Duman dokusu zaten bir kez üretiliyordu (her karede çizim yoktu); bu kısım değişmedi.
+Beklenen görsel fark: telefonda duman biraz daha seyrek/küçük; masaüstü AYNEN eski.
+GERİ ALMAK İÇİN: v30.js'te "V178" yazan 3 yeri eski haline getirin (hvLF/hvPaint satırlarını silin; "SLICE_LEFT = 6" yapın; stepBase koşulunu "if (baseJob)" yapın). wc_battle_fx.js'te FXLOW'u "false" yapmak yeterli.
+
+
+=================== V179 ===================
+V179 — SAVAŞ PANELİNDE ÜSTTEKİ HARİTA KİLİTLİ (yalnızca telefon; TEST EDİLMEDİ; node --check geçti)
+Panel açılıp harita yerine oturduktan sonra küre hiç çizilmez (eskiden 1,2 sn'de bir çiziliyordu) ve dokunma/sürükleme/yakınlaştırma kapalıdır. Savaş animasyonu (v60Active) sürerken çizim normal devam eder. Panel kapanınca küre kendiliğinden tazelenir.
+Not: panelde bulutlar artık kımıldamaz.
+GERİ ALMAK İÇİN: v30.js'te "V179" satırını silin ve "(LOWQ ? 1e9 : 1200)" ifadesini "1200" yapın.
+
+
+=================== V180 ===================
+V180 — DURAKLATMA KARTI GÖLGESİ KÜÇÜLTÜLDÜ (TEST EDİLMEDİ)
+v141.css: .wb-panel gölgesi 0 18px 50px -> 0 8px 20px (büyük bulanık gölge açılış/kapanışta her karede yeniden hesaplanıyordu).
+GERİ ALMAK İÇİN: v141.css'te 0 8px 20px ifadesini 0 18px 50px yapın.

@@ -52,7 +52,8 @@
     });
   }
 
-  const emitCount = (perSec, dt) => { const x = perSec * dt; let n = Math.floor(x); if (Math.random() < x - n) n++; return n; };
+  const FXLOW = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);   /* V178: telefonda parçacık yükü azaltılır */
+  const emitCount = (perSec, dt) => { const x = perSec * (FXLOW ? .6 : 1) * dt; let n = Math.floor(x); if (Math.random() < x - n) n++; return n; };
   function mkCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
   function softTex() {
     const c = mkCanvas(64, 64), x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -106,7 +107,7 @@
       this.mat = new T.ShaderMaterial({
         uniforms: { map: { value: tex }, uScale: { value: 600 } },
         vertexShader: 'attribute vec3 pcolor;attribute float alpha;attribute float size;attribute float rot;uniform float uScale;varying vec3 vC;varying float vA;varying float vR;' +
-          'void main(){vC=pcolor;vA=alpha;vR=rot;vec4 mv=modelViewMatrix*vec4(position,1.0);gl_PointSize=clamp(size*uScale/-mv.z,1.0,256.0);gl_Position=projectionMatrix*mv;}',
+          'void main(){vC=pcolor;vA=alpha;vR=rot;vec4 mv=modelViewMatrix*vec4(position,1.0);gl_PointSize=clamp(size*uScale/-mv.z,1.0,' + (FXLOW ? '150.0' : '256.0') + ');gl_Position=projectionMatrix*mv;}',
         fragmentShader: 'uniform sampler2D map;varying vec3 vC;varying float vA;varying float vR;' +
           'void main(){vec2 p=gl_PointCoord-.5;float s=sin(vR),c=cos(vR);p=vec2(c*p.x-s*p.y,s*p.x+c*p.y)+.5;vec4 t=texture2D(map,p);gl_FragColor=vec4(vC,t.a*vA);}',
         transparent: true, depthWrite: false, blending: additive ? T.AdditiveBlending : T.NormalBlending
@@ -681,9 +682,9 @@
       this.time = 0; this.timeScale = 1; this.hs = 0; this.hsK = .25; this.tasks = []; this.anims = []; this.tickers = []; this.objs = new Set();
       this.waveY = this.opts.waveY || ((x, z, t) => Math.sin(x * .55 + t * 1.2) * .04 + Math.sin(z * .7 + t * 1.6) * .03);
       this.tex = softTex(); this.smokeTex = smokeTex(); this.gradTex = gradTex(); this.ringTex = ringTex();
-      this.padd = new Particles(2200, true, this.tex);      // kıvılcım / parıltı
-      this.pfire = new Particles(1200, true, this.smokeTex); // alev / ateş topu
-      this.pnorm = new Particles(1800, false, this.smokeTex); // duman / toz / köpük
+      this.padd = new Particles(FXLOW ? 1300 : 2200, true, this.tex);      // kıvılcım / parıltı
+      this.pfire = new Particles(FXLOW ? 700 : 1200, true, this.smokeTex); // alev / ateş topu
+      this.pnorm = new Particles(FXLOW ? 1000 : 1800, false, this.smokeTex); // duman / toz / köpük
       this.sys = [this.padd, this.pfire, this.pnorm];
       this.root.add(this.pnorm.points, this.pfire.points, this.padd.points);
       this.lights = [0, 1, 2].map(() => { const l = new T.PointLight(0xffffff, 0, 14, 2); l.userData = { t0: -1, dur: 1, peak: 0 }; this.root.add(l); return l; });

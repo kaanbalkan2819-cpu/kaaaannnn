@@ -7,7 +7,7 @@ body.wc141-ig .wb-scene,body.wc141-ig .wb-title,body.wc141-ig .wb-foot{display:n
 body.wc141-ig .wb-wrap{height:auto!important;padding:0!important;gap:0!important;overflow:visible!important;justify-content:center!important}
 body.wc141-ig .wb-wrap>:first-child{margin-top:0!important}
 body.wc141-ig .wb-wrap>:last-child{margin-bottom:0!important}
-body.wc141-ig .wb-panel{box-shadow:0 18px 50px #000b,0 0 0 1px #d9b25e55!important}
+body.wc141-ig .wb-panel{box-shadow:0 8px 20px #000b,0 0 0 1px #d9b25e55!important}
 body.wc141-ig .wb-panel.wb-set,body.wc141-ig .wb-panel.wb-ask{max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch}
 @keyframes wc141in{from{opacity:0}to{opacity:1}}
 
