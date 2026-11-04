@@ -24,16 +24,18 @@
     var tA = 0, tB = 0, mxT = 1e-9, rows = '';
     for (var i = 0; i < 5; i++) { var a0 = +own[i] || 0, b0 = Math.max(a0, +sd.s[i] || 0); tA += a0; tB += b0; }
     var mx = 1e-9; for (var j = 0; j < 5; j++) mx = Math.max(mx, +sd.s[j] || 0, +own[j] || 0);
-    function row(ic, label, a, b, mxv, bold) {
+    function row(ic, label, a, b, mxv, bold, kn) {
+      if (!kn) { a = 0; b = 0; }
       var pa = Math.max(2, a / mxv * 100), pb = Math.max(pa, b / mxv * 100);
       return '<div style="display:flex;align-items:center;gap:6px;margin:3px 0;font-size:12px"><span style="width:18px">' + ic + '</span><span style="flex:1;min-width:0"><div style="position:relative;height:' + (bold ? 9 : 6) + 'px;border-radius:5px;background:rgba(255,255,255,.1);overflow:hidden">' +
         '<div style="position:absolute;left:0;top:0;bottom:0;width:' + pb + '%;background:#ef4444"></div>' +
         '<div style="position:absolute;left:0;top:0;bottom:0;width:' + pa + '%;background:#3b82f6"></div></div></span>' +
-        '<span style="min-width:84px;text-align:right"><b style="color:#60a5fa">' + num(a) + '</b> → <b style="color:#f87171">' + num(b) + '</b></span></div>';
+        '<span style="min-width:84px;text-align:right"><b style="color:#60a5fa">' + (kn ? num(a) : '?') + '</b> → <b style="color:#f87171">' + (kn ? num(b) : '?') + '</b></span></div>';
     }
     h += '<div style="font-size:11px;margin-bottom:3px"><span style="color:#60a5fa">■ ' + X('kendi gücü', 'own power') + '</span> &nbsp; <span style="color:#f87171">■ ' + X('müttefikleriyle birlikte', 'with allies') + '</span></div>';
-    h += row('⚡', '', tA, tB, Math.max(tB, 1e-9), true);
-    for (var k = 0; k < 5; k++) h += row(IC[k], '', +own[k] || 0, Math.max(+own[k] || 0, +sd.s[k] || 0), mx, false);
+    var knAll = true; for (var q = 0; q < 5; q++) if (!know(G.pl, e, q)) knAll = false;
+    h += row('⚡', '', tA, tB, Math.max(tB, 1e-9), true, knAll);
+    for (var k = 0; k < 5; k++) h += row(IC[k], '', +own[k] || 0, Math.max(+own[k] || 0, +sd.s[k] || 0), mx, false, !!know(G.pl, e, k));
     if (!joined.length) h += '<div style="opacity:.8;font-size:12px;margin-top:2px">' + X('Müttefikleri bu savaşa katılmaz (kırmızı = mavi).', 'Its allies will not join this fight (red = blue).') + '</div>';
     var d = document.createElement('div'); d.id = 'wcally';
     d.style.cssText = 'margin:8px 0;padding:8px 10px;border:1px solid #7c3aed;border-radius:10px;background:rgba(88,28,135,.28);color:#eee';
@@ -55,6 +57,6 @@
       return _k.apply(this, arguments);
     }; know.wc109 = 1;
   }
-  hookKnow(); hook(); window.addEventListener('load', function () { hookKnow(); hook(); });
+  hook(); window.addEventListener('load', function () { hook(); });   /* keşifsiz görünürlük (hookKnow) kaldırıldı */
   hook(); window.addEventListener('load', hook); setTimeout(hook, 1500);
 })();

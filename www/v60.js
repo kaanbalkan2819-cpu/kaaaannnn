@@ -17,7 +17,7 @@
   var MIDPT = true;      // V99: kara/ateş/füze sahneleri saldıran ve savunan ülkelerin MERKEZLERİNİN tam ortasında kurulur (false = eski sınır noktası yerleşimi)
   var TS = 1.3;          // animasyon hızı (1 = demo hızı)
   var BLUE = 0x3b82f6, RED = 0xff5a47, CYAN = 0x22d3ee;   // CYAN: saldıranın müttefiki (ikinci taraf)
-  var fx = null, fx2 = null, loadP = null, bad = false, play = null, shield = null, shk = 0, pend = null, hid = false, fails = 0;
+  var fx = null, fx2 = null, fx3 = null, loadP = null, bad = false, play = null, shield = null, shk = 0, pend = null, hid = false, fails = 0;
 
   function X(tr, en) { return (typeof L !== 'undefined' && L == 'tr') ? tr : en; }
   function A() { return window.v30API || null; }
@@ -42,6 +42,38 @@
     return fx;
   }
   function ensureFx2() { if (!fx2) fx2 = mkFx(); return fx2; }   // V67: müttefik saldırısı için ikinci sahne
+  function ensureFx3() { if (!fx3) fx3 = mkFx(); return fx3; }   // V165: müttefik varken karşı taraf için üçüncü sahne
+  /* V166: BİZİM BİRLİKLER VURULUR — yenilgide bizim (dud) birliklerimiz curV dizisine "kurban" olarak kaydolur; karşı sahnenin mermileri
+     (HKF kancaları) bu birliklerin dünya konumuna nişan alır ve isabette birlik patlar. */
+  var curV = null, HKF = null;
+  function fxo(o) {
+    if (curV) o.victim = curV;
+    if (HKF) { var h = HKF(); o.aim = h.aim; o.onHit = h.hit; }
+    return o;
+  }
+  function mkHooks(fc, victims) {
+    return function () {
+      var asg = {};
+      return {
+        aim: function (key, ahead) {
+          var v = asg[key];
+          if (!v || !v.alive) {
+            var pool = victims.filter(function (q) { return q.alive; }), fr = pool.filter(function (q) { return !q.claimed; });
+            v = fr.length ? fr[0] : (pool.length ? pool[(Math.random() * pool.length) | 0] : null);
+            if (!v) return null; asg[key] = v;
+          }
+          v.claimed = true;
+          try {
+            var sm = v.sample(ahead || 0); fc.root.updateWorldMatrix && fc.root.updateWorldMatrix(true, false);
+            var l = fc.root.worldToLocal(sm.w.clone()), k = v.fx.root.scale.x / (fc.root.scale.x || 1);
+            return { x: l.x, y: Math.max(.05, sm.h * k), z: l.z };
+          } catch (e) { return null; }
+        },
+        hit: function (key) { var v = asg[key]; if (v) v.die(); }
+      };
+    };
+  }
+  var PAR_COUNTER = true;   // V165: false yapılırsa karşı taraf eski V77 gibi sırayla saldırır
 
   var TMPV = null;
   /* V67: modeller oyuncunun bakış açısına göre boyutlanır — sahne (yerel uzunluk ≈ 11.6) kameranın görüş alanının dar kenarının
@@ -247,6 +279,19 @@
         if (bad === 0) return best;
       }
     }
+    if (best && land && MIDPT && best.bad > 2) {   /* V163: orta nokta sığmadı -> gerçek sınır noktalarında dene; hâlâ sığmazsa tank denize/3. ülkeye taşmasın diye yedek sahneye (saldıranın kendi toprağından ateş) geç */
+      var bc = []; try { bc = borderCands(a, from, tg, va, vt); } catch (eB) { bc = []; }
+      for (var bi = 0; bi < bc.length; bi++) for (var bs = 0; bs < scales.length; bs++) {
+        var PB = bc[bi], dB = [vt.clone().sub(va), vt.clone().sub(PB), PB.clone().sub(va)];
+        for (var bd2 = 0; bd2 < dB.length; bd2++) {
+          var frB = frameAt(a, PB, dB[bd2]), scB = SC * sizeF(ids) * scales[bs], badB = scoreLand(a, frB, scB, ids, tg);
+          if (badB === 0) badB = denseLand(a, frB, scB, ids, tg);
+          if (badB < best.bad) best = { bad: badB, fr: frB, sc: scB, P: PB };
+          if (badB === 0) return best;
+        }
+      }
+      return best.bad <= 2 ? best : null;
+    }
     if (best && land && MIDPT) return best;   /* V99: orta nokta sabit; sığmazsa en az hatalı ölçek kullanılır */
     if (best && !land && FORCE_SEA) return best;   /* V101: son çare: deniz sahnesi en az hatalı konumda */
     return best && best.bad <= (land ? 2 : 0) ? best : null;   /* V93b: kara tolerans 2 (animasyon kapanmasın) */   /* V92: kara sahnesinde de hata toleransı sıfır: birlik ayak izi başka ülkeye taşmaz; sığmazsa yedek sahne (kendi sınırına göre küçültülür) */   // V84: deniz sahnesinde hiç hata yok (gemi karaya taşmaz); kurulamazsa yedek sahne   // V67: başka ülkeye taşan sahne kurulmaz (en çok 2 kenar noktası hoşgörü)
@@ -396,17 +441,17 @@
       var kind = pickKind(), air = false;
       if (kind === 'air') {   // V124: HAVA SALDIRISI — 2 savaş uçağı hedefin üstünden alçalıp bomba bırakır
         var IA = pickImpacts(a, pl.fr, pl.sc, tg, 4, 0, 5.6, 3.6, 10), tosA = IA.pts.map(function (q) { return up(q, .15); });
-        var dA = f.planeAttack({ from: V(0, 0, -5), to: tosA[0], tos: tosA, color: o.color, scale: .95, planes: 2, bombs: 2, blast: win ? 1.7 : 1.2 });
+        var dA = f.planeAttack(fxo({ from: V(0, 0, -5), to: tosA[0], tos: tosA, color: o.color, scale: .95, planes: 2, bombs: 2, dud: !win, blast: win ? 1.7 : 1.2 }));
         dur = dA && dA.duration || 9; air = true;
       } else if (kind === 'twoTank') {   // V124: iki tank
         var T1 = pickImpacts(a, pl.fr, pl.sc, tg, 2, -1.4, 5.6, 3.6, 10), T2 = pickImpacts(a, pl.fr, pl.sc, tg, 2, 1.4, 5.4, 3.6, 10);
-        var e1 = f.tankAttack({ from: V(-1.5, 0, -5.4), to: up(T1.pts[0], .3), tos: T1.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15 * tk, shots: 2, blast: win ? 1.7 : 1.2 });
-        var e2 = f.tankAttack({ from: V(1.6, 0, -5), to: up(T2.pts[0], .3), tos: T2.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15 * tk, shots: 2, gap: 1.4, blast: win ? 1.7 : 1.2 });
+        var e1 = f.tankAttack(fxo({ from: V(-1.5, 0, -5.4), to: up(T1.pts[0], .3), tos: T1.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15 * tk, shots: 2, dud: !win, blast: win ? 1.7 : 1.2 }));
+        var e2 = f.tankAttack(fxo({ from: V(1.6, 0, -5), to: up(T2.pts[0], .3), tos: T2.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15 * tk, shots: 2, gap: 1.4, dud: !win, blast: win ? 1.7 : 1.2 }));
         dur = Math.max(e1 && e1.duration || 8, e2 && e2.duration || 8);
       } else {   // tank + piyade (eski sahne)
         var I1 = pickImpacts(a, pl.fr, pl.sc, tg, 2, -1.2, 5.6, 3.6, 10), I2 = pickImpacts(a, pl.fr, pl.sc, tg, 1, 1.6, 5.4, 3.6, 10);
-        var d1 = f.tankAttack({ from: V(-1.5, 0, -5.4), to: up(I1.pts[0], .3), tos: I1.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15 * tk, shots: 2, blast: win ? 1.7 : 1.2 });
-        var d2 = f.infantryAttack({ from: V(1.7, 0, -4.8), to: up(I2.pts[0], .2), pool: I2.pool(1.1), color: o.color, count: 4, scale: 1.2 * tk, blast: win ? 1.4 : 1 });
+        var d1 = f.tankAttack(fxo({ from: V(-1.5, 0, -5.4), to: up(I1.pts[0], .3), tos: I1.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15 * tk, shots: 2, dud: !win, blast: win ? 1.7 : 1.2 }));
+        var d2 = f.infantryAttack(fxo({ from: V(1.7, 0, -4.8), to: up(I2.pts[0], .2), pool: I2.pool(1.1), color: o.color, count: 4, scale: 1.2 * tk, dud: !win, blast: win ? 1.4 : 1 }));
         dur = Math.max(d1 && d1.duration || 8, d2 && d2.duration || 8);
       }
     } else { return null; }   // V70: deniz aşırı → yedek sahne (savunan gemi animasyonu yok)
@@ -467,14 +512,14 @@
     var I = pickImpacts(a, fr, sc, tg, 3, 0, lc, Math.max(2, lc - 6), lc + 6), tos = I.pts.map(function (q) { return up(q, .15); });
     var air = false, dur;
     if (o.land && Math.random() < .4) {   // V124: yedek sahnede de bazen uçaklar
-      var dA = f.planeAttack({ from: V(0, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2], tos[0]], color: o.color, scale: .95, planes: 2, bombs: 2, blast: win ? 1.9 : 1.3 });
+      var dA = f.planeAttack(fxo({ from: V(0, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2], tos[0]], color: o.color, scale: .95, planes: 2, bombs: 2, dud: !win, blast: win ? 1.9 : 1.3 }));
       dur = dA && dA.duration || 9; air = true;
     } else {
-      var d1 = f.tankAttack({ from: V(-1.3, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2]], color: o.color, scale: 1.15 * tk, shots: 3, blast: win ? 1.9 : 1.3 });
-      var d2 = f.tankAttack({ from: V(1.3, 0, -1.4), to: tos[1], tos: [tos[1], tos[2], tos[0]], color: o.color, scale: 1.15 * tk, shots: 3, blast: win ? 1.9 : 1.3 });
+      var d1 = f.tankAttack(fxo({ from: V(-1.3, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2]], color: o.color, scale: 1.15 * tk, shots: 3, dud: !win, blast: win ? 1.9 : 1.3 }));
+      var d2 = f.tankAttack(fxo({ from: V(1.3, 0, -1.4), to: tos[1], tos: [tos[1], tos[2], tos[0]], color: o.color, scale: 1.15 * tk, shots: 3, dud: !win, blast: win ? 1.9 : 1.3 }));
       dur = Math.max(d1 && d1.duration || 8, d2 && d2.duration || 8);
       if (o.land) {   // V78: kara saldırısında yedek sahnede de piyade olsun (tank + piyade)
-        var d3 = f.infantryAttack({ from: V(.1, 0, -2.2), to: up(I.pts[2], .2), pool: I.pool(1.4), color: o.color, count: 4, scale: 1.2 * tk, blast: win ? 1.4 : 1 });
+        var d3 = f.infantryAttack(fxo({ from: V(.1, 0, -2.2), to: up(I.pts[2], .2), pool: I.pool(1.4), color: o.color, count: 4, scale: 1.2 * tk, dud: !win, blast: win ? 1.4 : 1 }));
         dur = Math.max(dur, d3 && d3.duration || 8);
       }
     }
@@ -484,25 +529,35 @@
   /* V77: YENİLGİDE KARŞI TARAFIN ANİMASYONU — saldırı kaybedilirse savunan (KIRMIZI) bizim topraklarımıza saldırır.
      Kara komşusu → savunanın tank + piyadesi bizim toprağa ateş eder; deniz aşırı → savunanın gemisi torpidoyla bizim gemiyi batırır
      (gemi sahnesi kurulamazsa savunanın tankları kendi kıyısından bize ateş eder). Saldırı animasyonu bittikten sonra sırayla oynar. */
-  function buildSeaScene(a, f, ids, from, target, cA, cB, sink) {   // V79: gemi + torpido sahnesi (saldıran = A gemisi, hedef = B gemisi)
+  function buildSeaScene(a, f, ids, from, target, cA, cB, sink, both) {   // V79: gemi + torpido sahnesi (saldıran = A gemisi, hedef = B gemisi)
     var la = a.ll(from), lt = a.ll(target); if (!la || !lt) return null;
     var T = a.THREE(), pl = place(a, ids, target, from, false); if (!pl) return null;
     f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(pl.fr.x, pl.P, pl.fr.z));
     if (!f.root.parent) a.globe().add(f.root);
     f.root.scale.setScalar(pl.sc); f.root.position.copy(pl.P); f.root.visible = true; f.clear(); f.timeScale = TS; fitProj(a, f, target, pl.sc);   // V91
-    var d = f.navalAttack({ from: { x: -.8, y: 0, z: -4.4 }, to: { x: .8, y: 0, z: 4.2 }, color: cA, targetColor: cB, scale: SHIP_S, torpedoes: 3, sink: !!sink });
-    return { fx: f, dir: pl.P.clone(), sea: true, ids: ids.concat([target]), base: pl.sc, cur: pl.sc, t0: f.time, dur: (d && d.duration || 12) + .6 };
+    var d = f.navalAttack({ from: { x: -.8, y: 0, z: -4.4 }, to: { x: .8, y: 0, z: 4.2 }, color: cA, targetColor: cB, scale: SHIP_S, torpedoes: 3, sink: !!sink, dud: !sink, keep: !!both });   // V164: yenilgide boşa atış
+    var dur = d && d.duration || 12;
+    if (both && d && d.targetShip && d.ownShip) {   // V166: yenilgide AYNI sahnede karşı gemi de bizim gemimize torpido atıp batırır
+      var d2 = f.navalAttack({ from: { x: .8, y: 0, z: 4.2 }, to: { x: -.8, y: 0, z: -4.4 }, attacker: d.targetShip, target: d.ownShip, color: cB, scale: SHIP_S, torpedoes: 3, sink: true, keep: true });
+      dur = Math.max(dur, d2 && d2.duration || 12);
+    }
+    return { fx: f, dir: pl.P.clone(), sea: true, ids: ids.concat([target]), base: pl.sc, cur: pl.sc, t0: f.time, dur: dur + .6, bothSides: !!(both && d && d.targetShip && d.ownShip) };
   }
   function clearScenes() {
-    [fx, fx2].forEach(function (f) { if (!f) return; try { f.clear(); f.root.visible = false; if (f.root.parent) f.root.parent.remove(f.root); } catch (e) { } });
+    [fx, fx2, fx3].forEach(function (f) { if (!f) return; try { f.clear(); f.root.visible = false; if (f.root.parent) f.root.parent.remove(f.root); } catch (e) { } });
+  }
+  /* V165: karşı taraf (KIRMIZI) sahnesi — hem sıralı (V77) hem eş zamanlı (V165) mod bunu kullanır */
+  function buildCounter(a, f, c) {
+    var o = c.o, s = null, eo = { ids: [c.tg], from: c.tg, land: c.land, color: RED, extra: [o.from] };
+    if (c.land) { try { s = buildScene(a, f, eo, o.from, { win: true }); } catch (e1) { s = null; } }
+    else if (!c.tiny) { try { s = buildSeaScene(a, f, [c.tg], c.tg, o.from, RED, BLUE, true); } catch (e2) { s = null; } }   // V80: çok küçük savunan gemi göndermez
+    if (!s) { try { s = buildFireScene(a, f, eo, o.from, { win: true }); } catch (e3) { s = null; } }
+    return s;
   }
   function startCounter(p) {
     var c = p.cnt; p.cnt = null; if (!c) return false;
     try {
-      var a = A(), o = c.o; clearScenes(); var f = ensureFx(), s = null, eo = { ids: [c.tg], from: c.tg, land: c.land, color: RED, extra: [o.from] };
-      if (c.land) { try { s = buildScene(a, f, eo, o.from, { win: true }); } catch (e1) { s = null; } }
-      else if (!c.tiny) { try { s = buildSeaScene(a, f, [c.tg], c.tg, o.from, RED, BLUE, true); } catch (e2) { s = null; } }   // V80: çok küçük savunan gemi göndermez
-      if (!s) { try { s = buildFireScene(a, f, eo, o.from, { win: true }); } catch (e3) { s = null; } }
+      var a = A(); clearScenes(); var f = ensureFx(), s = buildCounter(a, f, c);
       if (!s) return false;
       p.scenes = [s]; p.t0 = s.t0;
       var m = (s.focus || s.dir).clone().normalize();
@@ -527,7 +582,7 @@
     if (!f.root.parent) a.globe().add(f.root);
     f.root.scale.setScalar(sc); f.root.position.copy(P); f.root.visible = true; f.clear(); f.timeScale = TS; fitProj(a, f, tg, sc);   // V91
     var win = !!r.win;
-    var d1 = f.missileAttack({ from: { x: 0, y: 0, z: -.9 }, to: cen, tos: tos, color: o.color, scale: 1.15, missiles: 6, blast: win ? 1.4 : 1, gap: .6 });
+    var d1 = f.missileAttack(fxo({ from: { x: 0, y: 0, z: -.9 }, to: cen, tos: tos, color: o.color, scale: 1.15, missiles: 6, dud: !win, blast: win ? 1.4 : 1, gap: .6 }));
     return { fx: f, dir: P.clone(), sea: false, ids: o.ids, base: sc, cur: sc, fixed: true, t0: f.time, dur: (d1 && d1.duration || 12) + .6, fire: true, zr: Math.min(5.8, Math.max(1.95, 1.2 + dt * 3)), focus: MIDPT ? P.clone() : P.clone().add(vt).normalize() };
   }
   /* V97: kamera uzaklığı sahne boyutuna göre — sahnenin uzunluğu dar ekran kenarının ~%55'ini kaplasın. Eskiden en az 3.0 uzaktı; modeller (~0.15 birim) birkaç piksel kalıp animasyon "çalışmıyor" gibi görünüyordu. */
@@ -545,24 +600,38 @@
     var T = a.THREE(), scenes = [], tiny = false, missile = false;
     try { tiny = isTiny(a, tg); } catch (e) { tiny = false; }
     missile = tiny && Math.random() < MISSILE_P;   // V141: füze her seferinde değil
-    var oList = origins(a, po, ids, tg);
+    var oList = origins(a, po, ids, tg), vl = (!r.win && PAR_COUNTER) ? [] : null;
+    curV = vl;   // V166: bu sırada kurulan bizim birlikler vurulabilir olarak kaydolur
     oList.forEach(function (o, i) {
       if (missile && i > 0) return;   // V71: füze atar sahnesinde tek taraf
       var f = i === 0 ? ensureFx() : ensureFx2(), s = null;
       if (missile && i === 0) { try { s = buildMissileScene(a, f, o, tg, r); } catch (e0) { s = null; try { console.error(e0); } catch (e1) { } } }   // V71: çok küçük hedef → füze atar
       if (!s && !tiny) { try { s = buildScene(a, f, o, tg, r); } catch (e) { s = null; } }   // V141: minik hedefte füze değilse doğrudan ateş (tank/uçak) sahnesi
-      if (!s && !o.land && !tiny) { try { s = buildSeaScene(a, f, o.ids, o.from, tg, o.color, RED, !!r.win); } catch (e4) { s = null; try { console.error(e4); } catch (e5) { } } }   // V79: kara sınırı yok → gemi + torpido
+      if (!s && !o.land && !tiny) { try { s = buildSeaScene(a, f, o.ids, o.from, tg, o.color, RED, !!r.win, i === 0 && !r.win && PAR_COUNTER); } catch (e4) { s = null; try { console.error(e4); } catch (e5) { } } }   // V79: kara sınırı yok → gemi + torpido
       if (!s && i === 0) { try { s = buildFireScene(a, f, o, tg, r); } catch (e2) { s = null; try { console.error(e2); } catch (e3) { } } }   // V68: yerleşim bulunamadıysa saldıran topraktan hedef yönüne ateş
-      if (!s && i === 0 && !tiny) { try { FORCE_SEA = true; s = buildSeaScene(a, f, o.ids, o.from, tg, o.color, RED, !!r.win); } catch (e6) { s = null; } FORCE_SEA = false; }   /* V101: hiçbir sahne kurulamadıysa animasyon atlanmaz */
+      if (!s && i === 0 && !tiny) { try { FORCE_SEA = true; s = buildSeaScene(a, f, o.ids, o.from, tg, o.color, RED, !!r.win, i === 0 && !r.win && PAR_COUNTER); } catch (e6) { s = null; } FORCE_SEA = false; }   /* V101: hiçbir sahne kurulamadıysa animasyon atlanmaz */
       if (s) scenes.push(s); else { try { f.clear(); f.root.visible = false; if (f.root.parent) f.root.parent.remove(f.root); } catch (e) { } }
     });
+    curV = null;
     if (!scenes.length) return;
+    var cnt = r.win ? null : { o: oList[0], tg: tg, land: oList[0].land, tiny: tiny };
+    if (cnt && PAR_COUNTER) {   // V165: yenilgide karşı taraf AYNI ANDA yükselip bizim topraklarımıza saldırır (kurulamazsa eski sıralı V77 çalışır)
+      if (scenes[0].bothSides) cnt = null;   // V166: gemi sahnesinde iki taraf zaten aynı sahnede
+      else try {
+        var fc = oList.length > 1 ? ensureFx3() : ensureFx2();
+        HKF = vl && vl.length ? mkHooks(fc, vl) : null;   // V166: karşı mermiler bizim birliklerin üzerine nişan alır
+        var sc2 = buildCounter(a, fc, cnt);
+        if (sc2) { scenes.push(sc2); cnt = null; }
+        else { try { fc.clear(); fc.root.visible = false; if (fc.root.parent) fc.root.parent.remove(fc.root); } catch (e7) { } }
+      } catch (e8) { try { console.error('v60 counter', e8); } catch (e9) { } }
+      HKF = null;
+    }
     var all = [tg]; scenes.forEach(function (s) { s.ids.forEach(function (i) { if (all.indexOf(i) < 0) all.push(i); }); });
     var mid = new T.Vector3(); scenes.forEach(function (s) { mid.add(s.focus || s.dir); }); if (mid.lengthSq() < 1e-6) mid.copy(scenes[0].dir); mid.normalize();   // V71: sahne odak noktası (füze/ateş: launcher + hedef ortası)
-    var th = scenes.length > 1 ? Math.acos(Math.max(-1, Math.min(1, scenes[0].dir.dot(scenes[1].dir)))) : 0;
-    play = { ids: all, tg: tg, scenes: scenes, t0: scenes[0].t0, cnt: r.win ? null : { o: oList[0], tg: tg, land: oList[0].land, tiny: tiny } };   // V77: yenilgi → karşı saldırı sırada
+    var th = 0; scenes.forEach(function (s, k) { if (k) th = Math.max(th, Math.acos(Math.max(-1, Math.min(1, scenes[0].dir.dot(s.dir))))); });   // V165: en uzak sahneye göre
+    play = { ids: all, tg: tg, scenes: scenes, t0: scenes[0].t0, cnt: cnt };   // V77: yenilgi → karşı saldırı sırada (V165: eş zamanlı kurulduysa null)
     var lon = Math.atan2(-mid.z, mid.x) / (Math.PI / 180), lat = Math.asin(Math.max(-1, Math.min(1, mid.y))) / (Math.PI / 180);
-    var zr = Math.max(camFor(a, scenes[0].base), 1 + 2.2 * th, scenes[0].zr || 0);   // V71: kamera biraz daha uzak (en yakın 2.8)   // iki taraf: ikisini de görecek kadar uzak
+    var zr = Math.max(camFor(a, scenes[0].base), 1 + 2.2 * th, scenes[0].zr || 0); scenes.forEach(function (s, k) { if (k) zr = Math.max(zr, camFor(a, s.base), s.zr || 0); });   // V165   // V71: kamera biraz daha uzak (en yakın 2.8)   // iki taraf: ikisini de görecek kadar uzak
     a.lift(play.ids); a.focusLL(lon, lat, window.innerWidth > window.innerHeight ? zr / 0.7 : zr);   // bir kez geniş açıya al; sonrası serbest (yatayda v30 kamerayı 0.7 ile çarpar, bu yüzden bölünür)
     document.body.appendChild(mkShield());
     try { var s0 = scenes[0]; if (window.WCSfx) WCSfx.animStart(s0.sea ? 'sea' : (s0.air ? 'air' : (s0.fire ? 'missile' : 'land'))); } catch (xs) { }   // V111: savaş sesleri
@@ -640,7 +709,7 @@
   closeBattle = function () {
     var q = pend;
     if (q) { if (q.t) { clearTimeout(q.t); q.t = 0; } if (q.mo) { try { q.mo.disconnect(); } catch (e) { } q.mo = null; } }
-    if (play) finish(); else showPanel();
+    try { if (play) finish(); else showPanel(); } catch (e) { }   // hata çıksa bile iç closeBattle çalışsın (BSH / bsh sınıfı takılı kalmasın)
     var res = _cb.apply(this, arguments);
     if (q && pend === q) setTimeout(function () { run(q, false); }, 450);   // harita/kamera savaş sonrası düzenini bitirsin
     return res;

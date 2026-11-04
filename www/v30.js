@@ -7,7 +7,7 @@
   var DEFAULT_3D = true;                       // true yaparsan oyun küre görünümüyle açılır
   var DEG = Math.PI / 180, ON = false, READY = false, LOADING = false, BAD = false;
   var C = [], cMap = {}, THREE, TEX;
-  var stage, renderer, scene, camera, globe, earth, cloudM, rafId = 0, last = 0, dirtyQ = 0, needPaint = true, lastSig = '';
+  var stage, renderer, scene, camera, globe, earth, cloudM, atmM, rafId = 0, last = 0, dirtyQ = 0, needPaint = true, lastSig = '';
   var LOWQ = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches), OW = LOWQ ? 2048 : 3072, OH = LOWQ ? 1024 : 1536, LS = OW / 2048, ZMIN3 = 1.9, LW = 1536, LH = 768, NW = 512, NH = 256, SCALE = 0.07;
   var ovC, ov, liftC, lift, reliefC, nsmall, nsx, nC, nx, nImg, topoH, ovTex, liftTex, normTex;
   var introStart = 0, introDur = 3000, introShown = false, introFrom = 3.4, introNext = false, vo = 0, vel = { x: 0, y: 0 }, focusQ = null, camZ = 3.4, zoomT = 3.4, ptrs = {}, down = null, pinch0 = 0, pinchA = null, pinchM = { x: 0, y: 0 };
@@ -351,7 +351,7 @@
     var coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches || document.body.classList.contains('fxlow');
     renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: false });
     /* V127: hareket sırasında düşük (akıcı), 260 ms durunca yüksek çözünürlük (net). Telefonda sabit 1.25 yüzünden küre bulanıktı. */
-    PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 2); PRHI = coarse ? PRLO : Math.min(window.devicePixelRatio || 1, 2);   /* V147: telefonda çözünürlük değişimi yok (setPR 238-266 ms donma + 1.5x karede ~150 ms) */ curPR = PRLO; idleSince = performance.now();
+    PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5);   /* V162: masaüstünde hareket/savaş animasyonu sırasında en çok 1.5x (eskiden 2x) */ PRHI = coarse ? PRLO : Math.min(window.devicePixelRatio || 1, 2);   /* V147: telefonda çözünürlük değişimi yok (setPR 238-266 ms donma + 1.5x karede ~150 ms) */ curPR = PRLO; idleSince = performance.now();
     renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace;
     stage.appendChild(renderer.domElement); try { renderer.domElement.style.opacity = '0'; } catch (e) { } /* V150: build() içindeki ön çizim (kamera 3.4, tam boy küre) perde kalkınca bir an görünüyordu; tuval doIntro/show açana kadar gizli */ CP('renderer');
     scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200); camera.position.set(0, 0, camZ);
@@ -370,7 +370,7 @@
       earth = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ map: marble, specularMap: water, specular: new THREE.Color(0x445566), shininess: 28, normalMap: normTex, normalScale: new THREE.Vector2(1, 1) })); globe.add(earth);
       var cover = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: ovTex, transparent: true, depthWrite: false, emissive: new THREE.Color(0xffffff), emissiveMap: ovTex, emissiveIntensity: 0.35, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); cover.scale.setScalar(1.0015); globe.add(cover);
       cloudM = new THREE.Mesh(new THREE.SphereGeometry(1.012, 96, 48), new THREE.MeshLambertMaterial({ map: clouds, transparent: true, opacity: 0.55, depthWrite: false })); globe.add(cloudM);
-      scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),4.2);gl_FragColor=vec4(.35,.6,.95,1.)*clamp(i,0.,1.)*0.75;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));
+      scene.add(atmM = new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),4.2);gl_FragColor=vec4(.35,.6,.95,1.)*clamp(i,0.,1.)*0.75;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));
       scene.add(new THREE.Mesh(new THREE.SphereGeometry(80, 32, 16), new THREE.MeshBasicMaterial({ map: sky, side: THREE.BackSide })));
       CP('meshes');
     }).then(YLD).then(function () {   /* V149 */
@@ -495,6 +495,16 @@
       window.__v148e = (window.__v148e || 16) * 0.9 + _raw * 0.1;
       if (window.__v148e > 38 && PRLO > 0.76) { PRLO = Math.max(0.75, PRLO - 0.25); PRHI = PRLO; window.__v148t = performance.now(); window.__v148e = 16; setPR(PRLO); try { window.WCPERF && WCPERF('  PR->' + PRLO); } catch (x) { } }
     } cloudM.rotation.y += dt * 0.004;
+    /* V170: telefonda hareket sirasinda kareler uzun surerse once bulut + atmosfer katmanlarini gizle (cozunurluk degistirmeden, dondurmadan); durunca geri getir */
+    try {
+      var _q = window.__v170 = window.__v170 || { e: 16, hi: 0, off: 0, t: 0 };
+      if (LOWQ && READY && _raw > 8 && _raw < 400) {
+        if (anyMoving()) {
+          _q.e = _q.e * 0.9 + _raw * 0.1; _q.t = now;
+          if (!_q.off) { if (_q.e > 30) { if (++_q.hi > 20) { _q.off = 1; cloudM.visible = false; if (atmM) atmM.visible = false; forceR = 3; } } else _q.hi = 0; }
+        } else if (_q.off && now - _q.t > 2500) { _q.off = 0; _q.hi = 0; _q.e = 16; cloudM.visible = true; if (atmM) atmM.visible = true; forceR = 3; }
+      }
+    } catch (e) { }
     if (needPaint) { needPaint = false; forceR = 3; var _p0 = performance.now(); paintOverlay(); PF('paintOverlay', _p0); _p0 = performance.now(); C.forEach(function (c) { if (EX[c.id]) colorEx(c); }); PF('colorEx', _p0); }
     if (baseJob) { var _b0 = performance.now(); stepBase(); PF('baseStep', _b0); }
     SLICE_LEFT = 6; var _s0 = performance.now();   /* V140: kare başına blok üretim bütçesi (ms) */
@@ -509,11 +519,10 @@
       /* V72: sahnede hiçbir şey değişmediyse (kamera/küre/yükselen ülke/animasyon yok) kareyi tekrar çizme; bulutlar için ~4 kare/sn yeter -> ülke seçiminde GPU/pil yükü ve kasma azalır */
       var q = globe.quaternion, k = camera.position.z.toFixed(4) + '|' + q.x.toFixed(4) + '|' + q.y.toFixed(4) + '|' + q.z.toFixed(4) + '|' + q.w.toFixed(4) + '|' + vo.toFixed(3) + '|' + window.innerWidth + 'x' + window.innerHeight;
       var _bsh = (typeof BSH !== 'undefined' && BSH && !window.v60Active);   /* V161: savaş paneli açıkken küre her karede çizilmez (eskiden BSH her kareyi zorluyordu -> panelde kasma) */
-      var busy = k !== lastRK || window.v60Active || anyMoving() || (now - lastRT) > (_bsh ? 1e9 : (curPR > PRLO ? 1500 : 250)) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
-      if (window.__v163b && !_bsh) forceR = Math.max(forceR, 2); window.__v163b = _bsh;   /* V163: panel kapanınca küre bir kez tazelenir */
+      var busy = k !== lastRK || window.v60Active || anyMoving() || (now - lastRT) > (_bsh ? 1200 : (curPR > PRLO ? 1500 : 250)) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
       var _mv = k !== lastRK || window.v60Active || anyMoving() || introStart;
       if (_mv) { idleSince = now; if (curPR !== PRLO) setPR(PRLO); busy = true; }
-      else if (_bsh) { if (curPR !== PRLO) { setPR(PRLO); busy = true; } }   /* V161: panel açıkken yüksek çözünürlüğe geçip tuvali yeniden ayırma */
+      else if (_bsh) { idleSince = now + 900; if (curPR !== PRLO) { setPR(PRLO); busy = true; } }   /* panel kapanınca PRHI'ye ~1,2 sn sonra geç: tuval yeniden ayırma kapanış geçişiyle çakışmasın */   /* V161: panel açıkken yüksek çözünürlüğe geçip tuvali yeniden ayırma */
       else if (PRHI > PRLO && curPR !== PRHI && now - idleSince > 300) { setPR(PRHI); busy = true; }
       if (forceR > 0) forceR--;
       if (busy) { lastRK = k; lastRT = now; var _r0 = performance.now(); renderer.render(scene, camera); PF('gl.render(PR' + curPR.toFixed(2) + ')', _r0); }
@@ -540,7 +549,7 @@
     if (introNext || _doI) { introNext = false; doIntro(); }
     last = performance.now(); if (!rafId) rafId = requestAnimationFrame(loop);
   }
-  function hide() { ON = false; setBtn(); $$('map').classList.remove('v30on'); stage.style.display = 'none'; if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+  function hide() { ON = false; setBtn(); $$('map').classList.remove('v30on'); stage.style.display = 'none'; setTimeout(function () { try { paint(); } catch (e) { } }, 0);   /* V162: 2B harita 3B açıkken boyanmıyordu; geri dönünce boya */ if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
   var prepWait = [];   /* V102: küreyi menü kapanmadan önce ("Sefer Başlıyor" perdesinin altında) kur; sinematik bekleme olmadan başlar */
   function prepDone() { var w = prepWait; prepWait = []; w.forEach(function (f) { try { f(); } catch (e) { } }); }
   window.v30Prep = function (cb) {

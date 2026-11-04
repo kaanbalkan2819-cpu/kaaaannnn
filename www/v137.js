@@ -329,23 +329,27 @@
   }
   if (!hookPol()) { var n2 = 0, iv2 = setInterval(function () { if (hookPol() || ++n2 > 40) clearInterval(iv2); }, 250); }
   function cardInject() {
+    try { var c = document.getElementById('v99c'), b = c && c.querySelector('.d137'); if (b) b.remove(); } catch (e) { }   // Kalkınma düğmesi Politikalar'ın yanına taşındı
+  }
+  setInterval(function () { if (!document.hidden && !(typeof BSH !== 'undefined' && BSH)) cardInject(); }, 700);
+
+  /* ---- Kalkınma düğmesi: ülke panelinde Politikalar düğmesinin yanında ---- */
+  function placeDev() {
     try {
-      var c = document.getElementById('v99c'); if (!c || !c.classList.contains('on') || !is5()) return;
-      var b = c.querySelector('.d137');
-      if (!b) {
-        b = document.createElement('button'); b.type = 'button'; b.className = 'd137';
-        b.onclick = function (e) { e.stopPropagation(); window.dev137Menu(); };
-        c.appendChild(b);
-      }
-      b.textContent = '🏗 ' + X('Kalkınma', 'Development') + ' · 💰 ' + r1(rawEco(G.pl));
+      if (!is5() || !window.G || G.over) return;
+      var el = document.getElementById('panel'), pb = el && el.querySelector('.polbtn'); if (!pb || el.querySelector('.d137p')) return;
+      pb.insertAdjacentHTML('afterend', '<button type="button" class="d137p" onclick="dev137Menu()">🏗 ' + X('Kalkınma', 'Development') + ' · ' + r1(rawEco(G.pl)) + '</button>');
     } catch (e) { }
   }
-  setInterval(function () { if (!document.hidden) cardInject(); }, 700);
+  if (typeof panel === 'function') { var _pn137 = panel; panel = function () { var r = _pn137.apply(this, arguments); placeDev(); return r; }; }
+  var _rf137 = window.v24Refresh;
+  if (_rf137) window.v24Refresh = function () { var r = _rf137.apply(this, arguments); placeDev(); return r; };
 
   var css = document.createElement('style');
   css.textContent = '.t137{margin:6px 0;padding:7px 10px;border-radius:10px;background:rgba(255,210,74,.10);border:1px solid rgba(255,210,74,.35);font-size:12.5px;line-height:1.5}' +
     '.t137 small{display:block;opacity:.75;margin-top:2px}.t137 .w{color:#4ade80}.t137 .l{color:#f87171}' +
     '.r137{margin:8px 0 4px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.06);font-size:12.5px;line-height:1.5}.r137 summary{cursor:pointer;font-weight:700}.r137 div{margin-top:5px}' +
+    '#panel .v15a>button.d137p{background:linear-gradient(180deg,#ffe38a,#e0a82a)!important;color:#102!important;border:0!important;font-weight:800}' +
     '#v99c .d137{width:100%;margin-top:8px;min-height:36px;border-radius:10px;border:0;font-weight:800;font-size:13px;color:#102;background:linear-gradient(180deg,#ffe38a,#e0a82a);cursor:pointer}';
   document.head.appendChild(css);
 })();

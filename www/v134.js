@@ -67,20 +67,7 @@
       if (!G || G.over || BSH || !G.sel) return;
       var o = G.owner[G.sel], pl = G.pl; if (typeof o !== 'string' || o === pl || typeof pl === 'undefined') return;
       var el = document.getElementById('panel'), box = el && el.querySelector('.v15p'); if (!box || box.querySelector('.c134')) return;
-      var kn = G.kn && G.kn[pl] && G.kn[pl][o], h;
-      if (!kn || !kn[0]) {
-        h = '<div class="c134"><small>' + X('KAZANMA İHTİMALİ', 'WIN CHANCE') + '</small><div class="c134q">' + X('🔍 Rakibi keşfedince kazanma yüzden görünür.', '🔍 Scout the rival to see your win chance.') + '</div></div>';
-      } else {
-        var c = chance(pl, o); if (!c) return;
-        var pct = Math.round(c.p * 100), b = c.base, n = names(), lead = [], beh = [], i;
-        if (b) for (i = 0; i < 5; i++) { var w = b.rows[i].w; if (w === 'a') lead.push(n[i]); else if (w === 'd') beh.push(n[i]); }
-        h = '<div class="c134"><small>' + X('KAZANMA İHTİMALİ', 'WIN CHANCE') + '</small>' +
-          '<div class="c134h"><b style="color:' + col(c.p) + '">%' + pct + '</b><span>' + label(c.p) + '</span></div>' +
-          '<div class="c134b"><i style="width:' + pct + '%;background:' + col(c.p) + '"></i></div>' +
-          (b ? '<div class="c134q">' + X('Zarlar eşit gelirse', 'If dice tie') + ': <b>' + b.aw + '–' + b.dw + '</b> ' + (b.win ? X('(kazanırsın)', '(you win)') : X('(kaybedersin)', '(you lose)')) +
-            (lead.length ? '<br>✔ ' + X('Üstünsün', 'You lead') + ': ' + lead.join(', ') : '') + (beh.length ? '<br>✖ ' + X('Gerideysin', 'Behind') + ': ' + beh.join(', ') : '') + '</div>' : '') +
-          '<div class="c134q">' + X('Kazanmak için 5 değerin en az 3\'ünde üstün olmalısın. Yüksek zar, tüm değerlerini ×1,15/adım artırır.', 'You need to lead in at least 3 of 5 stats. The higher die boosts all stats ×1.15 per step.') + '</div></div>';
-      }
+      var h = '<div class="c134"></div>', kn = null;   /* kazanma ihtimali kaldırıldı; v136 rehber kutusu bu kabın içine girer */
       var ac = box.querySelector('.v15a'); if (ac) ac.insertAdjacentHTML('beforebegin', h); else box.insertAdjacentHTML('beforeend', h);
     } catch (e) { }
   }

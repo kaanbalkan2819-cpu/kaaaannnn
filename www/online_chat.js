@@ -41,7 +41,7 @@
       var pv = $i('wcchp'); if (pv) pv.style.bottom = b == null ? '' : (b + 4) + 'px';
     } catch (e) { }
   }
-  setInterval(place, 400);
+  setInterval(function () { if (typeof BSH !== 'undefined' && BSH) return; place(); }, 400);
 
   // ---------- Info (sol alt) ----------
   function info(txt) {

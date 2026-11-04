@@ -137,14 +137,10 @@
         alp[i] = lerp(p.a0, p.a1, k) * Math.min(1, k * 10); siz[i] = lerp(p.s0, p.s1, ke); rot[i] = p.r;
         i++;
       }
-      const n = ps.length; this.geo.setDrawRange(0, n);
-      /* V163: parçacık yokken tamponlar her karede GPU'ya yeniden yüklenmesin; varken de yalnızca kullanılan aralık yüklensin (eskiden tüm 1200-2200'lük tampon) */
-      if (n === 0 && this._was0) return; this._was0 = n === 0;
-      const a = this.geo.attributes, cnt = Math.max(n, 1);
-      const up = (at, st) => { if (at.addUpdateRange) { if (at.clearUpdateRanges) at.clearUpdateRanges(); at.addUpdateRange(0, cnt * st); } at.needsUpdate = true; };
-      up(a.position, 3); up(a.pcolor, 3); up(a.alpha, 1); up(a.size, 1); up(a.rot, 1);
+      this.geo.setDrawRange(0, ps.length);
+      const a = this.geo.attributes; a.position.needsUpdate = a.pcolor.needsUpdate = a.alpha.needsUpdate = a.size.needsUpdate = a.rot.needsUpdate = true;
     }
-    reset() { this.ps.length = 0; this.geo.setDrawRange(0, 0); this._was0 = false; }
+    reset() { this.ps.length = 0; this.geo.setDrawRange(0, 0); }
   }
 
   /* ---------------------------------------------------------------- v5 model altyapısı: dokular, yüz‑renkli geometri, birleştirme */
@@ -766,6 +762,9 @@
       for (let i = 0; i < 4; i++) this.pnorm.emit({ x: pos.x, y: pos.y + .05, z: pos.z, vx: rnd(-.8, .8), vy: rnd(.5, 1.6), vz: rnd(-.8, .8), life: rnd(.4, .7), s0: .16, s1: .5, c0: [.6, .52, .4], c1: [.42, .38, .33], a0: .55, a1: 0, drag: 2 });
       for (let i = 0; i < 5; i++) this.padd.emit({ x: pos.x, y: pos.y + .05, z: pos.z, vx: rnd(-2.4, 2.4), vy: rnd(1.5, 3.5), vz: rnd(-2.4, 2.4), life: rnd(.2, .4), s0: .08, s1: .02, c0: [1, .85, .4], c1: [1, .4, .1], a0: 1, a1: 0, gy: -10 });
     }
+    fizzle(pos) { // V164: boşa giden mermi — havada sönen küçük duman (patlama/ateş/sarsıntı YOK)
+      for (let i = 0; i < 5; i++) this.pnorm.emit({ x: pos.x, y: pos.y, z: pos.z, vx: rnd(-.5, .5), vy: rnd(.1, .5), vz: rnd(-.5, .5), life: rnd(.5, .9), s0: .1, s1: .38, c0: [.7, .7, .72], c1: [.5, .5, .54], a0: .4, a1: 0, drag: 1.5 });
+    }
     ringFx(pos, color, radius, dur, delay) { // yere yayılan şok halkası
       const r = new T.Mesh(this.shared.planeGeo, new T.MeshBasicMaterial({ map: this.ringTex, color: color, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false }));
       r.position.set(pos.x, pos.y + .04, pos.z); r.scale.setScalar(.05); this.spawn(r);
@@ -913,6 +912,28 @@
         if (Math.random() < dt * 4) this.padd.emit({ x: wp.x + off.x, y: wp.y + off.y, z: wp.z + off.z, vx: rnd(-.5, .5), vy: rnd(1.5, 3), vz: rnd(-.5, .5), life: rnd(.6, 1.1), s0: .06, s1: .02, c0: [1, .7, .3], c1: [.8, .2, .05], a0: 1, a1: 0, gy: -2 });
       });
     }
+    /* V166: KURBAN BİRLİK — yenilgide bizim 3B birliklerimiz (tank, piyade, uçak, füze kamyonu) karşı sahnenin mermisiyle vurulup patlar.
+       list: v60.js'in verdiği paylaşılan dizi (yoksa hiçbir şey yapılmaz). o.pos(ahead) → yerel konum; o.die() → yok etme efekti.
+       Birlik en az bir kez ateş etmeden (arm) ölmez; vuruş daha erken gelirse ilk atıştan hemen sonra patlar. */
+    regVictim(list, o) {
+      if (!list) return null;
+      const v = { fx: this, alive: true, claimed: false, ready: false, pend: false, mobile: !!o.mobile };
+      v.sample = ahead => {
+        const p = o.pos(ahead || 0);
+        try { if (this.root.updateWorldMatrix) this.root.updateWorldMatrix(true, false); else this.root.updateMatrixWorld(); } catch (e) { }
+        return { w: this.root.localToWorld(new T.Vector3(p.x, 0, p.z)), h: p.y };
+      };
+      v.die = () => { if (!v.alive) return; if (!v.ready) { v.pend = true; return; } v.alive = false; o.die(); };
+      v.arm = () => { if (v.ready) return; v.ready = true; if (v.pend) { v.pend = false; this.at(.3, () => v.die()); } };
+      v.gone = () => { v.alive = false; };
+      list.push(v); return v;
+    }
+    wreck(pos, k, ground) { // V166: yok edilen birlik: enkaz, yangın, duman
+      const K = (k || 1) * this.projK, gp = ground || pos;
+      this.debris(gp, K); this.dust(gp, 1.2 * K, 10); this.flash(pos, 0xffa040, 60, .35); this.shake(.3); this.ringFx(gp, 0xffd9a0, 2.6 * K, .5);
+      const h = new T.Object3D(); h.position.copy(gp); this.spawn(h); this.fireOn(h, new T.Vector3(0, .25 * K, 0), 3.5, () => this.kill(h));
+      this.plume(gp, .7 * K, 2.4);
+    }
     flinch(obj) {
       if (!obj || obj.userData.dead) return;
       if (obj.userData.tiers) { const q = this.root.worldToLocal(obj.getWorldPosition(new T.Vector3())); q.y += .6; this.dust(q, .5, 5); } // taş tozu
@@ -944,7 +965,7 @@
       this.fireOn(holder, new T.Vector3(0, .25, 0), 4.5, () => this.kill(holder));
       this.plume(wp, .8, 2.6);
     }
-    shell(a, b, sc, onHit) {
+    shell(a, b, sc, onHit, dud) {
       const m = new T.Group();
       const mt = std(0xffd36b, { emissive: 0xffa030, emissiveIntensity: .8, roughness: .4 });
       const cb = cy(.05, .05, .3, 8, mt); cb.rotation.x = Math.PI / 2; m.add(cb);
@@ -953,7 +974,9 @@
       const dist = Math.hypot(b.x - a.x, b.z - a.z), dur = .5 + dist * .055, h = 1 + dist * .13;
       const pt = u => new T.Vector3(lerp(a.x, b.x, u), lerp(a.y, b.y, u) + 4 * h * u * (1 - u), lerp(a.z, b.z, u));
       let prev = null;
-      this.tween(dur, u => {
+      const frD = dud ? .6 : 1;   // V164: dud → mermi yolun %60'ında havada söner, hedefe düşmez
+      this.tween(dur * frD, u0 => {
+        const u = u0 * frD;
         const p = pt(u), d = pt(Math.min(1, u + .03)).sub(p), q0 = prev || p;
         m.position.copy(p); if (d.lengthSq() > 1e-8) m.quaternion.setFromUnitVectors(ZAX(), d.normalize());
         const n = Math.max(1, Math.ceil(q0.distanceTo(p) / .1));
@@ -964,7 +987,7 @@
         }
         this.padd.emit({ x: p.x, y: p.y, z: p.z, life: .07, s0: .6 * K, s1: .4 * K, c0: [1, .95, .7], c1: [1, .7, .3], a0: .9, a1: 0 });
         prev = p;
-      }, () => { this.kill(m); onHit(); });
+      }, () => { this.kill(m); if (dud) this.fizzle(pt(frD)); else onHit(); });
     }
 
     /* ----- v5: model animasyonu + kule çökmesi ----- */
@@ -1081,6 +1104,8 @@
         antV += (-90 * (antA + vf * .05) - 7 * antV) * dt; antA += antV * dt; tk.ant.rotation.x = antA; tk.ant.rotation.z = Math.sin(now * 3) * .02;
         if (g.scale.x > .3) { tk.exh.getWorldPosition(exw); this.root.worldToLocal(exw); for (let n = emitCount(9, dt); n > 0; n--) this.pnorm.emit({ x: exw.x, y: exw.y, z: exw.z, vx: rnd(-.1, .1), vy: rnd(.5, .9), vz: rnd(-.1, .1), life: rnd(.8, 1.3), s0: .06 * sc, s1: .3 * sc, c0: [.4, .4, .42], c1: [.25, .25, .27], a0: .35, a1: 0, gy: .15 }); }
       });
+      let dead = false;   // V166: bizim tank vurulursa patlar
+      const vic = this.regVictim(o.victim, { pos: () => new T.Vector3(g.position.x, g.position.y + .35 * sc, g.position.z), die: () => { dead = true; stopAnt(); const p = new T.Vector3(g.position.x, g.position.y + .3 * sc, g.position.z); this.explosion(p, .8); this.wreck(p, 1); this.kill(g); this.kill(shd); } });
       const dist = Math.hypot(to.x - fin.x, to.z - fin.z), elev = Math.min(.55, Math.max(.12, .1 + dist * .022));
       this.deploy(from, 1.1 * sc, o.color, 3.4 * sc);
       this.tween(.75, u => { g.scale.setScalar(sc * Math.max(.001, E.back(u))); g.position.y = from.y + (1 - E.out(u)) * 1.4 * sc; },
@@ -1101,6 +1126,7 @@
       this.tween(.9, u => { const e = E.io(u); tk.turret.rotation.y = ty0 * (1 - e); tk.pivot.rotation.x = -elev * e; }, null, 1.1);
       const tipW = new T.Vector3(), tipS = new T.Vector3(), base = 2.45;
       const fire = i => {
+        if (dead) return;
         g.updateMatrixWorld(true); tk.tip.getWorldPosition(tipW); const mz = this.root.worldToLocal(tipW.clone());
         const dir = new T.Vector3(to.x - fin.x, 0, to.z - fin.z).normalize().multiplyScalar(Math.cos(elev)); dir.y = Math.sin(elev); dir.normalize();
         this.muzzle(mz, dir, 1.4 * sc); this.shake(.22); antV += 6; this.ringFx(new T.Vector3(fin.x + fw.x * 1.4 * sc, fin.y, fin.z + fw.z * 1.4 * sc), 0xffe0b0, 1.8 * sc, .4);
@@ -1111,16 +1137,18 @@
           g.position.x = fin.x - fw.x * .12 * sc * r; g.position.z = fin.z - fw.z * .12 * sc * r;
         });
         this.tween(1.3, (u, dt) => { tk.tip.getWorldPosition(tipS); this.root.worldToLocal(tipS); for (let n = emitCount(14 * (1 - u), dt); n > 0; n--) this.pnorm.emit({ x: tipS.x, y: tipS.y, z: tipS.z, vx: rnd(-.1, .1), vy: rnd(.3, .7), vz: rnd(-.1, .1), life: rnd(.8, 1.3), s0: .12, s1: .45, c0: [.7, .7, .72], c1: [.45, .45, .48], a0: .35, a1: 0 }); });
-        const tt = o.tos && o.tos.length ? V(o.tos[i % o.tos.length]) : to;   // v6: hedefler dışarıdan verilebilir (hep hedef ülkenin içinde)
+        if (vic) vic.arm();
+        const ap = o.aim ? o.aim(i, 1.1) : null, tt = ap ? V(ap) : (o.tos && o.tos.length ? V(o.tos[i % o.tos.length]) : to);   // v6: hedefler dışarıdan verilebilir (hep hedef ülkenin içinde); V166: aim → karşı birlik
         this.shell(mz, tt, sc, () => {
           this.explosion(tt, o.blast);
           if (o.target) { if (i === o.shots - 1 && o.destroy) this.collapse(o.target); else this.flinch(o.target); }
           if (o.onHit) o.onHit(i);
-        });
+        }, o.dud);
       };
       for (let i = 0; i < o.shots; i++) this.at(base + i * o.gap, () => fire(i));
       const flight = .5 + dist * .055, leave = base + (o.shots - 1) * o.gap + flight + o.linger;
       this.at(leave, () => {
+        if (dead) return; if (vic) vic.gone();
         this.deploy(g.position, 1.1 * sc, o.color, 3.4 * sc);
         this.tween(.5, u => g.scale.setScalar(sc * Math.max(.001, 1 - E.io(u))), () => { stopAnt(); this.kill(g); this.kill(shd); if (o.onDone) o.onDone(); });
       });
@@ -1138,9 +1166,12 @@
         const f = form[i % form.length], m = buildSoldier(o.color, i), g = new T.Group();
         g.add(m.group); g.position.set(from.x + rt.x * f[0] * sc + fw.x * f[1] * sc, from.y, from.z + rt.z * f[0] * sc + fw.z * f[1] * sc);
         g.rotation.y = yaw + rnd(-.08, .08); g.scale.setScalar(.001); this.spawn(g);
-        const s = { g: g, m: m, kick: 0, run: 0, aim: 0, rl: 0, by: .46, ph: rnd(0, 6), p0: g.position.clone(), crouch: i % 3 === 1, shd: this.blob(g.position, .4 * sc) }; S.push(s);
+        const s = { g: g, m: m, kick: 0, run: 0, aim: 0, rl: 0, by: .46, ph: rnd(0, 6), i: i, p0: g.position.clone(), crouch: i % 3 === 1, shd: this.blob(g.position, .4 * sc) }; S.push(s);
         this.tween(.5, u => g.scale.setScalar(sc * Math.max(.001, E.back(u))), null, .15 + i * .1);
       }
+      let dead = false;   // V166: bizim piyade vurulursa patlar
+      const sCen = () => { let x = 0, z = 0; S.forEach(q => { x += q.g.position.x; z += q.g.position.z; }); return new T.Vector3(x / S.length, from.y + .35 * sc, z / S.length); };
+      const vic = this.regVictim(o.victim, { pos: sCen, die: () => { dead = true; const p = sCen(); this.explosion(p, .7); this.wreck(p, 1); S.forEach(q => { this.kill(q.g); this.kill(q.shd); }); } });
       const t0 = 2.1, burstT = o.perBurst * .115 + .65, fireTotal = o.bursts * burstT, tFinal = t0 + fireTotal + .35;
       // koşu: bacak döngüsü, sekme, ayak tozu
       this.tween(.8, (u, dt) => {
@@ -1165,13 +1196,15 @@
         }
       });
       const mzW = new T.Vector3();
-      const shoot = (s, n) => {
+      const shoot = (s, n, b) => {
+        if (dead) return; if (vic) vic.arm();
         s.g.updateMatrixWorld(true); s.m.muzzle.getWorldPosition(mzW); const mz = this.root.worldToLocal(mzW.clone());
-        const pp = o.pool && o.pool.length ? o.pool[(Math.random() * o.pool.length) | 0] : null, tp = pp ? new T.Vector3(pp.x, pp.y + rnd(.05, .35), pp.z) : new T.Vector3(to.x + rnd(-.5, .5), to.y + rnd(.1, .6), to.z + rnd(-.5, .5)), d = tp.clone().sub(mz), len = d.length(); d.normalize();
+        const ap = o.aim ? o.aim(b, .3) : null, pp = !ap && o.pool && o.pool.length ? o.pool[(Math.random() * o.pool.length) | 0] : null, tp = ap ? new T.Vector3(ap.x + rnd(-.25, .25), ap.y + rnd(.05, .3), ap.z + rnd(-.25, .25)) : pp ? new T.Vector3(pp.x, pp.y + rnd(.05, .35), pp.z) : new T.Vector3(to.x + rnd(-.5, .5), to.y + rnd(.1, .6), to.z + rnd(-.5, .5)), d = tp.clone().sub(mz), len = d.length(); d.normalize();
         s.kick = 1; this.muzzle(mz, d, .42 * sc, Math.random() > .25);
         this.padd.emit({ x: mz.x, y: mz.y - .05, z: mz.z, vx: rt.x * rnd(1, 2), vy: rnd(1.5, 2.5), vz: rt.z * rnd(1, 2), life: .5, s0: .05, s1: .03, c0: [1, .85, .4], c1: [.8, .5, .2], a0: 1, a1: 0, gy: -9 });
         const tr = new T.Mesh(this.shared.tracerGeo, this.shared.tracerMat); tr.quaternion.setFromUnitVectors(ZAX(), d); tr.scale.setScalar(this.projK); tr.position.copy(mz); this.spawn(tr);
-        this.tween(len / 50, u => tr.position.set(mz.x + d.x * len * u, mz.y + d.y * len * u, mz.z + d.z * len * u), () => { this.kill(tr); this.puff(tp); });
+        const frT = o.dud ? .55 : 1;   // V164: dud → iz mermisi havada söner
+        this.tween(len * frT / 50, u => tr.position.set(mz.x + d.x * len * u * frT, mz.y + d.y * len * u * frT, mz.z + d.z * len * u * frT), () => { this.kill(tr); if (o.dud) this.fizzle(tr.position); else this.puff(tp); });
         if (o.target && n % 5 === 0) this.flinch(o.target);
       };
       for (let b = 0; b < o.bursts - 1; b++) this.at(t0 + (b + 1) * burstT - .45, () => S.forEach(s => this.tween(.45, u => { s.rl = Math.sin(u * Math.PI); }, () => { s.rl = 0; }, rnd(0, .1)))); // şarjör değiştirme
@@ -1179,16 +1212,21 @@
       for (let b = 0; b < o.bursts; b++) {
         S.forEach(s => {
           const off = rnd(0, .25);
-          for (let j = 0; j < o.perBurst; j++) { const k = n++; this.at(t0 + b * burstT + off + j * (.09 + rnd(0, .03)), () => shoot(s, k)); }
+          for (let j = 0; j < o.perBurst; j++) { const k = n++; this.at(t0 + b * burstT + off + j * (.09 + rnd(0, .03)), () => shoot(s, k, b)); }
         });
       }
+      if (o.aim && !o.dud) for (let b = 0; b < o.bursts; b++) this.at(t0 + (b + 1) * burstT - .05, () => {   // V166: karşı piyade her seri sonunda bizim birliğe isabet ettirir
+        if (dead) return; const ap = o.aim(b, 0); this.explosion(ap ? V(ap) : to, o.blast); if (o.onHit) o.onHit(b);
+      });
       this.at(tFinal, () => {
+        if (o.dud || o.aim) return;   // V164: boşa atış, hedefte patlama yok
         if (o.blast) this.explosion(to, o.blast);
         if (o.target) { if (o.destroy) this.collapse(o.target); else this.flinch(o.target); }
         if (o.onHit) o.onHit(0);
       });
       const leave = tFinal + o.linger;
       this.at(leave, () => {
+        if (dead) return; if (vic) vic.gone();
         this.deploy(S[0].g.position, 1.4 * sc, o.color, 3 * sc);
         this.tween(.5, u => S.forEach(s => s.g.scale.setScalar(sc * Math.max(.001, 1 - E.io(u)))), () => { S.forEach(s => { this.kill(s.g); this.kill(s.shd); }); if (o.onDone) o.onDone(); });
       });
@@ -1235,10 +1273,13 @@
       this.tween(rackT, u => { L.rack.rotation.x = -o.elev * E.io(u); }, () => this.shake(.08), tR);
       // atış
       const n = Math.max(1, o.missiles | 0), tipA = new T.Vector3(), tipB = new T.Vector3(), base = tR + rackT + .35;
-      const impact = i => V(o.tos && o.tos.length ? o.tos[i % o.tos.length] : { x: to.x + rnd(-.8, .8), y: to.y, z: to.z + rnd(-.8, .8) });
+      let dead = false;   // V166: bizim füze kamyonu vurulursa patlar
+      const vic = this.regVictim(o.victim, { pos: () => new T.Vector3(g.position.x, g.position.y + .4 * sc, g.position.z), die: () => { dead = true; stopAnt(); const p = new T.Vector3(g.position.x, g.position.y + .4 * sc, g.position.z); this.explosion(p, 1); this.wreck(p, 1.2); this.kill(g); this.kill(shd); } });
+      const impact = i => { const ap = o.aim ? o.aim(i, 2) : null; return V(ap || (o.tos && o.tos.length ? o.tos[i % o.tos.length] : { x: to.x + rnd(-.8, .8), y: to.y, z: to.z + rnd(-.8, .8) })); };
       let farD = Math.hypot(to.x - from.x, to.z - from.z);
       if (o.tos) o.tos.forEach(p => { farD = Math.max(farD, Math.hypot(p.x - from.x, p.z - from.z)); });
       const launch = i => {
+        if (dead) return; if (vic) vic.arm();
         const s = L.slots[i % L.slots.length];
         if (i > 0 && i % L.slots.length === 0) L.slots.forEach(q => { q.m.visible = true; });   // rampa yeniden yüklenir
         g.updateMatrixWorld(true); s.tip.getWorldPosition(tipA); s.aim.getWorldPosition(tipB);
@@ -1258,7 +1299,9 @@
         this.tween(.5, u => { const r = u < .12 ? u / .12 : Math.pow(1 - (u - .12) / .88, 2); L.group.rotation.x = .03 * r; L.group.position.y = -.02 - .02 * r; });
         const K = this.projK, msc = sc * K; const ms = buildMissile(o.color); ms.group.scale.setScalar(msc); ms.group.position.copy(T0); this.spawn(ms.group);
         const pa = new T.Vector3(), pb = new T.Vector3(), tw = new T.Vector3(), prev = T0.clone();
-        this.tween(dur, u => {
+        const frM = o.dud ? .5 : 1;   // V164: dud → füze yükselir, havada söner
+        this.tween(dur * frM, u0 => {
+          const u = u0 * frM;
           const s2 = .42 * u + .58 * u * u;   // hızlanan uçuş
           bez(Math.min(1, s2), pa); bez(Math.min(1, s2 + .02), pb);
           tw.copy(pb).sub(pa); if (tw.lengthSq() > 1e-9) { tw.normalize(); ms.group.quaternion.setFromUnitVectors(ZAX(), tw); }
@@ -1272,6 +1315,7 @@
           this.padd.emit({ x: pa.x - tw.x * .9 * msc, y: pa.y - tw.y * .9 * msc, z: pa.z - tw.z * .9 * msc, life: .07, s0: msc, s1: .5 * msc, c0: [1, .95, .7], c1: [1, .7, .3], a0: .9, a1: 0 });
           prev.copy(pa);
         }, () => {
+          if (o.dud) { this.kill(ms.group); this.fizzle(pa); return; }
           this.kill(ms.group); this.explosion(tgt, o.blast * (last ? 1.25 : .5)); this.ringFx(tgt, 0xffd9a0, 1.6 * o.blast * K, .5);
           if (o.onHit) o.onHit(i);
         });
@@ -1283,6 +1327,7 @@
         this.tween(.5, u => { const e = 1 - E.io(u); L.jacks.forEach(j => { j.scale.y = Math.max(.001, e); }); L.group.position.y = -.02 * e; }, () => { L.jacks.forEach(j => { j.visible = false; }); }, .5);
       });
       this.at(leave, () => {
+        if (dead) return; if (vic) vic.gone();
         this.deploy(g.position, 1.2 * sc, o.color, 3.4 * sc);
         this.tween(.5, u => g.scale.setScalar(sc * Math.max(.001, 1 - E.io(u))), () => { stopAnt(); this.kill(g); this.kill(shd); if (o.onDone) o.onDone(); });
       });
@@ -1313,14 +1358,19 @@
       const veer = s => E.io(cl((s - z1 - .8) / Math.max(.01, sB - z1 - .8)));
       const posAt = (s, pl, out) => { const l = pl.lat + pl.out * 3.2 * veer(s); return out.set(from.x + fw.x * s + rt.x * l, from.y + yy(s), from.z + fw.z * s + rt.z * l); };
       let ends = 0, lastHit = 0;
+      const deadP = [];   // V166: vurulan uçaklar
       const tmp0 = new T.Vector3(), tmp1 = new T.Vector3();
       P.forEach((pl, k) => {
         const M = buildPlane(o.color), g = new T.Group(); g.add(M.group); g.scale.setScalar(.001); M.group.rotation.order = 'YXZ';
         posAt(sA, pl, tmp0); g.position.copy(tmp0); g.visible = false; this.spawn(g);
         const shd = this.blob(from, 1.6 * sc); shd.visible = false;
         const tail = new T.Vector3(), wl = new T.Vector3(), wr = new T.Vector3();
+        deadP[k] = false; const tS = this.time + pl.d;
+        const vic = this.regVictim(o.victim, { mobile: true, pos: ahead => { const uu = clamp01((this.time + (ahead || 0) - tS) / Tf), out = new T.Vector3(); posAt(sA + uu * total, pl, out); return out; },
+          die: () => { deadP[k] = true; const p = g.position.clone(), gp = new T.Vector3(p.x, 0, p.z); this.explosion(p, .9); this.wreck(p, 1, gp); this.kill(g); this.kill(shd); } });
         this.at(pl.d, () => { g.visible = true; this.ringFx(g.position, o.color, 2.4 * sc, .5); this.flash(g.position, o.color, 14, .3); });
         this.tween(Tf, (u, dt) => {
+          if (deadP[k]) return;
           const s = sA + u * total; posAt(s, pl, tmp0); posAt(s + .4, pl, tmp1);
           const dx = tmp1.x - tmp0.x, dy = tmp1.y - tmp0.y, dz = tmp1.z - tmp0.z, hz = Math.hypot(dx, dz) || 1e-6, ya = Math.atan2(dx, dz), pa = Math.atan2(dy, hz);
           g.position.copy(tmp0); g.rotation.set(0, 0, 0);
@@ -1335,25 +1385,29 @@
           for (let n = emitCount(16, dt); n > 0; n--) this.pnorm.emit({ x: tmp0.x - cx * 1.4 * sc, y: tmp0.y + Math.sin(pa) * 1.4 * sc, z: tmp0.z - cz * 1.4 * sc, vx: rnd(-.08, .08), vy: rnd(.05, .2), vz: rnd(-.08, .08), life: rnd(.8, 1.3), s0: .1 * sc, s1: .5 * sc, c0: [.55, .55, .58], c1: [.32, .32, .35], a0: .35, a1: 0 });
           for (let n = emitCount(10, dt); n > 0; n--) this.padd.emit({ x: tmp0.x - cx * 1.6 * sc, y: tmp0.y, z: tmp0.z - cz * 1.6 * sc, life: .1, s0: .35 * sc, s1: .1 * sc, c0: [1, .85, .5], c1: [1, .45, .15], a0: .8, a1: 0 });
           if (g.scale.x > .3) for (const sg of [-1, 1]) for (let n = emitCount(18, dt); n > 0; n--) this.pnorm.emit({ x: tmp0.x + rx * sg * 1.28 * sc - cx * .6 * sc, y: tmp0.y, z: tmp0.z + rz * sg * 1.28 * sc - cz * .6 * sc, vx: 0, vy: .04, vz: 0, life: rnd(.9, 1.4), s0: .05 * sc, s1: .32 * sc, c0: [.96, .96, 1], c1: [.82, .84, .92], a0: .26, a1: 0 });
-        }, () => { this.kill(g); this.kill(shd); if (k === nP - 1 && o.onDone) o.onDone(); }, pl.d);
+        }, () => { if (vic) vic.gone(); if (!deadP[k]) { this.kill(g); this.kill(shd); } if (k === nP - 1 && o.onDone) o.onDone(); }, pl.d);
         ends = Math.max(ends, pl.d + Tf);
         // bombaların bırakılması
         pl.bl.forEach((b, j) => {
           const tr = pl.d + (b.sr - sA) / v, last = k === nP - 1 && j === nB - 1; lastHit = Math.max(lastHit, tr + tf);
           this.at(tr, () => {
+            if (deadP[k]) return; if (vic) vic.arm();
             const slot = M.bombs[j % M.bombs.length]; slot.visible = false;
             g.updateMatrixWorld(true); const R = new T.Vector3(); slot.getWorldPosition(R); this.root.worldToLocal(R);
-            const tgt = b.tg, msc = sc * K, ms = buildBomb(o.color); ms.scale.setScalar(msc); ms.position.copy(R); this.spawn(ms);
+            const ap = o.aim ? o.aim(b.idx, tf) : null, tgt = ap ? V(ap) : b.tg, msc = sc * K, ms = buildBomb(o.color); ms.scale.setScalar(msc); ms.position.copy(R); this.spawn(ms);
             for (let q = 0; q < 6; q++) this.pnorm.emit({ x: R.x, y: R.y, z: R.z, vx: rnd(-.2, .2), vy: rnd(.1, .4), vz: rnd(-.2, .2), life: rnd(.6, 1), s0: .08 * sc, s1: .3 * sc, c0: [.8, .8, .84], c1: [.55, .55, .6], a0: .4, a1: 0 });
             const pa = new T.Vector3(), pb = new T.Vector3(), tw = new T.Vector3(), prev = R.clone();
             const at = (u, out) => out.set(lerp(R.x, tgt.x, u), lerp(R.y, tgt.y, u * u), lerp(R.z, tgt.z, u));
-            this.tween(tf, u => {
+            const frB = o.dud ? .3 : 1;   // V164: dud → bomba düşmez, kısa uçup havada söner
+            this.tween(tf * frB, u0 => {
+              const u = u0 * frB;
               at(u, pa); at(Math.min(1, u + .03), pb); tw.copy(pb).sub(pa); if (tw.lengthSq() > 1e-9) { tw.normalize(); ms.quaternion.setFromUnitVectors(ZAX(), tw); }
               ms.position.copy(pa);
               const nn = Math.max(1, Math.ceil(prev.distanceTo(pa) / .22));
               for (let q = 1; q <= nn; q++) { const kk = q / nn; this.pnorm.emit({ x: lerp(prev.x, pa.x, kk), y: lerp(prev.y, pa.y, kk) + .05, z: lerp(prev.z, pa.z, kk), life: rnd(.5, .9), s0: .05 * msc + .03 * K, s1: .3 * msc + .12 * K, c0: [.9, .9, .94], c1: [.6, .6, .65], a0: .3, a1: 0 }); }
               prev.copy(pa);
             }, () => {
+              if (o.dud) { this.kill(ms); this.fizzle(pa); return; }
               this.kill(ms); this.explosion(tgt, o.blast * (last ? 1.3 : .8)); this.ringFx(tgt, 0xffd9a0, 1.8 * o.blast * K, .5);
               this.dust(tgt, 1.2 * K, 8); this.shake(last ? .26 : .16); this.flash(tgt, 0xffb050, 22, .3);
               if (o.onHit) o.onHit(b.idx);
@@ -1367,11 +1421,11 @@
     navalAttack(o) {
       o = Object.assign({ color: 0x3b82f6, targetColor: 0xff5a47, scale: .9, torpedoes: 2, sink: true, advance: 1.2, linger: .8, runSpeed: 5.5 }, o || {});
       const from = V(o.from), to = V(o.to), sc = o.scale; from.y = 0; to.y = 0;
-      const yawT = yawBetween(from, to), heading = yawT - .5;
-      const A = this.createShip({ pos: from, heading: heading, color: o.color, scale: sc });
+      const yawT = yawBetween(from, to), heading = o.attacker ? o.attacker.outer.rotation.y : yawT - .5;
+      const A = o.attacker || this.createShip({ pos: from, heading: heading, color: o.color, scale: sc });   // V166: attacker → sahnedeki hazır gemi (karşı gemi)
       const own = !o.target, D = o.target || this.createShip({ pos: to, heading: yawT + Math.PI - .35, color: o.targetColor, scale: sc });
       const advDir = new T.Vector3(Math.sin(heading), 0, Math.cos(heading));
-      this.tween(1.2, (u, dt) => { const v = o.advance / 1.2 * (1 - u * .6); A.outer.position.x += advDir.x * v * dt; A.outer.position.z += advDir.z * v * dt; }, null, .4);
+      if (!o.attacker) this.tween(1.2, (u, dt) => { const v = o.advance / 1.2 * (1 - u * .6); A.outer.position.x += advDir.x * v * dt; A.outer.position.z += advDir.z * v * dt; }, null, .4);
       const tAim = 1.7;
       this.at(tAim, () => {
         const rel = wrapPi(yawBetween(A.outer.position, D.outer.position) - heading), r0 = A.mount.rotation.y;
@@ -1385,7 +1439,7 @@
         this.muzzle(mz, d, .9 * sc); this.shake(.15); A.dip = -.07;
         const gb = A.guns[0].barrel; this.tween(.45, u => { gb.position.z = .5 - .2 * (u < .12 ? u / .12 : Math.pow(1 - (u - .12) / .88, 2)); });
         this.tween(.7, u => { A.hitRoll = -.035 * Math.sin(u * Math.PI * 2) * (1 - u); }, () => { A.hitRoll = 0; });
-        this.shell(mz, hit, sc * .8, () => { this.explosion(hit, .4, { water: true }); D.dip = -.06; });
+        this.shell(mz, hit, sc * .8, () => { this.explosion(hit, .4, { water: true }); D.dip = -.06; }, o.dud);
       };
       this.at(2.3, salvo); this.at(2.55, salvo);
       const dx = to.x - from.x, dz = to.z - from.z, dist = Math.hypot(dx, dz), runDur = Math.max(.5, (dist - 1.5 * sc - .55 * sc - o.advance * .6) / o.runSpeed);
@@ -1407,7 +1461,7 @@
           this.splash(entry, .9);
           const dr = new T.Vector3(D.outer.position.x - entry.x, 0, D.outer.position.z - entry.z); dr.normalize();
           const end = new T.Vector3(D.outer.position.x - dr.x * .55 * D.scale, 0, D.outer.position.z - dr.z * .55 * D.scale);
-          const len = Math.max(.3, Math.hypot(end.x - entry.x, end.z - entry.z)), rdur = len / o.runSpeed, side = new T.Vector3(-dr.z, 0, dr.x);
+          const len = Math.max(.3, Math.hypot(end.x - entry.x, end.z - entry.z)) * (o.dud ? .5 : 1), rdur = len / o.runSpeed, side = new T.Vector3(-dr.z, 0, dr.x);
           let pl = entry.clone();
           tp.group.quaternion.setFromUnitVectors(ZAX(), dr);
           this.tween(rdur, (u, dt) => {
@@ -1423,6 +1477,7 @@
             }
             pl = p.clone();
           }, () => {
+            if (o.dud) { this.splash(new T.Vector3(tp.group.position.x, 0, tp.group.position.z), .5); this.kill(tp.group); return; }   // V164: torpido hedefe varmadan söner
             this.kill(tp.group); this.waterBlast(new T.Vector3(end.x, 0, end.z), 1.15); this.shipHit(D, k % 2 ? 1 : -1);
             if (o.onHit) o.onHit(k);
             if (k === N - 1 && o.sink) this.shipSink(D, own);
@@ -1431,11 +1486,11 @@
       };
       for (let k = 0; k < N; k++) this.at(tL0 + k * tGap, () => launch(k));
       const lastHit = tL0 + (N - 1) * tGap + .32 + runDur, leave = lastHit + o.linger + 1;
-      this.at(leave, () => {
+      if (!o.keep) this.at(leave, () => {   // V166: keep → gemi sahne bitene dek kalır (karşı gemi onu batırabilsin)
         this.deploy(A.outer.position, 1.3 * sc, o.color, 3.6 * sc);
         this.tween(.6, u => A.outer.scale.setScalar(sc * Math.max(.001, 1 - E.io(u))), () => { A.stop && A.stop(); this.kill(A.outer); if (o.onDone) o.onDone(); });
       });
-      return { duration: Math.max(leave + .7, lastHit + 4.6), targetShip: D };
+      return { duration: Math.max(leave + .7, lastHit + 4.6), targetShip: D, ownShip: A };
     }
   }
 

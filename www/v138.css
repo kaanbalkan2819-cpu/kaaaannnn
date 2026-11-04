@@ -40,3 +40,9 @@ body.d38on #panel .envbtn:not(.dipbtn){display:none!important}   /* tek "Diploma
 .d38-q{width:100%;box-sizing:border-box;margin:4px 0}
 .d38-rules ul{margin:4px 0 0;padding-left:18px;font-size:11.5px;opacity:.88;line-height:1.35}
 .d38-rules li{margin:3px 0}
+
+/* V163: genel button{white-space:nowrap} yüzünden açıklama yazısı sağdaki yüzde/zar ile üst üste biniyordu */
+.d38-r{white-space:normal;overflow:hidden}
+.d38-t{overflow:hidden;overflow-wrap:anywhere}
+.d38-t b,.d38-t small{white-space:normal;overflow-wrap:anywhere}
+.d38-r em{flex:0 0 auto;max-width:42%;text-align:right}

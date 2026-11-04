@@ -154,7 +154,7 @@
     var mine = ON.side === 'host' ? s.mp.host : s.mp.guest;
     if (s.over && !s.mp.coop) { var _o = s.over; s.over = { w: _o.w === 0 ? -1 : (_o.w === -1 ? 0 : _o.w) }; if (_o.draw) s.over.draw = 1; if (_o.dq) s.over.dq = 1; if (_o.tl) s.over.tl = 1; }   // kazanan/kaybeden gönderene göre yazılmıştır
     G = s; if (G.mp.act !== ON.side) G.mp.begin = 0; G.pl = G.act = G.cur = mine; G.busy = 0; G.sel = null; G.endLock = 0; G.aiBusy = 0; G.ts = Date.now();
-    OV = {}; BT = null; BSH = false;
+    OV = {}; BT = null; BSH = false; try { document.body.classList.remove('bsh'); } catch (e) { }
     return mine;
   }
   function recv(m) {

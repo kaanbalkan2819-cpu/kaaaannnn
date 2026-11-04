@@ -116,7 +116,7 @@ function rnd6(){return 1+Math.floor(Math.random()*6)}
 // ---- AKIŞ ----
 function newGame(m){G={mode:m,P:[],owner:{},cur:0,roll:0,left:0,ph:'pick',pi:0,noscout:0,rv:{},ed:{},v:3,kn:[],st:[],el:0,ts:Date.now(),sel:null,up:0};
  for(var i=0;i<m;i++){G.P.push({s:[0,0,0,0,0],name:t('pl')+' '+(i+1)});G.kn.push({});G.st.push({w:0,l:0,c:0})}
- R.forEach(function(r){G.owner[r.id]=r.id});OV={};BT=null;BSH=false;$('bs').style.display='none';closeMod();render();home(0)}
+ R.forEach(function(r){G.owner[r.id]=r.id});OV={};BT=null;BSH=false;try{document.body.classList.remove('bsh')}catch(e){}$('bs').style.display='none';closeMod();render();home(0)}
 function pickOk(){var id=G.sel;if(!id)return;if(G.owner[id]!==id)return toast(t('taken'));var i=G.pi;G.owner[id]=i;G.P[i].s=BASE[id].slice();G.P[i].start=id;G.pi++;G.sel=null;
  if(G.pi>=G.P.length){G.cur=0;if(solo()){G.ph='act';G.turn=0;G.up=0;G.left=0}else startTurn()}save();render();home()}
 function pickRnd(){var f=R.filter(function(r){return G.owner[r.id]===r.id});G.sel=f[Math.floor(Math.random()*f.length)].id;render();focusSel()}
@@ -179,7 +179,7 @@ function hud(){var h='',p=G.cur;
    if(G.ph=='act'&&!Object.keys(TG).length)h+='<button onclick="endTurn();render()">'+t('skip')+'</button>'}}
  $('hud').innerHTML=h+'<span class="sp"></span><button class="hb" title="'+t('world')+'" onclick="worldView()">'+IC.world+'</button><button class="hb" onclick="settings()">'+IC.set+'</button><button class="hb" onclick="menu()">'+IC.menu+'</button>'}
 function hint(){var el=$('hint');if(!G||G.ph!='act'||G.sel||BSH||G.over){el.style.display='none';return}el.textContent=Object.keys(TG).length?t('tgtHint'):t('noMoves');el.style.display='block'}
-function paint(){pel.each(function(r){var c=col(ownerOf(r.id));if(r._c!==c){r._c=c;this.style.fill=c}});overlay();labels()}
+function paint(){try{var _m=document.getElementById('map');if(_m&&_m.classList.contains('v30on'))return}catch(e){}pel.each(function(r){var c=col(ownerOf(r.id));if(r._c!==c){r._c=c;this.style.fill=c}});overlay();labels()}
 function overlay(){var L=[];if(G){if(BT){BT.a.forEach(function(id){L.push({id:id,c:'ba'})});L.push({id:BT.d,c:'bd'})}else{Object.keys(TG).forEach(function(id){L.push({id:id,c:'atks'});L.push({id:id,c:'atk'})});if(G.sel)L.push({id:G.sel,c:'sel'})}
   if(FLASH)L.push({id:FLASH,c:'cap'})}
  var s=ov.selectAll('path').data(L,function(o){return o.id+o.c});s.exit().remove();s.enter().append('path').attr('class',function(o){return'hl '+o.c}).attr('d',function(o){return ovd(o.id)})}
@@ -228,7 +228,7 @@ function splash(w){if(SET.rm)return;var s=document.createElement('div');s.classN
  if(w)for(var i=0;i<18;i++){var q=document.createElement('i');q.style.cssText='--x:'+(((Math.random()-.5)*320)|0)+'px;--y:'+((-30-Math.random()*150)|0)+'px;background:'+['#f5b53a','#34d399','#60a5fa','#fff'][i%4];s.appendChild(q)}
  $('map').appendChild(s);setTimeout(function(){s.remove()},1800)}
 function showBattle(r,p,e,tg,mv,att){var done=0,ph=0,tm=[],sp=SET.rm?0:SET.spd,SI=['👥','🎖','💰','🔬','🕊'],sa=(typeof p=='number'?G.P[p].start:p)||tg,aw=0,dw=0,bs=$('bs'),RM=sp?1300/Math.min(sp,1.25):0;
- BT={a:att,d:tg};BSH=true;$('panel').style.display='none';$('hint').style.display='none';bs.className='';
+ BT={a:att,d:tg};BSH=true;try{document.body.classList.add('bsh')}catch(e){}$('panel').style.display='none';$('hint').style.display='none';bs.className='';
  var h='<div class="sides"><div class="sd" id="sa"><div class="rl">'+t('A')+'</div>'+fimg(sa)+'<div class="nm">'+nm(p)+'</div>'+die3d('da','at')+'<div class="bn" id="ba"></div><div class="sub">'+t('pts')+': <b id="pa">–</b></div></div><div class="mid"><div class="sw">⚔</div><div class="mu" id="mu">'+t('pre')+'</div></div><div class="sd" id="sdf"><div class="rl">'+t('D')+'</div>'+fimg(tg)+'<div class="nm">'+M[tg].name+'</div>'+die3d('db','df')+'<div class="bn" id="bb"></div><div class="sub">'+t('pts')+': <b id="pd">–</b></div></div></div><div class="pre" id="pre"></div><div class="cmp">';
  for(var i=0;i<5;i++)h+='<div class="sr" id="r'+i+'"><div class="v"></div><div><div class="lbl"></div><div class="bar"><i class="a"></i><i class="d"></i></div></div><div class="v"></div></div>';
  bs.innerHTML=h+'</div><div class="fin" id="fn"></div>';bs.style.display='block';bs.scrollTop=0;paint();fitBattle(tg,att);
@@ -248,7 +248,7 @@ function showBattle(r,p,e,tg,mv,att){var done=0,ph=0,tm=[],sp=SET.rm?0:SET.spd,S
  bs.onclick=function(ev){if(ev.target.closest&&ev.target.closest('button'))return;if(ph==0)rolled();else if(ph==2)finish()};
  if(!sp){rolled();finish();return}
  AU.play('dice');rollDie('da',r.ra,RM,-1);rollDie('db',r.rd,RM,1,rolled)}
-function closeBattle(){BSH=false;BT=null;OV={};FLASH=null;var b=$('bs');b.style.display='none';b.onclick=null;if(!G)return;
+function closeBattle(){BSH=false;try{document.body.classList.remove('bsh')}catch(e){}BT=null;OV={};FLASH=null;var b=$('bs');b.style.display='none';b.onclick=null;if(!G)return;
  // Fetihten sonra yeni sahip olunan ülke seçili kalır; komşu hedefler kırmızı çerçeveyle görünür
  render();if(G.sel&&!G.over)focusSel();else if(!G.over)home()}
 function fmt(ms){var s=Math.floor(ms/1000),m=Math.floor(s/60);return m+':'+('0'+s%60).slice(-2)}
@@ -409,7 +409,7 @@ function ensureCycle(){var a=aliveEmp().filter(function(e){return!G.done[e]});if
 var _newGame=newGame;
 newGame=function(m){if(m!=1)return _newGame(m);
  G={mode:1,v:4,P:[{s:[0,0,0,0,0],name:t('pl')+' 1'}],owner:{},cur:null,act:null,roll:0,left:0,ph:'wheel',pi:1,noscout:0,rv:{},ed:{},es:{},kn:[{}],st:[{w:0,l:0,c:0}],el:0,ts:Date.now(),sel:null,up:0,cyc:1,done:{},boosts:0,turn:0};
- R.forEach(function(r){G.owner[r.id]=r.id});OV={};BT=null;BSH=false;TGT=null;WH=null;WAITW=false;clearRay();$('bs').style.display='none';closeMod();render();home(0);save()};
+ R.forEach(function(r){G.owner[r.id]=r.id});OV={};BT=null;BSH=false;try{document.body.classList.remove('bsh')}catch(e){}TGT=null;WH=null;WAITW=false;clearRay();$('bs').style.display='none';closeMod();render();home(0);save()};
 // -- bayrak çarkı (yatay çark şeridi)
 function showWheel(){if(WAITW||!G||G.ph!='wheel'||BSH)return;if(WH&&WH.stop)return;if(WH)cancelAnimationFrame(WH.raf);
  var el=ensureCycle(),base=[],i,CW=84;for(i=0;i<24;i++)base.push(el[Math.floor(Math.random()*el.length)]);

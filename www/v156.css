@@ -66,3 +66,16 @@ body.wc141-ig .wb-panel.wc156{box-shadow:0 18px 50px #000b!important}
   .wc141p.wc156 .c141s{margin-bottom:8px}
 }
 @media (prefers-reduced-motion:reduce){.wc141p.wc156 *{transition:none!important}}
+
+/* V167: duraklatma kartı küçültüldü; başlık küçüldü; BÖLGE 0/174 yazısı açıldı; Oyun Geçmişi düğmesi (v139 ekler) gizli */
+.wc141p.wc156{width:min(82vw,320px)!important;padding:22px 14px 16px!important}
+.wc141p.wc156 h3{font-size:clamp(15px,4.8vw,19px)!important;letter-spacing:.16em!important;padding-left:.16em;white-space:nowrap;max-width:100%}
+.wc141p.wc156 .e156{width:60px}
+.wc141p.wc156 .c141s{gap:0;margin-bottom:12px}
+.wc141p.wc156 .c141s div{padding:0 clamp(10px,3.4vw,16px);gap:4px}
+.wc141p.wc156 .c141s b{font-size:19px;white-space:nowrap}
+.wc141p.wc156 .c141s b i{font-style:normal;font-size:.6em;margin-left:.2em;letter-spacing:.06em;opacity:.65}
+.wc141p.wc156 .c141s small{letter-spacing:.12em;white-space:nowrap}
+.wc141p.wc156 .c141b{min-height:42px;font-size:15px}
+.wc141p.wc156 .c141b.pri{min-height:48px;font-size:17px}
+.wc141p #v139h,.wb-pause #v139h{display:none!important}

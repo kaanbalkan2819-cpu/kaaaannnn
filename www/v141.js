@@ -4,7 +4,7 @@
   'use strict';
   function X(tr, en) { return (typeof L !== 'undefined' && L == 'tr') ? tr : en; }
   function inGame() { try { return !!G && !G.over && G.ph !== 'over' && !document.body.classList.contains('wcm-on'); } catch (e) { return false; } }
-  function sync() { try { document.body.classList.toggle('wc141-ig', inGame()); } catch (e) { } }
+  function sync() { try { if (typeof BSH !== 'undefined' && BSH) return; document.body.classList.toggle('wc141-ig', inGame()); } catch (e) { } }
   setInterval(sync, 500);
 
   function chip(v, k) { return '<div><b>' + v + '</b><small>' + k + '</small></div>'; }
@@ -64,11 +64,8 @@
       '<div class="c141g">' +
       b('▶', X('Oyuna Dön', 'Resume'), 'closeMod()', 'pri') +
       homeBtn() +   /* V160: Ana Menü, Oyuna Dön'ün hemen altına alındı (görünür olsun) */
-      b('💾', '<span id="wb29save">' + X('Kaydet', 'Save') + '</span>', 'wb29Save()', '') +
+      /* V167: Kaydet, Oyun Geçmişi, Dil ve Yeni Oyun düğmeleri duraklatma menüsünden kaldırıldı */
       b('⚙', t('set'), 'settings()', '') +
-      hist +
-      b('🌐', t('lg'), 'setLang();menu()', '') +
-      b('🔄', t('nw'), 'askNew()', 'warn') +
       giveBtn() +
       '</div></div></div>';
     m.style.display = 'flex';

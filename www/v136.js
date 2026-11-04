@@ -122,17 +122,6 @@
         if (G && G.owner && A && D && A.length >= 5 && D.length >= 5) {
           var ea = ownerOf(A), ed = ownerOf(D), fa = [1, 1, 1, 1, 1], fd = [1, 1, 1, 1, 1], x;
           function up(f, idx, v) { for (var i = 0; i < idx.length; i++) f[idx[i]] *= v; }
-          // 💰 Ekonomi → lojistik (Ordu + Teknoloji)
-          if (A[2] > D[2]) { x = 1 + edge(A[2], D[2], .10, ECO_CAP); if (x > 1.0005) { up(fa, [1, 3], x); note.push('💰 ' + X('Ekonomi (lojistik): saldıranın Ordu+Teknoloji ×', 'Economy (logistics): attacker Army+Tech ×') + x.toFixed(2)); } }
-          else if (D[2] > A[2]) { x = 1 + edge(D[2], A[2], .10, ECO_CAP); if (x > 1.0005) { up(fd, [1, 3], x); note.push('💰 ' + X('Ekonomi (lojistik): savunanın Ordu+Teknoloji ×', 'Economy (logistics): defender Army+Tech ×') + x.toFixed(2)); } }
-          // 🔬 Teknoloji → silah kalitesi (Ordu)
-          if (A[3] > D[3]) { x = 1 + edge(A[3], D[3], .20, TECH_CAP); if (x > 1.0005) { up(fa, [1], x); note.push('🔬 ' + X('Silah kalitesi: saldıranın Ordu ×', 'Weapon quality: attacker Army ×') + x.toFixed(2)); } }
-          else if (D[3] > A[3]) { x = 1 + edge(D[3], A[3], .20, TECH_CAP); if (x > 1.0005) { up(fd, [1], x); note.push('🔬 ' + X('Silah kalitesi: savunanın Ordu ×', 'Weapon quality: defender Army ×') + x.toFixed(2)); } }
-          // 🕊 Diplomasi → uluslararası destek
-          if (D[4] > A[4]) { x = 1 + edge(D[4], A[4], .10, DIP_DEF); if (x > 1.0005) { up(fd, [0, 1, 2, 3, 4], x); note.push('🕊 ' + X('Uluslararası destek: savunan ×', 'International backing: defender ×') + x.toFixed(2)); } }
-          else if (A[4] > D[4]) { x = 1 + edge(A[4], D[4], .10, DIP_ATK); if (x > 1.0005) { up(fa, [0, 1, 2, 3, 4], x); note.push('🕊 ' + X('Meşruiyet / koalisyon: saldıran ×', 'Legitimacy / coalition: attacker ×') + x.toFixed(2)); } }
-          // 🎖 Ordu → ordusu üstün savunan hazırlıklıdır
-          if (D[1] > A[1]) { x = 1 + edge(D[1], A[1], .10, ARMY_DEF); if (x > 1.0005) { up(fd, [0, 1, 2, 3, 4], x); note.push('🎖 ' + X('Savunma hazırlığı: savunan ×', 'Defence readiness: defender ×') + x.toFixed(2)); } }
           A = build(A, fa, ea); D = build(D, fd, ed);
         }
       } catch (e) { note = []; }
@@ -146,10 +135,10 @@
   function guideHtml() {
     return '<details class="g136"><summary>📖 ' + X('Özellikler savaşı nasıl etkiler?', 'How do stats affect battle?') + '</summary>' +
       '<div>👥 <b>' + X('Nüfus', 'Population') + '</b>: ' + X('savunma avantajı — savunanın Nüfusu üstünse tüm değerleri en çok +%10.', 'defence edge — if the defender leads in Population, all its stats up to +10%.') + '</div>' +
-      '<div>🎖 <b>' + X('Ordu', 'Army') + '</b>: ' + X('saldırı avantajı — saldıranın Ordusu üstünse tüm değerleri en çok +%10; ordusu üstün savunan +%4.', 'attack edge — if the attacker leads in Army, all its stats up to +10%; a stronger defending army gets +4%.') + '</div>' +
-      '<div>💰 <b>' + X('Ekonomi', 'Economy') + '</b>: ' + X('lojistik — zengin tarafın Ordu ve Teknoloji değeri en çok +%5; ayrıca tur başı gelir / ekstra hamle.', 'logistics — the richer side\'s Army and Tech up to +5%; also turn income / extra moves.') + '</div>' +
-      '<div>🔬 <b>' + X('Teknoloji', 'Technology') + '</b>: ' + X('zarına +1/+2 ve silah kalitesi — üstün tarafın Ordu değeri en çok +%6.', 'die +1/+2 and weapon quality — the leader\'s Army up to +6%.') + '</div>' +
-      '<div>🕊 <b>' + X('Diplomasi', 'Diplomacy') + '</b>: ' + X('müttefik katkısı (en çok +%20) ve uluslararası destek — savunanda en çok +%5, saldıranda +%3.', 'ally contribution (up to +20%) and international backing — up to +5% for a defender, +3% for an attacker.') + '</div>' +
+      '<div>🎖 <b>' + X('Ordu', 'Army') + '</b>: ' + X('saldırı avantajı — saldıranın Ordusu üstünse tüm değerleri en çok +%10.', 'attack edge — if the attacker leads in Army, all its stats up to +10%.') + '</div>' +
+      '<div>💰 <b>' + X('Ekonomi', 'Economy') + '</b>: ' + X('tur başı gelir / ekstra hamle.', 'turn income / extra moves.') + '</div>' +
+      '<div>🔬 <b>' + X('Teknoloji', 'Technology') + '</b>: ' + X('zarına +1/+2.', 'die +1/+2.') + '</div>' +
+      '<div>🕊 <b>' + X('Diplomasi', 'Diplomacy') + '</b>: ' + X('müttefik katkısı (en çok +%20).', 'ally contribution (up to +20%).') + '</div>' +
       '<div>⚔ ' + X('Kazanmak için 5 değerin en az 3\'ünde üstün olmalısın.', 'You must lead in at least 3 of 5 stats to win.') + '</div></details>';
   }
   function addGuide() {

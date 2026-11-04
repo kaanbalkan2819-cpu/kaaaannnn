@@ -45,7 +45,7 @@
     G = { mode: 1, v: 4, v5: 1, P: [{ s: [0, 0, 0, 0, 0], name: t('pl') + ' 1' }], owner: owner, cur: pick, act: pick, pl: pick,
       roll: 0, left: 0, ph: 'v5intro', pi: 1, noscout: 0, rv: {}, ed: {}, es: {}, kn: {}, st: [{ w: 0, l: 0, c: 0 }], el: 0, ts: Date.now(),
       sel: null, up: 0, cyc: 1, done: {}, boosts: 0, turn: 0, T: { turn: 0, roll: 0, moves: 0, scouted: false }, pend: null };
-    OV = {}; BT = null; BSH = false; $('bs').style.display = 'none'; closeMod(); render(); home(0); save(); intro5();
+    OV = {}; BT = null; BSH = false; try { document.body.classList.remove('bsh'); } catch (e) { } $('bs').style.display = 'none'; closeMod(); render(); home(0); save(); intro5();
   };
   function intro5() {
     var id = G.pl, b = st(id), h = '<div class="dh">' + fimg(id, 'lg') + '<div><h3 style="margin:0 0 6px">' + M[id].name + '</h3><span class="bdg me">' + t('own') + '</span></div></div>' +
@@ -377,7 +377,7 @@
     if (!G || !G.v5) return;
     if (!G.kn || Array.isArray(G.kn)) G.kn = {};
     if (!G.T) G.T = { turn: 0, roll: 0, moves: 0, scouted: false };
-    G.act = G.cur = G.pl; G.busy = 0; G.endLock = 0; BSH = false;
+    G.act = G.cur = G.pl; G.busy = 0; G.endLock = 0; BSH = false; try { document.body.classList.remove('bsh'); } catch (e) { }
     closeMod();
     // Eski kayıtlar: bekleyen fetih / bekleyen bonus seçimi yeni kurala göre çözülür (5/5 üstünlükte seçim sorulmaz).
     var legacy = false;

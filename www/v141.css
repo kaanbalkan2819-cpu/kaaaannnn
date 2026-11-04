@@ -12,7 +12,7 @@ body.wc141-ig .wb-panel.wb-set,body.wc141-ig .wb-panel.wb-ask{max-height:88vh;ov
 @keyframes wc141in{from{opacity:0}to{opacity:1}}
 
 .wc141p{width:min(92vw,360px)!important;padding:16px 16px 16px!important;text-align:center;border-radius:20px!important;
-  background:linear-gradient(165deg,rgba(24,40,88,.96),rgba(9,16,40,.96))!important;color:#eef2ff!important;border:1px solid #d9b25e66!important;backdrop-filter:none;-webkit-backdrop-filter:none/* V163 */}
+  background:linear-gradient(165deg,rgba(24,40,88,.96),rgba(9,16,40,.96))!important;color:#eef2ff!important;border:1px solid #d9b25e66!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .wc141p::before{display:none!important}
 .wc141p .c141h{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 10px}
 .wc141p .c141h .p{font-size:18px;opacity:.9}

@@ -170,7 +170,7 @@
     var done = 0, tm = [], sp = SET.rm ? 0 : SET.spd, bs = $('bs'), aw = 0, dw = 0, ph = 0;
     var lock86 = !!(G && G.over); if (lock86 && !sp) sp = 1;   /* V86: oyunu bitirecek savaş atlanamaz */
     var fa = flagId(p), fd = flagId(e);
-    BT = { a: att, d: tg }; BSH = true; $('panel').style.display = 'none'; $('hint').style.display = 'none'; var eb = $('v7end'); if (eb) eb.style.display = 'none';
+    BT = { a: att, d: tg }; BSH = true; try { document.body.classList.add('bsh'); } catch (e) { } $('panel').style.display = 'none'; $('hint').style.display = 'none'; var eb = $('v7end'); if (eb) eb.style.display = 'none';
     bs.className = 'b7'; G.lastRep = r.rep;
     var h = '<div class="b7h">' + side('a', t('A'), fa, nm(p), r.A, r.mA, r.bA) + '<div class="sx" id="sx">' + SWORDS + '</div>' + side('d', t('D'), fd, nm(e), r.D, r.mD, r.bD) + '</div>' +
       '<div class="dr"><div class="dc" id="dca">' + die7('da') + '<b class="dsm" id="dsa"></b></div><div class="dm" id="mu">' + X('Savaş başlıyor…', 'Battle begins…') + '</div><div class="dc" id="dcd">' + die7('db') + '<b class="dsm" id="dsd"></b></div></div><div class="cmp">';
