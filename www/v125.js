@@ -49,7 +49,8 @@
       }
       if (inGame()) {
         var p = $('panel'); if (p && p.style.display === 'block' && G.sel) { try { deselect(); } catch (e) { G.sel = null; try { render(); } catch (e2) { } } ensure(); return; }   // alt panel → seçimi kaldır
-        askExit(); ensure(); return;                                           // oyundayken: "Oyundan çıkmak istiyor musun?"
+        try { menu(); } catch (e) { askExit(); }                               // V184: oyundayken geri = duraklatma menüsü (eskiden "Oyundan çıkmak istiyor musun?"); menü açılamazsa eski soru
+        ensure(); return;
       }
       var back = document.querySelector('#wcm [data-a="back"]');               // ana menü alt ekranı → bir adım geri
       if (back && menuOn()) { back.click(); ensure(); return; }

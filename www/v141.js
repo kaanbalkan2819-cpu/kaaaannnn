@@ -43,6 +43,21 @@
     } catch (e) { try { console.error(e); } catch (x) { } }
   };
 
+  /* V184: duraklatma menüsünün en altına "Oyundan Çık": basınca uygulama doğrudan kapanır (onay sorulmaz). Tek kişilik oyunda, kayıt güvenliyse (tur ortası zar/YZ turu değilse) sefer önce kaydedilir; Seferi Sürdür ile devam edilir. Online oyunda da görünür (maçtan ayrılınır). */
+  function quitBtn() { return b('🚪', X('Oyundan Çık', 'Quit Game'), 'v184Quit()', 'warn'); }
+  window.v184Quit = function () {
+    window.WC161_leaving = true;                                   // bilerek çıkış: oturum geri yükleme bayrağı yazılmaz (v125 exitGame ile aynı)
+    try { localStorage.removeItem('wc_live161'); } catch (e) { }
+    try {
+      var ok = !(G.v5 === 1 && typeof G.pl === 'string') || G.ph === 'act' || G.ph === 'v5roll';
+      if (G && !G.mp && !G.over && G.ph !== 'over' && ok) save();
+    } catch (e) { }
+    try { var ap = window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.App; if (ap && ap.exitApp) { ap.exitApp(); return; } } catch (e) { }
+    try { if (navigator.app && navigator.app.exitApp) { navigator.app.exitApp(); return; } } catch (e) { }
+    try { window.close(); } catch (e) { }
+    setTimeout(function () { try { location.reload(); } catch (e) { } }, 300);   // tarayıcıda pencere kapatılamazsa ana menüye dön
+  };
+
   /* V153: duraklatma menüsüne "Ana Menü": sefer kaydedilir (Seferi Sürdür ile devam edilir), oyun kapanır, ana menü açılır. Online oyunda gösterilmez. */
   function homeBtn() { try { if (G && G.mp) return ''; } catch (e) { return ''; } return b('🏠', X('Ana Menü', 'Main Menu'), 'v153Home()', ''); }
   window.v153Home = function () {
@@ -67,6 +82,7 @@
       /* V167: Kaydet, Oyun Geçmişi, Dil ve Yeni Oyun düğmeleri duraklatma menüsünden kaldırıldı */
       b('⚙', t('set'), 'settings()', '') +
       giveBtn() +
+      quitBtn() +   /* V184: en altta "Oyundan Çık" (Pes Et ile aynı 'warn' rengi) */
       '</div></div></div>';
     m.style.display = 'flex';
     m.onclick = function (e) { if (e.target === m && m.querySelector('.wc141p')) closeMod(); };   // karartılmış alana dokununca oyuna dön (yalnızca bu kart açıkken)

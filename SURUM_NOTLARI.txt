@@ -1,3 +1,50 @@
+=================== V186 ===================
+V186 — "HIZLI YZ TURU" ARTIK ÖDÜL (TELEFONDA DENENMEDİ; yalnızca node --check geçti)
+Oyun artık her zaman normal hızda oynanır: haritadaki ⚡ (Hızlı YZ turu) düğmesi başta GİZLİ ve özellik kapalı (eskiden varsayılan açıktı).
+Açılma koşulu: tek kişilik oyunda dünyayı fethetmek ("Dünya Fethedildi!" sonucu; süre dolunca puanla kazanmak sayılmaz, online oyun sayılmaz). İlk fetihte final ekranında "🎁 Ödül: Hızlı YZ turu açıldı!" kutusu çıkar ve kalıcı olarak (localStorage: wc_fastai_unlock) açılır. Oyun geçmişinde zaten bir fetih kaydı varsa baştan açıktır.
+Açıldıktan sonra da varsayılan KAPALI; ⚡ düğmesiyle açılıp kapanır (wc_fastai: '1' = açık).
+www/v139.js: fastUnlocked(), wantFast(), v139Fast(), fastBtn(), showFinal().
+GERİ ALMAK İÇİN: v139.js'te fastUnlocked() içinde "return true" yapın ve wantFast()'i eski haline getirin (varsayılan açık).
+
+=================== V185 ===================
+V185 — ÜLKE PANELİNDE "ZAYIF / ÇOK ZAYIF / GÜÇLÜ…" YAZILARI KALDIRILDI; ÖZELLİK ŞERİDİ KEŞİFTEN SONRA GELİR (TELEFONDA DENENMEDİ; yalnızca node --check geçti)
+v15.js panel(): keşfedilmemiş özellikler için artık hiçbir chip/satır çizilmez. Şerit (5 özellik) yalnızca açılmış değerleri sayı olarak gösterir; hiçbiri açık değilse şerit hiç çıkmaz. Keşif (5 değerden 3'ü) sonrası o 3 değer sayıyla görünür. Kendi ülken ve ülke seçme aşaması (pick) etkilenmez: hepsi sayı olarak görünür.
+Genişletilen ayrıntı satırlarında da (v15r) yalnızca bilinen özellikler çıkar.
+Not: app.js'teki relTxt/rangeTxt aynen duruyor (başka yerde kullanılmıyor); geri almak için v15.js'te "V185" yazan bloğu eski haline getirin.
+
+=================== V184 ===================
+V184 — GERİ TUŞU = DURAKLATMA MENÜSÜ + MENÜYE "OYUNDAN ÇIK" (TELEFONDA DENENMEDİ; yalnızca node --check geçti)
+1) v125.js: oyundayken telefon geri tuşu artık "Oyundan çıkmak istiyor musunuz?" sorusu yerine duraklatma menüsünü açar. Menü açıkken geri = oyuna dön (eskisi gibi). Alt panel açık ve ülke seçiliyken ilk geri yine seçimi kaldırır, sonraki geri menüyü açar. Savaş ekranında geri tuşu yine yok sayılır.
+2) v141.js: duraklatma menüsünün EN ALTINA "🚪 Oyundan Çık" eklendi; Pes Et ile aynı 'warn' sınıfı = aynı renk tonu. Basınca onay sorulmadan uygulama kapanır (Capacitor App.exitApp; yoksa Cordova; yoksa tarayıcıda ana menüye döner). Tek kişilik oyunda kayıt güvenliyse (v5'te yalnızca 'act'/'v5roll' aşamaları) sefer önce kaydedilir; Seferi Sürdür ile devam edilir. Online oyunda da görünür (Pes Et online'da gizli, bu değil).
+Ayarlar'daki "Ana Menü" düğmesi eski soruyu (askExit) kullanmaya devam eder.
+GERİ ALMAK İÇİN: v125.js'te "V184" yazan satırı askExit(); ile değiştirin; v141.js'te quitBtn() satırını silin.
+
+=================== V183 ===================
+V183 — TELEFONDA DURUNCA NETLEŞTİRME (hareket sırasında çözünürlük aynı: 1.25x; TELEFONDA DENENMEDİ; yalnızca node --check geçti)
+Eskiden telefonda PRHI = PRLO idi (V147: çözünürlük değişimi 238-266 ms donma yapıyordu). Şimdi küre 1,5 sn tam durgun kalınca çözünürlük 1.75x'e çıkar; dokunma/kaydırma/animasyon başlar başlamaz 1.25x'e döner.
+Yüksek çözünürlüğe GEÇİLMEZ: kaplama/taban boyaması sürerken, açılış animasyonunda, savaş paneli açıkken, cihaz yavaşsa (V170: bulut gizlendi veya ortalama kare süresi >30 ms).
+v30.js: PR_IDLE_PHONE (1.75; 1.25 yaparsanız özellik kapanır) ve PR_IDLE_MS (1500) sabitleri en üstte.
+BEKLENEN BEDEL: netleşme anında ve netleşmiş haldeyken ilk dokunuşta bir kez kısa takılma (tuval yeniden ayrılır). Sıkıcıysa PR_IDLE_MS'yi 2500 yapın ya da PR_IDLE_PHONE'u 1.5'e düşürün.
+GERİ ALMAK İÇİN: v30.js'te PR_IDLE_PHONE = 1.25 yapın.
+
+=================== V182 ===================
+V182 — ZAR UÇARKEN TEK YÜZLÜ KART GİBİ GÖRÜNÜYORDU (başsız Chromium'da önce/sonra kare kare ölçüldü; telefonda DENENMEDİ)
+SORUN: Ekran kaydında savaş zarı atılırken zar küp değil, düz tek yüzlü bir kart gibi dönüyordu; yere inince küp oluyordu.
+NEDEN: V175'te eklenen v156.css kuralı ".d3.rolling .cb{will-change:transform,opacity}" — opacity içeren will-change, tarayıcıda transform-style:preserve-3d'yi düzleştirir; 6 yüz aynı düzleme çöküp yalnızca biri görünüyordu. Yalnızca dönme sırasında (rolling sınıfı) oluyordu.
+ÇÖZÜM: www/v156.css — .cb için will-change yalnızca transform; gölge (.sdw) kuralı aynen kaldı (3B taşımıyor).
+GERİ ALMAK İÇİN: v156.css'te "V182" yazan satırın altındaki iki kuralı eski tek kuralla değiştirin.
+
+=================== V181 ===================
+V181 — ÜLKE SEÇİMİNDE İLK DOKUNUŞ TAKILMASI (3B blokların GPU'ya önceden yüklenmesi; telefonda DENENMEDİ, başsız Chromium'da ölçüldü)
+SORUN: Ekran kaydında Ermenistan'a dokunulurken ~330 ms'lik gerçek bir donma vardı. (Kaydın diğer uzun boşlukları, ekran değişmediği için kayıt aracından geliyordu; kasma değil.)
+NEDEN: warmHome() (blokları GPU'ya önceden yükleyen kod) yalnızca yeni oyunun "ülke seç" aşamasında ve yalnızca Türkiye'ye en yakın 14 ülke için çalışıyordu. Devam eden oyunda ve uzak ülkelerde ilk seçimde blok GPU'ya o karede yükleniyordu. Ayrıca önyükleme, kürenin arkasındaki ülkeleri (frustum culling) hiç yüklemiyordu.
+ÖLÇÜM (renderer.info.memory.geometries): eski kodda İran, Azerbaycan, Mısır, Suudi Arabistan, Polonya seçilirken her birinde 3 GPU yüklemesi oluyordu; yeni kodda 22 ülkelik testte seçim anında 0 yükleme.
+1) v30.js: warmHome() her aşamada çalışır (show() içinden 4 sn sonra da tetiklenir), oyuncunun ülkesinden başlayarak TÜM ülkeleri sırayla üretir ve yükler (dokunma/animasyon/savaş paneli varken bekler).
+2) v30.js: preUpMany() — frustumCulled geçici kapatılır, 4 ülke tek karede yüklenir.
+3) v26.js: bayrak ön yükleyicisi artık görüntüyü boş zamanda decode() ile de çözer.
+BEDEL: ~5-8 MB ek GPU/bellek (528 mesh; ölçülen vertex verisi 5,5 MB/120 ülke). Uygulama (APK) boyutu değişmedi.
+GERİ ALMAK İÇİN: v30.js ve v26.js'te "V181" yazan blokları eski haline getirin.
+
 =================== V160 ===================
 V160 — SAVAŞ YORGUNLUĞU/DİPLOMASİ/KEŞİF/POLİTİKA SEVİYE DÜŞÜŞÜ + ZAR/SAVAŞ SESİ + FETHEDİLEN TOPRAKTA POLİTİKA (TEST EDİLMEDİ; yalnızca node --check)
 1) Tur sonunda seviye düşüşü (sen veya YZ turu bitince = her yeni turda):

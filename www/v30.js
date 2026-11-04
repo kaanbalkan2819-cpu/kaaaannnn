@@ -10,6 +10,7 @@
   var stage, renderer, scene, camera, globe, earth, cloudM, atmM, rafId = 0, last = 0, dirtyQ = 0, needPaint = true, lastSig = '';
   var LOWQ = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches), OW = LOWQ ? 2048 : 3072, OH = LOWQ ? 1024 : 1536, LS = OW / 2048, ZMIN3 = 1.9, LW = 1536, LH = 768, NW = 512, NH = 256, SCALE = 0.07;
   var ovC, ov, liftC, lift, reliefC, nsmall, nsx, nC, nx, nImg, topoH, ovTex, liftTex, normTex;
+  var PR_IDLE_PHONE = 1.75, PR_IDLE_MS = 1500;   /* V183: telefonda durunca netleştirme — PR_IDLE_PHONE: durunca çözünürlük tavanı (1.25 = özellik kapalı); PR_IDLE_MS: tam durgunluktan sonra kaç ms beklenip geçilsin */
   var introStart = 0, introDur = 3000, introShown = false, introFrom = 3.4, introNext = false, vo = 0, vel = { x: 0, y: 0 }, focusQ = null, camZ = 3.4, zoomT = 3.4, ptrs = {}, down = null, pinch0 = 0, pinchA = null, pinchM = { x: 0, y: 0 };
   function X(tr, en) { return (typeof L !== 'undefined' && L == 'tr') ? tr : en; }
   function $$(i) { return document.getElementById(i); }
@@ -355,30 +356,44 @@
       try { if (renderer && scene && camera) renderer.compile(scene, camera); } catch (e) { }
     })();
   }
-  function preUp(e) {   /* V150: büyük ülke bloğunun köşe tamponları GPU'ya perde altında (tuval gizliyken) yüklenir; ilk seçimde (Rusya) 117-147 ms'lik yükleme karesi olmasın */
-    try { if (!e || !e.cap || !scene) return; e.g.visible = true; e.g.scale.setScalar(0.0001); renderer.render(scene, camera); e.g.visible = false; } catch (x) { try { e.g.visible = false; } catch (y) { } }
+  function preUpMany(arr) {   /* V181: bloklar (en çok ~4 tane) tek karede GPU'ya yüklenir; frustumCulled kapatılır, yoksa küre arkasındaki ülkeler yüklenmez ve ilk seçimde yükleme karesi kalır */
+    var vis = [];
+    try {
+      arr.forEach(function (e) { if (!e || !e.cap || !scene) return; e.cap.frustumCulled = e.wall.frustumCulled = e.line.frustumCulled = false; e.g.visible = true; e.g.scale.setScalar(0.0001); vis.push(e); });
+      if (vis.length) renderer.render(scene, camera);
+    } catch (x) { }
+    vis.forEach(function (e) { try { e.g.visible = false; e.cap.frustumCulled = e.wall.frustumCulled = e.line.frustumCulled = true; e.up = true; } catch (y) { } });
   }
+  function preUp(e) { preUpMany([e]); }   /* V150 (V181: toplu yükleme üzerinden) */
   /* V158: küre Türkiye'ye yaklaşırken (oyuncu daha dokunamazken) Türkiye ve çevresindeki ülkelerin 3B blokları üretilir ve GPU'ya yüklenir;
      ilk ülke seçiminde blok üretimi / tampon yükleme karesi kalmaz. Dokunma veya animasyon varken beklenir, kare başına en çok ~4 ms çalışır. */
   var HW = null;
-  function warmHome() {
+  function warmHome() {   /* V181: her aşamada (devam eden oyun dahil) çalışır; oyuncunun ülkesine en yakın ülkelerden başlayarak tüm ülkelerin bloğu üretilir ve GPU'ya yüklenir */
     try {
       if (HW || !READY || !cMap.TUR || !renderer) return;
-      var t = cMap.TUR, tx = (t.bb[0] + t.bb[2]) / 2, ty = (t.bb[1] + t.bb[3]) / 2, list = [t];
+      var hid = null; try { hid = homeId(); } catch (e) { }
+      var t = (hid && cMap[hid]) || cMap.TUR, tx = (t.bb[0] + t.bb[2]) / 2, ty = (t.bb[1] + t.bb[3]) / 2, list = [t];
       C.forEach(function (c) {
         if (c === t) return; var cx = (c.bb[0] + c.bb[2]) / 2, cy = (c.bb[1] + c.bb[3]) / 2, dx = Math.abs(cx - tx); if (dx > 180) dx = 360 - dx;
-        var d = Math.sqrt(dx * dx + (cy - ty) * (cy - ty)); if (d < 28) { c._hd = d; list.push(c); }
+        c._hd = Math.sqrt(dx * dx + (cy - ty) * (cy - ty)); list.push(c);
       });
-      list.sort(function (a, b) { return (a._hd || 0) - (b._hd || 0); }); list = list.slice(0, 14);
-      var i = 0, cur = null, cc = null; HW = true;
+      t._hd = 0; list.sort(function (a, b) { return (a._hd || 0) - (b._hd || 0); }); list = list.slice(0, 200);
+      var i = 0, cur = null, cc = null, pend = []; HW = true;
+      function flush() { if (pend.length) { var a = pend; pend = []; preUpMany(a); } }
       (function step() {
         if (!ON || !READY) { HW = null; return; }
-        if (down || anyMoving()) { setTimeout(step, 80); return; }
+        if (down || anyMoving() || introStart || (typeof BSH !== 'undefined' && BSH)) { setTimeout(step, 120); return; }
         var t0 = performance.now();
         while (performance.now() - t0 < 4) {
-          if (!cur) { if (i >= list.length) { HW = 'done'; return; } cc = list[i++]; if (EX[cc.id] && !GEN[cc.id]) { if (EX[cc.id].cap) preUp(EX[cc.id]); continue; } cur = GEN[cc.id] || (GEN[cc.id] = buildExG(cc)); }
-          var r = cur.next(); if (r.done) { delete GEN[cc.id]; cur = null; if (EX[cc.id] && EX[cc.id].cap) { preUp(EX[cc.id]); break; } }
+          if (!cur) {
+            if (i >= list.length) { flush(); HW = 'done'; return; }
+            cc = list[i++];
+            if (EX[cc.id] && !GEN[cc.id]) { if (EX[cc.id].cap && !EX[cc.id].up) { pend.push(EX[cc.id]); if (pend.length >= 4) break; } continue; }
+            cur = GEN[cc.id] || (GEN[cc.id] = buildExG(cc));
+          }
+          var r = cur.next(); if (r.done) { delete GEN[cc.id]; cur = null; if (EX[cc.id] && EX[cc.id].cap) { pend.push(EX[cc.id]); if (pend.length >= 4) break; } }
         }
+        if (pend.length >= 4) flush();
         setTimeout(step, 24);
       })();
     } catch (e) { HW = null; }
@@ -422,7 +437,7 @@
     var coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches || document.body.classList.contains('fxlow');
     renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: false });
     /* V127: hareket sırasında düşük (akıcı), 260 ms durunca yüksek çözünürlük (net). Telefonda sabit 1.25 yüzünden küre bulanıktı. */
-    PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5);   /* V162: masaüstünde hareket/savaş animasyonu sırasında en çok 1.5x (eskiden 2x) */ PRHI = coarse ? PRLO : Math.min(window.devicePixelRatio || 1, 2);   /* V147: telefonda çözünürlük değişimi yok (setPR 238-266 ms donma + 1.5x karede ~150 ms) */ curPR = PRLO; idleSince = performance.now();
+    PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5);   /* V162: masaüstünde hareket/savaş animasyonu sırasında en çok 1.5x (eskiden 2x) */ PRHI = coarse ? Math.max(PRLO, Math.min(window.devicePixelRatio || 1, PR_IDLE_PHONE)) : Math.min(window.devicePixelRatio || 1, 2);   /* V183: telefonda da durunca netleş (PR_IDLE_PHONE) */   /* V147: telefonda çözünürlük değişimi yok (setPR 238-266 ms donma + 1.5x karede ~150 ms) */ curPR = PRLO; idleSince = performance.now();
     renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace;
     stage.appendChild(renderer.domElement); try { renderer.domElement.style.opacity = '0'; } catch (e) { } /* V150: build() içindeki ön çizim (kamera 3.4, tam boy küre) perde kalkınca bir an görünüyordu; tuval doIntro/show açana kadar gizli */ CP('renderer');
     scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200); camera.position.set(0, 0, camZ);
@@ -598,7 +613,7 @@
       var _mv = k !== lastRK || window.v60Active || anyMoving() || introStart;
       if (_mv) { idleSince = now; if (curPR !== PRLO) setPR(PRLO); busy = true; }
       else if (_bsh) { idleSince = now + 900; if (curPR !== PRLO) { setPR(PRLO); busy = true; } }   /* panel kapanınca PRHI'ye ~1,2 sn sonra geç: tuval yeniden ayırma kapanış geçişiyle çakışmasın */   /* V161: panel açıkken yüksek çözünürlüğe geçip tuvali yeniden ayırma */
-      else if (PRHI > PRLO && curPR !== PRHI && now - idleSince > 300) { setPR(PRHI); busy = true; }
+      else if (PRHI > PRLO && curPR !== PRHI && now - idleSince > (LOWQ ? PR_IDLE_MS : 300) && !(LOWQ && (needPaint || baseJob || introStart || (window.__v170 && (window.__v170.off || window.__v170.e > 30))))) { setPR(PRHI); busy = true; }   /* V183: telefonda yalnızca tam durgunken ve cihaz yavaş değilken (V170 bayrağı) yüksek çözünürlüğe geç */
       if (forceR > 0) forceR--;
       if (busy) { lastRK = k; lastRT = now; var _r0 = performance.now(); renderer.render(scene, camera); PF('gl.render(PR' + curPR.toFixed(2) + ')', _r0); }
     }   /* V60: savaş animasyonu kareleri; V63: savaş paneli açıkken küre seyrek çizilir */
@@ -620,6 +635,7 @@
     } catch (e) { try { stage.classList.remove('v91cover'); } catch (x) { } }
   }
   function show() {
+    setTimeout(warmHome, 4000);   /* V181: devam eden oyunda da blokları GPU'ya önceden yükle (Seferi sürdür / 2B-3B geçişi) */
     ON = true; var _doI = (introNext || !introShown);   /* V101: yaklaşma animasyonu kapak sınıfına bağlı değil */ if (!_doI) { try { stage.classList.remove('v91cover'); } catch (e) { } try { var _cv0 = renderer && renderer.domElement; if (_cv0) { _cv0.style.transition = 'none'; _cv0.style.opacity = '1'; } } catch (e) { } } /* V150 */ setTimeout(function () { try { var _cv1 = renderer && renderer.domElement; if (_cv1 && _cv1.style.opacity === '0') { _cv1.style.transition = 'none'; _cv1.style.opacity = '1'; } } catch (e) { } }, 1500); /* V150: güvenlik ağı: tuval hiçbir koşulda gizli kalmaz */ setBtn(); $$('map').classList.add('v30on'); stage.style.display = 'block'; resize(); lastSig = ''; refresh(); focusHome(true);
     if (introNext || _doI) { introNext = false; doIntro(); }
     last = performance.now(); if (!rafId) rafId = requestAnimationFrame(loop);

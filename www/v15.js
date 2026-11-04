@@ -22,16 +22,18 @@
     if (!id || !M[id] || G.over || BSH) { el.style.display = 'none'; return; }
     var o = G.owner[id], p = G.cur, atk = G.ph == 'act' && o !== p && !!TG[id];
     var tag = atk ? '<span class="tag ok">⚔ ' + t('atkable') + ' · ' + t(TG[id] == 'land' ? 'landb' : 'seab') + '</span>' : '';
+    /* V185: keşfedilmemiş özellikler (Zayıf / Çok zayıf / Güçlü… yazıları) gösterilmez; özellik şeridi keşiften sonra, yalnızca açılan değerlerle (sayı) gelir. Hiçbiri açık değilse şerit hiç çıkmaz. */
+    function knw(j) { return G.ph == 'pick' || o === p || !!know(p, o, j); }
     var info = '';
-    for (var i = 0; i < 5; i++) info += '<span class="v15s" title="' + esc(t('S')[i]) + '">' + SI[i] + ' <b>' + rangeTxt(p, o, i) + '</b></span>';
+    for (var i = 0; i < 5; i++) if (knw(i)) info += '<span class="v15s" title="' + esc(t('S')[i]) + '">' + SI[i] + ' <b>' + rangeTxt(p, o, i) + '</b></span>';
     var more = '';
-    if (expanded === id) for (i = 0; i < 5; i++) { var v = st(o)[i], kn = o === p || know(p, o, i); more += '<div class="v15r"><span>' + SI[i] + ' ' + t('S')[i] + '</span><i><u style="width:' + (kn ? Math.min(100, v) : [10, 30, 50, 70, 90][relTier(p, v)]) + '%"></u></i><b>' + rangeTxt(p, o, i) + '</b></div>'; }
+    if (expanded === id) for (i = 0; i < 5; i++) if (knw(i)) { var v = st(o)[i], kn = true; more += '<div class="v15r"><span>' + SI[i] + ' ' + t('S')[i] + '</span><i><u style="width:' + (kn ? Math.min(100, v) : [10, 30, 50, 70, 90][relTier(p, v)]) + '%"></u></i><b>' + rangeTxt(p, o, i) + '</b></div>'; }
     var dd = (typeof o == 'string' && M[o]) ? o : id;   // V28: fethedilen bölgede eski ülke değil, sahibi (fetheden ülke) gösterilir
     var quote = (window.I18N ? I18N.hist(dd, L) : '');
     var scoutDis = (G.ph == 'act' && atk) ? !canScout(id) : false;
     el.innerHTML = '<div class="v15p"><button class="cls" onclick="deselect()">' + IC.x + '</button>' +
       '<div class="v15h">' + fimg(dd) + '<div class="v15n"><div class="nm">' + esc(M[dd].name) + '</div><div class="v15b">' + badge(o, p) + tag + '</div></div></div>' +
-      '<div class="v15st">' + info + '</div>' + more +
+      (info ? '<div class="v15st">' + info + '</div>' : '') + more +
       '<blockquote class="v15q"><small>' + X('Tarih Notu', 'History Note') + '</small>' + esc(quote) + '</blockquote>' +
       '<div class="v15a"><button onclick="v15Explore()"' + (scoutDis ? ' disabled' : '') + '>🔍 ' + X('KEŞİF', 'SCOUT') + '</button>' +
       '<button class="pri" onclick="v15Attack()"' + (atk ? '' : ' disabled') + '>⚔ ' + X('SALDIRI', 'ATTACK') + '</button></div></div>';

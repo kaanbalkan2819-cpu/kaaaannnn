@@ -36,7 +36,7 @@
       var i = 0, keep = window.__flagCache = [];
       (function step(dl) {
         var n = 0;
-        while (i < codes.length && n < 12 && (!dl || dl.timeRemaining() > 3)) { var im = new Image(); im.decoding = 'async'; var cd = codes[i++]; im.src = (window.FLAGSVG && FLAGSVG[cd]) || ('flags/' + cd + '.svg'); keep.push(im); n++; }
+        while (i < codes.length && n < 12 && (!dl || dl.timeRemaining() > 3)) { var im = new Image(); im.decoding = 'async'; var cd = codes[i++]; im.src = (window.FLAGSVG && FLAGSVG[cd]) || ('flags/' + cd + '.svg'); keep.push(im); n++; try { if (im.decode) im.decode().catch(function () { }); } catch (e) { } }   /* V181: görüntüyü boş zamanda çöz; ilk gösterimde çözme karesi kalmasın */
         if (i < codes.length) (window.requestIdleCallback ? requestIdleCallback(step, { timeout: 1500 }) : setTimeout(step, 80));
       })();
     } catch (e) { }

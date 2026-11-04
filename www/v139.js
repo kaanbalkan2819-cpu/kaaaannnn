@@ -182,7 +182,10 @@
 
   /* ================= D) HIZLI YZ TURU ================= */
   var FAST = false, rm0 = 0;
-  function wantFast() { try { return localStorage.getItem(FKEY) !== '0'; } catch (e) { return true; } }
+  /* V186: "Hızlı YZ turu" artık varsayılan olarak yok (oyun normal hızda oynanır). Oyuncu tek kişilik oyunda dünyayı bir kez fethedince ("Dünya Fethedildi!" ekranı) ÖDÜL olarak açılır; geçmişte zaten fetih kaydı varsa baştan açıktır. Açıldıktan sonra da varsayılan KAPALI, ⚡ düğmesiyle açılır. */
+  var UKEY = 'wc_fastai_unlock';
+  function fastUnlocked() { try { if (localStorage.getItem(UKEY) === '1') return true; } catch (e) { } try { return hist().some(function (h) { return h && h.res === 'win'; }); } catch (e) { return false; } }
+  function wantFast() { if (!fastUnlocked()) return false; try { return localStorage.getItem(FKEY) === '1'; } catch (e) { return false; } }
   function fastOn() { if (FAST || !wantFast() || !window.SET || !on()) return; rm0 = SET.rm; SET.rm = 1; FAST = true; }
   function fastOff() { if (!FAST) return; try { SET.rm = rm0; } catch (e) { } FAST = false; }
   window.v139FastOff = fastOff;   /* V141: v141.js oyuncu saldırısında çağırır */
@@ -204,13 +207,14 @@
     var _st = settings; settings = function () { fastOff(); return _st.apply(this, arguments); }; settings.v139 = 1;
   }
   window.v139Fast = function () {
+    if (!fastUnlocked()) return;
     var v = wantFast() ? '0' : '1'; try { localStorage.setItem(FKEY, v); } catch (e) { } if (v === '0') fastOff();
     say('⚡ ' + (v === '1' ? X('Hızlı YZ turu: AÇIK', 'Fast AI turn: ON') : X('Hızlı YZ turu: KAPALI', 'Fast AI turn: OFF'))); fastBtn();
   };
   function fastBtn() {
     var ctl = document.getElementById('ctl'); if (!ctl) return;
     var b = document.getElementById('v139fast'); if (!b) { b = document.createElement('button'); b.id = 'v139fast'; b.type = 'button'; b.textContent = '⚡'; b.addEventListener('click', function (ev) { ev.stopPropagation(); window.v139Fast(); }); ctl.appendChild(b); }
-    b.title = X('Hızlı YZ turu', 'Fast AI turn'); b.style.opacity = wantFast() ? '' : '.45'; b.style.display = on() && !G.over ? '' : 'none';
+    b.title = X('Hızlı YZ turu', 'Fast AI turn'); b.style.opacity = wantFast() ? '' : '.45'; b.style.display = on() && !G.over && fastUnlocked() ? '' : 'none';   /* V186: ödül açılana kadar düğme gizli */
   }
 
   /* ================= D) HAMLE GÖSTERGESİ + SÜRE ================= */
@@ -308,6 +312,8 @@
       if (typeof BSH !== 'undefined' && BSH) { if (!s.bs) s.bs = Date.now(); if (Date.now() - s.bs < 120000) return; }
       if (OVL) { try { OVL.remove(); } catch (e) { } }
       var m = summary(); OVLG = G;
+      var gift = false;   /* V186: ilk dünya fethi = Hızlı YZ turu ödülü (geçmişe yazmadan ÖNCE kontrol edilir) */
+      try { if (m.res === 'win' && !G.mp && !fastUnlocked()) { localStorage.setItem(UKEY, '1'); gift = true; } } catch (e) { }
       if (!s.rec) { s.rec = 1; var h = hist(); h.unshift(m); try { localStorage.setItem(HKEY, JSON.stringify(h.slice(0, CFG.HIST_MAX))); } catch (e) { } }
       var win = m.res === 'win' || m.res === 'pts', conf = '';
       if (win) for (var i = 0; i < 18; i++) conf += '<i style="left:' + (i * 5.6 + 2) + '%;animation-delay:' + ((i % 6) * .35).toFixed(2) + 's;background:hsl(' + (i * 37 % 360) + ',80%,60%)"></i>';
@@ -317,6 +323,7 @@
         '<div class="gr">' + cell(m.turns, X('TUR', 'TURNS')) + cell(mmss(m.sec), X('SÜRE', 'TIME')) + cell(m.lands + '<i>/' + m.total + '</i>', X('TOPRAK', 'LANDS')) + cell(m.max, X('EN ÇOK TOPRAK', 'PEAK LANDS')) +
         cell(m.w + ' / ' + m.l, X('SAVAŞ K / Y', 'WINS / LOSSES')) + cell(m.conq, X('FETİH', 'CONQUESTS')) + cell(m.pacts, X('PAKT', 'PACTS')) + cell(m.allies, X('İTTİFAK', 'ALLIANCES')) + '</div>' +
         '<div class="sc">⭐ ' + X('Skor', 'Score') + ' <b>' + m.score + '</b></div>' +
+        (gift ? '<div class="gift139" style="margin:8px 0;padding:8px 10px;border:1px solid #e3b94f;border-radius:10px;background:rgba(227,185,79,.14);color:#ffe9a8;font-size:13px;line-height:1.4">🎁 <b>' + X('Ödül: Hızlı YZ turu açıldı!', 'Reward: Fast AI turn unlocked!') + '</b><br>' + X('Haritadaki ⚡ düğmesiyle açıp kapatabilirsin.', 'Turn it on or off with the ⚡ button on the map.') + '</div>' : '') +
         '<button class="pri" onclick="v139New()">🔁 ' + X('Yeni Ülkeyle Başla', 'Start With a New Country') + '</button><button onclick="v139Hist()">📜 ' + X('Oyun Geçmişi', 'Game History') + '</button><button class="gh" onclick="v139Menu()">' + X('Ana Menü', 'Main Menu') + '</button></div>';
       document.body.appendChild(OVL);
       try { var m2 = document.getElementById('mod'); if (m2) m2.style.display = 'none'; } catch (e) { }
