@@ -126,14 +126,22 @@ return s+'</svg>'}
   function bind(id) {
     var e = document.getElementById(id); if (!e) return null;
     var s = ST[id] || (ST[id] = { v: 0, R: null, raf: 0, tm: 0, done: true });
-    s.e = e; s.cb = e.querySelector('.cb'); s.sdw = e.querySelector('.sdw'); s.fs = [].slice.call(e.querySelectorAll('.f')); s.lab = document.getElementById(id + 'n');
+    s.e = e; s.cb = e.querySelector('.cb'); s.sdw = e.querySelector('.sdw'); s.fs = [].slice.call(e.querySelectorAll('.f')); s.nrs = s.fs.map(function (f) { return NR[f.getAttribute('data-v')]; }); s.shv = []; s.shT = 0; s.lab = document.getElementById(id + 'n');
     return s;
   }
-  function pose(s, R, x, h, z) {
+  function pose(s, R, x, h, z, full) {
     s.cb.style.transform = 'rotateX(-' + TILT + 'deg) translate3d(' + x.toFixed(1) + 'px,' + (-h).toFixed(1) + 'px,' + z.toFixed(1) + 'px) ' + m3d(R);
     if (s.sdw) { var k = Math.max(.35, 1.05 - h / 240); s.sdw.style.opacity = Math.max(.25, 1 - h / 170).toFixed(2); s.sdw.style.transform = 'rotateX(-' + TILT + 'deg) translate3d(' + x.toFixed(1) + 'px,' + HF + 'px,' + z.toFixed(1) + 'px) rotateX(90deg) scale(' + k.toFixed(3) + ')'; }
-    var i, f, n, d, dk;
-    for (i = 0; i < s.fs.length; i++) { f = s.fs[i]; n = app(R, NR[f.getAttribute('data-v')]); d = n[0] * LIGHT[0] + n[1] * LIGHT[1] + n[2] * LIGHT[2]; dk = Math.max(0, Math.min(.55, (.62 - d) * .5)); f.style.setProperty('--sh', dk.toFixed(2)); }
+    /* V175: yüz gölgesi (--sh) her karede yazılınca 6 yüzün (4 katmanlı iç gölge + gradyan) dokusu her karede yeniden çiziliyordu → kasma.
+       Dönerken en çok ~8 kez/sn ve yalnızca belirgin değişimde yazılır; son poz (full) her zaman tam uygulanır. */
+    var nowT = (window.performance && performance.now) ? performance.now() : Date.now();
+    if (!full && nowT - s.shT < 125) return;
+    s.shT = nowT;
+    var i, n, d, dk;
+    for (i = 0; i < s.fs.length; i++) {
+      n = app(R, s.nrs[i]); d = n[0] * LIGHT[0] + n[1] * LIGHT[1] + n[2] * LIGHT[2]; dk = Math.max(0, Math.min(.55, (.62 - d) * .5));
+      if (full || s.shv[i] === undefined || Math.abs(dk - s.shv[i]) >= .06) { s.shv[i] = dk; s.fs[i].style.setProperty('--sh', dk.toFixed(2)); }
+    }
   }
   function mark(s, v, tot, show) {
     s.fs.forEach(function (f) { f.classList.toggle('top', +f.getAttribute('data-v') === v); });
@@ -148,7 +156,7 @@ return s+'</svg>'}
     var s = bind(id); if (!s) return; var tot = v; v = ((v - 1) % 6) + 1; cancel(s);
     if (!s.R || s.v !== v) { s.v = v; s.R = finalR(v, (Math.random() - .5) * 1.2); }
     s.e.classList.remove('rolling');
-    pose(s, s.R, 0, 0, 0); mark(s, v, tot);
+    pose(s, s.R, 0, 0, 0, true); mark(s, v, tot);
   }
 
   /* ---------- zar at ---------- */
@@ -184,7 +192,7 @@ return s+'</svg>'}
     }
     function finish() {
       if (s.done) return; cancel(s); s.v = v; s.R = Rf; s.e.classList.remove('rolling');
-      pose(s, Rf, 0, 0, 0); mark(s, v, tot);
+      pose(s, Rf, 0, 0, 0, true); mark(s, v, tot);
       try { var tf = topFace(Rf); if (tf !== v) console.warn('WCDice: üst yüz ' + tf + ' ≠ ' + v); } catch (x) { }
       tickSnd(); if (cb) cb();
     }

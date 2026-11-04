@@ -79,3 +79,9 @@ body.wc141-ig .wb-panel.wc156{box-shadow:0 18px 50px #000b!important}
 .wc141p.wc156 .c141b{min-height:42px;font-size:15px}
 .wc141p.wc156 .c141b.pri{min-height:48px;font-size:17px}
 .wc141p #v139h,.wb-pause #v139h{display:none!important}
+
+/* V175: zar dönerken akıcılık — yüz gölgesi geçişi/filtre kapalı, dönen küp ve gölgesi kendi katmanında (GPU) */
+.d3.rolling .f::after,.d3.rolling23 .f::after{transition:none!important}
+.d3.rolling23 .f,.d3.rolling .f{filter:none!important}
+.d3.rolling .cb,.d3.rolling .sdw{will-change:transform,opacity}
+.d3 .sdw{filter:none!important}

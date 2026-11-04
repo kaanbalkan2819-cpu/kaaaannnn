@@ -550,3 +550,52 @@ V167 — DURAKLATMA MENÜSÜ SADELEŞTİRİLDİ (görsel; TEST EDİLMEDİ; node 
 Kaldırıldı: Kaydet, Oyun Geçmişi, English (dil), Yeni Oyun. Kalanlar: Oyuna Dön, Ana Menü, Ayarlar, Pes Et. Kart küçüldü (en çok 320px), "DURAKLATILDI" başlığı küçüldü, "0/174" yazısı açıldı (eğik değil, daha küçük, boşluklu).
 v141.js: open() içinden dört düğme çıkarıldı; v156.css sonuna V167 bloğu eklendi.
 GERİ ALMAK İÇİN: v141.js'te "V167" satırının yerine silinen düğme satırlarını geri koyun; v156.css'teki V167 bloğunu silin.
+
+
+=================== V161 ===================
+V161 — (1) ÖĞRETİCİ SORUSUNDAN ÖNCE DOKUNUŞ KİLİDİ  (2) GERİ TUŞU  (3) ARKA PLANDAN DÖNÜNCE OYUN SIFIRLANMASIN  (TEST EDİLMEDİ; node --check geçti)
+
+1) Tek kişilik oyun başladıktan sonra "Öğretici ister misin?" penceresi açılana kadar ekrana dokunmak GEÇERSİZ (görünmez kalkan, www/v121.js: shieldOn/shieldOff).
+   Soru açılınca kalkan kalkar; cevap verilince (Evet/Hayır) oyun normal oynanır. Soru hiç açılmazsa ya da bir şey ters giderse kalkan en geç 20 sn'de kendiliğinden kalkar.
+
+2) Geri tuşu: SORUN — package.json'da @capacitor/app eklentisi YOKTU; Android geri tuşu uygulamayı doğrudan arka plana atıyordu (v125.js'teki mantık eklenti varsa çalışacak şekilde yazılmıştı).
+   package.json'a "@capacitor/app": "^8.1.2" eklendi. v125.js: eklenti dinleyicisi sayfa açıldıktan sonra ilk 6 sn içinde yeniden denenerek bağlanır.
+   Davranış (v125.js mantığı aynen): savaş ekranında geri tuşu yok sayılır · açık pencere varsa kapatır/bir adım geri · menüdeki pencerede "Kapat" düğmesi yoksa pencereyi kapatır (yeni) ·
+   ana menü alt ekranındaysa bir önceki menüye · oyundaysa "Oyundan çıkmak istiyor musunuz?" sorusu · ana menü kökünde iki kez geri = uygulamadan çıkış.
+   ÖNEMLİ: yeni APK derlerken `npm install` çalışmalı (GitHub Actions ve release_setup.js zaten çalıştırıyor); eski android/ klasörünüz varsa `npx cap sync android` gerekir.
+
+3) Oyunu aşağı alıp (ör. WhatsApp) hemen dönünce oyun sıfırlanıp ana menüye düşüyordu. Neden: telefon bellek yetmeyince oyunun web ekranını arka planda kapatıyor; dönüşte sayfa baştan yükleniyor.
+   Çözüm (yeni www/v161.js, index.html'e v160.js'den sonra eklendi): oyun arka plana alınırken zamanlı "oyun sürüyordu" işareti yazılır; sayfa baştan yüklenirse ve işaret 30 dk içindeyse
+   ana menü atlanır, kayıtlı sefer otomatik açılır ("Kaldığın yerden devam ediliyor"). Süre için v161.js başındaki SURE_DK değerini değiştirin.
+   Sınırlar: tur ortasında yapılan hamleler son kayda göre geri gelir (tek kişilik oyunda tur başı zarına dönülür); savaş animasyonu sırasında alınan oyun son tur sonu kaydına döner;
+   Online ve Rank maçları geri yüklenmez. Bilerek çıkış (Oyundan çık → Evet, Ayarlar ▸ Ana Menü, duraklatma ▸ Ana Menü) işaret yazmaz.
+GERİ ALMAK İÇİN: index.html'den v161.js satırını silin; v121.js'te "V161" yazan yerleri silin; v125.js'te "V161" yazan yerleri eski haline getirin; package.json'dan @capacitor/app satırını silin.
+
+
+=================== V173 ===================
+V173 — OYUN AŞAĞI ALINCA DURAKLATMA MENÜSÜ + SON İŞLEMDEN DEVAM (TEST EDİLMEDİ; node --check geçti)
+www/v161.js: oyun arka plana alınırken son işlemin durumu kaydedilir (tur ortası hamleler/zar dahil; savaş animasyonu sürerken kaydedilmez, son kayıt kalır) ve duraklatma menüsü açılır.
+Oyuna geri dönünce (telefon oyunu kapatmadıysa da, kapatıp baştan yüklediyse de) duraklatma menüsü açık bekler; "Oyuna Dön" deyince kalınan yerden devam edilir.
+Açık başka bir pencere (zar kutusu, seçim vb.) varsa üstüne duraklatma açılmaz; savaş animasyonu bitene kadar en çok 15-20 sn beklenir.
+www/v125.js: duraklatma kartı açıkken geri tuşu = oyuna dön.
+GERİ ALMAK İÇİN: v161.js'te "V173" yazan yerleri silin; visibilitychange satırını eski haline getirin (mark/clr).
+
+
+=================== V174 ===================
+V174 — DURAKLATMA MENÜSÜ DÜZELTMELERİ (oyun aşağı alınınca menü + son işlemden devam). Başsız Chromium'da (arka plan/ön plan olayı, sayfa yeniden yükleme, "Oyuna Dön") denendi; gerçek Android cihazda DENENMEDİ.
+Hata 1: "Oyuna Dön"e basınca duraklatma menüsü yarım saniye içinde TEKRAR açılıyordu (v161.js pauseSoon döngüsü kapanan menüyü yeniden açıyordu). Artık kart bir kez açılınca ya da zaten açıksa döngü biter; oyuncu kapatınca geri açılmaz.
+Hata 2: Ülke seçerken (v7pick / v5intro) aşağı alınınca boş bir kayıt yazılıp duraklatma açılıyordu. Artık bu aşamalarda kayıt ve duraklatma yok.
+Hata 3: Zar atılırken / YZ turunda / bekleyen seçimdeyken kayıt yazılması dönüşte yarım turu bozabilirdi. Artık çok ülkeli oyunda yalnızca 'act' (hamle) ve 'v5roll' (zar bekleme) aşamalarında kaydedilir ve duraklatma açılır; diğer aşamalarda son kayıt korunur, uygun aşama gelince (en çok 30 sn) menü açılır.
+Ek: Android'de visibilitychange gelmezse diye @capacitor/app 'appStateChange' olayı da dinlenir.
+Davranış: aşağı alınca son işlem (kalan hamle dahil) kaydedilir ve duraklatma menüsü açılır; telefon sayfayı kapatıp baştan yüklese de menü açık bekler, "Oyuna Dön" kalınan yerden sürdürür.
+Sınırlar: YZ turu / savaş animasyonu sırasında aşağı alınırsa o anda menü açılmaz (animasyon ortasında oyun dondurulmaz); dönüşte o aşama bitince menü açılır ve son kayıt o ana kadarki durumdur.
+GERİ ALMAK İÇİN: www/v161.js'te "V174" yazan yerleri eski haline getirin.
+
+
+=================== V175 ===================
+V175 — SAVAŞ PANELİNDE ZAR ATARKEN KASMA GİDERİLDİ (TEST EDİLMEDİ; node --check geçti)
+Neden: dice3d.js pose() her karede 6 yüzün --sh (gölge) değişkenini yazıyordu; yüzlerde 4 katmanlı iç gölge + gradyan + opaklık geçişi (transition) olduğundan 6 yüz dokusu her karede yeniden çiziliyordu (savaşta 2-6 zar birden).
+Çözüm: www/dice3d.js — gölgelendirme dönerken en çok ~8 kez/sn ve yalnızca belirgin değişimde yazılır; yüz normalleri bir kez hesaplanır; son poz her zaman tam uygulanır.
+www/v156.css sonu — dönerken yüz gölgesi geçişi ve filtre kapalı, küp/gölge katmanı will-change ile GPU'ya alınır, zemin gölgesindeki blur filtresi kaldırıldı.
+Görsel fark: uçuş sırasında yüz karartması biraz daha seyrek güncellenir; inişte tam doğru görünür.
+GERİ ALMAK İÇİN: dice3d.js'te "V175" bloğunu eski pose() döngüsüyle değiştirin; v156.css'teki V175 bloğunu silin.

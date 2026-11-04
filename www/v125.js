@@ -18,6 +18,8 @@
       '<button class="big" onclick="closeMod()">' + X('Hayır, oyuna dön', 'No, keep playing') + '</button>');
   }
   function exitGame() {
+    window.WC161_leaving = true;                                                // V161: bilerek çıkış → oturum geri yükleme bayrağı yazılmaz
+    try { localStorage.removeItem('wc_live161'); } catch (e) { }
     try { if (window.G && !G.mp) save(); } catch (e) { }
     try { location.reload(); } catch (e) { }
   }
@@ -40,7 +42,9 @@
       if (window.G && window.BSH) { ensure(); return; }                       // savaş ekranı: geri tuşu yok sayılır
       if (modalOpen()) {
         if ($('box') && $('box').querySelector('[data-wcexit]')) { closeMod(); ensure(); return; }
+        if ($('box') && $('box').querySelector('.wc141p')) { closeMod(); ensure(); return; }   // V173: duraklatma kartında geri = oyuna dön
         var b = findClose(); if (b) b.click();                                 // kapatılabilir pencere → bir adım geri
+        else if (menuOn() || !window.G || G.over) { try { closeMod(); } catch (e) { } }   // V161: menüdeki pencerede kapat düğmesi bulunamazsa yine de bir adım geri (pencereyi kapat)
         ensure(); return;
       }
       if (inGame()) {
@@ -58,7 +62,15 @@
     } catch (e) { ensure(); }
   }
   window.addEventListener('popstate', function () { onBack(false); });
-  try { var _ap = appPlugin(); if (_ap && _ap.addListener) _ap.addListener('backButton', function () { onBack(true); }); } catch (e) { }
+  /* V161: @capacitor/app artık package.json'da. Eklenti, sayfa betiklerinden SONRA hazır olabildiği için dinleyici ilk 6 sn içinde yeniden denenir (bir kez kurulur).
+     Dinleyici kuruluyken Android geri tuşu uygulamayı kendiliğinden kapatmaz/arka plana atmaz; her basış onBack()'e gelir. */
+  var _apBound = false;
+  function bindApp() {
+    if (_apBound) return true;
+    try { var ap = appPlugin(); if (ap && ap.addListener) { ap.addListener('backButton', function () { onBack(true); }); _apBound = true; return true; } } catch (e) { }
+    return false;
+  }
+  if (!bindApp()) { var _bn = 0, _bi = setInterval(function () { if (bindApp() || ++_bn > 24) clearInterval(_bi); }, 250); }
   document.addEventListener('backbutton', function (e) { try { e.preventDefault(); } catch (x) { } onBack(true); }, false);   // Cordova tarzı
   window.addEventListener('load', ensure);
   ['pointerup', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, ensure, true); });   // gerçek kullanıcı etkileşimi = nöbetçi atlanmaz

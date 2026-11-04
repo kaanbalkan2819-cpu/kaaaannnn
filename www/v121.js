@@ -48,6 +48,23 @@
   function hasSv() { try { return !!localStorage.getItem(saveKey()); } catch (e) { return false; } }
   function menuOn() { var m = document.getElementById('wcm'); return !!(m && m.classList.contains('on')); }
   function inSolo() { try { return !!(window.G && !G.mp && G.mode == 1 && !G.over && G.ph !== 'over' && !menuOn()); } catch (e) { return false; } }
+  /* V161: oyun başladıktan sonra öğretici sorusu açılana kadar ekrana dokunuşlar GEÇERSİZ sayılır (görünmez kalkan). Soru açılınca kalkan kalkar; soru kendi arka planıyla zaten oyunu kapatır. */
+  function shieldOn() {
+    try {
+      var s = document.getElementById('wcshield');
+      if (!s) {
+        s = document.createElement('div'); s.id = 'wcshield';
+        s.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483000;background:transparent;touch-action:none;-webkit-tap-highlight-color:transparent';
+        ['pointerdown', 'pointerup', 'pointermove', 'touchstart', 'touchmove', 'touchend', 'mousedown', 'mouseup', 'click', 'wheel', 'contextmenu'].forEach(function (ev) {
+          s.addEventListener(ev, function (e) { e.stopPropagation(); if (e.cancelable) e.preventDefault(); }, { passive: false });
+        });
+        document.body.appendChild(s);
+      }
+      s.style.display = 'block';
+      clearTimeout(shieldOn.t); shieldOn.t = setTimeout(shieldOff, 20000);   // emniyet: en geç 20 sn sonra mutlaka kalkar
+    } catch (e) { }
+  }
+  function shieldOff() { try { clearTimeout(shieldOn.t); var s = document.getElementById('wcshield'); if (s && s.parentNode) s.parentNode.removeChild(s); } catch (e) { } }
   function newTutGame() { try { closeMod(); } catch (e) { } if (window.WCTour) WCTour.arm(); if (window.WCLaunch) WCLaunch(1); }
   window.WCTut = {
     /* V122: ÖĞRETİCİ ARTIK HARİTA ÜZERİNDE (wc_tour.js). Oyun içindeyse mevcut oyunda başlar; menüdeyse yeni bir deneme seferi açar. */
@@ -131,7 +148,7 @@
       var r = _ng.apply(this, arguments);
       if (pendingAsk) {
         pendingAsk = false;
-        if (m == 1) { var n = 0, iv = setInterval(function () { n++; try { if (window.v30IntroBusy && v30IntroBusy() && n < 12) return; } catch (e) { } /* V150: küre yaklaşırken (3 sn) soru açılıp küreyi örtmesin */ var md = document.getElementById('mod'); if (!(md && md.style.display === 'flex') || n > 8) { clearInterval(iv); if (!(md && md.style.display === 'flex')) WCTut.askInGame(); } }, 700); }
+        if (m == 1) { shieldOn(); var n = 0, iv = setInterval(function () { n++; try { if (window.v30IntroBusy && v30IntroBusy() && n < 12) return; } catch (e) { } /* V150: küre yaklaşırken (3 sn) soru açılıp küreyi örtmesin */ var md = document.getElementById('mod'); if (!(md && md.style.display === 'flex') || n > 8) { clearInterval(iv); try { if (!(md && md.style.display === 'flex')) WCTut.askInGame(); } finally { shieldOff(); } } }, 700); }   /* V161: soru açılana kadar dokunuşlar geçersiz */
       }
       return r;
     };
