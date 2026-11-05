@@ -63,3 +63,8 @@ body.rm .hb.up::after{animation:none}
 .s7{transition:opacity .4s,border-color .4s,box-shadow .4s}
 #bs.shake .b7h{animation:shk204 .28s linear}
 @keyframes shk204{20%{transform:translate3d(-3px,2px,0)}40%{transform:translate3d(3px,-2px,0)}60%{transform:translate3d(-2px,-1px,0)}80%{transform:translate3d(2px,1px,0)}100%{transform:translateZ(0)}}
+
+/* V206 — KASMA 6. TUR (savaş sonucu): "ZAFER/YENİLGİ" yazısı (parlak text-shadow) ve konfeti parçaları sonuç anında yeni animasyon katmanı olarak açılıyordu (+ aynı anda küre/bayrak/çubuk güncellemeleri).
+   Katmanlar baştan GPU'ya alındı; telefonda konfeti 18 -> 10. Görünüm aynı. Geri almak için bu bloğu silin. */
+.spl,.spl i{will-change:transform,opacity}
+@media (pointer:coarse){.spl i:nth-child(n+11){display:none}}

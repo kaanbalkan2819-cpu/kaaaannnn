@@ -1,3 +1,15 @@
+=================== V206 ===================
+V206 — SAVAŞ PANELİ KOD İNCELEMESİ (test yapılmadı; yalnızca CSS)
+Gözden geçirilen: showBattle/roundRoll/rowsRun/finish (v7.js), v190-v192 CSS, dice3d, v60/v134/v136 gözlemcileri. Kalan tek anlamlı yük: sonuçta ZAFER/YENİLGİ yazısı + 18 konfeti. v200.css sonu: katmanlar baştan GPU, telefonda konfeti 10.
+GERİ ALMAK İÇİN: v200.css'teki "V206" bloğunu silin.
+
+=================== V205 ===================
+V205 — KASMA 5. TUR: VİDEO İNCELEMESİ (SALDIRI'ya basınca ~0,4 sn donma, kılıç/zar anında takılma, ülke seçimi/panel kapanışında kesikler; telefon çözünürlük geçişi)
+1) v30.js: PR_IDLE_PHONE 1.75 -> 1.25. Telefonda küre durunca 1.75, hareket/panel açılınca 1.25'e geçerken WebGL tuvali (setPixelRatio + resize) yeniden ayrılıyordu; savaş açılışı, ülke seçimi ve panel kapanışı bu yüzden takılıyordu. Artık geçiş yok.
+2) v30.js: stepCamera her karede stage.clientWidth/Height okuyordu (savaş paneli animasyonunda zorunlu düzen hesabı). Boyut önbelleğe alındı (resize() günceller).
+3) v205.js (yeni): 3B açıkken gizli 2B SVG'de labels() yenilemesi atlanır (removeChild/createElementNS/GC yükü).
+GERİ ALMAK İÇİN: v30.js'te PR_IDLE_PHONE'u 1.75 yapın; index.html'den v205.js bağlantısını silin.
+
 =================== V204 ===================
 V204 — KASMA 4. TUR: SAVAŞ PANELİNDE KILIÇ ÇARPIŞMASI (ölçüm yok; yalnızca CSS)
 v200.css sonu: .b7h baştan GPU katmanı, sarsıntı translate3d, kılıç/kıvılcım will-change, .s7 "transition:all" -> yalnız opaklık/kenar/gölge.

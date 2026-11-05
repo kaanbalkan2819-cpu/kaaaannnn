@@ -11,7 +11,9 @@
   var stage, renderer, scene, camera, globe, earth, cloudM, atmM, rafId = 0, last = 0, dirtyQ = 0, needPaint = true, lastSig = '';
   var LOWQ = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches), OW = LOWQ ? 2048 : 3072, OH = LOWQ ? 1024 : 1536, LS = OW / 2048, ZMIN3 = 1.9, LW = 1536, LH = 768, NW = 512, NH = 256, SCALE = 0.07;
   var ovC, ov, liftC, lift, reliefC, nsmall, nsx, nC, nx, nImg, topoH, ovTex, liftTex, normTex;
-  var PR_IDLE_PHONE = 1.75, PR_IDLE_MS = 1500;   /* V183: telefonda durunca netleştirme — PR_IDLE_PHONE: durunca çözünürlük tavanı (1.25 = özellik kapalı); PR_IDLE_MS: tam durgunluktan sonra kaç ms beklenip geçilsin */
+  var PR_IDLE_PHONE = 1.25, PR_IDLE_MS = 1500;   /* V205: 1.75 -> 1.25 (özellik kapalı): durunca/hareket edince 1.75<->1.25 geçişi WebGL tuvalini yeniden ayırıyordu (SALDIRI'ya basınca ~0,4 sn donma, ülke seçiminde/panel kapanışında takılma). Eski değer: 1.75 */
+  var _stW = 0, _stH = 0;   /* V205: sahne boyutu önbelleği (stepCamera her karede clientWidth/Height okuyup zorunlu düzen hesabı yapıyordu) */
+     /* V183: telefonda durunca netleştirme — PR_IDLE_PHONE: durunca çözünürlük tavanı (1.25 = özellik kapalı); PR_IDLE_MS: tam durgunluktan sonra kaç ms beklenip geçilsin */
   var introStart = 0, introDur = 3000, introShown = false, introFrom = 3.4, introNext = false, vo = 0, vel = { x: 0, y: 0 }, focusQ = null, camZ = 3.4, zoomT = 3.4, ptrs = {}, down = null, pinch0 = 0, pinchA = null, pinchM = { x: 0, y: 0 };
   function X(tr, en) { return (typeof L !== 'undefined' && L == 'tr') ? tr : en; }
   function $$(i) { return document.getElementById(i); }
@@ -516,7 +518,7 @@
   }
 
   /* ---------- Kamera ve etkileşim ---------- */
-  function resize() { if (!renderer) return; var w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h); bg199(); camera.aspect = w / h; camera.fov = w < h ? 52 : 40; camera.updateProjectionMatrix(); }
+  function resize() { if (!renderer) return; var w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; _stW = w; _stH = h; renderer.setSize(w, h); bg199(); camera.aspect = w / h; camera.fov = w < h ? 52 : 40; camera.updateProjectionMatrix(); }
   function rotateBy(dx, dy) { var k = 0.0042 * camZ / 3.4; globe.quaternion.premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(dy * k, dx * k, 0, 'XYZ'))); }
   function stepCamera(dt) {
     if (focusQ) { globe.quaternion.slerp(focusQ, Math.min(1, dt * 5)); if (globe.quaternion.angleTo(focusQ) < 0.002) focusQ = null; }
@@ -525,7 +527,7 @@
      camera.position.z = camZ * (window.innerWidth > window.innerHeight ? 0.7 : 1);   /* V57: yatayda küre daha da yakın (0.86 -> 0.70) */
     // savaş paneli açıkken görüntüyü panelin dışındaki alana kaydır (telefonda yukarı, geniş ekranda sola)
     var _pn = window.innerWidth > window.innerHeight && document.getElementById('panel'); vo += ((((typeof BSH !== 'undefined' && BSH && !window.v60Active) || (_pn && _pn.offsetWidth > 0)) ? 1 : 0) - vo) * Math.min(1, dt * 6);
-    var w = stage.clientWidth, h = stage.clientHeight;
+    var w = _stW || (_stW = stage.clientWidth), h = _stH || (_stH = stage.clientHeight);   /* V205 */
     if (vo < 0.01) { if (camera.view && camera.view.enabled) camera.clearViewOffset(); }
     else if (w && h) { var wide = window.innerWidth >= 900 || window.innerWidth > window.innerHeight; camera.setViewOffset(w, h, wide ? vo * (window.innerWidth > window.innerHeight && window.innerWidth < 900 ? -Math.min(205, w * 0.2) : 205) : 0, wide ? 0 : vo * h * .19, w, h); }
   }
