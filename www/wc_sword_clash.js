@@ -198,6 +198,7 @@
     wrap.appendChild(c);
     host.appendChild(wrap);
     this.wrap = wrap; this.canvas = c; this.ctx = c.getContext('2d');
+    if (o.sound) this._warmSound();
 
     if (o.replace) { this._repPrev = o.replace.style.visibility; o.replace.style.visibility = 'hidden'; }
     if (o.shakeEl) this._shakeBase = o.shakeEl.style.transform || '';
@@ -243,7 +244,6 @@
     if (this.wrap && this.wrap.parentNode) this.wrap.parentNode.removeChild(this.wrap);
     if (this.o.replace) this.o.replace.style.visibility = this._repPrev || '';
     if (this._hostPosChanged) this.host.style.position = '';
-    if (this.ac && this.ac.close) { try { this.ac.close(); } catch (e) {} }
   };
 
   // ---- internals
@@ -362,14 +362,24 @@
     if (o.onImpact) { try { o.onImpact(i); } catch (e) {} }
   };
 
+  // V209: AudioContext tek seferlik ve paylaşımlı; çarpma anında kurulup kasma yapmasın diye savaş açılırken ısıtılır, destroy'da kapatılmaz
+  var SHARED_AC = null;
+  function sharedAC() {
+    if (SHARED_AC && SHARED_AC.state !== 'closed') return SHARED_AC;
+    var AC = root.AudioContext || root.webkitAudioContext;
+    if (!AC) return null;
+    try { SHARED_AC = new AC(); } catch (e) { SHARED_AC = null; }
+    return SHARED_AC;
+  }
+  SwordClash.prototype._warmSound = function () {
+    var ac = sharedAC(); if (!ac) return;
+    try { if (ac.state === 'suspended' && ac.resume) ac.resume(); } catch (e) {}
+  };
   SwordClash.prototype._sound = function (strength) {
-    if (!this.ac) {
-      var AC = root.AudioContext || root.webkitAudioContext;
-      if (!AC) return;
-      this.ac = new AC();
-    }
-    if (this.ac.state === 'suspended' && this.ac.resume) this.ac.resume();
-    clang(this.ac, this.o.volume, strength);
+    var ac = sharedAC(); if (!ac) return;
+    this.ac = ac;
+    if (ac.state === 'suspended' && ac.resume) ac.resume();
+    clang(ac, this.o.volume, strength);
   };
 
   SwordClash.prototype._spawnSparks = function (n, ix, iy, power) {

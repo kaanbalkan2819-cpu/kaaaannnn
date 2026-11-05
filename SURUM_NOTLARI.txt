@@ -884,5 +884,12 @@ GERİ ALMAK İÇİN: wc_sfx_data.js'i V207 sürümüyle değiştirin.
 
 V208 (ek) — SAVAŞ PANELİ: RÖNESANS KILIÇ ÇARPIŞMASI (TEST EDİLMEDİ; yalnızca node --check)
 wc_sword_clash.js (yeni): bağımsız Canvas 2D kılıç çarpışması (çelik bıçak, kıvılcım, hit-stop, ses). v208.js (yeni): showBattle sarılır; bayrakların arasındaki #sx alanına modül bağlanır (tek vuruş, kılıçlar X duruşunda kalır). Oyun mantığı ve v7.js zamanlayıcıları değişmedi. v208.css: eski SVG kılıçları gizler. index.html'e 3 satır eklendi.
-Ses: kılıç çınlaması "Ses efektleri" (SET.sfxOn) açıksa çalar; seviye SET.vol×SET.sfx'e bağlıdır. Hızlı/azaltılmış hareket modunda (animasyon yok) hiçbir şey eklenmez.
+Ses: kılıç çınlaması "Ses efektleri" (SET.sfxOn) açıksa çalar; seviye SET.vol×SET.sfx'e bağlıdır. Hızlı/azaltılmış hareket modunda (animasyon yok) hiçbir şey eklenmez. (Eski kılıçlar data-wcsc özelliği + satır içi display:none ile gizlenir; v7.js className değiştirse de geri gelmez.)
 GERİ ALMAK İÇİN: index.html'den wc_sword_clash.js, v208.js ve v208.css satırlarını silin.
+
+=================== V209 ===================
+V209 — SAVAŞ PANELİ KASMA: KILIÇ SESİ (TEST EDİLMEDİ; yalnızca node --check)
+1) wc_sword_clash.js: kılıç çınlaması için AudioContext her savaşta ve tam ÇARPMA anında (kılıçlar çarpışırken) yeniden kuruluyordu; telefonda bu, çarpışma karesinde takılma yapıyordu. Artık tek, paylaşımlı bağlam: savaş açılırken (mount) ısıtılır, destroy'da kapatılmaz.
+2) v208.js: savaş paneli kapanınca canvas kılıç yok edilir (eskiden bir sonraki savaşa kadar bellekte kalıyordu).
+NOT: Eski v7.js SVG kılıçları (.swd sl/sr/spk + v7.css/v192.css swl/swr/spk animasyonları) hâlâ DOM'a kuruluyor ama display:none ile gizli; boyanmaz/animasyon çalışmaz. wc_battle_fx.js index.html'de yüklü DEĞİL (kullanılmıyor).
+GERİ ALMAK İÇİN: wc_sword_clash.js ve v208.js'i V208 sürümüyle değiştirin.

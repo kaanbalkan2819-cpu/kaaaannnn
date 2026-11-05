@@ -13,7 +13,8 @@
       if (!sx || sx.className.indexOf('go') < 0) return r;      // animasyonsuz (hızlı/azaltılmış hareket) mod: dokunma
       var S = window.SET || {}, sp = Math.min(S.spd || 1, 1.5);
       var vol = (S.vol == null ? .8 : S.vol) * (S.sfx == null ? .9 : S.sfx) * .35;
-      sx.classList.add('wcsc');
+      sx.setAttribute('data-wcsc', '1');   /* sınıf değil: v7.js className'i yeniden yazıyor */
+      Array.prototype.forEach.call(sx.querySelectorAll('.swd'), function (n) { n.style.display = 'none'; });
       prev = WCSwordClash.mount(sx, {
         width: 220, height: 150, scale: .62, originY: .38, intensity: 1,
         quality: (navigator.hardwareConcurrency || 4) <= 4 ? 'low' : 'high',
@@ -21,7 +22,12 @@
         attacker: '#3b82f6', defender: '#ef4444'
       });
       prev.playOnce();
-    } catch (e) { try { var s2 = document.getElementById('sx'); if (s2) s2.classList.remove('wcsc'); } catch (x) { } }
+    } catch (e) { try { var s2 = document.getElementById('sx'); if (s2) { s2.removeAttribute('data-wcsc'); Array.prototype.forEach.call(s2.querySelectorAll('.swd'), function (n) { n.style.display = ''; }); } } catch (x) { } }
     return r;
   };
+  /* V209: panel kapanınca canvas kılıç yok edilir (eskiden sonraki savaşa kadar bellekte kalıyordu) */
+  if (typeof closeBattle === 'function') {
+    var _cb209 = closeBattle;
+    closeBattle = function () { try { if (prev) { prev.destroy(); prev = null; } } catch (e) { } return _cb209.apply(this, arguments); };
+  }
 })();
