@@ -126,6 +126,15 @@
      ~8 MB dokuyu GPU'ya yüklemez: yalnızca değişen ülkelerin kutusu yeniden çizilir ve yalnızca o dikdörtgen copyTextureToTexture ile yüklenir.
      Tarih değişim çizgisini aşan ülke (Rusya, ABD, Antarktika...), müttefik şeridi, >8 değişen ülke ya da büyük alan -> eski tam yol. Hata olursa da eski tam yol. */
   var baseValid = false, basePrev = {}, ovValid = false, ovPrev = {}, ovDirty = null, ovAlly = false, ovPC = null, ovSrc = null;
+  /* V206: İLK ÜLKE SEÇİMİ KASMASI — ilk seçimde tüm ülkelerin Path2D yolu ve sınır kutusu ilk kez hesaplanıyordu (177 ülke, tek karede). Küre hazır olunca boş zamanda dilim dilim önceden hesaplanır. Geri almak için warm207 çağrısını silin. */
+  function warm207() {
+    var i = 0, idle = window.requestIdleCallback ? function (f) { requestIdleCallback(f, { timeout: 1200 }); } : function (f) { setTimeout(f, 60); };
+    (function step(dl) {
+      var t0 = performance.now();
+      while (i < C.length && performance.now() - t0 < 4 && (!dl || !dl.timeRemaining || dl.timeRemaining() > 2)) { var c = C[i++]; try { cext(c); pathOf(c); } catch (e) { } }
+      if (i < C.length) idle(step);
+    })();
+  }
   function cext(c) {
     if (c._ox) return c._ox; var a = 1e9, b = 1e9, d = -1e9, e = -1e9;
     c.polys.forEach(function (rg) { rg[0].forEach(function (q) { if (q[0] < a) a = q[0]; if (q[0] > d) d = q[0]; if (q[1] < b) b = q[1]; if (q[1] > e) e = q[1]; }); });
@@ -501,6 +510,7 @@
       CP('meshes');
     }).then(YLD).then(function () {   /* V149 */
       var cA = null; bindInput(); resize(); READY = true;
+      try { warm207(); } catch (e) { }   /* V206 */
       /* V132: shader derlemesi + ilk kare ve büyük ülke blokları perdenin altında hazırlanır (ilk dokunuşta/animasyonda takılma olmasın) */
       try {   /* V140: ülke bloklarının shader'ları (Lambert + çizgi) küre kurulurken, perdenin altında derlenir; ilk seçimde derleme takılması/donması olmasın */
         var dgm = new THREE.BufferGeometry(); dgm.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 1.3, .01, 0, 1.3, 0, .01, 1.3], 3)); dgm.setAttribute('normal', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1], 3));

@@ -1,3 +1,8 @@
+=================== V207 ===================
+V207 — İLK ÜLKE SEÇİMİ KASMASI (öğretici reddedildikten sonraki ilk seçim; test yapılmadı, kod incelemesi; node --check geçti)
+v30.js: warm207() — küre hazır olunca boş zamanda (kare başına en çok 4 ms) tüm ülkelerin Path2D yolu + sınır kutusu önceden hesaplanır. Eskiden ilk seçimdeki ilk tam kaplama boyaması bunların hepsini tek karede çıkarıyordu.
+GERİ ALMAK İÇİN: v30.js'te "try { warm207(); } catch (e) { }" satırını silin.
+
 =================== V206 ===================
 V206 — SAVAŞ PANELİ KOD İNCELEMESİ (test yapılmadı; yalnızca CSS)
 Gözden geçirilen: showBattle/roundRoll/rowsRun/finish (v7.js), v190-v192 CSS, dice3d, v60/v134/v136 gözlemcileri. Kalan tek anlamlı yük: sonuçta ZAFER/YENİLGİ yazısı + 18 konfeti. v200.css sonu: katmanlar baştan GPU, telefonda konfeti 10.
@@ -870,3 +875,14 @@ v198.js (yeni) + v198.css: ekrandaki tüm 🎲 emojileri (hamle/zar göstergeler
 v137.js (Kalkınma): altın düğmedeki "💰 −8 · +4" yerine "Geliştir · 8 💰"; kazanç zaten "Nüfus 62 → 66" etiketinde görünür; yan etki etiketi "Yan etki: ..." diye adlandırıldı. Ticaret Koridoru düğmesi de aynı.
 GERİ ALMAK İÇİN: index.html'den v198.js bağlantısını silin; v137.js'i V197 sürümüyle değiştirin.
 V198 (ek 2) — "BİT BİT" EMOJİLER: v198.js artık 🕊 ⚔ 🏗 🛡 emojilerini de (Diplomasi/Kalkınma başlıkları, İtibar/saldırganlık göstergesi, pakt/garanti satırları) assets/art madalyonlarıyla (dip, army, city, guard) değiştirir. .pic içindekilere ve bildirime (#toast, 🗡 ihanet) dokunmaz.
+
+
+=================== V208 ===================
+V208 — ZAR ATIŞ SESİ: ilk_zar_atisi.mp3 oyundaki zar sesi olarak eklendi (TEST EDİLMEDİ)
+www/wc_sfx_data.js: 'dice' örnek listesi artık yalnızca kullanıcının ses dosyası (eski 4 üretilmiş zar sesi kaldırıldı). wc_audio.js değişmedi; zar atılınca AU.play('dice') bu sesi çalar.
+GERİ ALMAK İÇİN: wc_sfx_data.js'i V207 sürümüyle değiştirin.
+
+V208 (ek) — SAVAŞ PANELİ: RÖNESANS KILIÇ ÇARPIŞMASI (TEST EDİLMEDİ; yalnızca node --check)
+wc_sword_clash.js (yeni): bağımsız Canvas 2D kılıç çarpışması (çelik bıçak, kıvılcım, hit-stop, ses). v208.js (yeni): showBattle sarılır; bayrakların arasındaki #sx alanına modül bağlanır (tek vuruş, kılıçlar X duruşunda kalır). Oyun mantığı ve v7.js zamanlayıcıları değişmedi. v208.css: eski SVG kılıçları gizler. index.html'e 3 satır eklendi.
+Ses: kılıç çınlaması "Ses efektleri" (SET.sfxOn) açıksa çalar; seviye SET.vol×SET.sfx'e bağlıdır. Hızlı/azaltılmış hareket modunda (animasyon yok) hiçbir şey eklenmez.
+GERİ ALMAK İÇİN: index.html'den wc_sword_clash.js, v208.js ve v208.css satırlarını silin.
