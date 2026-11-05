@@ -1,0 +1,30 @@
+/* V13: hedef simgeleri (statik) + ana menü */
+path.hl.atk{stroke:none!important;fill:#ff5a4722!important;animation:none!important}
+path.hl.atks{display:none!important}
+.tgi{pointer-events:none}
+.tgc{fill:#7f1d1dd9;stroke:#ffe3a3;stroke-width:1.2px;vector-effect:non-scaling-stroke}
+.tgx{fill:none;stroke:#ffe3a3;stroke-width:1.5px;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.tgd{fill:#ffe3a3}
+.tgi-new{animation:tgin .22s ease-out 1;transform-box:fill-box}
+@keyframes tgin{from{opacity:0}to{opacity:1}}
+.moving .tgi{display:none}
+.box.mm{max-width:400px;padding:26px 22px 22px;background:linear-gradient(180deg,#0e1a3d,#070d22);border:1px solid #c9a24d66;border-radius:14px;box-shadow:0 18px 50px #000a}
+.mm-hero{text-align:center;margin-bottom:20px}
+.mm-hero.sm{margin-bottom:14px}
+.mm-emb{font-size:34px;color:#c9a24d;line-height:1;margin-bottom:8px}
+.mm-hero h1{margin:0;font-size:28px;font-weight:800;letter-spacing:.22em;color:#f3e6c4;display:flex;flex-direction:column;line-height:1.15}
+.mm-hero h1 span{font-size:15px;letter-spacing:.5em;color:#c9a24d;margin-top:4px}
+.mm-hero.sm h1{font-size:18px}
+.mm-sub{margin-top:10px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#8d9bc0}
+.mm-sub:before,.mm-sub:after{content:"";display:inline-block;width:26px;height:1px;background:#c9a24d88;vertical-align:middle;margin:0 10px}
+.mm-btns{display:flex;flex-direction:column;gap:10px}
+.mm-b{min-height:48px;border-radius:8px;border:1px solid #3a4a7a;background:#14224d;color:#e8edf9;font-size:16px;font-weight:600;letter-spacing:.04em;cursor:pointer;padding:0 14px}
+.mm-b.pri{background:linear-gradient(180deg,#d9b560,#a9812f);color:#1b1402;border-color:#e8cf8c;font-weight:800}
+.mm-b.pri:disabled{opacity:.4;filter:grayscale(.6);cursor:default}
+.mm-b.ghost{background:transparent;color:#8d9bc0}
+.mm-b.sm{flex:1;font-size:14px}
+.mm-row{display:flex;gap:10px}
+.mm-card{display:flex;flex-direction:column;gap:4px;text-align:left;min-height:72px;padding:14px 16px;border-radius:10px;border:1px solid #c9a24d55;background:linear-gradient(180deg,#14224d,#0d1838);color:#e8edf9;cursor:pointer}
+.mm-card b{font-size:17px;color:#f3e6c4;letter-spacing:.05em}
+.mm-card small{color:#8d9bc0;font-size:12.5px;line-height:1.35}
+.mm-b:active,.mm-card:active{transform:translateY(1px)}

@@ -1,5 +1,5 @@
 /* V188 — yeni yenilgi ekranı (countryball yok) */
-#v139over.lose{background:radial-gradient(120% 70% at 50% 0%,#5a1f2e 0%,#241a38 38%,#0b0e1c 80%)}
+#v139over.lose{background:radial-gradient(120% 70% at 50% 0%,#5a1f2e 0%,#2f2b23 38%,#171410 80%)}
 #v139over.lose{align-items:flex-start}
 #v139over .l188{width:min(400px,100%);margin:auto;padding:max(6px,env(safe-area-inset-top,0px)) 0 max(10px,env(safe-area-inset-bottom,0px));animation:l188in .5s ease-out both}
 @keyframes l188in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -23,7 +23,7 @@
 #v139over .l188 .jc b{font-size:15px;margin-bottom:3px}
 #v139over .l188 .jb{display:flex;align-items:flex-end;width:100%;max-width:56px;flex:1 1 auto;min-height:0;border-radius:8px 8px 3px 3px;background:#ffffff0f;overflow:hidden}
 #v139over .l188 .jb i{display:block;width:100%;border-radius:8px 8px 0 0;animation:l188grow .9s .25s cubic-bezier(.2,.8,.2,1) both;transform-origin:50% 100%}
-#v139over .l188 .jc.s i{background:linear-gradient(180deg,#8fb8ff,#4c6fd0)}
+#v139over .l188 .jc.s i{background:linear-gradient(180deg,#dac8a8,#a39479)}
 #v139over .l188 .jc.p i{background:linear-gradient(180deg,#ffe28a,#e0a21f)}
 #v139over .l188 .jc.e i{background:linear-gradient(180deg,#ff8a96,#c0344a)}
 #v139over .l188 .jc small{margin-top:5px}

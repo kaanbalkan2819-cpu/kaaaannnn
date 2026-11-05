@@ -1,10 +1,10 @@
 /* V114 — Rank Maçı arayüzü. Geri almak için index.html'deki ranked.css satırını silin. */
 
 /* ---- Ana menü düğmesi: mevcut #wcm .mb ölçüleri, lacivert cam + altın çerçeve ---- */
-#wcm .mb.rk{background:linear-gradient(90deg,rgba(34,58,120,.92),rgba(8,16,40,.92));border-color:#e8b856;color:#ffe9b0;min-width:0}
+#wcm .mb.rk{background:linear-gradient(90deg,rgba(91,81,63,.92),rgba(29,25,19,.92));border-color:#e8b856;color:#ffe9b0;min-width:0}
 #wcm .mb.rk em{color:#ffd067;font-size:15px}
 #wcm .mb.rk small{color:#c9a24d}
-#wcm .mb.rk:hover,#wcm .mb.rk:focus-visible,#wcm .mb.rk:active{background:linear-gradient(90deg,#2a4aa8,#0b1840);border-color:#ffe29a;color:#fff6d8}
+#wcm .mb.rk:hover,#wcm .mb.rk:focus-visible,#wcm .mb.rk:active{background:linear-gradient(90deg,#7d6e55,#2d281e);border-color:#ffe29a;color:#fff6d8}
 #wcm .mb.rk:before{background:#e8b856}
 /* taşma önlemi (dar ekran): metin kısalır, alt yazı gizlenir */
 #wcm .mb{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -26,8 +26,8 @@
 .wcr-cd{text-align:center;color:var(--tx2);margin:8px 0}.wcr-cd b{color:#ffd067;font-size:22px}
 
 /* ---- liderlik ---- */
-.wcr-list{max-height:52vh;overflow:auto;border:1px solid #2f4a94;border-radius:10px;margin:6px 0}
-.wcr-row{display:flex;align-items:center;gap:6px;padding:7px 8px;border-bottom:1px solid #16296a;font-size:13px}
+.wcr-list{max-height:52vh;overflow:auto;border:1px solid #987e52;border-radius:10px;margin:6px 0}
+.wcr-row{display:flex;align-items:center;gap:6px;padding:7px 8px;border-bottom:1px solid #6d5b3b;font-size:13px}
 .wcr-row.me{background:#2a1d06;border-color:#6b5420}
 .wcr-row .n{width:34px;color:var(--tx3);text-align:right}.wcr-row .nk{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}
 .wcr-row .lb{color:var(--tx3);font-size:11px;white-space:nowrap}.wcr-row b{color:#ffd067;min-width:40px;text-align:right}
@@ -35,10 +35,10 @@
 /* ---- sonuç + lig animasyonu ---- */
 .wcr-res{text-align:center}
 .wcr-res h2{margin:4px 0;font-size:26px;letter-spacing:.12em}
-.wcr-res.win h2{color:#4ade80}.wcr-res.loss h2{color:#ff6b6b}.wcr-res.draw h2{color:#ffd067}.wcr-res.invalid h2{color:#9aa7d6}
+.wcr-res.win h2{color:#4ade80}.wcr-res.loss h2{color:#ff6b6b}.wcr-res.draw h2{color:#ffd067}.wcr-res.invalid h2{color:#cab99b}
 .wcr-d{font-size:44px;font-weight:900;animation:wcrpop .7s cubic-bezier(.2,1.4,.3,1)}.wcr-d.p{color:#4ade80}.wcr-d.n{color:#ff6b6b}
 @keyframes wcrpop{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
-.wcr-lg{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0;padding:10px;border-radius:12px;border:1px solid #e8b856;background:radial-gradient(circle,#2a4aa855,#0a1330);animation:wcrlg 1.2s ease-out}
+.wcr-lg{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0;padding:10px;border-radius:12px;border:1px solid #e8b856;background:radial-gradient(circle,#7d6e5555,#231f17);animation:wcrlg 1.2s ease-out}
 .wcr-lg span{font-weight:900;letter-spacing:.2em;font-size:13px}
 .wcr-lg.up span{color:#4ade80}.wcr-lg.down span{color:#ff6b6b}
 .wcr-lg.up .wcr-badge{animation:wcrup 1.2s ease-out}.wcr-lg.down .wcr-badge{animation:wcrdn 1s ease-out}
@@ -49,8 +49,8 @@
 /* ---- maç içi: süre sayacı + bağlantı koptu şeridi ---- */
 #wcr-t{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,var(--safe-area-inset-top,0px)) + 46px);z-index:61;pointer-events:none;display:none;
   padding:3px 12px;border-radius:999px;font:700 13px system-ui,sans-serif;white-space:nowrap;max-width:70vw;overflow:hidden;text-overflow:ellipsis;
-  background:linear-gradient(180deg,rgba(34,58,120,.75),rgba(8,16,40,.85));border:1px solid rgba(232,184,86,.8);color:#ffd067;box-shadow:0 3px 10px #0008}
-#wcr-t.op{color:#c9d3f0;border-color:rgba(79,111,197,.8)}
+  background:linear-gradient(180deg,rgba(91,81,63,.75),rgba(29,25,19,.85));border:1px solid rgba(232,184,86,.8);color:#ffd067;box-shadow:0 3px 10px #0008}
+#wcr-t.op{color:#e4dac8;border-color:rgba(192,173,139,.8)}
 #wcr-t.low{color:#fff;background:linear-gradient(180deg,#a11,#500);border-color:#ff8a7a;animation:wcrlow .6s steps(2) infinite}
 @keyframes wcrlow{50%{opacity:.55}}
 #wcr-dc{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,var(--safe-area-inset-top,0px)) + 80px);z-index:9999;display:none;text-align:center;

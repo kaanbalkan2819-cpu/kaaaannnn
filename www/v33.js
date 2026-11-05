@@ -62,7 +62,7 @@
     enemy: { tr: 'Düşman', en: 'Enemy', bg: '#b42318', fg: '#ffe4e0' },
     neg: { tr: 'Olumsuz', en: 'Unfavorable', bg: '#c26a14', fg: '#fff1de' },
     pos: { tr: 'Olumlu', en: 'Favorable', bg: '#2b83c9', fg: '#e6f4ff' },
-    neu: { tr: 'Tarafsız', en: 'Neutral', bg: '#3a4580', fg: '#dfe5ff' }
+    neu: { tr: 'Tarafsız', en: 'Neutral', bg: '#5a4d38', fg: '#f1e8d6' }
   };
 
   var _oi = ownerInfo;

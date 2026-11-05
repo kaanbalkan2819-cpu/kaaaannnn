@@ -13,7 +13,7 @@
     var en = LANG() === 'en';
     ovEl = document.createElement('div');
     ovEl.id = 'v38over';
-    ovEl.style.cssText = 'position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at 50% 32%,#2c2552 0%,#14172e 62%,#0c0f20 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font-family:inherit;text-align:center;padding:24px';
+    ovEl.style.cssText = 'position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at 50% 32%,#443e33 0%,#26221c 62%,#1a1712 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font-family:inherit;text-align:center;padding:24px';
     /* V122: korkutucu kırmızı "OYUN BİTTİ" yerine yumuşak, cana yakın metin (abartısız) */
     ovEl.innerHTML = '<div style="font-size:46px;line-height:1">' + (win ? '🌍' : '🌱') + '</div>' +
       '<div style="font-size:30px;font-weight:700;letter-spacing:.3px;color:' + (win ? '#f2c14e' : '#ffd9a8') + '">' + (win ? (en ? 'Victory!' : 'Zafer!') : (en ? 'Game Over' : 'Oyun Bitti')) + '</div>' +

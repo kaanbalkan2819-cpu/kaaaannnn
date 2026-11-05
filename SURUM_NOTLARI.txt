@@ -1,3 +1,21 @@
+=================== V200 ===================
+V200 — KALAN PANEL/MENÜLER DURAKLATMA KARTI TEMASINA (SİPER DEFTERİ) ÇEVRİLDİ (TEST EDİLMEDİ; yalnızca node --check ve CSS parantez dengesi kontrolü geçti)
+Zaten şablondaydı: duraklatma (v156), sıralamalı (v195), ülke paneli #panel (v196), politika/kalkınma kutuları (v197), dünya sahnesi (v199).
+1) Renkler (yerinde dönüşüm, kural sırası bozulmadan): tüm CSS dosyalarındaki lacivert/mavi arayüz renkleri (~180 yer: hex, rgb/rgba, 8 haneli hex, %23 hex) sıcak taş/altın karşılıklarına çevrildi. Kenarlıklar altın-kahveye çekildi.
+   :root değişkenleri (app.css, v113.css): --bg0 #1a150e, --bg1 #2a251e, --bg2 #3d352b, --bg3 #4a4034, --line #8f7b4c, --line2 #cdb06a, --tx #f3e8c8, --tx2 #d9cba4, --tx3 #a8935c.
+   Etkilenen dosyalar: app, v7, v13, v15, v16, v20, v21, v23, v24, v35, v37, v76, v102, v112, v113, v138, v139, v141, v188, ranked (.css); online_chat, v134, v99, v38, wc_tour, v60 (.js içine gömülü stil); v33.js ("Tarafsız" etiketi); index.html (açılış ekranı, durum çubuğu rengi).
+   DOKUNULMADI (bilerek): 2B harita yolları/su (#map, path.*, #wwater), zarlar (.die, .d3, .d7: saldıran/savunan renk anlamı), oyuncu/ülke renkleri, canlı mavi vurgular, rütbe madalyaları (ranked_art.js, v23.js SVG), sohbette kendi mesaj balonu mavisi, savaş sahnesi (wc_battle_fx.js), ana menü küresi (v35.js).
+2) Yeni www/v200.css (index.html'e bağlandı): diğer tüm açılır kutular (#mod .box) v197 ile aynı çerçeve + köşe işlemeleri + karartma; oyun içi Ayarlar/Onay kartı (.wb-set/.wb-ask) duraklatma çerçevesi; savaş paneli #bs aynı zemin (zafer/yenilgi üst kenar rengi korunur); #toast; birincil düğme turuncu yerine mat altın; kutu/kart başlıklarında Georgia yazı tipi.
+GERİ ALMAK İÇİN: (a) yalnızca çerçeve/yazı tipi: index.html'den v200.css bağlantısını silin. (b) renkler: yedek_v198_oncesi/www/ içindeki dosyaları www/ üzerine kopyalayın (değişen her dosyanın V198 hali orada; klasör www dışında, APK'ya girmez).
+
+=================== V199 ===================
+V199 — DÜNYA SAHNESİ DURAKLATMA MENÜSÜ TEMASINA (SİPER DEFTERİ, v156) ÇEVRİLDİ (TEST EDİLMEDİ; yalnızca node --check geçti). Paneller/menüler bu sürümde DEĞİŞMEDİ.
+Oyun başlayınca açılan 3B dünya: siyah uzay yerine sıcak taş/parşömen zemin, ince altın harita halkaları (çok yavaş döner), hafif kağıt grenı, altın toz; ışık sıcak krem + sıcak taş dolgu + arkadan ince altın kenar ışığı; atmosfer mavi yerine altın; görünüm -14° eğik; yerküre üstünde ince altın enlem/boylam ızgarası; yükleme kapağı da aynı tema.
+Dosyalar: www/v199.css (yeni, index.html'e bağlandı), www/v30.js ("V199" yazan yerler: alpha:true + setClearColor, ışıklar, kamera eğimi WC199_TILT, atmosfer rengi, gökyüzü küresi yerine toz+ızgara, tuval arkası halka/gren katmanları).
+AYAR: v30.js en üstte WC199_TILT (derece; 0 = düz). Işık renkleri/şiddetleri "V199" yorumunun altındaki satırlarda; ülke renkleri ayırt edilemezse güneş 0xffeccb -> 0xffffff, ortam 0x857a68 -> 0x8a8f9a yapın.
+Not: eğim kamera yuvarlanması olarak yapıldı (küre grubu döndürülmedi) -> ülke seçimi/odaklama/çift parmak döndürme mantığına dokunulmadı.
+GERİ ALMAK İÇİN: index.html'den v199.css bağlantısını silin ve v30.js'i V198 sürümüne döndürün (V199 yorumlu satırların ESKİ değerleri yorumlarda yazılı).
+
 =================== V194 ===================
 V194 — RESİMLİ MADALYONLAR (yalnızca node --check geçti; oyunda denenmedi)
 Diplomasi menüsünde: İttifak, Yenile, Saldırmazlık, Garanti, Koruma, İttifaktan Çık, Haraç, Kışkırt, Paktı Boz + başlıkta elçi. Kalkınma kartlarında: Halk, Silahlanma, Ar-Ge, Diplomatik Atılım, Ticaret.

@@ -1,0 +1,45 @@
+/* V200 — Kalan panel/menüler duraklatma kartı (v156 "Siper Defteri") şablonuna çevrildi. Dünya sahnesi v199'da yapıldı.
+   Zaten şablonda olanlar: duraklatma (v156), sıralamalı (v195), ülke paneli #panel (v196), politika/kalkınma kutuları (v197).
+   Bu dosya: diğer tüm açılır kutular (#mod .box), oyun içi Ayarlar/Onay kartı (.wb-panel), savaş paneli (#bs), bildirim (#toast), düğme/başlık yazı tipi.
+   Renk dönüşümü (lacivert -> sıcak taş/altın) CSS dosyalarında yerinde yapıldı; ESKİ HALLERİ yedek_v198_oncesi/ klasöründe.
+   Geri almak için index.html'den bu dosyanın bağlantısını silin. */
+
+/* 1) Açılır kutular: v197 ile aynı çerçeve + köşe işlemeleri (wbm = ana menü/duraklatma/ayar kabuğu hariç; ranked, politika ve eski ana menü kartı kendi stilinde) */
+#mod:not(.wbm) .box:not(:has(.polx)):not(:has(.d38)):not(.wcr-box):not(.mm){--bg1:#2f2a22;--bg2:#3a3329;--bg3:#3a3329;--line:#6e5f3c;--line2:#8f7b4c;--tx:#f3e8c8;--tx2:#cfc4a4;--tx3:#a8935c;
+  color:var(--tx);border:2px solid #8f7b4c!important;border-radius:4px!important;box-shadow:0 18px 50px #000b!important;
+  background:
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(1 0 0 1 0 0)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") left 6px top 6px/24px 24px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(-1 0 0 1 46 0)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") right 6px top 6px/24px 24px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(1 0 0 -1 0 46)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") left 6px bottom 6px/24px 24px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(-1 0 0 -1 46 46)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") right 6px bottom 6px/24px 24px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 440 440' fill='none' stroke='%23B9A066' stroke-opacity='.13'%3E%3Ccircle cx='220' cy='220' r='196' stroke-width='2.2'/%3E%3Ccircle cx='220' cy='220' r='208'/%3E%3Cpath d='M220 24V416'/%3E%3Cellipse cx='220' cy='220' rx='173' ry='196'/%3E%3Cellipse cx='220' cy='220' rx='110' ry='196'/%3E%3Cellipse cx='220' cy='150' rx='183' ry='29'/%3E%3Cellipse cx='220' cy='220' rx='196' ry='31'/%3E%3Cellipse cx='220' cy='290' rx='183' ry='29'/%3E%3C/svg%3E") center -40px/300px 300px no-repeat,
+    linear-gradient(180deg,#3d352b,#2a251e)!important}
+#mod:not(.wbm) .box:not(:has(.polx)):not(:has(.d38)):not(.wcr-box):not(.mm) h2,
+#mod:not(.wbm) .box:not(:has(.polx)):not(:has(.d38)):not(.wcr-box):not(.mm) h3{font-family:Georgia,'Times New Roman',serif;letter-spacing:.14em;color:#f3e8c8;text-shadow:0 2px 6px rgba(0,0,0,.7)}
+/* kutu arkasındaki karartma: duraklatma ile aynı sıcak ton (v156) */
+#mod:not(.wbm){background:rgba(26,21,14,.62)!important}
+
+/* 2) Oyun içi Ayarlar / Onay kartı: duraklatma kartıyla aynı çerçeve */
+body.wc141-ig .wb-panel.wb-set,body.wc141-ig .wb-panel.wb-ask{--bg1:#2f2a22;--bg2:#3a3329;--bg3:#3a3329;--line:#6e5f3c;--line2:#8f7b4c;--tx:#f3e8c8;--tx2:#cfc4a4;--tx3:#a8935c;
+  color:var(--tx);border:2px solid #8f7b4c!important;border-radius:4px!important;box-shadow:0 18px 50px #000b!important;
+  background:
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(1 0 0 1 0 0)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") left 6px top 6px/22px 22px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(-1 0 0 1 46 0)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") right 6px top 6px/22px 22px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(1 0 0 -1 0 46)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") left 6px bottom 6px/22px 22px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(-1 0 0 -1 46 46)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") right 6px bottom 6px/22px 22px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 440 440' fill='none' stroke='%23B9A066' stroke-opacity='.13'%3E%3Ccircle cx='220' cy='220' r='196' stroke-width='2.2'/%3E%3Ccircle cx='220' cy='220' r='208'/%3E%3Cpath d='M220 24V416'/%3E%3Cellipse cx='220' cy='220' rx='173' ry='196'/%3E%3Cellipse cx='220' cy='220' rx='110' ry='196'/%3E%3Cellipse cx='220' cy='150' rx='183' ry='29'/%3E%3Cellipse cx='220' cy='220' rx='196' ry='31'/%3E%3Cellipse cx='220' cy='290' rx='183' ry='29'/%3E%3C/svg%3E") center -40px/300px 300px no-repeat,
+    linear-gradient(180deg,#3d352b,#2a251e)!important;filter:none!important;clip-path:none!important}
+body.wc141-ig .wb-panel.wb-set h3,body.wc141-ig .wb-panel.wb-ask h3{font-family:Georgia,'Times New Roman',serif!important;letter-spacing:.24em;color:#f3e8c8!important;text-shadow:0 2px 6px rgba(0,0,0,.8)}
+
+/* 3) Savaş paneli (#bs): aynı zemin + çerçeve; zafer/yenilgi üst kenar rengi (yeşil/kırmızı) KORUNUR */
+#bs{background:linear-gradient(180deg,#3d352b,#2a251e);border-radius:4px 4px 0 0;--line:#6e5f3c;--line2:#8f7b4c;--tx:#f3e8c8;--tx2:#cfc4a4;--tx3:#a8935c}
+#bs::before{content:"";position:absolute;left:6px;right:6px;bottom:6px;top:6px;border:1px solid rgba(143,123,76,.3);pointer-events:none}
+
+/* 4) Bildirim */
+#toast{background:rgba(26,21,14,.94);border:1px solid #8f7b4c;border-radius:3px;color:#f3e8c8;font-family:Georgia,'Times New Roman',serif;letter-spacing:.04em;box-shadow:0 8px 24px #000a}
+
+/* 5) Düğmeler: sivri köşe + menü kartındaki altın; birincil düğme mat altın (turuncu yerine) */
+button.pri{background:linear-gradient(180deg,#e6c46a,#b8902f);border-color:#f0dc9a;color:#2b1c00}
+button.pri:hover{background:linear-gradient(180deg,#f0d07a,#c49a38)}
+.box button.big{font-family:Georgia,'Times New Roman',serif;letter-spacing:.06em;border-radius:4px}
+@media (prefers-reduced-motion:reduce){#mod,#panel{animation:none}}

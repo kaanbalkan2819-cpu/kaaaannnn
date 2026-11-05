@@ -1,0 +1,127 @@
+/* V24 — elçi ekranı taşma düzeltmesi + her öğede animasyon, savaş paneli yazıları küçük, Zar At düğmesi sağ altta */
+
+/* ---- elçi ekranı: yatay taşma yok (kutu içine tam sığar) ---- */
+#mod .envx,#mod .polx{width:100%!important;max-width:100%!important;overflow-x:hidden;box-sizing:border-box}
+.ecard{position:relative;overflow:hidden;box-sizing:border-box;width:100%;max-width:100%;min-width:0;white-space:normal}
+.etx{min-width:0}
+.etx b,.etx small{white-space:normal;overflow-wrap:anywhere;word-break:normal}
+.ecost{flex:0 0 auto;white-space:nowrap}
+.envhd{max-width:100%}
+.envx .big{max-width:100%;white-space:normal}
+
+/* ---- elçi ekranı: üç kartın hepsinde + bayraklarda canlı animasyon ---- */
+.envf .fi{animation:envFlag 2.6s ease-in-out infinite;transform-origin:50% 100%}
+.envf.r .fi{animation-delay:.5s}
+.envf{animation-name:envL;animation-duration:.6s;animation-timing-function:ease-out;animation-fill-mode:both}
+.envf.r{animation-name:envR}
+.ecard{animation:ecIn .45s cubic-bezier(.2,.9,.3,1.1) both,ecBreath 3s ease-in-out 1s infinite}
+.ecard:nth-of-type(2){animation-name:ecInR,ecBreath}
+.ecard::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;pointer-events:none;background:linear-gradient(100deg,transparent,#ffffff30,transparent);transform:skewX(-20deg);animation:ecShine 3.6s ease-in-out 1.2s infinite}
+.ecard:nth-of-type(2)::after{animation-delay:1.9s}
+.ecard:nth-of-type(3)::after{animation-delay:2.6s}
+.ecard:disabled::after{display:none}
+.eic svg{transform-origin:50% 50%}
+.ecard[onclick*="v20Pact"] .eic svg{animation:eicStamp 2.4s ease-in-out infinite}
+.ecard[onclick*="v23Guard"] .eic svg{animation:eicShield 2.2s ease-in-out infinite}
+.ecard[onclick*="v23Incite"] .eic svg{animation:eicFlame .55s ease-in-out infinite alternate}
+.ecard[onclick*="v20Pact"] .eic{animation:eicRingG 2.4s ease-in-out infinite}
+.ecard[onclick*="v23Guard"] .eic{animation:eicRingB 2.2s ease-in-out infinite}
+.ecard[onclick*="v23Incite"] .eic{animation:eicRingR 1.6s ease-in-out infinite}
+.ecost{animation:ecCost 2s ease-in-out infinite}
+.envopt{animation:ecIn .35s ease-out both}
+@keyframes envFlag{0%,100%{transform:translateY(0) rotate(-2deg) skewX(0)}50%{transform:translateY(-3px) rotate(2deg) skewX(-3deg)}}
+@keyframes ecIn{from{opacity:0;transform:translateX(-34px)}to{opacity:1;transform:none}}
+@keyframes ecInR{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
+@keyframes ecBreath{0%,100%{box-shadow:0 0 0 #0000}50%{box-shadow:0 0 14px var(--ec)}}
+@keyframes ecShine{0%{left:-60%}40%,100%{left:150%}}
+@keyframes eicStamp{0%,70%,100%{transform:scale(1) rotate(0)}78%{transform:scale(1.18) rotate(-6deg)}88%{transform:scale(.96) rotate(3deg)}}
+@keyframes eicShield{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes eicFlame{from{transform:scale(1,1) rotate(-4deg)}to{transform:scale(1.1,1.16) rotate(4deg)}}
+@keyframes eicRingG{0%,100%{box-shadow:inset 0 0 0 1px #ffffff22,0 4px 10px #0007,0 0 0 #4fe0a000}50%{box-shadow:inset 0 0 0 1px #ffffff22,0 4px 10px #0007,0 0 12px #4fe0a0aa}}
+@keyframes eicRingB{0%,100%{box-shadow:inset 0 0 0 1px #ffffff22,0 4px 10px #0007,0 0 0 #4aa3ff00}50%{box-shadow:inset 0 0 0 1px #ffffff22,0 4px 10px #0007,0 0 12px #4aa3ffaa}}
+@keyframes eicRingR{0%,100%{box-shadow:inset 0 0 0 1px #ffffff22,0 4px 10px #0007,0 0 0 #ff6b5a00}50%{box-shadow:inset 0 0 0 1px #ffffff22,0 4px 10px #0007,0 0 14px #ff6b5acc}}
+@keyframes ecCost{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+body.rm .ecard,body.rm .ecard *,body.rm .envf,body.rm .envf *{animation:none!important}
+@media (prefers-reduced-motion:reduce){.ecard,.ecard *,.envf,.envf *{animation:none!important}}
+.pacthint24{margin:6px 0;padding:6px 10px;border-radius:10px;background:#7a4be022;border:1px solid #7a4be066;font-size:12px;color:#d9c9ff;line-height:1.35}
+
+/* ---- savaş paneli: yazılar biraz küçük ---- */
+#bs.b7 .s7 .rl{font-size:10px}
+#bs.b7 .s7 .nm{font-size:12.5px}
+#bs.b7 .s7 .ln{font-size:10px}
+#bs.b7 .s7 .mx{font-size:12px}
+#bs.b7 .s7 .pt{font-size:9px}
+#bs.b7 .s7 .pt b{font-size:21px}
+#bs.b7 .sr7 .v{font-size:11.5px}
+#bs.b7 .sr7 .lbl{font-size:10px}
+#bs.b7 .dm{font-size:11px}
+#bs.b7 .ul{font-size:10px}
+#bs.b7 .banner{font-size:19px}
+#bs.b7 .tl{font-size:12px;padding:2px 10px}
+#bs.b7 .c7{font-size:11px;padding:2px 8px}
+#bs.b7 .why7,#bs.b7 .why7 .rs,#bs.b7 .rs{font-size:10.5px}
+#bs.b7 .goldline{font-size:10.5px!important}
+#bs.b7 button.big{font-size:13.5px;padding:10px}
+
+/* ---- Zar At düğmesi: sağ alt köşe ---- */
+.rollbtn23{top:auto!important;bottom:calc(18px + var(--safe-b,0px))!important;right:calc(12px + env(safe-area-inset-right,var(--safe-area-inset-right,0px)))!important}
+
+/* ---- elçi ekranı: gerçekçi görseller ---- */
+.eic{width:64px!important;height:64px!important;padding:3px!important;border-radius:14px;background:radial-gradient(circle at 50% 35%,#ffffff1c,#00000080)!important}
+.ecard[onclick*="v20Pact"] .eic svg{animation:eicFloat 3.2s ease-in-out infinite}
+.ecard[onclick*="v23Guard"] .eic svg{animation:eicFloat 3.6s ease-in-out .3s infinite}
+.ecard[onclick*="v23Incite"] .eic svg{animation:eicFloat 2.8s ease-in-out .15s infinite}
+@keyframes eicFloat{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-2px) rotate(1.5deg)}}
+.envdv svg{filter:drop-shadow(0 3px 5px #000a)}
+
+/* ---- savaş sonrası: zarlar ve saldıran/savunan panelleri kalkar; bayraklar karşılaştırmanın üstünde ---- */
+#bs.vw .b7h,#bs.vl .b7h,#bs.vw .dr,#bs.vl .dr{display:none!important}
+.fl7{display:flex;align-items:center;justify-content:center;gap:18px;margin:0 0 6px}
+.fl7s{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;max-width:40%}
+.fl7s .fi.lg{width:84px;height:56px;border-radius:6px;box-shadow:0 3px 10px #000a}
+.fl7s small{font-size:10.5px;font-weight:700;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.fl7s.w .fi{box-shadow:0 0 0 2px var(--ok),0 0 14px #34d39988}.fl7s.w small{color:var(--ok)}
+.fl7s.l{opacity:.6}.fl7s.l .fi{filter:grayscale(.9)}
+.fl7x{font-size:16px;opacity:.7}
+#bs.vw .fin button.big.pri,#bs.vl .fin button.big.pri{position:sticky;bottom:0;z-index:2;box-shadow:0 -10px 12px #0a1330}
+
+/* ---- keşif raporu + istihbarat ---- */
+.scr28{margin:8px 0 6px;padding:9px 11px 10px;border-radius:14px;background:linear-gradient(160deg,#16335a88,#0a1a3399);border:1px solid #4f8fbf55;box-shadow:inset 0 1px 0 #ffffff14,0 4px 14px #0006}
+.sc28t{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;font-size:10.5px;font-weight:800;letter-spacing:.16em;color:#9ad8f5}
+.sc28t .leg{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:0;color:var(--tx2)}
+.sc28t .leg u{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:6px}
+.sc28t .leg u:first-child{margin-left:0}
+.leg u.a,.sc28r .bar i.a{background:linear-gradient(90deg,#3b82f6,#7fb2ff)}.leg u.d,.sc28r .bar i.d{background:linear-gradient(90deg,#ff8a7a,#e0402f)}
+.sc28r{display:grid;grid-template-columns:78px 30px 1fr 30px;gap:6px;align-items:center;padding:3px 0;font-size:11px}
+.sc28r .l{color:var(--tx2);white-space:nowrap}.sc28r b{font-size:11px;color:#fff;text-align:center}
+.sc28r.a .va,.sc28r.d .vd{color:#ffd067}
+.sc28r .bar{display:flex;height:7px;border-radius:4px;overflow:hidden;background:#0a1330;box-shadow:inset 0 1px 2px #0008}.sc28r .bar i{display:block;transition:width .5s}
+.sc28v{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0 7px}
+.vc{display:flex;flex-direction:column;gap:3px;padding:7px 8px;border-radius:10px;background:#0a143066;border:1px solid #ffffff12}
+.vc small{font-size:9.5px;letter-spacing:.06em;color:var(--tx2);text-transform:uppercase}.vc b{font-size:12.5px;color:#fff}
+.m28{display:flex;gap:3px}.m28 i{flex:1;height:5px;border-radius:3px;background:#ffffff1c}
+.m28 i.on.g0,.m28 i.on.r3{background:#f87171}.m28 i.on.g1,.m28 i.on.r2{background:#f5b53a}.m28 i.on.g2,.m28 i.on.r1{background:#9fd86a}.m28 i.on.g3,.m28 i.on.r0{background:#34d399}
+.sc28f{display:flex;flex-wrap:wrap;gap:5px}
+.sc28f .ch{padding:3px 9px;border-radius:999px;background:#ffffff10;border:1px solid #ffffff14;font-size:10.5px;color:var(--tx2)}.sc28f .ch b{color:#fff}.sc28f .ch.pk{color:#4fe0a0;border-color:#4fe0a055}
+.intent24{bottom:calc(168px + var(--safe-b,0px));border-color:#c0502f;background:#2a1008f2}
+.intent24 small{color:#ffb38a}
+
+/* ---- YENİ ZAR MODELİ: obsidyen küp + altın işlemeli göz, parlak yüzey ---- */
+.d3 .f,.d3.at .f,.d3.df .f{
+  border-radius:14px;
+  background:linear-gradient(145deg,#343848 0%,#171924 45%,#07080d 100%);
+  box-shadow:inset 0 0 0 1.5px #e3b94f,inset 0 0 0 3.5px #07080d,inset 0 0 0 4px #e3b94f55,inset 0 7px 12px #ffffff14,inset 0 -8px 12px #00000099}
+.d3.at .f{box-shadow:inset 0 0 0 1.5px #e3b94f,inset 0 0 0 3.5px #07080d,inset 0 0 0 4px #5b9bff99,inset 0 7px 12px #ffffff14,inset 0 -8px 12px #00000099}
+.d3.df .f{box-shadow:inset 0 0 0 1.5px #e3b94f,inset 0 0 0 3.5px #07080d,inset 0 0 0 4px #ff6b5a99,inset 0 7px 12px #ffffff14,inset 0 -8px 12px #00000099}
+.d3.hi .f{box-shadow:inset 0 0 0 1.5px #fff0b0,inset 0 0 0 3.5px #07080d,inset 0 0 0 4px #4fe0a0,0 0 18px #4fe0a0aa,inset 0 7px 12px #ffffff18}
+.d3 .f::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(135deg,#ffffff3d 0%,#ffffff00 34%),radial-gradient(circle at 78% 88%,#e3b94f26,transparent 55%)}
+.d3 .f i.p{width:12px;height:12px;background:radial-gradient(circle at 35% 30%,#fff3bf 0,#e8c45a 42%,#9a6b12 100%);box-shadow:0 0 0 1.5px #2a1d04,0 1px 2px #000c,inset 0 -1px 2px #5a3f08}
+.d3,.d3.at,.d3.df{--b1:#2a2d3a;--b2:#07080d;--b3:#0a0b11}
+.d3 .k{background:#0a0b11;box-shadow:inset 0 0 0 1px #e3b94f55}
+.d3 .sdw{background:#000c}
+/* savaştaki düz zar (d7) aynı model */
+.d7{background:linear-gradient(145deg,#343848,#171924 45%,#07080d)!important;box-shadow:inset 0 0 0 1.5px #e3b94f,inset 0 0 0 3.5px #07080d,inset 0 0 0 4px #e3b94f55,0 5px 0 #05060a,0 10px 16px #000a!important;position:relative}
+.d7::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,#ffffff3d,#ffffff00 36%);pointer-events:none}
+.d7 circle{fill:#e8c45a!important;stroke:#2a1d04;stroke-width:.25}
+.d7.hi{box-shadow:inset 0 0 0 1.5px #fff0b0,inset 0 0 0 3.5px #07080d,inset 0 0 0 4px #4fe0a0,0 5px 0 #05060a,0 0 18px #4fe0a0aa!important}
+.rollbtn23 .rb-d{display:inline-flex}.rb-die{filter:drop-shadow(0 2px 3px #0009)}

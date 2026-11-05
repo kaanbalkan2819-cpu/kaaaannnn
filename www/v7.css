@@ -6,15 +6,15 @@ path.c{stroke:#06102c;stroke-opacity:.95}
 #v7end small{font-weight:600;opacity:.8}
 #panel .pk{display:block}
 .pkh{display:flex;gap:12px;align-items:flex-start}.pki{min-width:0}.pki .nm{font-size:18px;font-weight:800}
-.pki .hs{color:var(--tx2);font-size:12px;line-height:1.4;margin-top:3px;max-height:5.6em;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding-right:6px;scrollbar-width:thin;scrollbar-color:#6f86c9 transparent;outline:none}
-.pki .hs::-webkit-scrollbar{width:5px}.pki .hs::-webkit-scrollbar-thumb{background:#6f86c9;border-radius:3px}.pki .hs::-webkit-scrollbar-track{background:transparent}
+.pki .hs{color:var(--tx2);font-size:12px;line-height:1.4;margin-top:3px;max-height:5.6em;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding-right:6px;scrollbar-width:thin;scrollbar-color:#b8a077 transparent;outline:none}
+.pki .hs::-webkit-scrollbar{width:5px}.pki .hs::-webkit-scrollbar-thumb{background:#b8a077;border-radius:3px}.pki .hs::-webkit-scrollbar-track{background:transparent}
 /* Kaydırılabilir açıklama: altta/üstte devam eden metin solma ile belli olur; sona gelince solma kalkar (metnin sonu açıkça anlaşılır) */
 .pki .hs.mb{-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 1.6em),transparent);mask-image:linear-gradient(180deg,#000 calc(100% - 1.6em),transparent)}
 .pki .hs.mt{-webkit-mask-image:linear-gradient(180deg,transparent,#000 1.6em);mask-image:linear-gradient(180deg,transparent,#000 1.6em)}
 .pki .hs.mt.mb{-webkit-mask-image:linear-gradient(180deg,transparent,#000 1.6em,#000 calc(100% - 1.6em),transparent);mask-image:linear-gradient(180deg,transparent,#000 1.6em,#000 calc(100% - 1.6em),transparent)}
-.pki .hs.sc:focus-visible{box-shadow:0 0 0 1px #6f86c9;border-radius:4px}
+.pki .hs.sc:focus-visible{box-shadow:0 0 0 1px #b8a077;border-radius:4px}
 .pkb{display:flex;align-items:center;gap:8px;margin:6px 0}.pkl{flex:1;min-width:0}
-.pr{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #243a7855;font-size:13px}.pr b{color:var(--acc2)}
+.pr{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #7a654255;font-size:13px}.pr b{color:var(--acc2)}
 svg.rad{width:150px;height:150px;flex:none;overflow:visible}
 .rg{fill:none;stroke:#3a5bb0;stroke-opacity:.5;stroke-width:.7}.ra{stroke:#3a5bb0;stroke-opacity:.5;stroke-width:.7}
 .rv{fill:#f5b53a55;stroke:#ffcf6b;stroke-width:1.8;stroke-linejoin:round}
@@ -23,7 +23,7 @@ svg.rad{width:150px;height:150px;flex:none;overflow:visible}
 /* Savaş ekranı: üstte harita, altta iki devlet */
 #bs.b7{max-height:60%;padding:8px 10px calc(10px + var(--safe-b))}
 .b7h{display:grid;grid-template-columns:1fr 84px 1fr;gap:4px;align-items:center}
-.s7{text-align:center;padding:6px 4px;border-radius:12px;background:#0a1330;border:1px solid var(--line);min-width:0;transition:.4s}
+.s7{text-align:center;padding:6px 4px;border-radius:12px;background:#231f17;border:1px solid var(--line);min-width:0;transition:.4s}
 .s7 .rl{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--tx2)}.s7.a .rl{color:#7fb2ff}.s7.d .rl{color:#ff9a8a}
 .s7 .fi.lg{width:74px;height:50px;margin:3px auto;display:block}
 .s7 .nm{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -45,7 +45,7 @@ svg.rad{width:150px;height:150px;flex:none;overflow:visible}
 @keyframes rl7{0%{transform:translateY(-10px) rotate(0)}50%{transform:translateY(0) rotate(180deg) scale(1.06)}100%{transform:translateY(-10px) rotate(360deg)}}
 .sr7{display:grid;grid-template-columns:44px 1fr 44px;gap:6px;align-items:center;padding:3px 4px;border-radius:8px;opacity:.35;transition:.3s}.sr7.on{opacity:1}
 .sr7 .v{text-align:center;font-size:13px}.sr7 .v.up{color:var(--ok)}.sr7 .lbl{font-size:11px;color:var(--tx2)}
-.sr7 .bar{display:flex;height:7px;border-radius:4px;overflow:hidden;background:#0a1330}.sr7 .bar i{display:block;transition:width .4s}.sr7 .bar i.a{background:#4c8dff}.sr7 .bar i.d{background:#ff6a55}
+.sr7 .bar{display:flex;height:7px;border-radius:4px;overflow:hidden;background:#231f17}.sr7 .bar i{display:block;transition:width .4s}.sr7 .bar i.a{background:#4c8dff}.sr7 .bar i.d{background:#ff6a55}
 .sr7.a{background:#2f7bff1a}.sr7.d{background:#ff5a471a}.sr7.e .lbl::after{content:' =';color:var(--tx3)}
 .ul{font-size:11px;color:var(--tx2);text-align:center;margin:4px 0;min-height:14px}
 .rm .sx.go .sl,.rm .sx.go .sr{animation-duration:.01ms}.rm #bs.shake .b7h{animation:none}
@@ -58,7 +58,7 @@ svg.rad{width:150px;height:150px;flex:none;overflow:visible}
 .cd{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;text-align:left;padding:10px;border-radius:12px;white-space:normal;position:relative}
 .cd{align-content:start}.cd .ci{font-size:20px;grid-row:1/span 5;align-self:start}.cd .cn{font-weight:800}.cd .cv{display:flex;justify-content:space-between;gap:6px;font-size:12px;grid-column:2}.cd .cv i{font-style:normal;color:var(--tx2)}.cd .cv.af b{color:var(--acc2)}
 .cd .dl{grid-column:2;font-size:11px;font-weight:700;color:var(--tx3)}.cd .dl.up{color:var(--ok)}.cd .dl.dn{color:var(--bad)}
-.cd.on{border-color:var(--acc);background:#2a2f5a;box-shadow:0 0 0 2px var(--acc),0 0 16px #f5b53a55}.cd.on::after{content:'✔';position:absolute;right:8px;top:6px;color:var(--acc2);font-weight:900}
+.cd.on{border-color:var(--acc);background:#4c4538;box-shadow:0 0 0 2px var(--acc),0 0 16px #f5b53a55}.cd.on::after{content:'✔';position:absolute;right:8px;top:6px;color:var(--acc2);font-weight:900}
 .cd:nth-child(5){grid-column:1/3}
 
 /* V9: v6 merkez bayrak rozeti (sabit boyutlu küçük dikdörtgen) kapatıldı; bayrak artık ülke geometrisine oturuyor (bkz. v7.js) */

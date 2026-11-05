@@ -111,7 +111,7 @@
   function mkShield() {   // V111: düğme yok; yalnızca "geçmek için dokun" ipucu. Ekrana dokunmak (sürüklemek değil) animasyonu geçer.
     if (shield) return shield;
     var st = document.getElementById('v60css');
-    if (!st) { st = document.createElement('style'); st.id = 'v60css'; st.textContent = '#v60s{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9000;pointer-events:none;font:600 12px system-ui,sans-serif;color:#fff;background:rgba(10,18,40,.55);border-radius:999px;padding:6px 14px;opacity:1;transition:opacity 1.2s ease 3.5s}#v60s.fd{opacity:0}'; document.head.appendChild(st); }
+    if (!st) { st = document.createElement('style'); st.id = 'v60css'; st.textContent = '#v60s{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9000;pointer-events:none;font:600 12px system-ui,sans-serif;color:#fff;background:rgba(30,26,20,.55);border-radius:999px;padding:6px 14px;opacity:1;transition:opacity 1.2s ease 3.5s}#v60s.fd{opacity:0}'; document.head.appendChild(st); }
     shield = document.createElement('div'); shield.id = 'v60s'; shield.textContent = X('Geçmek için ekrana dokun', 'Tap the screen to skip');
     setTimeout(function () { if (shield) shield.className = 'fd'; }, 60);
     return shield;

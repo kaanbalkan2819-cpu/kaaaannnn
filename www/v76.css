@@ -1,5 +1,5 @@
 /* V76 — olay parşömeni: yatay açılır (ortadan iki yana), yatay ekran için sıkı yerleşim */
-#ev76{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:#02061099;animation:ev76fade .25s}
+#ev76{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:#0b0a0799;animation:ev76fade .25s}
 #ev76.out{animation:ev76fadeout .4s forwards}
 .sc76{display:flex;align-items:stretch;justify-content:center;max-width:98vw;max-height:94vh;filter:drop-shadow(0 14px 30px #000c)}
 .rod76{flex:none;width:16px;border-radius:8px;margin:-7px 0;background:linear-gradient(90deg,#3b2410,#a8763a 35%,#e0b070 50%,#8a5a28 70%,#2e1b0c);box-shadow:0 0 0 1px #20120a}

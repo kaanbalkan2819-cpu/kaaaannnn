@@ -1,8 +1,8 @@
 /* V139 — final ekranı, geçmiş, hamle göstergesi, kayıt göstergesi */
 #v38over{display:none!important}   /* eski sade final yerine #v139over kullanılır */
 #v139over{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;color:#fff;overflow:auto;padding:16px;box-sizing:border-box;
-  background:radial-gradient(circle at 50% 28%,#3a2f6e 0%,#16193a 62%,#0b0e22 100%)}
-#v139over.lose{background:radial-gradient(circle at 50% 28%,#2c3550 0%,#141a2e 62%,#0b0e1c 100%)}
+  background:radial-gradient(circle at 50% 28%,#5b5242 0%,#2e2a22 62%,#1a1813 100%)}
+#v139over.lose{background:radial-gradient(circle at 50% 28%,#464036 0%,#26221c 62%,#171410 100%)}
 #v139over .in{position:relative;z-index:2;width:min(380px,100%);text-align:center}
 #v139over .ic{font-size:44px;line-height:1}
 #v139over .fg{margin:6px 0}

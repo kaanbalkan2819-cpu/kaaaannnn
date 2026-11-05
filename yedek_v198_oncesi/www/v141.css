@@ -1,0 +1,57 @@
+/* V141 — oyun içi menü kartı + ana menü hizası + "İmparatorluk Düştü" countryball bayrağı. Geri almak için index.html'den bu dosyanın bağlantısını silin. */
+
+/* ===== Oyun içi duraklatma / ayarlar / onay: ana menü sahnesi YOK, oyun arkada görünür ===== */
+body.wc141-ig #mod.wbm{background:rgba(3,8,22,.55)!important;padding:12px!important;align-items:center!important;justify-content:center!important;overflow:auto;animation:wc141in .18s ease-out}
+body.wc141-ig #mod.wbm .box{width:auto!important;height:auto!important;max-width:min(94vw,420px)!important;max-height:none!important;overflow:visible!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important;border-radius:0!important;position:relative}
+body.wc141-ig .wb-scene,body.wc141-ig .wb-title,body.wc141-ig .wb-foot{display:none!important}
+body.wc141-ig .wb-wrap{height:auto!important;padding:0!important;gap:0!important;overflow:visible!important;justify-content:center!important}
+body.wc141-ig .wb-wrap>:first-child{margin-top:0!important}
+body.wc141-ig .wb-wrap>:last-child{margin-bottom:0!important}
+body.wc141-ig .wb-panel{box-shadow:0 8px 20px #000b,0 0 0 1px #d9b25e55!important}
+body.wc141-ig .wb-panel.wb-set,body.wc141-ig .wb-panel.wb-ask{max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch}
+@keyframes wc141in{from{opacity:0}to{opacity:1}}
+
+.wc141p{width:min(92vw,360px)!important;padding:16px 16px 16px!important;text-align:center;border-radius:20px!important;
+  background:linear-gradient(165deg,rgba(24,40,88,.96),rgba(9,16,40,.96))!important;color:#eef2ff!important;border:1px solid #d9b25e66!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.wc141p::before{display:none!important}
+.wc141p .c141h{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 10px}
+.wc141p .c141h .p{font-size:18px;opacity:.9}
+.wc141p h3{margin:0!important;font-size:13px!important;letter-spacing:.32em!important;color:#f5c75a!important;font-weight:700!important}
+.wc141p .c141s{display:flex;gap:6px;margin:0 0 12px}
+.wc141p .c141s div{flex:1 1 0;min-width:0;background:#ffffff12;border:1px solid #ffffff1a;border-radius:10px;padding:6px 2px}
+.wc141p .c141s b{display:block;font-size:16px;color:#fff}
+.wc141p .c141s b i{font-style:normal;opacity:.55;font-size:11px}
+.wc141p .c141s small{display:block;font-size:8.5px;letter-spacing:.08em;opacity:.65;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wc141p .c141g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wc141p .c141b{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;padding:12px 8px;border-radius:12px;border:1px solid #ffffff24;background:#ffffff14;color:#eef2ff;font:600 14px system-ui,-apple-system,Roboto,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wc141p .c141b:active{background:#ffffff2a}
+.wc141p .c141b .ic{font-size:16px;line-height:1}
+.wc141p .c141b .lb{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wc141p .c141b.pri{grid-column:1/-1;padding:14px;font-size:16px;background:linear-gradient(180deg,#f4c95a,#d49a1f);border-color:#ffe29a;color:#2b1c00}
+.wc141p .c141b.warn{color:#ffb9ad}
+@media (max-height:420px){.wc141p{padding:10px 12px!important}.wc141p .c141s{margin-bottom:8px}.wc141p .c141b{padding:9px 6px}.wc141p .c141b.pri{padding:10px}}
+
+/* ===== Ana menü: tüm düğmelerin yazısı ortada (Seferi Sürdür yana kayıyordu); süs işaretleri iki yandan simetrik/kapalı ===== */
+#wcm .menu .mb{justify-content:center!important;text-align:center!important}
+#wcm .menu .mb small{margin-left:0!important}
+#wcm.flat .menu .mb:before,#wcm.flat .menu .mb:after{display:none!important}
+
+/* ===== "İmparatorluk Düştü": büyük, yuvarlak, üzgün countryball bayrak ===== */
+#v139over.lose .fg{margin:2px 0 6px}
+#v139over .cb139{position:relative;display:block;width:min(240px,50vh,66vw);height:min(240px,50vh,66vw);margin:0 auto 6px;border-radius:50%;animation:cb141 3.4s ease-in-out infinite;transform-origin:50% 90%}
+#v139over .cb139 img.fi,#v139over .cb139 img.cbf{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;border-radius:50%!important;object-fit:cover;display:block;box-shadow:none!important;filter:none!important;background:#1b2a5a}
+#v139over .cb139 .cbs{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.28) 0,rgba(255,255,255,0) 42%),radial-gradient(circle at 62% 70%,rgba(0,0,0,0) 48%,rgba(0,0,0,.42) 100%);box-shadow:inset 0 0 0 2px rgba(0,0,0,.35),0 14px 30px rgba(0,0,0,.55)}
+#v139over .cb139 .cbe{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:2}
+#v139over .cb139 .tr{animation:tr141 2.2s ease-in infinite;transform-box:fill-box;transform-origin:50% 0}
+#v139over .cb139 .tr.b{animation-delay:1.1s}
+@keyframes tr141{0%{opacity:0;transform:translateY(-4px) scale(.6)}20%{opacity:1;transform:translateY(0) scale(1)}85%{opacity:.9;transform:translateY(16px) scale(1)}100%{opacity:0;transform:translateY(22px) scale(.8)}}
+@keyframes cb141{0%,100%{transform:rotate(-2.2deg) translateY(0)}50%{transform:rotate(2.2deg) translateY(3px)}}
+@media (prefers-reduced-motion:reduce),(max-height:300px){#v139over .cb139,#v139over .cb139 .tr{animation:none}}
+body.rm #v139over .cb139,body.rm #v139over .cb139 .tr{animation:none}
+
+/* ===== V152 ===== */
+/* Seferi Sürdür (kayıt yokken disabled): animation:none olunca taban transform:translateX(-30px) kalıyordu -> sola kayıyordu */
+#wcm .mb:disabled,#wcm .mb[disabled],#wcm.flat .mb[disabled]{transform:none!important;animation:none!important;opacity:.35!important}
+/* Alıntı kutusu SABİT yükseklik: metin değişince amblem/başlık/düğmeler kaymaz (taşan metin v35.js fitQuote ile küçülür) */
+#wcm.flat .quote{flex:none!important;box-sizing:border-box!important;height:70px!important;min-height:70px!important;max-height:70px!important;overflow:hidden!important}
+@media (orientation:landscape) and (max-height:520px){#wcm.flat .quote{height:2.8em!important;min-height:2.8em!important;max-height:2.8em!important}}

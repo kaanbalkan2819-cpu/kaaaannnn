@@ -7,6 +7,7 @@
   var DEFAULT_3D = true;                       // true yaparsan oyun küre görünümüyle açılır
   var DEG = Math.PI / 180, ON = false, READY = false, LOADING = false, BAD = false;
   var C = [], cMap = {}, THREE, TEX;
+  var WC199_TILT = -14;   /* V199: görünüm eğimi (derece); 0 = eski düz görünüm */
   var stage, renderer, scene, camera, globe, earth, cloudM, atmM, rafId = 0, last = 0, dirtyQ = 0, needPaint = true, lastSig = '';
   var LOWQ = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches), OW = LOWQ ? 2048 : 3072, OH = LOWQ ? 1024 : 1536, LS = OW / 2048, ZMIN3 = 1.9, LW = 1536, LH = 768, NW = 512, NH = 256, SCALE = 0.07;
   var ovC, ov, liftC, lift, reliefC, nsmall, nsx, nC, nx, nImg, topoH, ovTex, liftTex, normTex;
@@ -435,13 +436,17 @@
     ovC = mk(OW, OH); ov = ovC.getContext('2d'); liftC = mk(LW, LH); lift = liftC.getContext('2d'); reliefC = mk(LW, LH); var YLD = function () { return new Promise(function (r) { setTimeout(r, 24); }); };   /* V149: ağır adımlar arasında ana iş parçacığı serbest bırakılır */
     nsmall = mk(NW, NH); nsx = nsmall.getContext('2d', { willReadFrequently: true }); nC = mk(NW, NH); nx = nC.getContext('2d'); nImg = nx.createImageData(NW, NH); topoH = new Float32Array(NW * NH);
     var coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches || document.body.classList.contains('fxlow');
-    renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: false });
+    renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: true });   /* V199: tuval saydam; taş/parşömen zemin #g3d CSS'inde */
     /* V127: hareket sırasında düşük (akıcı), 260 ms durunca yüksek çözünürlük (net). Telefonda sabit 1.25 yüzünden küre bulanıktı. */
     PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5);   /* V162: masaüstünde hareket/savaş animasyonu sırasında en çok 1.5x (eskiden 2x) */ PRHI = coarse ? Math.max(PRLO, Math.min(window.devicePixelRatio || 1, PR_IDLE_PHONE)) : Math.min(window.devicePixelRatio || 1, 2);   /* V183: telefonda da durunca netleş (PR_IDLE_PHONE) */   /* V147: telefonda çözünürlük değişimi yok (setPR 238-266 ms donma + 1.5x karede ~150 ms) */ curPR = PRLO; idleSince = performance.now();
-    renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.setClearColor(0x000000, 0);   /* V199 */
     stage.appendChild(renderer.domElement); try { renderer.domElement.style.opacity = '0'; } catch (e) { } /* V150: build() içindeki ön çizim (kamera 3.4, tam boy küre) perde kalkınca bir an görünüyordu; tuval doIntro/show açana kadar gizli */ CP('renderer');
     scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200); camera.position.set(0, 0, camZ);
-    var sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(3, 2, 4); scene.add(sun); scene.add(new THREE.AmbientLight(0x6b7fa8, 0.9));
+    /* V199: duraklatma menüsü (Siper Defteri) teması: sıcak krem güneş sol üstten, sıcak taş dolgu, arkadan ince altın kenar ışığı.
+       ESKİ DEĞERLER: güneş 0xffffff/2.4 (3,2,4), ortam 0x6b7fa8/0.9, kenar ışığı yok, kamera yuvarlanması yok. */
+    var sun = new THREE.DirectionalLight(0xffeccb, 2.3); sun.position.set(-3, 2.4, 4); scene.add(sun); scene.add(new THREE.AmbientLight(0x857a68, 0.95));
+    var rim199 = new THREE.DirectionalLight(0xcdb06a, 0.7); rim199.position.set(-2.5, 1.2, -3.5); scene.add(rim199);
+    camera.rotation.z = WC199_TILT * Math.PI / 180;   /* V199: küre -14° eğik görünür (menü kartındaki küre motifi); 0 yaparsanız düz */
     globe = new THREE.Group(); scene.add(globe);
     ovTex = new THREE.CanvasTexture(ovC); ovTex.colorSpace = THREE.SRGBColorSpace; ovTex.anisotropy = 8; if (LOWQ) { ovTex.generateMipmaps = false; ovTex.minFilter = THREE.LinearFilter; ovTex.anisotropy = 1; }   /* V142: telefonda her seçimde 2048x1024 kaplamanın mipmap'i yeniden üretilmesin (seçim anı takılması) */ liftTex = new THREE.CanvasTexture(liftC); normTex = new THREE.CanvasTexture(nC);
     var marble, water, sky, clouds, geo; return Promise.all([loadImg(TEX.marble), loadImg(TEX.topo), loadImg(TEX.water), loadImg(TEX.sky), loadImg(TEX.clouds)]).then(function (im) {
@@ -456,8 +461,18 @@
       earth = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ map: marble, specularMap: water, specular: new THREE.Color(0x445566), shininess: 28, normalMap: normTex, normalScale: new THREE.Vector2(1, 1) })); globe.add(earth);
       var cover = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: ovTex, transparent: true, depthWrite: false, emissive: new THREE.Color(0xffffff), emissiveMap: ovTex, emissiveIntensity: 0.35, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); cover.scale.setScalar(1.0015); globe.add(cover);
       cloudM = new THREE.Mesh(new THREE.SphereGeometry(1.012, 96, 48), new THREE.MeshLambertMaterial({ map: clouds, transparent: true, opacity: 0.55, depthWrite: false })); globe.add(cloudM);
-      scene.add(atmM = new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),4.2);gl_FragColor=vec4(.35,.6,.95,1.)*clamp(i,0.,1.)*0.75;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));
-      scene.add(new THREE.Mesh(new THREE.SphereGeometry(80, 32, 16), new THREE.MeshBasicMaterial({ map: sky, side: THREE.BackSide })));
+      scene.add(atmM = new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),4.2);gl_FragColor=vec4(.80,.69,.42,1.)*clamp(i,0.,1.)*0.75;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));
+      /* V199: yıldızlı gökyüzü küresi kaldırıldı (eski: SphereGeometry(80) + sky dokusu). Yerine seyrek altın toz + kürede ince altın enlem/boylam ızgarası. */
+      try {
+        var dp = [], di, du, dt2, dr; for (di = 0; di < 380; di++) { du = Math.random() * 2 - 1; dt2 = Math.random() * 6.2832; dr = Math.sqrt(1 - du * du); dp.push(40 * dr * Math.cos(dt2), 40 * du, 40 * dr * Math.sin(dt2)); }
+        var dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
+        var dust = new THREE.Points(dg, new THREE.PointsMaterial({ color: 0xcdb06a, size: 0.1, transparent: true, opacity: 0.3, depthWrite: false })); dust.frustumCulled = false; scene.add(dust);
+        var gp = [], ga, gb, gk, R = 1.004; for (ga = -60; ga <= 60; ga += 30) { for (gk = 0; gk < 96; gk++) { var l1 = gk / 96 * 6.2832, l2 = (gk + 1) / 96 * 6.2832, la = ga * Math.PI / 180, cr = Math.cos(la) * R, sy = Math.sin(la) * R; gp.push(cr * Math.cos(l1), sy, cr * Math.sin(l1), cr * Math.cos(l2), sy, cr * Math.sin(l2)); } }
+        for (gb = 0; gb < 180; gb += 30) { var lo = gb * Math.PI / 180, co = Math.cos(lo), so = Math.sin(lo); for (gk = 0; gk < 96; gk++) { var p1 = gk / 96 * 6.2832, p2 = (gk + 1) / 96 * 6.2832; gp.push(Math.cos(p1) * R * co, Math.sin(p1) * R, Math.cos(p1) * R * so, Math.cos(p2) * R * co, Math.sin(p2) * R, Math.cos(p2) * R * so); } }
+        var gg = new THREE.BufferGeometry(); gg.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3));
+        var grat = new THREE.LineSegments(gg, new THREE.LineBasicMaterial({ color: 0xcdb06a, transparent: true, opacity: 0.2, depthWrite: false })); grat.frustumCulled = false; globe.add(grat);
+        if (earth && earth.material && earth.material.color) earth.material.color.setHex(0xffe6c2);   /* V199: deniz/kara dokusuna hafif sıcak ton */
+      } catch (e) { }
       CP('meshes');
     }).then(YLD).then(function () {   /* V149 */
       var cA = null; bindInput(); resize(); READY = true;
@@ -673,6 +688,8 @@
     var ctl = $$('ctl'), map = $$('map'); if (!ctl || !map || $$('v30b')) return;
     var b = document.createElement('button'); b.id = 'v30b'; b.type = 'button'; b.textContent = '3B'; b.title = X('3B küre', '3D globe'); b.setAttribute('onclick', 'void 0'); b.style.display = 'none'; ctl.appendChild(b);
     stage = document.createElement('div'); stage.id = 'g3d'; stage.style.display = 'none'; map.insertBefore(stage, map.firstChild);
+    /* V199: tuvalin ARKASINDA ince altın harita halkaları + hafif kağıt grenı (CSS: v199.css) */
+    try { stage.innerHTML = '<div id="wc199d"><svg viewBox="0 0 600 600" fill="none" stroke="#e6cf8e" stroke-opacity=".3"><circle cx="300" cy="300" r="130"/><circle cx="300" cy="300" r="180" stroke-opacity=".22"/><circle cx="300" cy="300" r="240"/><circle cx="300" cy="300" r="290" stroke-opacity=".18"/><circle cx="300" cy="300" r="262" stroke-width="8" stroke-dasharray="1 11.2" stroke-opacity=".4"/><path d="M300 4V596M4 300H596" stroke-opacity=".16"/><path d="M91 91L509 509M509 91L91 509" stroke-opacity=".1"/></svg></div><div id="wc199g"></div>'; } catch (e) { }
     if (window.ResizeObserver) new ResizeObserver(function () { if (ON) resize(); }).observe(stage); else window.addEventListener('resize', function () { if (ON) resize(); });
     /* V90: ana menü (v35, body.wcm-on) açıkken oyunun 3B küresi kurulmaz. Kurulum ~sn'lik ana-thread yükü; menü küresini kasıyordu.
        Menü kapanınca (oyun başlar / devam) kurulur. */
