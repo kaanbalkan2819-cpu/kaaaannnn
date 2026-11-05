@@ -174,7 +174,7 @@
   }
   hooks(); window.addEventListener('load', hooks); setTimeout(hooks, 1500);
 
-  window.AU = { init: init, vol: vol, play: play };
+  window.AU = { init: init, vol: vol, play: play, ctx: function () { return c; } };   /* V212: ctx — kılıç çarpışması sesi ayrı AudioContext kurmasın (ilk savaşta ~230 ms donma) */
   window.WCSfx = { animStart: animStart, animEnd: animEnd, play: play };
   try { AU = window.AU; } catch (e) { }
 })();

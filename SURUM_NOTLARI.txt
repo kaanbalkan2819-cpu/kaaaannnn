@@ -910,3 +910,13 @@ Toprak el değiştirdiğinde (yapay zekâ savaşında saldıranın yenilip savun
 Yöntem 2B haritadaki V14 ile aynı: topojson.mesh ile yalnızca sahipleri FARKLI komşular arasındaki sınırlar + kıyılar çizilir. Aynı sahibin ülkeleri arasında dikiş çizgisi kalmasın diye dolgular tam opak + aynı renkte ince konturla çizilip katman topluca %50'ye indirilir (görünüm eskisiyle aynı).
 Telefondaki kısmi güncelleme yolu (baseQuick) da aynı çizimi kullanır. Oyun kuralları/kayıtlar değişmedi; yalnızca çizim.
 GERİ ALMAK İÇİN: v30.js'te "var MESH_ON = true" -> false.
+
+=================== V212 ===================
+V212 — SAVAŞ ANİMASYONU KALİTESİ + SAVAŞ PANELİ KASMASI (masaüstü Chrome'da ölçüldü: ekran kartıyla, normal ve 4x yavaşlatılmış işlemciyle; gerçek telefonda denenmedi)
+Ölçüm (masaüstü, 3 deneme): savaş açılışında ilk 2,5 sn kare kaybı 1380-1810 ms -> 430-810 ms; küre animasyonunda 630-830 ms -> 17-420 ms; uzun görevler toplamı 307-515 ms -> 68-87 ms.
+1) Kılıç sesi (wc_sword_clash.js) ilk savaşta AYRI bir AudioContext kuruyordu: ~230 ms donma (SALDIRI'ya basınca). Artık oyunun ses motorunun bağlamı kullanılır (wc_audio.js: AU.ctx()).
+2) İstatistik simgeleri (assets/icons/*.svg, SVG filtreli; panelde ~20 tane) ve bayraklar (SVG; gri olan SVG filtreli) panelin her yeniden taranmasında baştan çiziliyordu. Boşta bir kez bitmap'e (PNG) çevrilir (v7.js). GERİ ALMAK İÇİN: v7.js'te FR7_ON = false (bayraklar); icons() çağrısını silin (simgeler).
+3) Kılıç gövdesi her karede ~12 gradyan + ~40 çizgiyle sıfırdan çiziliyordu (savruluşta kare başına 24 gövde). Değişmeyen gövde bir kez 1,6x üst örneklemeyle önbelleğe çizilir; kılıç tuvali ayrı katman. 4x yavaş işlemcide kare başına 16-22 ms -> 2-3 ms. GERİ ALMAK İÇİN: SWORD_CACHE = false.
+4) Küre savaş animasyonu: tank/asker/gemi/uçak/patlama shader'ları ilk sahnede derleniyordu (~160-400 ms donma). Boşta önceden derlenir (v60.js precompile212).
+5) Kamera kadrajı: savaşta kamera hedefin ~17° güneyine bakıyordu; savaşan ülkeler ekranın en üstüne, üst çubuğun altına kaçıyordu. Savaş animasyonu artık ortalanır; yatay ekranda normal seçim de daha ortada (v30.js latOff). Sahne ekranın daha büyük kısmını kaplar (v60.js camFor 0.55 -> 0.72).
+6) v30.js: kamera her karede panel genişliğini okuyordu (zorunlu yerleşim hesabı) -> 250 ms'de bir. countryAt (birlik yerleşimi) 10° ızgarayla ~2x hızlı, sonuç birebir aynı (16.376 noktada doğrulandı).

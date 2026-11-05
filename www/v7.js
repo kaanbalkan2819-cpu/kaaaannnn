@@ -170,7 +170,78 @@
   /* V192: bayrak data-URI'leri (büyük base64 dizgisi) her innerHTML'de yeniden ayrıştırılıyordu: bir kez Blob URL'ye çevrilip önbelleğe alınır.
      Kaybeden bayrağın CSS grayscale filtresi yerine gri sürüm bir kez (boştayken) üretilir; olmazsa eski filtreye geri düşer (.gfb). */
   var FB7 = {}, FG7 = {};
-  function flagBlob7(code, gray) {
+  /* V212: BAYRAKLAR BİTMAP. Bayraklar SVG (bir kısmı içinde gömülü WebP taşıyan SVG); kaybedenin gri sürümü ise SVG filtresiydi.
+     Chrome SVG görselini önbelleğe almıyor: savaş panelinin her yeniden taranmasında (zar, kılıç kareleri) bayraklar baştan çözülüp taranıyordu
+     -> savaş açılışında ~1,4 sn'ye varan kare kaybı (ölçüm: bayraklar gizlenince ~0,6 sn). Artık her bayrak boşta BİR KEZ 252 px PNG'ye çevrilir
+     (gri sürüm tuvalde soldurulur); hazır olunca bu bitmap kullanılır, hazır değilse eski SVG yolu. GERİ ALMAK İÇİN: FR7_ON = false. */
+  var FR7_ON = true, FR7 = {}, FRG7 = {}, FR7q = {}, FR7_W = 252;
+  function rasterFlag7(code, gray) {
+    var k = code + (gray ? '|g' : ''); if (!FR7_ON || FR7q[k] || !window.FLAGSVG || !FLAGSVG[code]) return; FR7q[k] = 1;
+    try {
+      var im = new Image();
+      im.onload = function () {
+        try {
+          var nw = im.naturalWidth || 513, nh = im.naturalHeight || 342, w = FR7_W, h = Math.max(1, Math.round(w * nh / nw)), cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+          /* willReadFrequently: işlemci belleğinde tuval -> toBlob/getImageData GPU'dan geri okuma yapmaz (yoksa savaş sırasında ~250 ms donma) */
+          var x = cv.getContext('2d', { willReadFrequently: true }); x.imageSmoothingQuality = 'high';
+          var fOk = false; if (gray && 'filter' in x) { x.filter = 'saturate(0.1)'; fOk = x.filter === 'saturate(0.1)'; }
+          x.drawImage(im, 0, 0, w, h); if (fOk) x.filter = 'none';
+          if (gray && !fOk) {   /* eski SVG filtresiyle aynı: feColorMatrix saturate .1 (ctx.filter yoksa) */
+            var d = x.getImageData(0, 0, w, h), p = d.data, s = 0.1;
+            for (var i = 0; i < p.length; i += 4) { var r = p[i], g = p[i + 1], b = p[i + 2];
+              p[i] = (0.213 + 0.787 * s) * r + (0.715 - 0.715 * s) * g + (0.072 - 0.072 * s) * b;
+              p[i + 1] = (0.213 - 0.213 * s) * r + (0.715 + 0.285 * s) * g + (0.072 - 0.072 * s) * b;
+              p[i + 2] = (0.213 - 0.213 * s) * r + (0.715 - 0.715 * s) * g + (0.072 + 0.928 * s) * b; }
+            x.putImageData(d, 0, 0);
+          }
+          cv.toBlob(function (bl) {
+            if (!bl) return; var u = URL.createObjectURL(bl), old = gray ? FG7[code] : FB7[code]; (gray ? FRG7 : FR7)[code] = u;
+            if (old) { try { Array.prototype.forEach.call(document.querySelectorAll('img.fi'), function (e) { if (e.getAttribute('src') === old) e.setAttribute('src', u); }); } catch (y) { } }   /* ekranda eski SVG ile duruyorsa bitmap'e geçir */
+          }, 'image/png');
+        } catch (e) { }
+      };
+      im.src = flagBlob7(code, false, true) || FLAGSVG[code];   /* gri sürüm de renkli SVG'den soldurularak üretilir */
+    } catch (e) { }
+  }
+  try { if (typeof fimg === 'function' && !fimg.v212) { var _fimg212 = fimg; fimg = function (id, c) { var cd = window.FL && FL[id], r = cd && FR7[cd]; if (r) return '<img class="fi ' + (c || '') + '" src="' + r + '" alt="" draggable="false">'; return _fimg212.apply(this, arguments); }; fimg.v212 = 1; } } catch (e) { }   /* V212: diğer ekranlar da hazırsa bitmap bayrak kullanır */
+  window.wcFlagWarm = function (ids, gray) { try { (ids || []).forEach(function (id) { var cd = window.FL && FL[id]; if (cd) rasterFlag7(cd, gray); }); } catch (e) { } };
+  /* boşta tüm bayraklar sırayla bitmap'e çevrilir (ilk savaştan önce hazır olsunlar) */
+  (function () {
+    var idle = window.requestIdleCallback ? function (f) { requestIdleCallback(f, { timeout: 2000 }); } : function (f) { setTimeout(f, 120); };
+    function go() { var ks = window.FLAGSVG ? Object.keys(FLAGSVG) : null; if (!ks) return setTimeout(go, 1500); var i = 0; (function step() { if (i >= ks.length) return; rasterFlag7(ks[i++], false); idle(step); })(); }
+    setTimeout(go, 3000);
+    /* V212: İSTATİSTİK SİMGELERİ (assets/icons/*.svg) de bitmap'e çevrilir. Her biri SVG filtresi (gölge + bulanık parlama) içeriyor ve savaş
+       panelinde ~20 tane var: panelin her yeniden taranmasında filtreleriyle baştan çiziliyorlardı (ölçüm: savaş açılışındaki kare kaybının yarısından fazlası).
+       Dosya metin olarak okunur -> Blob -> 128 px PNG. WC_ICONS yolları PNG'ye çevrilir, ekrandaki eski <img>'ler de değiştirilir. */
+    function icons() {
+      var I = window.WC_ICONS; if (!I) return;
+      Object.keys(I).forEach(function (k) {
+        var src = I[k]; if (!src || !/\.svg($|\?)/i.test(src)) return;
+        function draw(u, rev) {
+          var im = new Image();
+          im.onload = function () {
+            try {
+              var cv = document.createElement('canvas'); cv.width = cv.height = 128; var x = cv.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0, 128, 128);
+              cv.toBlob(function (bl) {
+                if (rev) { try { URL.revokeObjectURL(u); } catch (e) { } }
+                if (!bl) return; var nu = URL.createObjectURL(bl); I[k] = nu;
+                try { Array.prototype.forEach.call(document.querySelectorAll('img'), function (e) { if (e.getAttribute('src') === src) e.setAttribute('src', nu); }); } catch (e) { }
+              }, 'image/png');
+            } catch (e) { }
+          };
+          im.src = u;
+        }
+        try {
+          var xr = new XMLHttpRequest(); xr.open('GET', src, true); xr.responseType = 'blob';
+          xr.onload = function () { try { if (xr.response && xr.response.size) draw(URL.createObjectURL(new Blob([xr.response], { type: 'image/svg+xml' })), true); } catch (e) { } };
+          xr.send();
+        } catch (e) { }
+      });
+    }
+    setTimeout(icons, 1200);
+  })();
+  function flagBlob7(code, gray, svgOnly) {
+    if (!svgOnly) { var rr = (gray ? FRG7 : FR7)[code]; if (rr) return rr; if (FR7_ON) (window.requestIdleCallback ? function (f) { requestIdleCallback(f, { timeout: 1500 }); } : function (f) { setTimeout(f, 200); })(function () { rasterFlag7(code, gray); }); }   /* boşta üretilir; savaş karelerine binmez */
     var c = gray ? FG7 : FB7; if (c[code] !== undefined) return c[code];
     var u = window.FLAGSVG && FLAGSVG[code], out = null;
     try {

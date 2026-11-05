@@ -589,8 +589,8 @@
   function camFor(a, base) {
     try {
       var c = a.camera(), asp = c.aspect || 1, narrow = 2 * Math.tan(c.fov * Math.PI / 360) * Math.min(1, asp);
-      var d = (SCENE_LEN * base) / (0.55 * narrow);
-      return Math.max(1.95, Math.min(4.2, 1 + d));
+      var d = (SCENE_LEN * base) / (0.72 * narrow);   /* V212: 0.55 -> 0.72: sahne ekranın daha büyük kısmını kaplar (birlikler/patlamalar daha yakından); savaş artık ortalandığı için kenara taşmaz */
+      return Math.max(1.65, Math.min(4.2, 1 + d));   /* V212: en yakın 1.95 -> 1.65 (yüzeye uzaklık 0.95 -> 0.65): kara sahnelerinde birlikler ~1,5x büyük görünür */
     } catch (e) { return 2.4; }
   }
   function begin(args) {
@@ -684,8 +684,35 @@
     try {
       if (bad || fx) return;
       var a = A(); if (!a || !a.ready()) { setTimeout(warm, 4000); return; }
-      loadFx().then(function () { try { if (!fx && A() && A().ready()) ensureFx(); } catch (e) { } }, function () { });
+      loadFx().then(function () { try { if (!fx && A() && A().ready()) ensureFx(); if (fx) setTimeout(function () { precompile212(fx); }, 600); } catch (e) { } }, function () { });
     } catch (e) { }
+  }
+  /* V212: SHADER ÖN DERLEMESİ. Savaş animasyonunun ilk karesinde tank/asker/gemi/patlama malzemelerinin shader'ları derleniyordu
+     (ölçüm: ilk sahnede gl.render ~270-400 ms donma). Boşta her modelden ve her efektten birer örnek görünmeden sahneye konup derlenir;
+     örnekler sahneden çıkarılır ama malzemeleri SİLİNMEZ (silinirse derlenen program da atılır). Oyun/animasyon akışı değişmez. */
+  var pre212 = false;
+  function precompile212(f) {
+    if (pre212 || !f || play) return; var a = A(); if (!a || !a.ready()) return; pre212 = true;
+    var keep = window.__v212keep = [], wasVis = f.root.visible;
+    try {
+      var T = a.THREE(), r = a.renderer(), cam = a.camera(), scn = a.globe(); while (scn.parent) scn = scn.parent;
+      var p = new T.Vector3(0, 0, 0), M = window.WCBattleFX && window.WCBattleFX.models;
+      f.root.visible = true;
+      [function () { f.explosion(p, 1); }, function () { f.debris(p, 1); }, function () { f.dust(p, 1, 4); }, function () { f.deploy(p, 1, 0x3b82f6, 2); },
+       function () { f.muzzle(p, new T.Vector3(1, 0, 0), 1, true); }, function () { f.splash(p, 1); }, function () { f.waterBlast(p, 1); }, function () { f.blob(p, 1); }]
+        .forEach(function (fn) { try { fn(); } catch (e) { } });
+      if (M) Object.keys(M).forEach(function (k) { try { var o = M[k](0x3b82f6); if (o && o.isObject3D) { f.root.add(o); keep.push(o); } } catch (e) { } });
+      var mine = Array.from(f.objs || []);   /* yalnızca ön derlemenin eklediği nesneler (derleme sürerken savaş başlarsa onunkilere dokunulmaz) */
+      var done = function () {
+        try {
+          mine.forEach(function (o) { f.root.remove(o); if (f.objs) f.objs.delete(o); keep.push(o); });   /* dispose edilmeden çıkarılır */
+          keep.forEach(function (o) { if (o.parent) o.parent.remove(o); });
+          if (!play) { f.clear(); f.root.visible = wasVis; }
+        } catch (e) { }
+      };
+      var pr = r.compileAsync ? r.compileAsync(scn, cam) : (r.compile(scn, cam), null);
+      if (pr && pr.then) pr.then(done, done); else done();
+    } catch (e) { try { f.clear(); f.root.visible = wasVis; } catch (x) { } }
   }
   setTimeout(function w() { (window.requestIdleCallback ? requestIdleCallback(warm, { timeout: 3000 }) : warm()); }, 2500);   // V100: ön hazırlık daha erken
 

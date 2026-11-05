@@ -36,10 +36,25 @@
     });
   }
   function inRing(r, x, y) { var ins = false; for (var a = 0, b = r.length - 1; a < r.length; b = a++) { var xi = r[a][0], yi = r[a][1], xj = r[b][0], yj = r[b][1]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) ins = !ins; } return ins; }
+  /* V212: countryAt hızlandırma. Savaş sahnesi kurulurken (birlik/gemi yerleşimi) yüzlerce kez çağrılıyor ve her seferinde 197 ülkeyi tarıyordu.
+     10°x10° ızgara: nokta yalnızca kendi hücresindeki aday ülkelerle (eski sırayla) denenir; çok parçalı ülkelerde parçanın kutusu dışındaysa
+     halka testi atlanır. Sonuç eskisiyle birebir aynı. */
+  var GRID = null, GC = 10;
+  function gridBuild() {
+    GRID = {}; for (var k = 0; k < C.length; k++) { var b = C[k].all, x0 = Math.floor((b[0] + 180) / GC), x1 = Math.floor((b[2] + 180) / GC), y0 = Math.floor((b[1] + 90) / GC), y1 = Math.floor((b[3] + 90) / GC);
+      for (var x = x0; x <= x1; x++) for (var y = y0; y <= y1; y++) (GRID[x + ',' + y] = GRID[x + ',' + y] || []).push(k); }
+    GRID.__n = C.length;
+  }
+  function partBB(c) {
+    if (c._pb) return c._pb; c._pb = c.polys.map(function (rings) { var o = rings[0] || [], a = 1e9, b = 1e9, d = -1e9, e = -1e9; for (var i = 0; i < o.length; i++) { var q = o[i]; if (q[0] < a) a = q[0]; if (q[0] > d) d = q[0]; if (q[1] < b) b = q[1]; if (q[1] > e) e = q[1]; } return [a, b, d, e]; }); return c._pb;
+  }
   function countryAt(lon, lat) {
-    for (var k = 0; k < C.length; k++) {
-      var c = C[k], b = c.all; if (lon < b[0] || lon > b[2] || lat < b[1] || lat > b[3]) continue;
-      for (var p = 0; p < c.polys.length; p++) { var rings = c.polys[p], n = 0; for (var r = 0; r < rings.length; r++) if (inRing(rings[r], lon, lat)) n++; if (n % 2 === 1) return c; }
+    if (!GRID || GRID.__n !== C.length) gridBuild();
+    var cand = GRID[Math.floor((lon + 180) / GC) + ',' + Math.floor((lat + 90) / GC)]; if (!cand) return null;
+    for (var j = 0; j < cand.length; j++) {
+      var c = C[cand[j]], b = c.all; if (lon < b[0] || lon > b[2] || lat < b[1] || lat > b[3]) continue;
+      var pb = partBB(c);
+      for (var p = 0; p < c.polys.length; p++) { var q = pb[p]; if (lon < q[0] || lon > q[2] || lat < q[1] || lat > q[3]) continue; var rings = c.polys[p], n = 0; for (var r = 0; r < rings.length; r++) if (inRing(rings[r], lon, lat)) n++; if (n % 2 === 1) return c; }
     }
     return null;
   }
@@ -618,7 +633,7 @@
   function rotateBy(dx, dy) { var k = 0.0042 * camZ / 3.4; globe.quaternion.premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(dy * k, dx * k, 0, 'XYZ'))); if (ringM) { ringRot += dx * k * 0.06; ringM.rotation.z = ringRot; } }   /* V210: zemin halkaları sürüklerken küreyle hafifçe döner (derinlik hissi) */
   /* V210: odaklanma artık süreye bağlı, yumuşak hızlanıp yavaşlayan (easeInOut) bir geçiş: eskiden ilk karede ani sıçrayıp sonda sürünüyordu.
      Savurma, yakınlaştırma ve odaklanma kare hızından bağımsız (120 Hz ekranda iki kat hızlı/uzun dönmez). */
-  var fq0 = null, fqT = 0, fqD = 0.8;
+  var fq0 = null, fqT = 0, fqD = 0.8, _pnT = -1e9, _pnV = false;
   function ease210(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
   function stepCamera(dt) {
     if (!focusQ) fq0 = null;
@@ -631,14 +646,19 @@
     if (introStart) { var _k = Math.max(0, Math.min(1, (performance.now() - introStart) / introDur)); camZ = introFrom + (zoomT - introFrom) * (1 - Math.pow(1 - _k, 4)); if (_k >= 1) introStart = 0; } else { var _zd = zoomT - camZ; camZ = Math.abs(_zd) < 1e-4 ? zoomT : camZ + _zd * (1 - Math.exp(-dt * 7)); }   /* V56: yeni oyunda küre uzaktan yaklaşır; V210: yaklaşma eğrisi daha yumuşak iniş (quart) */
      camera.position.z = camZ * (window.innerWidth > window.innerHeight ? 0.7 : 1);   /* V57: yatayda küre daha da yakın (0.86 -> 0.70) */
     // savaş paneli açıkken görüntüyü panelin dışındaki alana kaydır (telefonda yukarı, geniş ekranda sola)
-    var _pn = window.innerWidth > window.innerHeight && document.getElementById('panel'); var _vt = (((typeof BSH !== 'undefined' && BSH && !window.v60Active) || (_pn && _pn.offsetWidth > 0)) ? 1 : 0); vo += (_vt - vo) * (1 - Math.exp(-dt * 6)); if (Math.abs(_vt - vo) < 0.002) vo = _vt;   /* V210: kare hızından bağımsız */
+    /* V212: panelin görünürlüğü (offsetWidth = zorunlu yerleşim hesabı) her karede değil, en çok 250 ms'de bir okunur; savaş paneli animasyonlarında kare başına yerleşim hesabı yapılmaz */
+    var _nw = performance.now(); if (_nw - _pnT > 250) { _pnT = _nw; var _pn = window.innerWidth > window.innerHeight && document.getElementById('panel'); _pnV = !!(_pn && _pn.offsetWidth > 0); }
+    var _vt = (((typeof BSH !== 'undefined' && BSH && !window.v60Active) || _pnV) ? 1 : 0); vo += (_vt - vo) * (1 - Math.exp(-dt * 6)); if (Math.abs(_vt - vo) < 0.002) vo = _vt;   /* V210: kare hızından bağımsız */
     var w = _stW || (_stW = stage.clientWidth), h = _stH || (_stH = stage.clientHeight);   /* V205 */
     if (vo < 0.01) { if (camera.view && camera.view.enabled) camera.clearViewOffset(); }
     else if (w && h) { var wide = window.innerWidth >= 900 || window.innerWidth > window.innerHeight; camera.setViewOffset(w, h, wide ? vo * (window.innerWidth > window.innerHeight && window.innerWidth < 900 ? -Math.min(205, w * 0.2) : 205) : 0, wide ? 0 : vo * h * .19, w, h); }
   }
-  function focusOn(c, instant) {
+  /* V212: hedefin ekrandaki dikey konumu. Eskiden her zaman 0.3 rad (~17°) güneye bakılıyordu: dikey telefonda alttaki panel için doğru,
+     ama yatay ekranda ve savaş animasyonunda savaşan ülkeler ekranın üstüne, üst çubuğun altına kaçıyordu. */
+  function latOff(battle) { var portrait = window.innerWidth <= window.innerHeight; if (battle) return portrait ? 0.1 : 0.02; return portrait ? 0.3 : 0.1; }
+  function focusOn(c, instant, lo) {
     if (!c || !READY) return; var b = c.bb, lon = (b[0] + b[2]) / 2 * DEG, lat = (b[1] + b[3]) / 2 * DEG;
-    var qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 2 - lon), qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), lat - 0.3), q = qx.multiply(qy);
+    var qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 2 - lon), qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), lat - (lo == null ? latOff((typeof BSH !== 'undefined') && BSH) : lo)), q = qx.multiply(qy);
     if (instant) globe.quaternion.copy(q); else focusQ = q;
     var span = Math.max(b[2] - b[0], (b[3] - b[1]) * 1.6); zoomT = Math.max(2.2, Math.min(3.6, 2.2 + span / 25)); if (instant) camZ = zoomT;
   }
@@ -714,7 +734,7 @@
     sph: function (lon, lat, r) { var q = sph([lon, lat], r || 1); return new THREE.Vector3(q[0], q[1], q[2]); },
     height: function (ids) { var h = 1; ids.forEach(function (id) { var c = cMap[id]; if (c && c.h < h) h = c.h; }); return 1 + H0 * h; },
     lift: function (ids) { ids.forEach(function (id) { var c = cMap[id]; if (c) c.t = 1; }); },
-    focusLL: function (lon, lat, z) { focusOn({ bb: [lon, lat, lon, lat] }, false); if (z) zoomT = z; },
+    focusLL: function (lon, lat, z) { focusOn({ bb: [lon, lat, lon, lat] }, false, latOff(true)); if (z) zoomT = z; },   /* V212: savaş animasyonu ortalanır */
     zoom: function (z) { zoomT = z; },
     /* V65: kara/deniz denetimi + animasyon sonrası yükseltmeyi geri al */
     at: function (lon, lat) { var c = countryAt(lon, lat); return c ? c.id : null; },

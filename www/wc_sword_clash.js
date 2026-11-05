@@ -186,7 +186,7 @@
     var wrap = document.createElement('div');
     wrap.className = 'wc-sword-clash';
     wrap.style.cssText =
-      'position:absolute;left:50%;top:50%;pointer-events:none;overflow:visible;' +
+      'position:absolute;left:50%;top:50%;pointer-events:none;overflow:visible;will-change:transform;' +   /* V212: kendi katmanı; her karede tüm savaş paneli yeniden taranmaz */
       'width:' + this.W + 'px;height:' + this.H + 'px;' +
       'margin-left:' + (-this.W / 2 + o.offsetX) + 'px;' +
       'margin-top:' + (-this.H * o.originY + o.offsetY) + 'px;' +
@@ -366,6 +366,11 @@
   var SHARED_AC = null;
   function sharedAC() {
     if (SHARED_AC && SHARED_AC.state !== 'closed') return SHARED_AC;
+    /* V212: oyunun ses motorunun (wc_audio.js) AudioContext'i kullanılır. Yeni AudioContext kurmak ana iş parçacığını ~230 ms kilitliyordu
+       (SALDIRI'ya basınca ilk savaşta donma) ve iki ses iş parçacığı açık kalıyordu. Oyun sesi henüz kurulmadıysa AU.init() kurar (tek bağlam). */
+    try {
+      var AU0 = root.AU; if (AU0 && AU0.ctx) { var gc = AU0.ctx(); if (!gc && AU0.init) { AU0.init(); gc = AU0.ctx(); } if (gc && gc.state !== 'closed') { SHARED_AC = gc; return gc; } }
+    } catch (e) { }
     var AC = root.AudioContext || root.webkitAudioContext;
     if (!AC) return null;
     try { SHARED_AC = new AC(); } catch (e) { SHARED_AC = null; }
@@ -530,27 +535,80 @@
     ctx.rotate(p.a * DEG);
     ctx.scale(k, k);
     ctx.globalAlpha = clamp(alpha, 0, 1);
+    var lite = alpha < 0.1;   /* V212: hayalet (hareket bulanıklığı) kopyalarında yalnızca hazır gövde görüntüsü çizilir */
     if (Math.abs(f) < 0.08) {
-      this._swordBody(ctx, side, glow, nowT, col);
+      this._swordBody(ctx, side, glow, nowT, col, lite);
     } else {                                           // 3 dilim: kabza sabit, orta hafif, uç en çok bükülür
       var f1 = f * 0.4 * DEG, f2 = (f - f * 0.4) * DEG;
       ctx.save(); ctx.beginPath(); ctx.rect(-70, -24, 140, 140); ctx.clip();
-      this._swordBody(ctx, side, glow, nowT, col); ctx.restore();
+      this._swordBody(ctx, side, glow, nowT, col, lite); ctx.restore();
       ctx.save(); ctx.translate(0, -24); ctx.rotate(f1); ctx.translate(0, 24);
       ctx.beginPath(); ctx.rect(-70, -66, 140, 42); ctx.clip();
-      this._swordBody(ctx, side, glow, nowT, col); ctx.restore();
+      this._swordBody(ctx, side, glow, nowT, col, lite); ctx.restore();
       ctx.save(); ctx.translate(0, -24); ctx.rotate(f1); ctx.translate(0, 24);
       ctx.translate(0, -66); ctx.rotate(f2); ctx.translate(0, 66);
       ctx.beginPath(); ctx.rect(-70, -130, 140, 64); ctx.clip();
-      this._swordBody(ctx, side, glow, nowT, col); ctx.restore();
+      this._swordBody(ctx, side, glow, nowT, col, lite); ctx.restore();
     }
     ctx.restore();
   };
 
-  SwordClash.prototype._swordBody = function (ctx, side, glow, nowT, col) {
+  /* V212: KILIÇ GÖVDESİ ÖNBELLEĞİ. Bıçak/siper/kabza/topuz her karede ~12 gradyan + ~40 çizgiyle sıfırdan çiziliyordu; savruluşta
+     (hayalet kopyalar + esneme dilimleri) kare başına 24 gövdeye çıkıyordu (4x yavaş işlemcide kare başına 16-22 ms -> kare kaçırma).
+     Artık değişmeyen gövde tek sefer, 1,6x üst örneklemeyle bir tuvale çizilir; her karede yalnızca bu görüntü + hareketli parlama çizilir.
+     Görüntü aynı (daha keskin). GERİ ALMAK İÇİN: SWORD_CACHE = false. */
+  var SWORD_CACHE = true, BX0 = -27, BY0 = -107, BW = 54, BH = 170;
+  SwordClash.prototype._bodyCache = function (ctx) {
+    var t = ctx.getTransform ? ctx.getTransform() : null;
+    var sc = t ? Math.hypot(t.a, t.b) : this.k * this.dpr;   /* gövde biriminin ekrandaki piksel ölçeği */
+    var want = Math.min(6, Math.max(1, Math.ceil(sc * 1.6 * 4) / 4));
+    if (this._bc && this._bcS >= want) return this._bc;
+    var c = document.createElement('canvas'); c.width = Math.ceil(BW * want); c.height = Math.ceil(BH * want);
+    var x = c.getContext('2d'); x.setTransform(want, 0, 0, want, -BX0 * want, -BY0 * want);
+    this._staticBody(x);
+    this._bc = c; this._bcS = want; return c;
+  };
+  SwordClash.prototype._swordBody = function (ctx, side, glow, nowT, col, lite) {
+    if (!SWORD_CACHE || this._spriteOk) return this._swordBodyFull(ctx, side, glow, nowT, col);
+    var i;
+    if (!lite) {   // takım rengi: yalnızca çok hafif bir yansıma
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      var gr = ctx.createRadialGradient(0, -42, 4, 0, -42, 60), ga = 0.01 + glow * 0.04;
+      gr.addColorStop(0, 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + ga + ')');
+      gr.addColorStop(1, 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0)');
+      ctx.fillStyle = gr; ctx.fillRect(-80, -120, 160, 190); ctx.restore();
+    }
+    var bc = this._bodyCache(ctx);
+    ctx.imageSmoothingEnabled = true; try { ctx.imageSmoothingQuality = 'high'; } catch (e) { }
+    ctx.drawImage(bc, BX0, BY0, BW, BH);
+    if (lite) return;
+    // hareketli ışık yansıması + çarpmada uçtaki sıcak parlama (yalnızca bıçak üzerinde)
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(0, -104); ctx.lineTo(1.7, -96); ctx.lineTo(2.7, -78); ctx.lineTo(5.9, 12); ctx.lineTo(-5.9, 12); ctx.lineTo(-2.7, -78); ctx.lineTo(-1.7, -96); ctx.closePath(); ctx.clip();
+    ctx.globalCompositeOperation = 'lighter';
+    var s0 = ((nowT * 0.0011) + side * 0.37) % 1;
+    var sg = ctx.createLinearGradient(0, -104, 0, 12);
+    sg.addColorStop(clamp(s0 - 0.08, 0, 1), 'rgba(255,255,255,0)');
+    sg.addColorStop(clamp(s0, 0, 1), 'rgba(255,255,255,' + (0.1 + glow * 0.2) + ')');
+    sg.addColorStop(clamp(s0 + 0.08, 0, 1), 'rgba(255,255,255,0)');
+    ctx.fillStyle = sg; ctx.fillRect(-9, -105, 18, 118);
+    if (glow > 0.02) {
+      var hg = ctx.createRadialGradient(0, -92, 0, 0, -92, 26);
+      hg.addColorStop(0, 'rgba(255,214,150,' + (glow * 0.35) + ')'); hg.addColorStop(1, 'rgba(255,214,150,0)');
+      ctx.fillStyle = hg; ctx.fillRect(-9, -105, 18, 40);
+    }
+    ctx.restore();
+  };
+  /* gövdenin değişmeyen kısmı (önbelleğe çizilir) — _swordBodyFull ile birebir aynı çizim, hareketli parlamalar hariç */
+  SwordClash.prototype._staticBody = function (ctx) {
+    this._swordBodyFull(ctx, 0, 0, 0, [0, 0, 0], true);
+  };
+
+  SwordClash.prototype._swordBodyFull = function (ctx, side, glow, nowT, col, staticOnly) {
     var i;
 
     // takım rengi: yalnızca çok hafif bir yansıma
+    if (!staticOnly) {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     var gr = ctx.createRadialGradient(0, -42, 4, 0, -42, 60);
@@ -560,8 +618,9 @@
     ctx.fillStyle = gr;
     ctx.fillRect(-80, -120, 160, 190);
     ctx.restore();
+    }
 
-    if (this._spriteOk) {            // Figma'dan gelen kılıç çizimi varsa onu kullan
+    if (this._spriteOk && !staticOnly) {            // Figma'dan gelen kılıç çizimi varsa onu kullan
       var sp = this.o.sprite;
       ctx.drawImage(this._img, -sp.px, -sp.py, sp.w, sp.h);
       return;
@@ -602,6 +661,7 @@
     dg.addColorStop(0, 'rgba(0,0,0,0)'); dg.addColorStop(1, 'rgba(0,0,0,0.3)');
     ctx.fillStyle = dg; ctx.fillRect(-8, -20, 16, 34);
     // hareketli ışık yansıması
+    if (!staticOnly) {
     ctx.globalCompositeOperation = 'lighter';
     var s0 = ((nowT * 0.0011) + side * 0.37) % 1;
     var sg = ctx.createLinearGradient(0, -104, 0, 12);
@@ -613,6 +673,7 @@
       var hg = ctx.createRadialGradient(0, -92, 0, 0, -92, 26);
       hg.addColorStop(0, 'rgba(255,214,150,' + (glow * 0.35) + ')'); hg.addColorStop(1, 'rgba(255,214,150,0)');
       ctx.fillStyle = hg; ctx.fillRect(-9, -105, 18, 40);
+    }
     }
     ctx.restore();
     blade(); ctx.lineJoin = 'miter'; ctx.lineWidth = 0.4; ctx.strokeStyle = 'rgba(10,14,20,0.75)'; ctx.stroke();
