@@ -893,3 +893,20 @@ V209 — SAVAŞ PANELİ KASMA: KILIÇ SESİ (TEST EDİLMEDİ; yalnızca node --c
 2) v208.js: savaş paneli kapanınca canvas kılıç yok edilir (eskiden bir sonraki savaşa kadar bellekte kalıyordu).
 NOT: Eski v7.js SVG kılıçları (.swd sl/sr/spk + v7.css/v192.css swl/swr/spk animasyonları) hâlâ DOM'a kuruluyor ama display:none ile gizli; boyanmaz/animasyon çalışmaz. wc_battle_fx.js index.html'de yüklü DEĞİL (kullanılmıyor).
 GERİ ALMAK İÇİN: wc_sword_clash.js ve v208.js'i V208 sürümüyle değiştirin.
+
+=================== V210 ===================
+V210 — 3B KÜRE: ZEMİNLE BÜTÜNLÜK + ANİMASYON KALİTESİ (yalnızca v30.js; masaüstü Chrome'da ekran kartıyla denendi, telefonda denenmedi)
+1) Zemin halkaları ekrana sabit 2B dokudan çıkarıldı; kürenin merkezindeki tek bir 3B düzleme (ring210) taşındı. Halkalar artık küreyle birlikte yakınlaşır, savaş paneli açılınca küreyle birlikte kayar, sürüklerken hafifçe döner. Eskiden halkaların merkezi kürenin merkezinden kaymıştı.
+2) Aynı düzlemde kürenin arkasından taşan sıcak altın ışık halesi var; küre zeminden kopuk durmuyor.
+3) haze210: kürenin kenarına doğru artan sıcak pus (fresnel). Lacivert okyanusun siyaha kesilen kenarı ve gece tarafı zemine yumuşakça bağlanıyor. Atmosfer parlaklığı 0.75 -> 0.85.
+4) Ülkeye odaklanma: eskiden ilk karede ani sıçrayıp sonda sürünüyordu; artık açıya göre 0,45-1,25 sn süren, yumuşak hızlanıp yavaşlayan geçiş. Geçiş sürerken yeni hedef gelirse yavaşlamadan devam eder.
+5) Savurma, yakınlaştırma ve panel kayması artık kare hızından bağımsız (120 Hz ekranda iki kat hızlı/uzun dönmüyor). Savurma hızı yumuşatıldı; parmak durup bekledikten sonra bırakınca küre kendi kendine savrulmuyor.
+6) Açılıştaki yaklaşma eğrisi biraz daha yumuşak iniyor (cubic -> quart).
+GERİ ALMAK İÇİN: v30.js'i V209 sürümüyle değiştirin (zip: World_conquest-v209.zip).
+
+=================== V211 ===================
+V211 — 3B KÜREDE BİRLEŞİK SINIRLAR (yalnızca v30.js; masaüstü Chrome'da denendi, telefonda denenmedi)
+Toprak el değiştirdiğinde (yapay zekâ savaşında saldıranın yenilip savunana toprak kaybetmesi dahil, tüm fetih/yenilgi durumları) yeni toprakla sahibinin kendi toprağı arasındaki iç sınır artık 3B kürede de çizilmiyor; iki toprak tek parça görünüyor.
+Yöntem 2B haritadaki V14 ile aynı: topojson.mesh ile yalnızca sahipleri FARKLI komşular arasındaki sınırlar + kıyılar çizilir. Aynı sahibin ülkeleri arasında dikiş çizgisi kalmasın diye dolgular tam opak + aynı renkte ince konturla çizilip katman topluca %50'ye indirilir (görünüm eskisiyle aynı).
+Telefondaki kısmi güncelleme yolu (baseQuick) da aynı çizimi kullanır. Oyun kuralları/kayıtlar değişmedi; yalnızca çizim.
+GERİ ALMAK İÇİN: v30.js'te "var MESH_ON = true" -> false.

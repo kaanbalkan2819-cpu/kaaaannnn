@@ -76,6 +76,45 @@
       });
     });
   }
+  /* V211: BİRLEŞİK SINIRLAR (3B). Fetihte / yenilgide toprak el değiştirince yeni toprakla sahibinin kendi toprağı arasındaki iç sınır çizilmez.
+     2B haritadaki V14 ile aynı kural (topojson.mesh): yalnızca sahipleri FARKLI komşular arasındaki sınırlar + kıyılar çizilir.
+     Örn. yapay zekâ savaşında saldıran yenilip savunana toprak kaybederse, o toprak savunanın toprağıyla tek parça görünür.
+     Oyun durumu değişmez; yalnızca çizim. topojson/dünya verisi yoksa eski ülke ülke çizime döner. GERİ ALMAK İÇİN: MESH_ON = false. */
+  var MESH_ON = true, meshL = null, meshK = null;
+  function meshLines() {
+    if (!MESH_ON || !window.topojson || !window.Datamap || !Datamap.prototype.worldTopo) return null;
+    var key; try { var a = []; for (var i = 0; i < C.length; i++) a.push(ownerOf(C[i].id)); key = a.join(','); } catch (e) { return null; }
+    if (meshL && key === meshK) return meshL;
+    try {
+      var topo = Datamap.prototype.worldTopo, inM = function (id) { return typeof M === 'undefined' ? !!cMap[id] : !!M[id]; };
+      var ms = topojson.mesh(topo, topo.objects.world, function (a, b) {
+        if (a === b) return inM(a.id);
+        var am = inM(a.id), bm = inM(b.id); if (!am && !bm) return false;
+        var x = am ? ownerOf(a.id) : '~' + a.id, y = bm ? ownerOf(b.id) : '~' + b.id; return x !== y;
+      });
+      var out = [];
+      (ms && ms.coordinates || []).forEach(function (ln) {
+        var n = ln.length; if (n < 2) return;
+        var xs = new Array(n), ys = new Array(n), off = 0, prev = ln[0][0], mn = 1e9, mx = -1e9, y0 = 1e9, y1 = -1e9, k;
+        for (k = 0; k < n; k++) { var lo = ln[k][0], d = lo - prev; if (d > 180) off -= 360; else if (d < -180) off += 360; prev = lo; xs[k] = (lo + off + 180) / 360 * OW; ys[k] = (90 - ln[k][1]) / 180 * OH; if (xs[k] < mn) mn = xs[k]; if (xs[k] > mx) mx = xs[k]; if (ys[k] < y0) y0 = ys[k]; if (ys[k] > y1) y1 = ys[k]; }
+        out.push({ x: xs, y: ys, x0: mn, x1: mx, y0: y0, y1: y1 });
+      });
+      meshL = out; meshK = key; return out;
+    } catch (e) { return null; }
+  }
+  function strokeMesh(ctx, L, R) {   /* R verilirse yalnızca o dikdörtgene değen çizgiler */
+    var P = 5 * LS + 2;
+    for (var i = 0; i < L.length; i++) {
+      var l = L[i], n = l.x.length;
+      for (var sh = -1; sh <= 1; sh++) {
+        var dx = sh * OW; if (l.x1 + dx < 0 || l.x0 + dx > OW) continue;
+        if (R && (l.x1 + dx + P < R.x || l.x0 + dx - P > R.x + R.w || l.y1 + P < R.y || l.y0 - P > R.y + R.h)) continue;
+        ctx.beginPath(); var px = 0, py = 0;
+        for (var k = 0; k < n; k++) { var qx = l.x[k] + dx, qy = l.y[k]; if (k) { if (k < n - 1 && Math.abs(qx - px) < 0.35 && Math.abs(qy - py) < 0.35) continue; ctx.lineTo(qx, qy); } else ctx.moveTo(qx, qy); px = qx; py = qy; }
+        ctx.stroke();
+      }
+    }
+  }
   var baseC, base, baseSig = null;
   function ownSig() { try { var a = [G.pl || '', G.plCol || '']; for (var k in G.owner) a.push(ownerOf(k)); if (window.WCD && WCD.sig) a.push(WCD.sig()); return a.join('|'); } catch (e) { return Math.random() + ''; } }
   function ownCol(c) {
@@ -102,10 +141,18 @@
   function* baseGen() {
     if (!baseC) { baseC = mk(OW, OH); base = baseC.getContext('2d'); }
     baseValid = false; ovValid = false; ovDirty = null; var nb = {};   /* V176: tam yeniden çizim başladı; kısmi güncelleme tamamlanana kadar kapalı */
-    base.clearRect(0, 0, OW, OH); base.globalAlpha = .5; var i, c, cl;
+    base.clearRect(0, 0, OW, OH); var i, c, cl, ML = meshLines(); yield;
+    if (ML) {   /* V211: dolgular tam opak + aynı renkte ince kontur (aynı sahibin ülkeleri arasında dikiş çizgisi kalmasın), sonra katman topluca %50'ye indirilir (eski globalAlpha .5 ile aynı sonuç) */
+      base.globalAlpha = 1; base.lineJoin = 'round'; base.lineWidth = 1.1 * LS;
+      for (i = 0; i < C.length; i++) { c = C[i]; base.beginPath(); trace(base, c, OW, OH); cl = ownCol(c); nb[c.id] = cl; base.fillStyle = cl; base.fill('evenodd'); base.strokeStyle = cl; base.stroke(); yield; }
+      base.globalCompositeOperation = 'destination-in'; base.fillStyle = 'rgba(0,0,0,.5)'; base.fillRect(0, 0, OW, OH); base.globalCompositeOperation = 'source-over';
+      base.lineWidth = 1.4 * LS; base.strokeStyle = 'rgba(255,255,255,.38)'; strokeMesh(base, ML, null); yield;
+    } else {
+    base.globalAlpha = .5;
     for (i = 0; i < C.length; i++) { c = C[i]; base.beginPath(); trace(base, c, OW, OH); cl = ownCol(c); nb[c.id] = cl; base.fillStyle = cl; base.fill('evenodd'); yield; }
     base.globalAlpha = 1; base.lineWidth = 1.4 * LS; base.lineJoin = 'round'; base.strokeStyle = 'rgba(255,255,255,.38)';
     for (i = 0; i < C.length; i++) { base.beginPath(); trace(base, C[i], OW, OH); base.stroke(); yield; }
+    }
     /* V81: çok küçük ülkeler uzaktan görünmüyordu; merkezlerine ince bir halka çizilir */
     base.lineWidth = 1.2 * LS; base.strokeStyle = 'rgba(255,230,160,.75)';
     C.forEach(function (c) {
@@ -157,9 +204,17 @@
       if (ch.length > 8) return false;
       var R = rectOf(ch, null); if (!R) return false;
       base.save(); base.beginPath(); base.rect(R.x, R.y, R.w, R.h); base.clip(); base.clearRect(R.x, R.y, R.w, R.h);
+      var ML = meshLines();
+      if (ML) {   /* V211: birleşik sınırlar (baseGen ile aynı çizim) */
+        base.globalAlpha = 1; base.lineJoin = 'round'; base.lineWidth = 1.1 * LS;
+        for (i = 0; i < C.length; i++) { c = C[i]; if (!hits(c, R)) continue; base.beginPath(); trace(base, c, OW, OH); base.fillStyle = cur[c.id]; base.fill('evenodd'); base.strokeStyle = cur[c.id]; base.stroke(); }
+        base.globalCompositeOperation = 'destination-in'; base.fillStyle = 'rgba(0,0,0,.5)'; base.fillRect(R.x, R.y, R.w, R.h); base.globalCompositeOperation = 'source-over';
+        base.lineWidth = 1.4 * LS; base.strokeStyle = 'rgba(255,255,255,.38)'; strokeMesh(base, ML, R);
+      } else {
       base.globalAlpha = .5; for (i = 0; i < C.length; i++) { c = C[i]; if (!hits(c, R)) continue; base.beginPath(); trace(base, c, OW, OH); base.fillStyle = cur[c.id]; base.fill('evenodd'); }
       base.globalAlpha = 1; base.lineWidth = 1.4 * LS; base.lineJoin = 'round'; base.strokeStyle = 'rgba(255,255,255,.38)';
       for (i = 0; i < C.length; i++) { c = C[i]; if (!hits(c, R)) continue; base.beginPath(); trace(base, c, OW, OH); base.stroke(); }
+      }
       base.lineWidth = 1.2 * LS; base.strokeStyle = 'rgba(255,230,160,.75)';
       C.forEach(function (c) {
         var b = c.bb, sp = Math.max(b[2] - b[0], b[3] - b[1]); if (sp >= 2.2 || !hits(c, R)) return;
@@ -451,17 +506,43 @@
       if (_bg199 && _bg199.w === cw && _bg199.h === ch) return;
       var c = document.createElement('canvas'); c.width = cw; c.height = ch; var x = c.getContext('2d'), cx = cw / 2, cy = ch * 0.44, m = Math.min(cw, ch), far = Math.hypot(Math.max(cx, cw - cx), Math.max(ch * 0.4, ch * 0.6));
       var g = x.createRadialGradient(cx, ch * 0.4, 0, cx, ch * 0.4, far); g.addColorStop(0, '#74634a'); g.addColorStop(0.3, '#5a4c38'); g.addColorStop(0.62, '#3d352b'); g.addColorStop(1, '#2a251e'); x.fillStyle = g; x.fillRect(0, 0, cw, ch);
-      var sc = (1.5 * m) / 600; x.save(); x.translate(cx, cy); x.strokeStyle = '#e6cf8e';
-      function ring(r, a, lw, dash) { x.globalAlpha = a; x.lineWidth = lw; x.setLineDash(dash || []); x.beginPath(); x.arc(0, 0, r * sc, 0, 6.2832); x.stroke(); }
-      ring(130, 0.3, Math.max(1, sc)); ring(180, 0.22, Math.max(1, sc)); ring(240, 0.3, Math.max(1, sc)); ring(290, 0.18, Math.max(1, sc)); ring(262, 0.4, 8 * sc, [sc, 11.2 * sc]);
-      x.setLineDash([]); x.lineWidth = Math.max(1, sc); x.globalAlpha = 0.16; x.beginPath(); x.moveTo(0, -300 * sc); x.lineTo(0, 300 * sc); x.moveTo(-300 * sc, 0); x.lineTo(300 * sc, 0); x.stroke();
-      x.globalAlpha = 0.1; x.beginPath(); x.moveTo(-209 * sc, -209 * sc); x.lineTo(209 * sc, 209 * sc); x.moveTo(209 * sc, -209 * sc); x.lineTo(-209 * sc, 209 * sc); x.stroke(); x.restore(); x.globalAlpha = 1;
-      var t = document.createElement('canvas'); t.width = t.height = 96; var tx = t.getContext('2d'), id = tx.createImageData(96, 96), q; for (q = 0; q < id.data.length; q += 4) { id.data[q] = 204; id.data[q + 1] = 176; id.data[q + 2] = 106; id.data[q + 3] = Math.random() * 20; } tx.putImageData(id, 0, 0);
+      /* V210: halkalar artık bu ekran dokusunda değil; küreye bağlı 3B düzlemde (ring210). Burada yalnızca taş zemin + gren + kenar karartması. */
+      var t =document.createElement('canvas'); t.width = t.height = 96; var tx = t.getContext('2d'), id = tx.createImageData(96, 96), q; for (q = 0; q < id.data.length; q += 4) { id.data[q] = 204; id.data[q + 1] = 176; id.data[q + 2] = 106; id.data[q + 3] = Math.random() * 20; } tx.putImageData(id, 0, 0);
       x.fillStyle = x.createPattern(t, 'repeat'); x.fillRect(0, 0, cw, ch);
       var vg = x.createRadialGradient(cx, ch / 2, 0, cx, ch / 2, Math.hypot(cx, ch / 2)); vg.addColorStop(0.58, 'rgba(14,9,2,0)'); vg.addColorStop(1, 'rgba(14,9,2,.3)'); x.fillStyle = vg; x.fillRect(0, 0, cw, ch);
       var tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.generateMipmaps = false; tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
       var old = scene.background; scene.background = tex; if (old && old.dispose) old.dispose(); _bg199 = { w: cw, h: ch };
     } catch (e) { }
+  }
+  /* V210: küre ile zemin tek parça görünsün diye: altın harita halkaları + kürenin arkasından taşan sıcak ışık halesi, kürenin merkezinde duran
+     tek bir 3B düzleme (tek seferlik doku) çizilir. Küreyle birlikte yakınlaşır / panel açılınca kayar / sürüklerken hafifçe döner.
+     Maliyet: tek dörtgen + tek doku okuması (her kare çizim zorlamaz). GERİ ALMAK İÇİN: build() içindeki "ring210(coarse);" satırını silin. */
+  var ringM = null, ringRot = 0;
+  function ring210(coarse) {
+    try {
+      var N = coarse ? 768 : 1280, S = 3.0, c = document.createElement('canvas'); c.width = c.height = N; var x = c.getContext('2d'), h = N / 2, u = h / S;   /* u: 1 dünya birimi kaç piksel */
+      x.translate(h, h);
+      /* sıcak hale: kürenin kenarından (r~1) dışa doğru söner; kürenin arkasında kalan kısım görünmez */
+      var g = x.createRadialGradient(0, 0, 0.85 * u, 0, 0, 2.5 * u);
+      g.addColorStop(0, 'rgba(230,198,128,.40)'); g.addColorStop(0.12, 'rgba(214,180,114,.28)'); g.addColorStop(0.32, 'rgba(186,152,96,.15)'); g.addColorStop(0.62, 'rgba(150,120,78,.06)'); g.addColorStop(1, 'rgba(120,96,64,0)');
+      x.fillStyle = g; x.beginPath(); x.arc(0, 0, 2.5 * u, 0, 6.2832); x.fill();
+      var lw = Math.max(1, N / 900);
+      x.strokeStyle = '#ead39a';
+      function ring(r, a, w, dash) { x.globalAlpha = a; x.lineWidth = w; x.setLineDash(dash || []); x.beginPath(); x.arc(0, 0, r * u, 0, 6.2832); x.stroke(); }
+      ring(1.2, 0.34, lw); ring(1.46, 0.24, lw); ring(1.86, 0.3, lw); ring(2.32, 0.16, lw);
+      ring(1.33, 0.32, 0.06 * u, [lw * 1.4, 0.075 * u]);   /* derece çentikleri */
+      ring(2.08, 0.2, 0.035 * u, [lw * 1.2, 0.16 * u]);
+      x.setLineDash([]); x.lineWidth = lw;
+      function spoke(ang, a, r0, r1) { var cs = Math.cos(ang), sn = Math.sin(ang); x.globalAlpha = a; x.beginPath(); x.moveTo(cs * r0 * u, sn * r0 * u); x.lineTo(cs * r1 * u, sn * r1 * u); x.stroke(); }
+      for (var k = 0; k < 4; k++) spoke(k * Math.PI / 2, 0.2, 1.1, 2.75);
+      for (k = 0; k < 4; k++) spoke(Math.PI / 4 + k * Math.PI / 2, 0.11, 1.1, 2.2);
+      /* kenar: dokunun dışı yumuşakça sıfırlanır (kesik kenar görünmez) */
+      x.globalAlpha = 1; x.globalCompositeOperation = 'destination-in';
+      var e = x.createRadialGradient(0, 0, 2.2 * u, 0, 0, 2.95 * u); e.addColorStop(0, 'rgba(0,0,0,1)'); e.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = e; x.fillRect(-h, -h, N, N);
+      var tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 1;
+      ringM = new THREE.Mesh(new THREE.PlaneGeometry(2 * S, 2 * S), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false }));
+      ringM.renderOrder = -2; ringM.frustumCulled = false; scene.add(ringM);
+    } catch (e) { ringM = null; }
   }
   function build() {
     THREE = window.THREE; TEX = window.WC_TEX;
@@ -481,7 +562,8 @@
     if (!coarse) { var rim199 = new THREE.DirectionalLight(0xcdb06a, 0.7); rim199.position.set(-2.5, 1.2, -3.5); scene.add(rim199); }   /* V201: üçüncü ışık yalnızca masaüstünde (telefonda piksel başına maliyet) */
     camera.rotation.z = WC199_TILT * Math.PI / 180;   /* V199: küre -14° eğik görünür (menü kartındaki küre motifi); 0 yaparsanız düz */
     bg199();   /* V201 */
-    globe = new THREE.Group(); scene.add(globe);
+    ring210(coarse);   /* V210 */
+    globe =new THREE.Group(); scene.add(globe);
     ovTex = new THREE.CanvasTexture(ovC); ovTex.colorSpace = THREE.SRGBColorSpace; ovTex.anisotropy = 8; if (LOWQ) { ovTex.generateMipmaps = false; ovTex.minFilter = THREE.LinearFilter; ovTex.anisotropy = 1; }   /* V142: telefonda her seçimde 2048x1024 kaplamanın mipmap'i yeniden üretilmesin (seçim anı takılması) */ liftTex = new THREE.CanvasTexture(liftC); normTex = new THREE.CanvasTexture(nC);
     var marble, water, sky, clouds, geo; return Promise.all([loadImg(TEX.marble), loadImg(TEX.topo), loadImg(TEX.water), loadImg(TEX.sky), loadImg(TEX.clouds)]).then(function (im) {
       marble = new THREE.Texture(im[0]); marble.colorSpace = THREE.SRGBColorSpace; marble.anisotropy = 4; marble.needsUpdate = true;
@@ -495,7 +577,11 @@
       earth = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ map: marble, specularMap: water, specular: new THREE.Color(0x445566), shininess: 28, normalMap: normTex, normalScale: new THREE.Vector2(1, 1) })); globe.add(earth);
       var cover = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: ovTex, transparent: true, depthWrite: false, emissive: new THREE.Color(0xffffff), emissiveMap: ovTex, emissiveIntensity: 0.35, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); cover.scale.setScalar(1.0015); globe.add(cover);
       cloudM = new THREE.Mesh(new THREE.SphereGeometry(1.012, 96, 48), new THREE.MeshLambertMaterial({ map: clouds, transparent: true, opacity: 0.55, depthWrite: false })); globe.add(cloudM);
-      scene.add(atmM = new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),4.2);gl_FragColor=vec4(.80,.69,.42,1.)*clamp(i,0.,1.)*0.75;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));
+      scene.add(atmM = new THREE.Mesh(new THREE.SphereGeometry(1.14, 64, 32), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}', fragmentShader: 'varying vec3 vN;void main(){float i=pow(0.68-dot(vN,vec3(0.,0.,1.)),4.2);gl_FragColor=vec4(.84,.72,.45,1.)*clamp(i,0.,1.)*0.85;}', side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })));   /* V210: 0.75 -> 0.85, biraz daha sıcak */
+      /* V210: kenar pusu — kürenin kenarına doğru artan sıcak altın ışık (fresnel). Lacivert okyanusun siyaha kesilen kenarı zemindeki haleye yumuşakça bağlanır;
+         gece tarafı da tamamen siyaha düşmez. Tek ucuz shader. GERİ ALMAK İÇİN: bu "haze210" satırını silin. */
+      var haze210 = new THREE.Mesh(new THREE.SphereGeometry(1.006, 96, 48), new THREE.ShaderMaterial({ vertexShader: 'varying vec3 vN;varying vec3 vV;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}', fragmentShader: 'varying vec3 vN;varying vec3 vV;void main(){float f=1.-clamp(dot(normalize(vN),normalize(vV)),0.,1.);float i=pow(f,1.7)*0.30+pow(f,6.)*0.12+0.045;gl_FragColor=vec4(vec3(.86,.70,.44)*i,1.);}', blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
+      haze210.renderOrder = 1; scene.add(haze210);
       /* V199: yıldızlı gökyüzü küresi kaldırıldı (eski: SphereGeometry(80) + sky dokusu). Yerine seyrek altın toz + kürede ince altın enlem/boylam ızgarası. */
       try {
         var dp = [], di, du, dt2, dr; for (di = 0; di < 380; di++) { du = Math.random() * 2 - 1; dt2 = Math.random() * 6.2832; dr = Math.sqrt(1 - du * du); dp.push(40 * dr * Math.cos(dt2), 40 * du, 40 * dr * Math.sin(dt2)); }
@@ -529,14 +615,23 @@
 
   /* ---------- Kamera ve etkileşim ---------- */
   function resize() { if (!renderer) return; var w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; _stW = w; _stH = h; renderer.setSize(w, h); bg199(); camera.aspect = w / h; camera.fov = w < h ? 52 : 40; camera.updateProjectionMatrix(); }
-  function rotateBy(dx, dy) { var k = 0.0042 * camZ / 3.4; globe.quaternion.premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(dy * k, dx * k, 0, 'XYZ'))); }
+  function rotateBy(dx, dy) { var k = 0.0042 * camZ / 3.4; globe.quaternion.premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(dy * k, dx * k, 0, 'XYZ'))); if (ringM) { ringRot += dx * k * 0.06; ringM.rotation.z = ringRot; } }   /* V210: zemin halkaları sürüklerken küreyle hafifçe döner (derinlik hissi) */
+  /* V210: odaklanma artık süreye bağlı, yumuşak hızlanıp yavaşlayan (easeInOut) bir geçiş: eskiden ilk karede ani sıçrayıp sonda sürünüyordu.
+     Savurma, yakınlaştırma ve odaklanma kare hızından bağımsız (120 Hz ekranda iki kat hızlı/uzun dönmez). */
+  var fq0 = null, fqT = 0, fqD = 0.8;
+  function ease210(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
   function stepCamera(dt) {
-    if (focusQ) { globe.quaternion.slerp(focusQ, Math.min(1, dt * 5)); if (globe.quaternion.angleTo(focusQ) < 0.002) focusQ = null; }
-    else if (!down && (Math.abs(vel.x) > 0.05 || Math.abs(vel.y) > 0.05)) { rotateBy(vel.x, vel.y); vel.x *= 0.93; vel.y *= 0.93; }
-    if (introStart) { var _k = Math.max(0, Math.min(1, (performance.now() - introStart) / introDur)); camZ = introFrom + (zoomT - introFrom) * (1 - Math.pow(1 - _k, 3)); if (_k >= 1) introStart = 0; } else camZ += (zoomT - camZ) * Math.min(1, dt * 8);   /* V56: yeni oyunda küre uzaktan yaklaşır */
+    if (!focusQ) fq0 = null;
+    if (focusQ) {
+      if (!fq0 || fq0.tgt !== focusQ) { var _mid = !!(fq0 && fqT > 0 && fqT < 1); fq0 = { q: globe.quaternion.clone(), tgt: focusQ, out: _mid }; fqT = 0; var _ang = globe.quaternion.angleTo(focusQ); fqD = Math.max(0.45, Math.min(1.25, 0.4 + _ang * 0.32)); }   /* hareket sürerken yeni hedef gelirse yavaşlayıp yeniden hızlanmaz (yalnız yumuşak iniş) */
+      fqT += dt / fqD; var _t1 = Math.min(1, fqT), _e = fq0.out ? 1 - Math.pow(1 - _t1, 3) : ease210(_t1); globe.quaternion.copy(fq0.q).slerp(focusQ, _e);
+      if (fqT >= 1) { globe.quaternion.copy(focusQ); focusQ = null; fq0 = null; }
+    }
+    else if (!down && (Math.abs(vel.x) > 0.05 || Math.abs(vel.y) > 0.05)) { var _f = dt * 60; rotateBy(vel.x * _f, vel.y * _f); var _d = Math.pow(0.93, _f); vel.x *= _d; vel.y *= _d; }
+    if (introStart) { var _k = Math.max(0, Math.min(1, (performance.now() - introStart) / introDur)); camZ = introFrom + (zoomT - introFrom) * (1 - Math.pow(1 - _k, 4)); if (_k >= 1) introStart = 0; } else { var _zd = zoomT - camZ; camZ = Math.abs(_zd) < 1e-4 ? zoomT : camZ + _zd * (1 - Math.exp(-dt * 7)); }   /* V56: yeni oyunda küre uzaktan yaklaşır; V210: yaklaşma eğrisi daha yumuşak iniş (quart) */
      camera.position.z = camZ * (window.innerWidth > window.innerHeight ? 0.7 : 1);   /* V57: yatayda küre daha da yakın (0.86 -> 0.70) */
     // savaş paneli açıkken görüntüyü panelin dışındaki alana kaydır (telefonda yukarı, geniş ekranda sola)
-    var _pn = window.innerWidth > window.innerHeight && document.getElementById('panel'); vo += ((((typeof BSH !== 'undefined' && BSH && !window.v60Active) || (_pn && _pn.offsetWidth > 0)) ? 1 : 0) - vo) * Math.min(1, dt * 6);
+    var _pn = window.innerWidth > window.innerHeight && document.getElementById('panel'); var _vt = (((typeof BSH !== 'undefined' && BSH && !window.v60Active) || (_pn && _pn.offsetWidth > 0)) ? 1 : 0); vo += (_vt - vo) * (1 - Math.exp(-dt * 6)); if (Math.abs(_vt - vo) < 0.002) vo = _vt;   /* V210: kare hızından bağımsız */
     var w = _stW || (_stW = stage.clientWidth), h = _stH || (_stH = stage.clientHeight);   /* V205 */
     if (vo < 0.01) { if (camera.view && camera.view.enabled) camera.clearViewOffset(); }
     else if (w && h) { var wide = window.innerWidth >= 900 || window.innerWidth > window.innerHeight; camera.setViewOffset(w, h, wide ? vo * (window.innerWidth > window.innerHeight && window.innerWidth < 900 ? -Math.min(205, w * 0.2) : 205) : 0, wide ? 0 : vo * h * .19, w, h); }
@@ -575,7 +670,12 @@
     });
     el.addEventListener('pointermove', function (e) {
       var p = ptrs[e.pointerId]; if (!p) return; var dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; var ids = Object.keys(ptrs);
-      if (ids.length === 1 && down) { down.moved += Math.abs(dx) + Math.abs(dy); rotateBy(dx, dy); vel.x = dx; vel.y = dy; }
+      if (ids.length === 1 && down) {
+        down.moved += Math.abs(dx) + Math.abs(dy); rotateBy(dx, dy);
+        /* V210: savurma hızı olay sıklığından bağımsız (px / 60 Hz karesi) ve yumuşatılmış: tek titrek olay savurmayı belirlemez */
+        var _now = performance.now(), _ms = Math.max(4, Math.min(50, _now - (down.lt || _now - 16))); down.lt = _now;
+        var _s = 16.67 / _ms; vel.x = vel.x * 0.45 + dx * _s * 0.55; vel.y = vel.y * 0.45 + dy * _s * 0.55;
+      }
       else if (ids.length === 2) {
         var a = ptrs[ids[0]], b = ptrs[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y), ang = Math.atan2(b.y - a.y, b.x - a.x), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
         if (pinch0) zoomT = Math.max(ZMIN3, Math.min(6, zoomT * pinch0 / d));
@@ -587,7 +687,7 @@
         pinch0 = d; pinchA = ang; pinchM = { x: mx, y: my };
       }
     });
-    function up(e) { var d = down; delete ptrs[e.pointerId]; if (Object.keys(ptrs).length < 2) { pinch0 = 0; pinchA = null; } if (d && d.moved < 8 && performance.now() - d.t < 400) pick(e.clientX, e.clientY); down = null; }
+    function up(e) { var d = down; if (d && d.lt && performance.now() - d.lt > 90) { vel.x = vel.y = 0; }   /* V210: parmak durup bekledikten sonra bırakınca küre kendi kendine savrulmaz */ delete ptrs[e.pointerId]; if (Object.keys(ptrs).length < 2) { pinch0 = 0; pinchA = null; } if (d && d.moved < 8 && performance.now() - d.t < 400) pick(e.clientX, e.clientY); down = null; }
     el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
     el.addEventListener('wheel', function (e) { e.preventDefault(); zoomT = Math.max(ZMIN3, Math.min(6, zoomT * (1 + e.deltaY * 0.001))); }, { passive: false });
     function pick(cx, cy) {
