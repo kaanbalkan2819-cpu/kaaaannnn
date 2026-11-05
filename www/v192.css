@@ -1,0 +1,15 @@
+/* V192 — savaş paneli akıcılık: ağır SVG ve bitmap (listenin 2/3 parçası). Görünüm aynı, oyun mantığı aynı.
+   1) Kılıçlar/kıvılcım artık ayrı <svg> HTML elemanları (v7.js SWORDS): transform animasyonu compositor katmanında, SVG her karede yeniden boyanmaz.
+      Eski SVG kullanıcı birimi (120 birim = 84px, ölçek .7) px'e çevrildi: 46 -> 32.2px, 3 -> 2.1px.
+   2) Kaybeden bayrak: CSS grayscale filtresi kalktı; gri sürüm bir kez üretilir (v7.js flagBlob7). Üretilemezse .gfb ile eski filtre. */
+.sx{position:relative}
+.swd{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.sx .sl,.sx .sr{opacity:.9}
+.sx .sl{transform:translateX(-32.2px)}
+.sx .sr{transform:translateX(32.2px)}
+.sx .spk{opacity:0;transform:scale(.2);will-change:transform,opacity}
+@keyframes swl{to{transform:translateX(-2.1px) rotate(-6deg)}}
+@keyframes swr{to{transform:translateX(2.1px) rotate(6deg)}}
+.fl7s.l .fi{filter:none}
+.fl7s.l .fi.gfb{filter:grayscale(.9)}
+.s7.lose .fi{filter:none}

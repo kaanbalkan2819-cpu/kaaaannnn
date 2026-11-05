@@ -293,23 +293,39 @@
     if (r === 'time') return X('Süre doldu ve en geniş devlet sen değildin. Bir dahaki sefere daha atak ol!', 'Time ran out and yours was not the largest state. Be bolder next time!');
     return X('Son toprağını kaybettin ama her büyük hükümdar bir yenilgiyle öğrenir. Yeni bir ülkeyle dene!', 'You lost your last land, yet every great ruler learns from defeat. Try a new country!');
   }
-  /* V141: "İmparatorluk Düştü" — yaprak simgesi kaldırıldı; bayrak büyük yuvarlak bir countryball: gözler, kaşlar (üzgün) ve gözyaşı. Çizim v141.css'te. */
-  function ballFlag(e) {
+  /* V188: yenilgi ekranı yeniden tasarlandı (countryball kaldırıldı): üst şerit, skor + rütbe, yolculuk çubukları, savaş oranı, imparatorluk özeti. Çizim v188.css'te. */
+  function rankOf(sc) {
+    var R5 = [[0, 'Çaylak Hükümdar', 'Rookie Ruler', '🌱'], [120, 'Genç Komutan', 'Young Commander', '⚔'], [300, 'Cesur Savaşçı', 'Bold Warrior', '🛡'], [600, 'Usta Stratejist', 'Master Strategist', '🧭'], [1000, 'Efsanevi Hükümdar', 'Legendary Ruler', '👑']], r = R5[0];
+    for (var i = 0; i < R5.length; i++) if (sc >= R5[i][0]) r = R5[i]; return r;
+  }
+  function loseHTML(m) {
+    var rk = rankOf(m.score), tw = (m.w || 0) + (m.l || 0), rate = tw ? Math.round(m.w * 100 / tw) : 0, top = Math.max(1, m.max, m.l0), pk = Math.round(m.max * 100 / Math.max(m.total, 1));
+    var bar = function (lbl, v, cls) { var h = Math.max(v > 0 ? 6 : 2, Math.round(v * 100 / top)); return '<div class="jc ' + cls + '"><b>' + v + '</b><span class="jb"><i style="height:' + h + '%"></i></span><small>' + lbl + '</small></div>'; };
+    var chip = function (ic, v, k) { return '<div class="ch"><span>' + ic + '</span><b>' + v + '</b><small>' + k + '</small></div>'; };
+    return '<div class="in l188">' +
+      '<div class="tg">' + X('SEFER SONA ERDİ', 'CAMPAIGN OVER') + '</div>' +
+      '<h2>' + resTitle('lose') + '</h2>' +
+      '<div class="who">' + fl(m.c) + '<span>' + nm(m.c) + '</span><em>' + X(m.turns + '. turda düştü', 'Fell on turn ' + m.turns) + '</em></div>' +
+      '<div class="rk"><div class="rn">' + rk[3] + '</div><div class="rt"><small>' + X('RÜTBE', 'RANK') + '</small><b>' + X(rk[1], rk[2]) + '</b></div><div class="sv"><small>' + X('SKOR', 'SCORE') + '</small><b id="v188sc" data-v="' + m.score + '">0</b></div></div>' +
+      '<div class="bx188"><h4>' + X('TOPRAK YOLCULUĞU', 'LAND JOURNEY') + '</h4><div class="jr">' + bar(X('BAŞLANGIÇ', 'START'), m.l0, 's') + bar(X('ZİRVE', 'PEAK'), m.max, 'p') + bar(X('SON', 'END'), m.lands, 'e') + '</div>' +
+      '<p class="nt">' + X('Zirvede dünyanın %' + pk + '\'ine hükmettin.', 'At your peak you ruled ' + pk + '% of the world.') + '</p></div>' +
+      '<div class="bx188"><h4>' + X('SAVAŞ PERFORMANSI', 'BATTLE RECORD') + '</h4><div class="wl"><span class="w" style="flex:' + (m.w || 0.0001) + '"></span><span class="l" style="flex:' + (m.l || 0.0001) + '"></span></div>' +
+      '<div class="wr"><span><b>' + m.w + '</b> ' + X('zafer', 'wins') + '</span><span class="rt2">%' + rate + '</span><span><b>' + m.l + '</b> ' + X('yenilgi', 'losses') + '</span></div></div>' +
+      '<div class="cr">' + chip('⏱', mmss(m.sec), X('SÜRE', 'TIME')) + chip('🏴', m.conq, X('FETİH', 'CONQUESTS')) + chip('🤝', m.pacts, X('PAKT', 'PACTS')) + chip('🛡', m.allies, X('İTTİFAK', 'ALLIES')) + '</div>' +
+      '<button class="pri" onclick="v139New()">🔁 ' + X('Yeni Ülkeyle Başla', 'Start With a New Country') + '</button><button onclick="v139Hist()">📜 ' + X('Oyun Geçmişi', 'Game History') + '</button><button class="gh" onclick="v139Menu()">' + X('Ana Menü', 'Main Menu') + '</button></div>';
+  }
+  function countUp() {
     try {
-      var im = fimg(e, 'cbf');
-      var eye = function (cx) { return '<ellipse cx="' + cx + '" cy="53" rx="11.5" ry="13.5" fill="#fff" stroke="#111" stroke-width="1.6"/><circle cx="' + (cx - 1) + '" cy="59" r="6" fill="#111"/><circle cx="' + (cx - 3) + '" cy="56.5" r="1.9" fill="#fff"/>'; };
-      var brow = function (d) { return '<path d="' + d + '" stroke="#fff" stroke-width="9" stroke-linecap="round" fill="none" opacity=".9"/><path d="' + d + '" stroke="#111" stroke-width="5" stroke-linecap="round" fill="none"/>'; };
-      var tear = function (x, c) { return '<path class="tr ' + c + '" d="M' + x + ' 71 C' + (x - 4) + ' 77 ' + (x - 4) + ' 82 ' + x + ' 82 C' + (x + 4) + ' 82 ' + (x + 4) + ' 77 ' + x + ' 71 Z" fill="#8fd0ff" stroke="#2c7fc0" stroke-width="1.1"/>'; };
-      return '<div class="cb139">' + im + '<svg class="cbe" viewBox="0 0 100 100" aria-hidden="true">' +
-        eye(34) + eye(66) + brow('M19 38 L45 26') + brow('M81 38 L55 26') + tear(27, 'a') + tear(73, 'b') + '</svg><i class="cbs"></i></div>';
-    } catch (x) { return fl(e); }
+      var el = document.getElementById('v188sc'); if (!el) return; var to = +el.getAttribute('data-v') || 0, t0 = Date.now(), D = 1200;
+      (function st() { var k = Math.min(1, (Date.now() - t0) / D), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(to * e); if (k < 1 && document.body.contains(el)) setTimeout(st, 33); else el.textContent = to; })();
+    } catch (e) { }
   }
   var OVL = null, OVLG = null;
-  function showFinal() {
+  function showFinal(force) {
     try {
       if (!G || G.ph !== 'over' || !(G.fin139 || G.over)) return; var s = S();
       if (OVL && OVLG === G) return;
-      if (typeof BSH !== 'undefined' && BSH) { if (!s.bs) s.bs = Date.now(); if (Date.now() - s.bs < 120000) return; }
+      if (!force && typeof BSH !== 'undefined' && BSH) { if (!s.bs) s.bs = Date.now(); if (Date.now() - s.bs < 120000) return; }
       if (OVL) { try { OVL.remove(); } catch (e) { } }
       var m = summary(); OVLG = G;
       var gift = false;   /* V186: ilk dünya fethi = Hızlı YZ turu ödülü (geçmişe yazmadan ÖNCE kontrol edilir) */
@@ -319,16 +335,17 @@
       if (win) for (var i = 0; i < 18; i++) conf += '<i style="left:' + (i * 5.6 + 2) + '%;animation-delay:' + ((i % 6) * .35).toFixed(2) + 's;background:hsl(' + (i * 37 % 360) + ',80%,60%)"></i>';
       var cell = function (v, k) { return '<div><b>' + v + '</b><small>' + k + '</small></div>'; };
       OVL = document.createElement('div'); OVL.id = 'v139over'; OVL.className = win ? 'win' : 'lose';
-      OVL.innerHTML = (win ? '<div class="cf">' + conf + '</div>' : '') + '<div class="in">' + (m.res === 'lose' ? '' : '<div class="ic">' + resIcon(m.res) + '</div>') + '<div class="fg">' + (m.res === 'lose' ? ballFlag(m.c) : fl(m.c)) + '</div><h2>' + resTitle(m.res) + '</h2><p>' + resLine(m.res, m) + '</p>' +
+      OVL.innerHTML = m.res === 'lose' ? loseHTML(m) : (win ? '<div class="cf">' + conf + '</div>' : '') + '<div class="in">' + '<div class="ic">' + resIcon(m.res) + '</div>' + '<div class="fg">' + fl(m.c) + '</div><h2>' + resTitle(m.res) + '</h2><p>' + resLine(m.res, m) + '</p>' +
         '<div class="gr">' + cell(m.turns, X('TUR', 'TURNS')) + cell(mmss(m.sec), X('SÜRE', 'TIME')) + cell(m.lands + '<i>/' + m.total + '</i>', X('TOPRAK', 'LANDS')) + cell(m.max, X('EN ÇOK TOPRAK', 'PEAK LANDS')) +
         cell(m.w + ' / ' + m.l, X('SAVAŞ K / Y', 'WINS / LOSSES')) + cell(m.conq, X('FETİH', 'CONQUESTS')) + cell(m.pacts, X('PAKT', 'PACTS')) + cell(m.allies, X('İTTİFAK', 'ALLIANCES')) + '</div>' +
         '<div class="sc">⭐ ' + X('Skor', 'Score') + ' <b>' + m.score + '</b></div>' +
         (gift ? '<div class="gift139" style="margin:8px 0;padding:8px 10px;border:1px solid #e3b94f;border-radius:10px;background:rgba(227,185,79,.14);color:#ffe9a8;font-size:13px;line-height:1.4">🎁 <b>' + X('Ödül: Hızlı YZ turu açıldı!', 'Reward: Fast AI turn unlocked!') + '</b><br>' + X('Haritadaki ⚡ düğmesiyle açıp kapatabilirsin.', 'Turn it on or off with the ⚡ button on the map.') + '</div>' : '') +
         '<button class="pri" onclick="v139New()">🔁 ' + X('Yeni Ülkeyle Başla', 'Start With a New Country') + '</button><button onclick="v139Hist()">📜 ' + X('Oyun Geçmişi', 'Game History') + '</button><button class="gh" onclick="v139Menu()">' + X('Ana Menü', 'Main Menu') + '</button></div>';
-      document.body.appendChild(OVL);
+      document.body.appendChild(OVL); if (m.res === 'lose') countUp();
       try { var m2 = document.getElementById('mod'); if (m2) m2.style.display = 'none'; } catch (e) { }
     } catch (e) { console.error(e); }
   }
+  window.v139Show = function (f) { showFinal(!!f); };
   function hideFinal() { try { if (OVL) OVL.remove(); } catch (e) { } OVL = null; OVLG = null; }
   window.v139New = function () { hideFinal(); try { localStorage.removeItem(SV); } catch (e) { } try { G = null; } catch (e) { } try { closeMod(); } catch (e) { } try { newGame(1); } catch (e) { console.error(e); try { menu(); } catch (x) { } } };
   window.v139Menu = function () { hideFinal(); try { localStorage.removeItem(SV); } catch (e) { } try { G = null; } catch (e) { } try { menu(); } catch (e) { } };

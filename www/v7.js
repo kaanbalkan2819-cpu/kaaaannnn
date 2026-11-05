@@ -156,13 +156,51 @@
   /* V63: 6 gelince tekrar atılan savaş zarı toplamı 6'yı aşabilir (ör. 6+4=10); eskiden PP[n] tanımsız kalıp savaş ekranı zarda donuyordu.
      Zarın üstünde (n-1)%6+1 noktası gösterilir, toplam rozet olarak yanında yazılır. */
   (function () { if (document.getElementById('v7totcss')) return; var st = document.createElement('style'); st.id = 'v7totcss'; st.textContent = '.d7{position:relative}.d7[data-tot]:not([data-tot=""])::after{content:attr(data-tot);position:absolute;right:-6px;top:-8px;min-width:20px;height:20px;line-height:20px;border-radius:10px;text-align:center;font:700 12px system-ui,sans-serif;color:#1b1300;background:#ffd067;box-shadow:0 1px 4px #0008}'; document.head.appendChild(st); })();
-  function setD7(id, n) { var e = $(id); if (e) { if (e.getAttribute('data-x3') && window.WCDice) WCDice.set(id + '_3', ((Math.round(+n) || 1) - 1) % 6 + 1); else e.firstChild.innerHTML = pipsHtml(n); e.setAttribute('data-tot', n > 6 ? String(n) : ''); } }
+  function setD7(id, n) {
+    var e = $(id); if (e) {
+      if (e.getAttribute('data-x3') && window.WCDice) {
+        /* V190: zar zaten aynı değerle inmişse (landed) tam yeniden pozlama/gölgelendirme tekrarlanmaz — görünüm aynı, iş azalır */
+        var v6 = ((Math.round(+n) || 1) - 1) % 6 + 1, d3 = document.getElementById(id + '_3');
+        if (!(e.__sv === v6 && d3 && d3.classList.contains('landed') && !d3.classList.contains('rolling'))) WCDice.set(id + '_3', v6);
+        e.__sv = v6;
+      } else e.firstChild.innerHTML = pipsHtml(n);
+      var tt = n > 6 ? String(n) : ''; if (e.getAttribute('data-tot') !== tt) e.setAttribute('data-tot', tt);
+    }
+  }
+  /* V192: bayrak data-URI'leri (büyük base64 dizgisi) her innerHTML'de yeniden ayrıştırılıyordu: bir kez Blob URL'ye çevrilip önbelleğe alınır.
+     Kaybeden bayrağın CSS grayscale filtresi yerine gri sürüm bir kez (boştayken) üretilir; olmazsa eski filtreye geri düşer (.gfb). */
+  var FB7 = {}, FG7 = {};
+  function flagBlob7(code, gray) {
+    var c = gray ? FG7 : FB7; if (c[code] !== undefined) return c[code];
+    var u = window.FLAGSVG && FLAGSVG[code], out = null;
+    try {
+      if (u && u.indexOf('data:image/svg+xml;base64,') === 0 && window.URL && URL.createObjectURL) {
+        var bin = atob(u.slice(26)), n = bin.length, ar = new Uint8Array(n); for (var k = 0; k < n; k++) ar[k] = bin.charCodeAt(k);
+        if (!gray) out = URL.createObjectURL(new Blob([ar], { type: 'image/svg+xml' }));
+        else if (window.TextDecoder) {
+          var tx = new TextDecoder('utf-8').decode(ar), m = tx.match(/<svg[^>]*[^\/]>/i), e2 = tx.lastIndexOf('</svg>');
+          if (m && e2 > 0) { var at = m.index + m[0].length; tx = tx.slice(0, at) + '<filter id="wcg"><feColorMatrix type="saturate" values=".1"/></filter><g filter="url(#wcg)">' + tx.slice(at, e2) + '</g>' + tx.slice(e2); out = URL.createObjectURL(new Blob([tx], { type: 'image/svg+xml' })); }
+        }
+      }
+    } catch (x) { out = null; }
+    c[code] = out; return out;
+  }
+  function fimg7(id, c, gray) {
+    var code = FL[id], b = code ? flagBlob7(code, gray) : null;
+    if (!b) return fimg(id, (c || '') + (gray ? ' gfb' : ''));
+    return '<img class="fi ' + (c || '') + '" src="' + b + '" alt="" draggable="false">';
+  }
   var SWORD = '<g><path d="M0 -46 L5 -40 L5 20 L-5 20 L-5 -40Z" fill="url(#sg)" stroke="#6b7488" stroke-width="1"/><rect x="-16" y="20" width="32" height="6" rx="3" fill="#f5b53a" stroke="#8a5a00"/><rect x="-3.5" y="26" width="7" height="18" rx="3" fill="#7a3b12"/><circle cy="47" r="4.5" fill="#f5b53a" stroke="#8a5a00"/></g>';
-  var SWORDS = '<svg viewBox="-60 -60 120 120" class="swd"><defs><linearGradient id="sg" x1="0" x2="1"><stop offset="0" stop-color="#e9eefc"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#9aa6c2"/></linearGradient></defs>' +
-    '<g class="sl"><g transform="rotate(45)">' + SWORD + '</g></g><g class="sr"><g transform="rotate(-45)">' + SWORD + '</g></g>' +
-    '<g class="spk"><circle r="3" fill="#fff"/>' + [0, 45, 90, 135, 180, 225, 270, 315].map(function (a) { return '<line x1="0" y1="-8" x2="0" y2="-22" stroke="#ffd067" stroke-width="2.4" stroke-linecap="round" transform="rotate(' + a + ')"/>'; }).join('') + '</g></svg>';
+  /* V192: kılıçlar ve kıvılcım ayrı <svg> katmanları (HTML eleman = compositor katmanı, bir kez boyanır); gradyan korunur; 8 çizgi tek <path> */
+  var SWORDS = (function () {
+    var vb = '<svg viewBox="-60 -60 120 120" class="swd ', gr = function (id) { return '<defs><linearGradient id="' + id + '" x1="0" x2="1"><stop offset="0" stop-color="#e9eefc"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#9aa6c2"/></linearGradient></defs>'; };
+    var d = [0, 45, 90, 135, 180, 225, 270, 315].map(function (a) { var r = a * Math.PI / 180, s = Math.sin(r), c = Math.cos(r); return 'M' + (8 * s).toFixed(2) + ' ' + (-8 * c).toFixed(2) + 'L' + (22 * s).toFixed(2) + ' ' + (-22 * c).toFixed(2); }).join('');
+    return vb + 'sl">' + gr('sgl') + '<g transform="rotate(45)">' + SWORD.replace(/#sg\)/g, '#sgl)') + '</g></svg>' +
+      vb + 'sr">' + gr('sgr') + '<g transform="rotate(-45)">' + SWORD.replace(/#sg\)/g, '#sgr)') + '</g></svg>' +
+      vb + 'spk"><circle r="3" fill="#fff"/><path d="' + d + '" fill="none" stroke="#ffd067" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  })();
   function side(cls, role, id, name, s, m, bon) {
-    return '<div class="s7 ' + cls + '" id="' + (cls == 'a' ? 'sa' : 'sdf') + '"><div class="rl">' + role + '</div>' + fimg(id, 'lg') + '<div class="nm">' + esc(name) + '</div>' +
+    return '<div class="s7 ' + cls + '" id="' + (cls == 'a' ? 'sa' : 'sdf') + '"><div class="rl">' + role + '</div>' + fimg7(id, 'lg') + '<div class="nm">' + esc(name) + '</div>' +
       '<div class="ln">👥 ' + X('Nüfus', 'Pop.') + ' <b>' + v1(s[0]) + '</b></div><div class="ln">🎖 ' + X('Ordu', 'Army') + ' <b>' + v1(s[1]) + '</b></div>' +
       '<div class="mx" id="m' + cls + '">×' + (m * (bon ? PREV_WIN : 1)).toFixed(2) + '</div><div class="pt">' + X('PUAN', 'POINTS') + '<b id="p' + cls + '">0</b></div></div>';
   }
@@ -176,21 +214,31 @@
       '<div class="dr"><div class="dc" id="dca">' + die7('da') + '<b class="dsm" id="dsa"></b></div><div class="dm" id="mu">' + X('Savaş başlıyor…', 'Battle begins…') + '</div><div class="dc" id="dcd">' + die7('db') + '<b class="dsm" id="dsd"></b></div></div><div class="cmp">';
     for (var i = 0; i < 5; i++) h += '<div class="sr7" id="r' + i + '"><b class="v"></b><div class="mid"><span class="lbl">' + SI[i] + ' ' + SNm(i) + '</span><div class="bar"><i class="a"></i><i class="d"></i></div></div><b class="v"></b></div>';
     bs.innerHTML = h + '</div><div class="ul" id="ul"></div><div class="fin" id="fn"></div>'; bs.style.display = 'block'; bs.scrollTop = 0; paint(); fitBattle(tg, att);
+    try { var lc = FL[r.win ? fd : fa]; (window.requestIdleCallback || function (f) { setTimeout(f, 300); })(function () { if (lc) flagBlob7(lc, true); }); } catch (x) { }   /* V192 */
     function mult() {
       var parts = [];
       parts.push(r.diff ? X('Yüksek zar', 'Higher die') + ': <b>' + (r.ra > r.rd ? t('A') : t('D')) + ' ×' + r.mult.toFixed(2) + '</b>' : X('Eşit zar: çarpan yok', 'Equal dice: no multiplier'));
       if (r.bA) parts.push(X('Saldıran önceki zafer bonusu ×' + PREV_WIN.toFixed(2), 'Attacker previous-win bonus ×' + PREV_WIN.toFixed(2)));
       if (r.adv && r.adv.length) r.adv.forEach(function (s) { parts.push(s); });   /* V102 */
       if (r.bD) parts.push(X('Savunan önceki zafer bonusu ×' + PREV_WIN.toFixed(2), 'Defender previous-win bonus ×' + PREV_WIN.toFixed(2)));
-      $('ul').innerHTML = parts.join(' · ');
+      var ulh = parts.join(' · '), ule = $('ul'); if (ule.innerHTML !== ulh) ule.innerHTML = ulh;   /* V190: aynı içerik yeniden kurulmaz */
     }
     /* V86: karşı taraftan yüksek değer → yeşil dolu ▲, düşük değer → kırmızı küçük ▼, eşitse işaret yok */
     function wcArr(a, b) { a = v1(a); b = v1(b); return a > b ? '<span class="ar up">▲</span>' : a < b ? '<span class="ar dn">▼</span>' : ''; }
+    var rr = [];   /* V190: satır elemanları + son yazılan genişlikler (finish() satırları ikinci kez çalıştırınca DOM'a dokunulmaz) */
     function row(i, snd) {
-      var x = r.rows[i], el = $('r' + i), tot = x.a + x.d || 1, v = el.querySelectorAll('.v'), b = el.querySelectorAll('.bar i');
-      v[0].innerHTML = v1(x.a) + wcArr(x.a, x.d); v[1].innerHTML = v1(x.d) + wcArr(x.d, x.a); v[0].className = 'v' + (x.w == 'a' ? ' up' : ''); v[1].className = 'v' + (x.w == 'd' ? ' up' : '');
-      b[0].style.width = (x.a / tot * 100) + '%'; b[1].style.width = (x.d / tot * 100) + '%'; el.className = 'sr7 on ' + (x.w == 'a' ? 'a' : x.w == 'd' ? 'd' : 'e');
-      if (x.w == 'a') aw++; if (x.w == 'd') dw++; $('pa').textContent = aw; $('pd').textContent = dw; if (snd) AU.play('tick');
+      var x = r.rows[i], rw = rr[i];
+      if (!rw) { var el0 = $('r' + i); rw = rr[i] = { el: el0, v: el0.querySelectorAll('.v'), b: el0.querySelectorAll('.bar i'), w0: null, w1: null }; }
+      var el = rw.el, tot = x.a + x.d || 1, v = rw.v, b = rw.b;
+      var h0 = v1(x.a) + wcArr(x.a, x.d), h1 = v1(x.d) + wcArr(x.d, x.a), c0 = 'v' + (x.w == 'a' ? ' up' : ''), c1 = 'v' + (x.w == 'd' ? ' up' : '');
+      if (v[0].innerHTML !== h0) v[0].innerHTML = h0; if (v[1].innerHTML !== h1) v[1].innerHTML = h1;
+      if (v[0].className !== c0) v[0].className = c0; if (v[1].className !== c1) v[1].className = c1;
+      var w0 = 'scaleX(' + (x.a / tot).toFixed(4) + ')', w1 = 'scaleX(' + (x.d / tot).toFixed(4) + ')';   /* V191: width yerine transform (layout yok) */
+      if (rw.w0 !== w0) { b[0].style.transform = w0; rw.w0 = w0; } if (rw.w1 !== w1) { b[1].style.transform = w1; rw.w1 = w1; }
+      var cl = 'sr7 on ' + (x.w == 'a' ? 'a' : x.w == 'd' ? 'd' : 'e'); if (el.className !== cl) el.className = cl;
+      if (x.w == 'a') aw++; if (x.w == 'd') dw++;
+      var pa = $('pa'), pd = $('pd'), sa = String(aw), sd = String(dw); if (pa.textContent !== sa) pa.textContent = sa; if (pd.textContent !== sd) pd.textContent = sd;
+      if (snd) AU.play('tick');
     }
     /* V66: 6 gelen zar sabit kalır, yanına yeni zar eklenir (en çok 3); oyuncu dokununca yeni zar atılır */
     var sA = (r.da && r.da.length) ? r.da : [r.ra], sD = (r.dd && r.dd.length) ? r.dd : [r.rd], waiting = false, rk = 0;
@@ -198,21 +246,33 @@
     function mkDie(sd, i, blank) {
       var id = did(sd, i), e = $(id), c = $('dc' + (sd == 'a' ? 'a' : 'd'));
       if (!e) { var w = document.createElement('div'); w.innerHTML = die7(id); e = w.firstChild; c.insertBefore(e, $('ds' + sd)); }
-      c.className = 'dc m' + c.querySelectorAll('.d7').length; if (blank) { e.className = 'd7 wait'; } return e;
+      var dcl = 'dc m' + c.querySelectorAll('.d7').length; if (c.className !== dcl) c.className = dcl; if (blank) { e.className = 'd7 wait'; } return e;   /* V190: aynı sınıf yeniden yazılıp zar boyutu stili geçersiz kılınmaz */
     }
-    function sumLbl(i) { [['a', sA], ['d', sD]].forEach(function (y) { var a = y[1].slice(0, i == null ? y[1].length : i + 1), t0 = a.reduce(function (p, q) { return p + q; }, 0), l = $('ds' + y[0]); if (l) l.textContent = a.length > 1 ? '= ' + t0 : ''; }); }
-    function rowsRun() { var i = 0; (function nx() { if (done) return; if (i < 5) { row(i++, 1); tm.push(setTimeout(nx, 420 / sp)); } else tm.push(setTimeout(finish, 380 / sp)); })(); }
+    function sumLbl(i) { [['a', sA], ['d', sD]].forEach(function (y) { var a = y[1].slice(0, i == null ? y[1].length : i + 1), t0 = a.reduce(function (p, q) { return p + q; }, 0), l = $('ds' + y[0]), tx = a.length > 1 ? '= ' + t0 : ''; if (l && l.textContent !== tx) l.textContent = tx; }); }
+    function rowsRun() {   /* V191: 5 satır + finish tek rAF döngüsünde (zamanlama aynı: satır i = i*420/sp, finish = 2480/sp); yazımlar kare başına denk gelir */
+      var t0 = null, i = 0, fin = 0;
+      row(i++, 1);
+      (function fr(ts) {
+        if (done) return;
+        if (t0 === null) t0 = ts;
+        var el = (ts - t0) * sp;
+        if (i < 5 && el >= i * 420) { row(i++, 1); }
+        if (i >= 5 && !fin && el >= 2100) { fin = 1; }
+        if (fin && el >= 2480) { finish(); return; }
+        requestAnimationFrame(fr);
+      })(performance.now());
+    }
     function roundRoll(i) {
       var act = []; if (sA.length > i) act.push(['a', i]); if (sD.length > i) act.push(['d', i]);
       var x3 = !!window.WCDice, RMS = Math.round(1250 / Math.min(sp, 1.5));
-      act.forEach(function (x) { mkDie(x[0], x[1]).className = x3 ? 'd7' : 'd7 rolling'; });
+      act.forEach(function (x) { var de = mkDie(x[0], x[1]); de.__sv = 0; de.className = x3 ? 'd7' : 'd7 rolling'; });
       AU.play('dice');
       var iv = null;
       if (x3) act.forEach(function (x) { WCDice.roll(did(x[0], x[1]) + '_3', (x[0] == 'a' ? sA : sD)[x[1]], RMS, x[0] == 'a' ? -1 : 1); });   /* V80: zar önceden belirlenen sayıya, ÜST yüzü o olacak şekilde iner */
       else { iv = setInterval(function () { act.forEach(function (x) { setD7(did(x[0], x[1]), 1 + Math.floor(Math.random() * 6)); }); }, 85); tm.push(iv); }
       tm.push(setTimeout(function () {
         if (iv) clearInterval(iv); if (done) return;
-        act.forEach(function (x) { var f = (x[0] == 'a' ? sA : sD)[x[1]], id = did(x[0], x[1]); setD7(id, f); $(id).className = 'd7' + (f == 6 ? ' six' : ''); });
+        act.forEach(function (x) { var f = (x[0] == 'a' ? sA : sD)[x[1]], id = did(x[0], x[1]); setD7(id, f); var ce = $(id), cn = 'd7' + (f == 6 ? ' six' : ''); if (ce.className !== cn) ce.className = cn; });
         sumLbl(i);
         if (sA.length > i + 1 || sD.length > i + 1) {   // 6 geldi: yeni zar yerini alır, oyuncu dokununca atılır
           [['a', sA], ['d', sD]].forEach(function (y) { if (y[1].length > i + 1) mkDie(y[0], i + 1, true); });
@@ -222,14 +282,14 @@
     }
     function showDice() {
       [['a', sA, r.ra > r.rd], ['d', sD, r.rd > r.ra]].forEach(function (y) {
-        for (var i = 0; i < y[1].length; i++) { var id = did(y[0], i); mkDie(y[0], i); setD7(id, y[1][i]); $(id).className = 'd7' + (y[2] ? ' hi' : '') + (y[1][i] == 6 ? ' six' : ''); }
+        for (var i = 0; i < y[1].length; i++) { var id = did(y[0], i); mkDie(y[0], i); setD7(id, y[1][i]); var de2 = $(id), cn2 = 'd7' + (y[2] ? ' hi' : '') + (y[1][i] == 6 ? ' six' : ''); if (de2.className !== cn2) de2.className = cn2; }
       });
-      sumLbl(); $('mu').innerHTML = r.diff ? (r.ra > r.rd ? '◀ ' : '') + '×' + r.mult.toFixed(2) + (r.ra > r.rd ? '' : ' ▶') : '＝'; mult(); }
+      sumLbl(); var muh = r.diff ? (r.ra > r.rd ? '◀ ' : '') + '×' + r.mult.toFixed(2) + (r.ra > r.rd ? '' : ' ▶') : '＝', mue = $('mu'); if (mue.innerHTML !== muh) mue.innerHTML = muh; mult(); }
     function finish() {
       if (done) return; done = 1; tm.forEach(clearTimeout); ph = 3; showDice(); aw = 0; dw = 0; for (var i = 0; i < 5; i++) row(i, 0);
       $('sa').className = 's7 a ' + (r.win ? 'win' : 'lose'); $('sdf').className = 's7 d ' + (r.win ? 'lose' : 'win'); bs.className = 'b7 ' + (r.win ? 'vw' : 'vl');
       // V27: sonuçta saldıran/savunan panelleri ve zarlar kalkar; bayraklar 5 özellik karşılaştırmasının üstüne iner
-      try { var cmp7 = bs.querySelector('.cmp'); if (cmp7 && !bs.querySelector('.fl7')) cmp7.insertAdjacentHTML('beforebegin', '<div class="fl7"><div class="fl7s ' + (r.win ? 'w' : 'l') + '">' + fimg(fa, 'lg') + '<small>' + esc(nm(p)) + '</small></div><span class="fl7x">⚔</span><div class="fl7s ' + (r.win ? 'l' : 'w') + '">' + fimg(fd, 'lg') + '<small>' + esc(nm(e)) + '</small></div></div>'); } catch (x) { }
+      try { var cmp7 = bs.querySelector('.cmp'); if (cmp7 && !bs.querySelector('.fl7')) cmp7.insertAdjacentHTML('beforebegin', '<div class="fl7"><div class="fl7s ' + (r.win ? 'w' : 'l') + '">' + fimg7(fa, 'lg', !r.win) + '<small>' + esc(nm(p)) + '</small></div><span class="fl7x">⚔</span><div class="fl7s ' + (r.win ? 'l' : 'w') + '">' + fimg7(fd, 'lg', r.win) + '<small>' + esc(nm(e)) + '</small></div></div>'); } catch (x) { }
       var wn = r.win ? nm(p) : nm(e), ls = r.win ? nm(e) : nm(p);
       $('fn').innerHTML = '<div class="fh"><span class="banner ' + (r.win ? 'w' : 'l') + '">' + (r.win ? t('win') : t('lose')) + '</span><span class="tl">' + r.aw + ' – ' + r.dw + '</span></div>' +
         '<div class="chips7"><span class="c7">' + (r.win ? '🏳 <b class="w">+' + esc(M[tg].name) + '</b>' : (mv ? '🏳 <b class="l">−' + esc(M[mv].name) + '</b>' : '—')) + '</span>' +
@@ -238,7 +298,7 @@
         '<details class="why7"><summary>ℹ ' + X('Ayrıntı', 'Details') + '</summary><p class="rs">' + X('Kazanan', 'Winner') + ': <b class="w">' + esc(wn) + '</b> · ' + X('Kaybeden', 'Loser') + ': <b class="l">' + esc(ls) + '</b><br>' + (r.win ? t('ru1') : r.dw >= 3 ? t('ru2') : t('ru3')) + '<br>' + t('rep') + ': ' + esc(nm(r.rep.w)) + ' +' + v1(r.rep.amt) + ' / ' + esc(nm(r.rep.l)) + ' −' + v1(r.rep.amt) + '</p></details>' +
         '<button class="big pri" onclick="closeBattle()">' + ((r.win && G.pend && !G.pend.done) ? t('cont2') : X('Haritaya Dön', 'Back to Map')) + '</button>';
       OV = {}; if (r.win) { FLASH = tg; setTimeout(function () { FLASH = null; if (G) overlay(); }, 1300); }
-      paint(); splash(r.win); bs.scrollTop = bs.scrollHeight; AU.play(r.win ? 'win' : 'lose'); if (r.win) tm.push(setTimeout(function () { AU.play('conq'); }, 500));
+      paint(); splash(r.win); requestAnimationFrame(function () { bs.scrollTop = bs.scrollHeight; }); /* V191: scrollHeight okuması finish içinde senkron layout zorluyordu; kare başına ertelendi */ AU.play(r.win ? 'win' : 'lose'); if (r.win) tm.push(setTimeout(function () { AU.play('conq'); }, 500));
     }
     bs.onclick = function (ev) { if (ev.target.closest && ev.target.closest('button')) return; if (done) return; if (waiting) { waiting = false; $('mu').innerHTML = ''; roundRoll(rk); return; } if (lock86) return; finish(); };
     if (!sp) { finish(); return; }

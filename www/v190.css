@@ -1,0 +1,12 @@
+/* V190 — savaş paneli akıcılık (1/4: filter/gölge/opacity + gereksiz DOM yazımı). Görünüm aynı, oyun mantığı aynı.
+   1) Zar sonuç parlaması (hi/six): V189'daki box-shadow geçişi her karede 14px bulanık gölgeyi yeniden BOYUYORDU (her zar için, .35 sn).
+      Artık parlama bir ::before halkasında sabit; yalnızca opacity geçiyor (compositor, yeniden boyama yok). Boyut/renk/yarıçap aynı.
+   2) .sr7 / .s7 'transition: all' idi (genişlik, kenarlık, gölge dahil her şey izleniyordu); yalnızca kullanılan özellikler kaldı. */
+.dr .d7[data-x3]{transition:none}
+.dr .d7[data-x3].hi,.dr .d7[data-x3].six{box-shadow:none!important}
+.dr .d7[data-x3]::before{display:block!important;content:'';position:absolute;inset:0;border-radius:15px;background:none;pointer-events:none;opacity:0;transition:opacity .35s;box-shadow:0 0 14px 3px #4fe0a0aa;will-change:opacity}
+.dr .d7[data-x3].hi::before{opacity:1}
+.dr .d7[data-x3].six::before{opacity:1;box-shadow:0 0 14px 3px #ffd067cc}
+.sr7{transition:opacity .3s,background-color .3s}
+.s7{transition:border-color .4s,box-shadow .4s,opacity .4s}
+body.rm .dr .d7[data-x3]::before{transition:none}

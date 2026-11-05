@@ -87,3 +87,6 @@ body.wc141-ig .wb-panel.wc156{box-shadow:0 18px 50px #000b!important}
 .d3.rolling .cb{will-change:transform}
 .d3.rolling .sdw{will-change:transform,opacity}
 .d3 .sdw{filter:none!important}
+/* V187: savaş zarı — atılmadan önce görünmez (eskiden '1' yüzüyle durup atışta yana ışınlanıyordu); atışta fade-in ile girer */
+.d7[data-x3]>.d3:not(.landed):not(.rolling){opacity:0}
+.d3.d80 .bx{transform-origin:50% 50%}

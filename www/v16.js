@@ -8,7 +8,8 @@
   'use strict';
   var SEAMAX = 0.085,   // rad (~540 km) kıyı-kıyı azami mesafe
       SEAISO = 0.40,    // rad (~2550 km) yalnızca komşusuz adalar için
-      KNN = 4, STEP = 0.012, ISO_N = 2, SL = null, REP = null,
+      KNN = 4, STEP = 0.012, ISO_N = 2, SL = null, REP = null, NAT = {}, ONEW = {},
+      ISL_MIN = 4, ISL_TIERS = [0.14, 0.2, 0.3, 0.45],   // V189: kara komşusu olmayan adalar en az ISL_MIN hedefe ulaşana kadar menzil genişler
       BOX_RANGE = 0.20,  // V122: yalnızca büyük+güçlü komşularla çevrili kıyı ülkeleri için genişletilmiş deniz menzili (~1275 km)
       BOX_EXTRA = 6,
       RESC_MIN = 0.35,   // V124: en iyi kazanma şansı bunun altındaki ülkeler 'kazanamayan' sayılır
@@ -94,6 +95,20 @@
       var l = pairs(a, SEAISO).slice(0, ISO_N); if (!l.length) { l = pairs(a, 1.2).slice(0, 1); REP.far = (REP.far || []).concat(a.id); } if (!l.length) REP.noSea.push(a.id);
       l.forEach(function (p) { link(a.id, p.id, p.d); });
     });
+    /* V189: kara komşusu olmayan ada ülkeleri (ör. Sri Lanka) yalnızca 1-2 hedefe sahipse en yakın, yolu üçüncü ülkeden geçmeyen,
+       karayla çevrili olmayan ülkelere (güçlü ya da zayıf fark etmez) ISL_MIN hedefe tamamlanana kadar menzil kademeli genişler. */
+    REP.islandExt = [];
+    R.forEach(function (a) {
+      if (LLK.indexOf(a.id) >= 0 || a.nb.filter(function (n) { return n !== a.id; }).length) return;
+      var have = Object.keys(S[a.id] || {}).length; if (have >= ISL_MIN) return;
+      for (var ti = 0; ti < ISL_TIERS.length && have < ISL_MIN; ti++) {
+        pairs(a, ISL_TIERS[ti]).forEach(function (p) { if (have >= ISL_MIN || (S[a.id] && S[a.id][p.id])) return; link(a.id, p.id, p.d); have++; REP.islandExt.push(a.id + '→' + p.id); });
+      }
+    });
+    NAT = {}; for (var nk in S) { NAT[nk] = {}; for (var nj in S[nk]) NAT[nk][nj] = S[nk][nj]; }   // V189: kurtarma öncesi 'doğal' bağlantılar
+    var RA = {}; ONEW = {};   // V189: RA[a][b] = a, b'ye kurtarma bağıyla saldırabilir; ONEW[x][y] = x, y'ye SALDIRAMAZ (tek yönlü bağ)
+    function reach(a, b) { if (LLK.indexOf(a.id) >= 0) return true; if (LLK.indexOf(b.id) >= 0) return false; var k = closest(coastPts(a), coastPts(b)); return !blocked(a, b, k.a, k.b, k.d); }
+    function allow(x, y) { (RA[x] = RA[x] || {})[y] = 1; if (ONEW[x] && ONEW[x][y]) delete ONEW[x][y]; if (!(RA[y] && RA[y][x])) (ONEW[y] = ONEW[y] || {})[x] = 1; }
     /* V124: "KAZANAMAYAN ÜLKE" kurtarması. Mevcut hedefleri (kara + deniz) içinde en iyi kazanma şansı RESC_MIN altında kalan ülkeler,
        kazanma şansı en az RESC_WIN olan en yakın ülkelerden RESC_N tanesini ek hedef olarak alır (çift yönlü, 'sea' etiketi = 2 hamle).
        Şans, BASE değerleri ve zar dağılımı üzerinden SABİT (rastgelesiz) hesaplanır: kayıtlı oyunlarda bağlantılar her açılışta aynı çıkar. */
@@ -113,18 +128,26 @@
     REP.rescued = []; REP.winP = winP;
     if (typeof BASE !== 'undefined') R.forEach(function (a) {
       var A = BASE[a.id]; if (!A) return;
-      var cur = {}; a.nb.forEach(function (n) { cur[n] = 1; }); for (var q in (S[a.id] || {})) cur[q] = 1;
+      var cur = {}; a.nb.forEach(function (n) { cur[n] = 1; }); for (var q in (S[a.id] || {})) if (!(ONEW[a.id] && ONEW[a.id][q])) cur[q] = 1;
       var best = 0, any = false; for (var n in cur) if (BASE[n]) { any = true; best = Math.max(best, winP(A, BASE[n])); }
       if (any && best >= RESC_MIN) return;
       var cand = [];
       R.forEach(function (b) { if (b === a || cur[b.id] || !BASE[b.id]) return; var w = winP(A, BASE[b.id]); if (w < RESC_WIN) return;
-        var cd = angC(a.cu, b.cu) - a.rad - b.rad; if (cd < RESC_MAX[RESC_MAX.length - 1]) cand.push({ id: b.id, d: Math.max(0.01, cd), w: w }); });
+        var cd = angC(a.cu, b.cu) - a.rad - b.rad; if (cd < RESC_MAX[RESC_MAX.length - 1]) cand.push({ id: b.id, o: b, d: Math.max(0.01, cd), w: w }); });
       cand.sort(function (x, y) { return x.d - y.d; });
-      var pick = []; for (var ri = 0; ri < RESC_MAX.length && !pick.length; ri++) pick = cand.filter(function (c) { return c.d < RESC_MAX[ri]; }).slice(0, RESC_N);   // menzil kademeli genişler
+      var pick = [], rch = {};   // V189: karayla çevrili (Nepal gibi) ya da yolu başka ülkenin ardından geçen hedefler seçilmez (karayla çevrili ülkenin kendi kurtarması hariç)
+      for (var ri = 0; ri < RESC_MAX.length && !pick.length; ri++) {
+        cand.filter(function (c) { return c.d < RESC_MAX[ri]; }).forEach(function (c) {
+          if (pick.length >= RESC_N) return;
+          if (rch[c.id] === undefined) { try { rch[c.id] = reach(a, c.o); } catch (x) { rch[c.id] = false; } }
+          if (rch[c.id]) pick.push(c);
+        });
+      }   // menzil kademeli genişler
       if (!pick.length) return;
       REP.rescued.push(a.id + '→' + pick.map(function (p) { return p.id; }).join(','));
-      pick.forEach(function (p) { link(a.id, p.id, p.d); });
+      pick.forEach(function (p) { link(a.id, p.id, p.d); allow(a.id, p.id); });   // V189: kurtarma bağı tek yönlü
     });
+    REP.oneway = []; for (var ox in ONEW) for (var oy in ONEW[ox]) REP.oneway.push(ox + ' !→ ' + oy);
     for (var k in S) REP.links += Object.keys(S[k]).length;
     REP.links /= 2; return S;
   }
@@ -136,7 +159,7 @@
     R.forEach(function (a) {
       if (ow[a.id] !== p) return;
       a.nb.forEach(function (n) { if (ow[n] !== p) s[n] = 'land'; });     // kara her zaman önce
-      var l = S[a.id]; if (l) for (var n in l) if (ow[n] !== p && !s[n]) s[n] = 'sea';
+      var l = S[a.id], oo = ONEW[a.id]; if (l) for (var n in l) if (ow[n] !== p && !s[n] && !(oo && oo[n])) s[n] = 'sea';
     });
     return s;
   };
@@ -195,4 +218,5 @@
   window.WC = window.WC || {};
   window.WC.seaLinks = function () { return sea(); };
   window.WC.seaReport = function () { sea(); return REP; };
+  window.WC.seaNat = function () { sea(); return NAT; };
 })();

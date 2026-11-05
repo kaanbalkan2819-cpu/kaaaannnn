@@ -1,3 +1,37 @@
+=================== V194 ===================
+V194 — RESİMLİ MADALYONLAR (yalnızca node --check geçti; oyunda denenmedi)
+Diplomasi menüsünde: İttifak, Yenile, Saldırmazlık, Garanti, Koruma, İttifaktan Çık, Haraç, Kışkırt, Paktı Boz + başlıkta elçi. Kalkınma kartlarında: Halk, Silahlanma, Ar-Ge, Diplomatik Atılım, Ticaret.
+Dosyalar: www/v194.js, www/v194.css, www/assets/art/*.webp İhanet bildirimi (🗡) yanında betray.webp madalyonu çıkar. Geri almak için index.html'den v194 bağlantılarını silin.
+
+
+=================== V188 ===================
+V188 — YENİLGİDE KİLİTLENME DÜZELTMESİ + YENİ YENİLGİ EKRANI (başsız tarayıcıda yalnızca SAHTE yenilgi durumuyla denendi; gerçek oyunda denenmedi)
+1) Kilitlenme: Son toprak kaybedilince "Haritaya Dön"e basınca oyun donuyordu. Kesin neden bulunamadı (şüphe: kapanış zincirinin toprağı kalmamış oyuncu için render/kamera/animasyon yeniden oynatması).
+   www/v188.js: tek oyunculu modda oyuncunun toprağı 0 ise closeBattle zinciri çalıştırılmaz; panel doğrudan kapatılır, oyun "over" olur, yenilgi ekranı açılır. Online'a dokunmaz.
+2) Yenilgi ekranı (www/v139.js loseHTML, www/v188.css): countryball kaldırıldı. Yeni düzen: "SEFER SONA ERDİ" şeridi, ülke rozeti, rütbe + sayarak yükselen skor,
+   toprak yolculuğu çubukları (başlangıç/zirve/son), savaş zafer-yenilgi oranı çubuğu, süre/fetih/pakt/ittifak kutuları, Yeni Ülke / Geçmiş / Ana Menü düğmeleri. Zafer ekranı AYNEN eski.
+GERİ ALMAK İÇİN: index.html'den v188.js ve v188.css bağlantılarını silin; v139.js'te showFinal içindeki "m.res === 'lose' ? loseHTML(m) :" kısmını eski ballFlag çağrısıyla değiştirmek gerekir (v188 öncesi zip'e dönmek daha kolay).
+
+
+=================== V187 ===================
+V187 — SAVAŞ PANELİ ZAR ATMA ANİMASYONU YENİDEN YAZILDI: AKICI, GPU'DA (TEST EDİLMEDİ; yalnızca node --check geçti)
+SORUN: Zar akıcı değil, "katı" hissediliyordu. Nedenler (kodda bulundu):
+ 1) Zar atılmadan önce '1' yüzüyle yerinde duruyor, atış başlayınca ilk karede yana ve rastgele yöne ışınlanıyordu (pop).
+ 2) Son sallanma sıfır olmayan açıdan başlıyordu: zar yere inince 0-7° sıçrama (ikinci pop).
+ 3) Dönüş sekmelerden bağımsız tek eğriyle akıyordu; çarpma hissi yoktu.
+ 4) Tüm hareket ana iş parçacığında JS (rAF) ile yazılıyordu; savaş sahnesi/ses/harita meşgulken kare kaçıyordu.
+ÇÖZÜM (www/dice3d.js, www/v156.css sonu):
+ - Hareket tek bir yol fonksiyonundan (plan().at) üretilir; yol ~8 ms aralıklı anahtar karelere çevrilip Web Animations ile transform/opacity olarak
+   compositor'a (GPU) verilir. Ana iş parçacığı meşgul olsa bile zar akar. Desteklenmiyorsa aynı yol rAF ile oynar (otomatik geri dönüş).
+ - Zar atılana kadar görünmez, atışta yandan fade-in ile girer ve havaya fırlar (ışınlanma yok).
+ - Dönüş her parçada sabit hızla, her sekmede keskin biçimde azalır (çarpma hissi); 4 sönümlü sekme (80/27/9/2.8) + son çarpmada kısa "oturma" vuruşu (ölçek).
+ - Son sallanma sıfırdan başlar ve sıfırda biter (sıçrama yok). Çarpma sesleri zaman çizelgesine bağlıdır.
+ - Uçuşta yüz gölgesi tek sabit ton (yüz başına ışık hesabı yok); inişte gerçek gölgelendirme 0,3 sn'de yumuşakça gelir. Eski 125 ms'lik gölge döngüsü kaldırıldı.
+ - Süre aynı (1250 ms/hız). Oyun mantığı/sonuç (üst yüz) DEĞİŞMEDİ.
+ZEVKE GÖRE AYAR (dice3d.js, plan() üstü): AMP = sekme yükseklikleri, AIR = havada kalma oranı, SPIN = dönüşün sekmelerde kalan oranı.
+GERİ ALMAK İÇİN: dice3d.js ve v156.css'in V186 öncesi kopyasını geri koyun (v156.css'ten V187 bloğunu silin).
+
+
 =================== V186 ===================
 V186 — "HIZLI YZ TURU" ARTIK ÖDÜL (TELEFONDA DENENMEDİ; yalnızca node --check geçti)
 Oyun artık her zaman normal hızda oynanır: haritadaki ⚡ (Hızlı YZ turu) düğmesi başta GİZLİ ve özellik kapalı (eskiden varsayılan açıktı).
@@ -696,3 +730,83 @@ GERİ ALMAK İÇİN: v30.js'te "V179" satırını silin ve "(LOWQ ? 1e9 : 1200)"
 V180 — DURAKLATMA KARTI GÖLGESİ KÜÇÜLTÜLDÜ (TEST EDİLMEDİ)
 v141.css: .wb-panel gölgesi 0 18px 50px -> 0 8px 20px (büyük bulanık gölge açılış/kapanışta her karede yeniden hesaplanıyordu).
 GERİ ALMAK İÇİN: v141.css'te 0 8px 20px ifadesini 0 18px 50px yapın.
+
+
+=================== V189 ===================
+V189 — HARAÇ ÜCRETİ 1 ZAR + YAKIN KOMŞULARA SALDIRI DÜZELTMESİ (TEST EDİLMEDİ; yalnızca node --check geçti)
+1) Haraç: ücret 2 -> 1 zar (v138.js COSTS.tribute, v40.js metin). Tur başına en çok 2 talep ve aynı ülkeden turda en çok 1 talep ZATEN böyleydi (v40.js MAX_TOT=2, MAX_PER=1); değişmedi.
+2) Sri Lanka -> Hindistan/Bangladeş sorunu, nedenleri:
+   a) v40.js V46 kuralı: oyuncu kendinden 1,6 kat güçlü ülkeye denizden saldıramıyordu; yakın deniz komşusu Hindistan da bu yüzden siliniyordu.
+      Artık yakın (doğal) deniz bağlantıları kara komşusu gibi muaf (v16.js WC.seaNat()). Yalnızca uzak/kurtarma bağlantıları için kural geçerli.
+   b) Nepal: kendi "kurtarma" bağlantısı çift yönlüydü; Sri Lanka da Nepal'e saldırabiliyordu. Artık kurtarma bağı TEK YÖNLÜ (Nepal -> hedef; hedef -> Nepal yok).
+      Ayrıca karayla çevrili ya da yolu başka ülkenin ardından geçen ülkeler, karayla çevrili olmayan ülkelerin kurtarma hedefi olamaz.
+   c) Kara komşusu olmayan adalar (Sri Lanka, vb.) 4 hedefe ulaşana kadar (en yakın, yolu açık, karayla çevrili olmayan ülkelerle) menzil genişler: ISL_MIN / ISL_TIERS (v16.js).
+Konsol: WC.seaReport().islandExt (ada eklemeleri), .oneway (tek yönlü bağlar), .rescued.
+GERİ ALMAK İÇİN: V189 öncesi zip. Hızlı ayar: v16.js ISL_MIN=0 (ada genişletmesini kapatır).
+
+
+=================== V190 ===================
+V190 — SAVAŞ PANELİ AKICILIK 1/4 (TEST EDİLMEDİ; yalnızca node --check geçti)
+Kapsam: filter/gölge/opacity + gereksiz DOM yazımı. Oyun mantığı, zar sonuçları, ses ve süreler aynı.
+1) v190.css: zar hi/six parlaması box-shadow geçişinden ::before + opacity geçişine alındı (her karede yeniden boyama yok).
+2) v190.css: .sr7 ve .s7 'transition: all' -> yalnızca kullanılan özellikler.
+3) v7.js row(): satır elemanları bir kez bulunur; innerHTML/className/width/puan yalnızca DEĞİŞİNCE yazılır (finish() 5 satırı tekrar çalıştırıyordu).
+4) v7.js setD7(): zar aynı değerle zaten inmişse WCDice.set (6 yüzde --sh + sınıf + poz) tekrarlanmaz; data-tot yalnız değişince yazılır.
+5) v7.js showDice/mult/mkDie/sumLbl/roundRoll: #mu, #ul, .dc, zar sınıfı ve toplam yazısı yalnızca değişince yazılır (showDice sonuç anında 2 kez çalışıyordu).
+GERİ ALMAK İÇİN: index.html'den v190.css bağlantısını silin ve v7.js'i V189 sürümüyle değiştirin.
+
+
+=================== V191 ===================
+V191 — SAVAŞ PANELİ AKICILIK: GENİŞLİK VE LAYOUT (listenin 1/3 parçası; TEST EDİLMEDİ; yalnızca node --check)
+1) v191.css + v7.js row(): .sr7 .bar i genişlik geçişi (her karede layout) yerine transform: scaleX geçişi. İki çubuk üst üste, a soldan d sağdan; görünüm aynı.
+2) v7.js finish(): sonundaki bs.scrollTop = bs.scrollHeight (senkron layout zorluyordu) requestAnimationFrame içine alındı.
+3) v7.js rowsRun(): 5 satır + finish setTimeout zinciri yerine tek rAF döngüsü (zamanlama aynı: satır i = i*420/sp, finish = 2480/sp).
+GERİ ALMAK İÇİN: index.html'den v191.css bağlantısını silin ve v7.js'i V190 sürümüyle değiştirin.
+
+
+=================== V192 ===================
+V192 — SAVAŞ PANELİ AKICILIK: AĞIR SVG VE BİTMAP (listenin 2/3 parçası; TEST EDİLMEDİ; yalnızca node --check)
+1) v7.js SWORDS + v192.css: kılıçlar ve kıvılcım tek SVG içindeki <g> yerine üç ayrı <svg> eleman (sl, sr, spk). Transform animasyonu HTML elemanında = compositor, SVG her karede yeniden boyanmaz. Gradyan aynen korundu (iki ayrı id: sgl/sgr). 8 kıvılcım çizgisi tek <path>. Piksel değerleri ölçeklendi (46u -> 32.2px, 3u -> 2.1px).
+2) v7.js fimg7/flagBlob7: bayrak data-URI'leri (büyük base64) her innerHTML'de yeniden ayrıştırılmasın diye bir kez Blob URL'ye çevrilip önbelleğe alınır (savaş paneli bayrakları: yan paneller + fl7).
+3) fl7 kaybeden bayrak: CSS grayscale filtresi kaldırıldı; gri sürüm (SVG feColorMatrix saturate .1) savaş açılırken boşta bir kez üretilir. Üretilemezse (.gfb) eski CSS filtresine geri düşer. .s7.lose .fi filtresi de kaldırıldı (sonuçta o paneller gizli).
+GERİ ALMAK İÇİN: index.html'den v192.css bağlantısını silin ve v7.js'i V191 sürümüyle değiştirin.
+
+
+=================== V193 ===================
+V193 — ANA MENÜ: ARKADAKİ KÜRE DÖNER (TEST EDİLMEDİ; yalnızca node --check)
+1) v158.js: amblem (.crest) dokununca ÖNDEKİ amblem artık dönmez; ARKA PLAN resmindeki (bg.webp) küre döner. Dokunuş başına bir turun %15'i (54°), 0.9 sn yumuşak yavaşlama.
+2) Küre yüzeyi canvas ile çizilir (resmin küre diski kırpılır, yatayda küresel eşleme ile kaydırılır); ışık/gölge yerinde kalır, pirinç halka ve kenar bölgesi dokunulmaz.
+3) Menü yeniden kurulunca tuval son açıyla yeniden eklenir. Resim okunamazsa hiçbir şey olmaz.
+Ayar: v158.js başındaki STEP (0.15 = %15), CX/CY/R (küre konumu, bg.webp 800x1200 piksel koordinatı).
+GERİ ALMAK İÇİN: v158.js'i V192 sürümüyle değiştirin.
+
+
+=================== V195 ===================
+V195 — RANK EKRANI: DURAKLATMA KARTIYLA AYNI ŞABLON VE BOYUT (TEST EDİLMEDİ; yalnızca node --check)
+1) ranked.js hub(): gül/kılıç/kalkan ikonları ve ★ kaldırıldı; v156 köşe işlemesi, baklavalı ayırıcı, çizili yıldız. rmodal/modal: #mod'a wcr156 sınıfı (duraklatma ile aynı karartma).
+2) v195.css (yeni): kart genişliği min(82vw,320px) (duraklatma kartıyla aynı), taş/altın palet, kutusuz ortalı büyük harf düğmeler, etiket üstte-değer altta istatistik satırı. Emblem 150px'e küçüldü; kısa ekranda 112px, lig şeridi gizlenir.
+GERİ ALMAK İÇİN: index.html'den v195.css bağlantısını silin ve ranked.js'i V194 sürümüyle değiştirin.
+
+
+=================== V196 ===================
+V196 — ÜLKE PANELİ: DURAKLATMA KARTIYLA AYNI ŞABLON (TEST EDİLMEDİ; yalnızca CSS)
+v196.css (yeni): ülkeye tıklayınca açılan alt panel (#panel) taş-kahve zemin, altın çerçeve, köşe işlemeleri ve soluk küre desenine geçti; düğmeler/etiketler/istatistik kutuları sıcak tonlara boyandı. İçerik, yerleşim ve yazı tipi DEĞİŞMEDİ (JS'e dokunulmadı).
+GERİ ALMAK İÇİN: index.html'den v196.css bağlantısını silin.
+
+
+=================== V197 ===================
+V197 — KALKINMA VE DİPLOMASİ PENCERELERİ: DURAKLATMA/ÜLKE PANELİYLE AYNI ZEMİN (TEST EDİLMEDİ; yalnızca CSS)
+v197.css (yeni): .box:has(.polx) (Kalkınma + Politikalar) ve .box:has(.d38) (Diplomasi/Elçi) pencereleri taş-kahve zemin, altın çerçeve, köşe işlemeleri ve soluk küre desenine geçti; düğme/kart/etiket renkleri sıcak tonlara boyandı. İçerik, yerleşim, yazı tipi ve JS değişmedi.
+GERİ ALMAK İÇİN: index.html'den v197.css bağlantısını silin.
+
+=================== V198 ===================
+V198 — DİPLOMASİ ÜLKE SAYFASI: KALKINMA PENCERESİYLE AYNI BİÇİM (TEST EDİLMEDİ)
+v138.js (sheet): sayfa artık Kalkınma ile aynı yapıda (.polx): sol üstte "🕊 Diplomasi" + ülke adı, sağ üstte ✕, altında iki kutu (🎲 zar, 🤝 Güven), ilişki çubuğu, sonra madalyonlu kartlar (İttifak, Saldırmazlık, Haraç, Garanti, Koruma, Kışkırt... hepsi tek listede, "Diğer işlemler" başlığı yok) ve altın düğmeler (olasılık · zar maliyeti). Üstteki büyük resim ve alttaki Kapat düğmesi yok.
+v194.js: yeni .pcard.d38p kartlarına madalyon resmi eşleme eklendi; büyük başlık resmi (envoy) ekleyen blok kaldırıldı.
+v198.css (yeni): varsa eski .d38-art görselini gizler.
+GERİ ALMAK İÇİN: V197 sürümündeki v138.js, v194.js ve index.html'i geri koyun.
+V198 (ek) — ZAR SİMGESİ + KALKINMA YAZILARI
+v198.js (yeni) + v198.css: ekrandaki tüm 🎲 emojileri (hamle/zar göstergeleri, düğmeler, bildirimler) siyah-beyaz zar simgesiyle (beyaz yüz, siyah çerçeve ve noktalar) değişir. index.html'e v198.js eklendi. Kaynak dosyalardaki 🎲 karakterlerine dokunulmadı.
+v137.js (Kalkınma): altın düğmedeki "💰 −8 · +4" yerine "Geliştir · 8 💰"; kazanç zaten "Nüfus 62 → 66" etiketinde görünür; yan etki etiketi "Yan etki: ..." diye adlandırıldı. Ticaret Koridoru düğmesi de aynı.
+GERİ ALMAK İÇİN: index.html'den v198.js bağlantısını silin; v137.js'i V197 sürümüyle değiştirin.
+V198 (ek 2) — "BİT BİT" EMOJİLER: v198.js artık 🕊 ⚔ 🏗 🛡 emojilerini de (Diplomasi/Kalkınma başlıkları, İtibar/saldırganlık göstergesi, pakt/garanti satırları) assets/art madalyonlarıyla (dip, army, city, guard) değiştirir. .pic içindekilere ve bildirime (#toast, 🗡 ihanet) dokunmaz.

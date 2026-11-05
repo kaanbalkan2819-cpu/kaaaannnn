@@ -1,0 +1,27 @@
+/* V197 — Kalkınma (🏗) ve Diplomasi (🕊) pencereleri: ülke paneli/duraklatma kartıyla aynı zemin, çerçeve ve köşe işlemeleri.
+   Yazı tipi, içerik ve yerleşim aynen kalır (yalnızca renk/zemin). Politikalar penceresi Kalkınma ile aynı yapıyı (.polx) kullandığı için o da aynı görünümü alır.
+   Geri almak için index.html'den v197.css bağlantısını silin. */
+#mod .box:has(.polx),#mod .box:has(.d38){--bg1:#2f2a22;--bg2:#3a3329;--bg3:#3a3329;--line:#6e5f3c;--line2:#8f7b4c;--tx:#f3e8c8;--tx2:#cfc4a4;--tx3:#a8935c;
+  color:var(--tx);border:2px solid #8f7b4c!important;border-radius:4px!important;box-shadow:0 18px 50px #000b!important;
+  background:
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(1 0 0 1 0 0)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") left 6px top 6px/24px 24px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(-1 0 0 1 46 0)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") right 6px top 6px/24px 24px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(1 0 0 -1 0 46)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") left 6px bottom 6px/24px 24px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 46' fill='none' stroke='%23CDB06A' stroke-width='1.2'%3E%3Cg transform='matrix(-1 0 0 -1 46 46)'%3E%3Cpath d='M2 44V14Q2 2 14 2H44'/%3E%3Cpath d='M8 44V18Q8 8 18 8H44' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M13 13l4-4 4 4-4 4z' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='2' cy='44' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3Ccircle cx='44' cy='2' r='1.6' fill='%23CDB06A' stroke='none'/%3E%3C/g%3E%3C/svg%3E") right 6px bottom 6px/24px 24px no-repeat,
+    url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 440 440' fill='none' stroke='%23B9A066' stroke-opacity='.13'%3E%3Ccircle cx='220' cy='220' r='196' stroke-width='2.2'/%3E%3Ccircle cx='220' cy='220' r='208'/%3E%3Cpath d='M220 24V416'/%3E%3Cellipse cx='220' cy='220' rx='173' ry='196'/%3E%3Cellipse cx='220' cy='220' rx='110' ry='196'/%3E%3Cellipse cx='220' cy='150' rx='183' ry='29'/%3E%3Cellipse cx='220' cy='220' rx='196' ry='31'/%3E%3Cellipse cx='220' cy='290' rx='183' ry='29'/%3E%3C/svg%3E") center -40px/300px 300px no-repeat,
+    linear-gradient(180deg,#3d352b,#2a251e)!important}
+/* düğmeler: koyu taş zemin + ince altın çerçeve (altın düğmeler aynen) */
+.box:has(.polx) button:not(.polgo):not(.polcl):not(.pri),.box:has(.d38) button:not(.d38-r):not(.d38-c):not(.pri){border-color:#8f7b4c;background:#3a3329;color:#f3e8c8;border-radius:3px}
+.box:has(.polx) .polgo:not(.gold):not(.shop):not(:disabled),.box:has(.polx) .polgo.on{background:#3a3329;color:#f3e8c8;border:1px solid #8f7b4c}
+.box:has(.polx) .polcl{border-color:#8f7b4c;background:#3a3329;color:#cdb06a}
+.box:has(.polx) .pcard{background:rgba(0,0,0,.2);border-color:rgba(143,123,76,.35);border-radius:6px;border-left-width:4px}
+.box:has(.polx) .polbar span{background:rgba(0,0,0,.22);border-radius:4px}
+.box:has(.polx) .polinfo{color:#cfc4a4}
+/* diplomasi */
+.box:has(.d38) .d38-r{background:linear-gradient(180deg,rgba(74,66,52,.75),rgba(34,29,22,.85));border-color:rgba(143,123,76,.7);border-radius:6px}
+.box:has(.d38) .d38-c{background:rgba(0,0,0,.2);border-color:rgba(143,123,76,.3);border-radius:5px}
+.box:has(.d38) .d38-stats span,.box:has(.d38) .d38-why span{background:rgba(0,0,0,.22);border-radius:4px}
+.box:has(.d38) .d38-sec,.box:has(.polx) .d38-sec{color:#cdb06a}
+.box:has(.d38) input{background:#16120d;border:1px solid #8f7b4c;color:#f3e8c8;border-radius:3px}
+/* V197: madalyon resimlerinin (v194) köşeleri siyah dolu; açık zeminde görünmesin diye daire biçiminde kırpılır */
+.box:has(.polx) .wa,.box:has(.d38) .wa,.box:has(.d38) .d38-art{border-radius:50%}

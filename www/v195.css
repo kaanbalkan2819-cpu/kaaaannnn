@@ -1,0 +1,72 @@
+/* V195 — Rank ekranı: duraklatma kartıyla (v156 "Siper Defteri") aynı şablon ve AYNI BOYUT (min(82vw,320px)).
+   Geri almak için index.html'den v195.css bağlantısını silin ve ranked.js'i V194 sürümüyle değiştirin. */
+#mod.wcr156{background:rgba(26,21,14,.62)!important}
+.wcr-box{--g:#cdb06a;--gd:#8f7b4c;--tx:#f3e8c8;--dim:#a8935c;--warn:#c07a6c;
+  position:relative!important;width:min(82vw,320px)!important;max-width:none!important;max-height:92vh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:22px 14px 14px!important;border-radius:4px!important;background:linear-gradient(180deg,#3d352b,#2a251e)!important;border:2px solid var(--gd)!important;color:var(--tx)!important;
+  font-family:Georgia,'Times New Roman',serif;box-shadow:0 18px 50px #000b!important;text-align:center}
+.wcr-box::before{content:"";position:absolute;left:50%;top:-30px;width:300px;height:300px;transform:translateX(-50%) rotate(-14deg);opacity:.11;pointer-events:none;
+  background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 440 440' fill='none' stroke='%23B9A066'%3E%3Ccircle cx='220' cy='220' r='196' stroke-width='2.2'/%3E%3Ccircle cx='220' cy='220' r='208'/%3E%3Cpath d='M220 24V416'/%3E%3Cellipse cx='220' cy='220' rx='173' ry='196'/%3E%3Cellipse cx='220' cy='220' rx='110' ry='196'/%3E%3Cellipse cx='220' cy='150' rx='183' ry='29'/%3E%3Cellipse cx='220' cy='220' rx='196' ry='31'/%3E%3Cellipse cx='220' cy='290' rx='183' ry='29'/%3E%3C/svg%3E") center/contain no-repeat}
+.wcr-box::after{content:"";position:absolute;inset:6px;border:1px solid rgba(143,123,76,.35);pointer-events:none}
+.wcr-box>*{position:relative;z-index:1}
+.wcr-hub{position:relative}
+.wcr-k{position:absolute;width:28px;height:28px;color:var(--g);pointer-events:none;line-height:0}
+.wcr-k svg{display:block;width:100%;height:100%}
+.wk1{top:-16px;left:-8px}.wk2{top:-16px;right:-8px;transform:scaleX(-1)}.wk3{bottom:-6px;left:-8px;transform:scaleY(-1)}.wk4{bottom:-6px;right:-8px;transform:scale(-1,-1)}
+/* başlık + ayırıcı (duraklatma kartıyla aynı ölçü) */
+.wcr-title{display:block;margin:0}
+.wcr-box h3{margin:0;font:700 clamp(15px,4.8vw,19px)/1.2 Georgia,'Times New Roman',serif;letter-spacing:.16em;padding-left:.16em;white-space:nowrap;text-transform:uppercase;color:var(--tx);text-shadow:0 2px 6px rgba(0,0,0,.8)}
+.wcr-div{display:flex;align-items:center;gap:8px;width:min(240px,80%);margin:8px auto 0}
+.wcr-div i{flex:1;height:1px;border:0;background:linear-gradient(to right,transparent,var(--gd))}
+.wcr-div i:last-child{background:linear-gradient(to left,transparent,var(--gd))}
+.wcr-div b,.wcr-dia{display:inline-block;width:8px;height:8px;background:var(--g);transform:rotate(45deg);flex:none}
+.wcr-div s{width:4px;height:4px;border:1px solid #a8935c;transform:rotate(45deg);flex:none}
+/* emblem: küçültüldü, lig şeridi/ad/puan aynı kartın ölçüsüne sığar */
+.wcr-stage{height:158px;margin:0 -6px}
+.wcr-stage:before{width:170px;height:170px;margin:-85px 0 0 -85px;opacity:.1}
+.wcr-m3d .wcr-medal-w{width:150px!important;height:150px!important}
+.wcr-dv{min-width:40px;padding:1px 10px 2px;font:700 12px/1.2 Georgia,serif;border-radius:0;color:var(--tx);background:#201b15;border:1px solid var(--gd);box-shadow:none}
+.wcr-plate{max-width:68%;margin:8px auto 0;padding:5px 24px;background:none;border:0;border-top:1px solid var(--gd);border-bottom:1px solid var(--gd);box-shadow:none;color:var(--tx)}
+.wcr-plate:before,.wcr-plate:after{top:50%;bottom:auto;width:5px;height:5px;background:var(--g);border:0;clip-path:none;z-index:auto;transform:translateY(-50%) rotate(45deg)}
+.wcr-plate:before{left:8px}.wcr-plate:after{right:8px}
+.wcr-plate b{font:600 15px/1.2 Georgia,serif;letter-spacing:.14em;color:var(--tx)}
+.wcr-lgn{font:700 20px/1 Georgia,serif;letter-spacing:.14em;margin-top:10px;text-shadow:0 2px 4px rgba(0,0,0,.8)!important}
+.wcr-rat{display:flex;justify-content:center;align-items:center;gap:7px;font:600 19px/1 Georgia,serif;color:var(--tx);text-shadow:none;margin-top:6px}
+.wcr-sp{width:11px;height:11px;fill:var(--g)}
+.wcr-prog{margin:12px 0 0;gap:8px}
+.wcr-prog .wcr-mini,.wcr-prog .wcr-medal-w{width:26px!important;height:26px!important}
+.wcr-prog .wcr-dia{margin:0 9px}
+.wcr-bar2{height:6px;border-radius:0;border:1px solid var(--gd);background:#16120d;box-shadow:none}
+.wcr-bar2 i{border-radius:0;background:linear-gradient(90deg,#8f7b4c,var(--g));box-shadow:none}
+.wcr-bar2 em{background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),#16120d calc(25% - 1px) 25%)}
+.wcr-sm{font:italic 13px Georgia,serif;color:var(--dim);letter-spacing:.02em;margin:7px 0 0}
+.wcr-strip{margin:8px -2px 0;gap:2px}
+.wcr-st{padding:1px 0 4px}
+.wcr-st.cur{border-bottom-color:var(--g);background:linear-gradient(180deg,transparent,rgba(205,176,106,.12))}
+/* istatistikler: duraklatma kartının sayaçlarıyla aynı dil — etiket üstte, değer altta, ince dikey çizgi */
+.wcr-led{grid-template-columns:.8fr 1.15fr 1.35fr .9fr;margin:10px -2px 4px;padding:0;border:0;border-radius:0;background:none}
+.wcr-led div{display:flex;flex-direction:column-reverse;align-items:center;gap:3px;padding:0 3px}
+.wcr-led div+div{border-left:1px solid var(--gd)}
+.wcr-led b{font:600 18px/1 Georgia,serif;color:var(--tx)}
+.wcr-led span{font:11px Georgia,serif;color:var(--dim);letter-spacing:.03em;white-space:nowrap}
+.wcr-led .l b{color:var(--warn)}
+.wcr-note{margin:8px 0 0;padding:6px 8px;font:12px/1.3 Georgia,serif;color:#d6b98a;background:rgba(0,0,0,.2);border:0;border-left:2px solid var(--warn);border-radius:0;text-align:left}
+/* düğmeler: kutusuz, ortalı büyük harf yazı, iki yanında baklava (duraklatma kartı gibi) */
+.wcr-box button.big{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:40px;margin:0!important;padding:0 8px!important;border:0!important;border-radius:2px;background:none!important;box-shadow:none;
+  font:600 14px Georgia,serif;letter-spacing:.18em;text-transform:uppercase;color:#cfc4a4;text-shadow:0 2px 4px rgba(0,0,0,.8)}
+.wcr-box button.big::before,.wcr-box button.big::after{content:"";width:5px;height:5px;background:transparent;transform:rotate(45deg);flex:none}
+.wcr-box button.big:active,.wcr-box button.big:focus-visible{background:rgba(205,176,106,.12)!important;color:var(--tx);outline:0}
+.wcr-box button.big:active::before,.wcr-box button.big:active::after,.wcr-box button.big:focus-visible::before,.wcr-box button.big:focus-visible::after{background:var(--g)}
+@media (hover:hover){.wcr-box button.big:hover{color:var(--tx)}.wcr-box button.big:hover::before,.wcr-box button.big:hover::after{background:var(--g)}}
+.wcr-box button.big.pri,.wcr-box button.big.wcr-go{min-height:46px;margin-top:6px!important;font-size:17px!important;font-weight:700;color:var(--tx);background:none!important;box-shadow:none;text-shadow:0 2px 4px rgba(0,0,0,.8)}
+.wcr-box button.big.pri::before,.wcr-box button.big.pri::after{background:var(--g)}
+.wcr-two{display:grid;grid-template-columns:1fr 1fr;gap:0 4px;margin-top:2px}
+.wcr-two .big{font-size:12px!important;letter-spacing:.12em!important;padding:0 4px!important}
+.wcr-box button.big.ghost,.wcr-x2{min-height:34px;margin-top:2px!important;font-size:12px!important;color:var(--dim);background:none!important;border:0!important}
+/* diğer rank ekranları (arama, sonuç, liderlik) aynı kartta */
+.wcr-box .wcr-lg{border-radius:0;border-color:var(--gd);background:rgba(205,176,106,.08)}
+.wcr-box .wcr-list{border-radius:0;border-color:rgba(143,123,76,.5);background:rgba(0,0,0,.2)}
+.wcr-box .wcr-in{border-radius:0;border-color:var(--gd);background:#16120d;color:var(--tx)}
+.wcr-rt,.wcr-x,.wcr-cd b,.wcr-row b{color:var(--g)}
+@media (max-height:700px){.wcr-stage{height:118px}.wcr-m3d .wcr-medal-w{width:112px!important;height:112px!important}.wcr-strip{display:none}}
+@media (max-height:520px){.wcr-box{width:min(94vw,420px)!important}.wcr-stage{display:none}}

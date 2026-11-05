@@ -98,9 +98,20 @@ return s+'</svg>'}
   function m3d(R) { return 'matrix3d(' + [R[0], R[3], R[6], 0, R[1], R[4], R[7], 0, R[2], R[5], R[8], 0, 0, 0, 0, 1].map(function (q) { return q.toFixed(5); }).join(',') + ')'; }
 
   /* ---------- işaretleme ---------- */
-  var FIMG = {}, FACES = '', STY = false;
+  var FIMG = {}, PNG = {}, FACES = '', STY = false;
+  /* V189 — AKICILIK: 6 yüz SVG'si açılışta bir kez bitmap'e çevrilir; savaşta vektör çizim/raster maliyeti sıfır */
+  function prep(cb) {
+    var n = 0, v;
+    function end() { if (++n < 6) return; FACES = ''; STY = false; var o = document.getElementById('d88img'); if (o) o.remove(); if (cb) cb(); }
+    for (v = 1; v <= 6; v++) (function (v) {
+      var im = new Image();
+      im.onload = function () { try { var c = document.createElement('canvas'); c.width = c.height = 300; c.getContext('2d').drawImage(im, 0, 0, 300, 300); PNG[v] = c.toDataURL('image/png'); } catch (x) { } end(); };
+      im.onerror = end;
+      im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(faceSvg(v).replace('<svg ', '<svg width="300" height="300" '));
+    })(v);
+  }
   function faceUri(v) { return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(faceSvg(v)); }
-  function faceImgUri(v) { return FIMG[v] || (FIMG[v] = faceUri(v)); }
+  function faceImgUri(v) { return PNG[v] || FIMG[v] || (FIMG[v] = faceUri(v)); }
   function faceStyle() {   // V88: 6 yüz görseli sayfaya TEK stil olarak girer (zar başına işaretleme küçük, görsel bir kez çözülür)
     if (STY) return; STY = true;
     try {
@@ -126,29 +137,38 @@ return s+'</svg>'}
   function bind(id) {
     var e = document.getElementById(id); if (!e) return null;
     var s = ST[id] || (ST[id] = { v: 0, R: null, raf: 0, tm: 0, done: true });
-    s.e = e; s.cb = e.querySelector('.cb'); s.sdw = e.querySelector('.sdw'); s.fs = [].slice.call(e.querySelectorAll('.f')); s.nrs = s.fs.map(function (f) { return NR[f.getAttribute('data-v')]; }); s.shv = []; s.shT = 0; s.lab = document.getElementById(id + 'n');
+    s.e = e; s.cb = e.querySelector('.cb'); s.bx = e.querySelector('.bx'); s.sdw = e.querySelector('.sdw'); s.fs = [].slice.call(e.querySelectorAll('.f')); s.nrs = s.fs.map(function (f) { return NR[f.getAttribute('data-v')]; }); s.shv = []; s.shT = 0; s.lab = document.getElementById(id + 'n');
     return s;
   }
-  function pose(s, R, x, h, z, full) {
-    s.cb.style.transform = 'rotateX(-' + TILT + 'deg) translate3d(' + x.toFixed(1) + 'px,' + (-h).toFixed(1) + 'px,' + z.toFixed(1) + 'px) ' + m3d(R);
-    if (s.sdw) { var k = Math.max(.35, 1.05 - h / 240); s.sdw.style.opacity = Math.max(.25, 1 - h / 170).toFixed(2); s.sdw.style.transform = 'rotateX(-' + TILT + 'deg) translate3d(' + x.toFixed(1) + 'px,' + HF + 'px,' + z.toFixed(1) + 'px) rotateX(90deg) scale(' + k.toFixed(3) + ')'; }
-    /* V175: yüz gölgesi (--sh) her karede yazılınca 6 yüzün (4 katmanlı iç gölge + gradyan) dokusu her karede yeniden çiziliyordu → kasma.
-       Dönerken en çok ~8 kez/sn ve yalnızca belirgin değişimde yazılır; son poz (full) her zaman tam uygulanır. */
-    var nowT = (window.performance && performance.now) ? performance.now() : Date.now();
-    if (!full && nowT - s.shT < 125) return;
-    s.shT = nowT;
-    var i, n, d, dk;
-    for (i = 0; i < s.fs.length; i++) {
-      n = app(R, s.nrs[i]); d = n[0] * LIGHT[0] + n[1] * LIGHT[1] + n[2] * LIGHT[2]; dk = Math.max(0, Math.min(.55, (.62 - d) * .5));
-      if (full || s.shv[i] === undefined || Math.abs(dk - s.shv[i]) >= .06) { s.shv[i] = dk; s.fs[i].style.setProperty('--sh', dk.toFixed(2)); }
-    }
+  function pose(s, R, x, h, z, full) {   /* V187: durağan poz (setDie3 / bitiş) — transform + gerçek gölgelendirme */
+    setT(s, R, x, h, z);
+    if (full) shadeAll(s, R);
   }
   function mark(s, v, tot, show) {
     s.fs.forEach(function (f) { f.classList.toggle('top', +f.getAttribute('data-v') === v); });
     s.e.classList.add('landed');
     if (s.lab) { s.lab.textContent = tot > 6 ? (tot + ' (' + v + ')') : v; s.lab.className = show === false ? 'dn' : 'dn on'; }
   }
-  function cancel(s) { if (!s) return; if (s.raf) { cancelAnimationFrame(s.raf); s.raf = 0; } if (s.tm) { clearTimeout(s.tm); s.tm = 0; } s.done = true; }
+  function cancel(s) {
+    if (!s) return;
+    if (s.raf) { cancelAnimationFrame(s.raf); s.raf = 0; }
+    if (s.tm) { clearTimeout(s.tm); s.tm = 0; }
+    if (s.tms) { s.tms.forEach(clearTimeout); s.tms = null; }
+    if (s.an) { s.an.forEach(function (a) { try { a.cancel(); } catch (x) { } }); s.an = null; }
+    s.done = true;
+  }
+  /* V187: yalnızca transform yazan poz (gölgelendirme ayrı); WAAPI ve rAF yolu ortak kullanır */
+  function setT(s, R, x, h, z) {
+    s.cb.style.transform = cbT(R, x, h, z);
+    if (s.sdw) { var o = sdwT(h, x, z); s.sdw.style.opacity = o.op; s.sdw.style.transform = o.t; }
+  }
+  function cbT(R, x, h, z) { return 'rotateX(-' + TILT + 'deg) translate3d(' + x.toFixed(1) + 'px,' + (-h).toFixed(1) + 'px,' + z.toFixed(1) + 'px) ' + m3d(R); }
+  function sdwT(h, x, z) { var k = Math.max(.35, 1.05 - h / 240); return { op: Math.max(.25, 1 - h / 170).toFixed(2), t: 'rotateX(-' + TILT + 'deg) translate3d(' + x.toFixed(1) + 'px,' + HF + 'px,' + z.toFixed(1) + 'px) rotateX(90deg) scale(' + k.toFixed(3) + ')' }; }
+  function shadeAll(s, R) {   /* ışığa göre yüz karartması — yalnızca duruşta (uçuşta tek sabit ton) */
+    var i, n, d, dk;
+    for (i = 0; i < s.fs.length; i++) { n = app(R, s.nrs[i]); d = n[0] * LIGHT[0] + n[1] * LIGHT[1] + n[2] * LIGHT[2]; dk = Math.max(0, Math.min(.55, (.62 - d) * .5)); s.shv[i] = dk; s.fs[i].style.setProperty('--sh', dk.toFixed(2)); }
+  }
+  function flatShade(s, dk) { var i; for (i = 0; i < s.fs.length; i++) { s.shv[i] = dk; s.fs[i].style.setProperty('--sh', dk); } }
   function tickSnd() { try { AU.play('tick'); } catch (x) { } }
 
   /* ---------- sabit göster (animasyonu iptal eder) ---------- */
@@ -160,46 +180,98 @@ return s+'</svg>'}
   }
 
   /* ---------- zar at ---------- */
-  var AMP = [84, 28, 10, 3.5], AIR = .84;
-  function rollDie(id, v, ms, dir, cb) {
-    var s = bind(id); if (!s) { if (cb) cb(); return; }
-    var tot = v; v = ((v - 1) % 6) + 1; cancel(s); s.done = false; ms = ms || 1300; dir = dir || 1;
+  /* V187 — AKICI ZAR: hareket tek bir "yol" fonksiyonundan (plan) üretilir.
+     • Tarayıcı Web Animations destekliyorsa yol, ~8 ms aralıklı anahtar karelere çevrilip transform/opacity olarak
+       compositor'a (GPU) verilir: ana iş parçacığı (savaş sahnesi, harita, ses) meşgul olsa bile zar kasmaz.
+     • Desteklenmezse aynı yol requestAnimationFrame ile oynatılır.
+     Hareket: yandan fade-in ile havaya fırlatılır (ilk karede ışınlanma yok), 4 sönümlü sekme, dönüş her sekmede
+     keskin biçimde azalır (çarpma hissi), son çarpmada küçük "oturma" vuruşu, sonra sıfırdan başlayan yumuşak sallanma. */
+  var AMP = [80, 27, 9, 2.8], AIR = .8, SPIN = [1, .5, .2, .06, 0];
+  function plan(v, dir) {
     var yaw = (Math.random() - .5) * 1.2, Rf = finalR(v, yaw), sg = Math.random() < .5 ? -1 : 1;
-    var x0 = dir * (64 + Math.random() * 24), z0 = -(26 + Math.random() * 34);
+    var P = { Rf: Rf }, x0 = dir * (64 + Math.random() * 24), z0 = -(26 + Math.random() * 34), h0 = 20;
     var a1 = [(Math.random() - .5) * .5, (Math.random() - .5) * .5, dir || 1], a2 = [1, (Math.random() - .5) * .6, (Math.random() - .5) * .4];
     var th1 = (2 + Math.floor(Math.random() * 2) + Math.random() * .6) * 2 * Math.PI * sg, th2 = (1 + Math.floor(Math.random() * 2) + Math.random() * .5) * 2 * Math.PI * (Math.random() < .5 ? -1 : 1);
     var sq = AMP.map(Math.sqrt), sum = sq.reduce(function (p, q) { return p + q; }, 0), seg = [], acc = 0, i;
     for (i = 0; i < AMP.length; i++) { var d = AIR * sq[i] / sum; seg.push([acc, acc + d]); acc += d; }
-    var wa = [1, 0, .3 + Math.random() * .4], wph = Math.random() * 6.28, lastSeg = -1;
-    s.e.classList.remove('landed'); s.e.classList.add('rolling'); s.fs.forEach(function (f) { f.classList.remove('top'); });
-    if (s.lab) s.lab.className = 'dn';
-    var t0 = 0;
-    function frame(now) {
-      if (s.done) return;
-      if (!t0) t0 = now; var tt = Math.min(1, (now - t0) / ms), h = 0, q, R, x, z, w = 0, k;
+    var wa = [1, 0, .3 + Math.random() * .4], wsg = Math.random() < .5 ? -1 : 1;
+    P.seg = seg;
+    P.at = function (tt) {
+      var h = 0, w = 0, q, k, u, rem, R, x, z;
       if (tt < AIR) {
         q = tt / AIR;
-        for (k = 0; k < seg.length; k++) if (tt <= seg[k][1] || k === seg.length - 1) break;
-        var u = Math.min(1, Math.max(0, (tt - seg[k][0]) / (seg[k][1] - seg[k][0])));
-        h = 4 * AMP[k] * u * (1 - u);
-        if (k !== lastSeg) { if (lastSeg >= 0) tickSnd(); lastSeg = k; }
-      } else { q = 1; var sg2 = (tt - AIR) / (1 - AIR); w = 7 * D2R * Math.exp(-4 * sg2) * Math.cos(15 * sg2 + wph) * (1 - sg2); }
-      var r = Math.pow(1 - q, 2.2); x = x0 * r; z = z0 * r;
-      R = mul(aa(a2[0], a2[1], a2[2], th2 * Math.pow(1 - q, 2)), mul(aa(a1[0], a1[1], a1[2], th1 * Math.pow(1 - q, 1.5)), Rf));
+        for (k = 0; k < seg.length - 1; k++) if (tt <= seg[k][1]) break;
+        u = Math.min(1, Math.max(0, (tt - seg[k][0]) / (seg[k][1] - seg[k][0])));
+        h = 4 * AMP[k] * u * (1 - u) + (k === 0 ? h0 * (1 - u) : 0);
+        rem = SPIN[k] + (SPIN[k + 1] - SPIN[k]) * u;   /* her parçada sabit açısal hız, çarpmada ani düşüş */
+      } else {
+        q = 1; rem = 0;
+        var sg2 = (tt - AIR) / (1 - AIR);
+        w = wsg * 5 * D2R * Math.exp(-3.2 * sg2) * Math.sin(9.42 * sg2);   /* sıfırdan başlar → iniş anında sıçrama yok */
+      }
+      var r = Math.pow(1 - q, 2.3); x = x0 * r; z = z0 * r;
+      R = mul(aa(a2[0], a2[1], a2[2], th2 * Math.pow(rem, 1.35)), mul(aa(a1[0], a1[1], a1[2], th1 * rem), Rf));
       if (w) R = mul(aa(wa[0], wa[1], wa[2], w), R);
-      pose(s, R, x, h, z);
-      if (tt < 1) s.raf = requestAnimationFrame(frame); else finish();
-    }
+      return { R: R, x: x, h: h, z: z };
+    };
+    return P;
+  }
+  function rollDie(id, v, ms, dir, cb) {
+    var s = bind(id); if (!s) { if (cb) cb(); return; }
+    var tot = v; v = ((v - 1) % 6) + 1; cancel(s); s.done = false; ms = ms || 1300; dir = dir || 1;
+    var P = plan(v, dir), Rf = P.Rf, seg = P.seg, i;
+    s.e.classList.remove('landed'); s.e.classList.add('rolling'); s.fs.forEach(function (f) { f.classList.remove('top'); });
+    if (s.lab) s.lab.className = 'dn';
+    flatShade(s, .16);   /* uçuşta sabit ton (yüz başına ışık hesabı yok) */
+    s.tms = [];
+    /* çarpma sesleri ve son çarpmadaki oturma vuruşu: zaman çizelgesine bağlı */
+    for (i = 0; i < seg.length - 1; i++) s.tms.push(setTimeout(tickSnd, ms * seg[i][1]));
+    s.tms.push(setTimeout(function () { if (s.done) return; tickSnd(); }, ms * AIR));
+
     function finish() {
       if (s.done) return; cancel(s); s.v = v; s.R = Rf; s.e.classList.remove('rolling');
       pose(s, Rf, 0, 0, 0, true); mark(s, v, tot);
       try { var tf = topFace(Rf); if (tf !== v) console.warn('WCDice: üst yüz ' + tf + ' ≠ ' + v); } catch (x) { }
-      tickSnd(); if (cb) cb();
+      if (cb) cb();
     }
-    s.raf = requestAnimationFrame(frame);
-    s.tm = setTimeout(function () { if (!s.done) finish(); }, ms + 250);   // arka planda rAF durursa oyun akışı takılmasın
+
+    var useWA = false;
+    if (s.cb.animate) {
+      try {
+        var n = Math.min(120, Math.max(30, Math.round(ms / 14))), kc = [], ks = [], o, so, f;
+        for (i = 0; i <= n; i++) {
+          f = i / n; o = P.at(f); so = sdwT(o.h, o.x, o.z);
+          kc.push({ transform: cbT(o.R, o.x, o.h, o.z), offset: f });
+          ks.push({ transform: so.t, opacity: so.op, offset: f });
+        }
+        setT(s, Rf, 0, 0, 0);   /* animasyon bitince/iptalde son poz zaten yerinde — yanıp sönme yok */
+        var opt = { duration: ms, easing: 'linear' }, a1 = s.cb.animate(kc, opt);
+        s.an = [a1, s.e.animate([{ opacity: 0 }, { opacity: 1, offset: .07 }, { opacity: 1 }], { duration: ms, easing: 'linear' })];
+        if (s.sdw) s.an.push(s.sdw.animate(ks, opt));
+        a1.onfinish = finish;
+        useWA = true;
+      } catch (x) { useWA = false; if (s.an) { s.an.forEach(function (a) { try { a.cancel(); } catch (y) { } }); s.an = null; } }
+    }
+    if (!useWA) {
+      var t0 = 0;
+      s.e.style.opacity = '0';
+      var frame = function (now) {
+        if (s.done) return;
+        if (!t0) t0 = now; var tt = Math.min(1, (now - t0) / ms), o = P.at(tt);
+        setT(s, o.R, o.x, o.h, o.z);
+        s.e.style.opacity = tt < .07 ? (tt / .07).toFixed(2) : '';
+        if (tt < 1) s.raf = requestAnimationFrame(frame); else { s.e.style.opacity = ''; finish(); }
+      };
+      s.raf = requestAnimationFrame(frame);
+    }
+    s.tm = setTimeout(function () { if (!s.done) { try { s.e.style.opacity = ''; } catch (x) { } finish(); } }, ms + 250);   // arka planda animasyon durursa oyun akışı takılmasın
+  }
+  /* son çarpmada zar hafifçe "oturur" (kısa ölçek vuruşu; .bx preserve-3d olduğundan transform animasyonu 3B'yi bozmaz) */
+  function thud(s) {
+    try { if (s.bx && s.bx.animate) s.bx.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.09)', offset: .3 }, { transform: 'scale(.985)', offset: .65 }, { transform: 'scale(1)' }], { duration: 300, easing: 'ease-out' }); } catch (x) { }
   }
 
-  window.WCDice = { faceUri: faceImgUri, cube: cube, set: setDie3, roll: rollDie, topFace: function (id) { var s = ST[id]; return s && s.R ? topFace(s.R) : 0; }, _finalR: finalR, _top: topFace, _app: app };
+  window.WCDice = { ready: prep, faceUri: faceImgUri, cube: cube, set: setDie3, roll: rollDie, topFace: function (id) { var s = ST[id]; return s && s.R ? topFace(s.R) : 0; }, _finalR: finalR, _top: topFace, _app: app };
+  try { prep(function () { faceStyle(); }); } catch (x) { }
   window.die3d = die3d; window.setDie3 = setDie3; window.rollDie = rollDie;
 })();

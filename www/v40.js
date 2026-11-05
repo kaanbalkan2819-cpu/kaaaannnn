@@ -176,10 +176,12 @@
     // V46: oyuncu, kendinden çok güçlü (>1.6x) devlete yalnızca kara sınırından saldırabilir (denizden ulaşamaz)
     try {
       if (is5() && p === G.pl) {
-        var f = {}, n = 0, mine = pw(p);
+        var f = {}, n = 0, mine = pw(p), nat = null; try { nat = window.WC && window.WC.seaNat && window.WC.seaNat(); } catch (x) { }
         for (var k2 in s) {
           var e2 = ow[k2], land = M[k2] && M[k2].nb && M[k2].nb.some(function (x) { return ow[x] === p; });
-          if (typeof e2 === 'string' && e2 !== p && !land && pw(e2) > 1.6 * mine) continue;
+          /* V189: yakın (doğal) deniz komşuları da kara komşusu gibi muaf: Sri Lanka → Hindistan/Bangladeş gibi */
+          var natl = !!(nat && nat[k2] && Object.keys(nat[k2]).some(function (x) { return ow[x] === p; }));
+          if (typeof e2 === 'string' && e2 !== p && !land && !natl && pw(e2) > 1.6 * mine) continue;
           f[k2] = s[k2]; n++;
         }
         if (n) return f;
@@ -279,7 +281,7 @@
       (cd ? '<p style="color:var(--bad)">' + T('Bu tur zaten teklif ettin.', 'You already proposed this turn.') + '</p>' : '<p>' + WCPay.costLine() + '</p>' + WCPay.rows('wcdFriendGo')) +
       '<button class="big" onclick="closeMod()">' + T('Vazgeç', 'Cancel') + '</button>');
   };
-  window.wcdFriendGo = function (how) {   // V119: 2 zar ya da reklam
+  window.wcdFriendGo = function (how) {   // V119: 1 zar ya da reklam
     if (!canAct()) { closeMod(); return; } var e0 = selE(); if (!e0 || !canJoin(G.pl, e0) || D().cd['f' + e0] === turn()) { closeMod(); return; }
     closeMod(); WCPay.spend(how, wcdFriendRun);
   };
@@ -334,7 +336,7 @@
       '<p>' + WCPay.costLine() + '</p>' + WCPay.rows('wcdTributeGo') +
       '<button class="big" onclick="closeMod()">' + T('Vazgeç', 'Cancel') + '</button>');
   };
-  window.wcdTributeGo = function (how) {   // V119: 2 zar ya da reklam
+  window.wcdTributeGo = function (how) {   // V119: 1 zar ya da reklam
     if (!canAct()) { closeMod(); return; } var e0 = selE(); if (!e0 || !tribCheck(e0).ok) { closeMod(); return; }
     closeMod(); WCPay.spend(how, wcdTributeRun);
   };
@@ -465,7 +467,7 @@
     var h = '<div class="wd-h">🕊 ' + T('Diplomasi', 'Diplomacy') + (mine.length ? '<small>' + T('Müttefikler: ', 'Allies: ') + mine.map(nm).join(', ') + '</small>' : '') + (inC ? '<small>' + T('İlişki: ', 'Relations: ') + frLevel(e).n + ' ' + frLevel(e).h + '</small>' : '') + '</div>' +
       rows('🤝', T('Dostluk Antlaşması', 'Friendship Treaty'), T('Birlikte savaş, değerler toplanır · 2 🎲', 'Fight together, stats add up · 2 🎲'), inC ? T('Müttefik', 'Allied') : label(p), 'wcdFriend()') +
       rows('🛡', T('Saldırmazlık Antlaşması', 'Non-Aggression Pact'), T('Kolay kabul · 4 tur saldırmazlık', 'Easy to get · 4 turns without attacks'), (window.v20Pacted && v20Pacted(G.pl, e)) ? T('Aktif', 'Active') : WCPay.label(), 'wcdNap()') +
-      rows('💰', T('Haraç Talep Et', 'Demand Tribute'), T('Zayıf devletlerden ödeme iste · 2 🎲', 'Ask weaker states to pay · 2 🎲'), tLeft() + '/' + MAX_TOT, 'wcdTribute()') +
+      rows('💰', T('Haraç Talep Et', 'Demand Tribute'), T('Zayıf devletlerden ödeme iste · 1 🎲', 'Ask weaker states to pay · 1 🎲'), tLeft() + '/' + MAX_TOT, 'wcdTribute()') +
       (coIdx(G.pl) >= 0 ? rows('🚪', T('İttifaktan Çık', 'Leave Alliance'), '', '', 'wcdLeave()', 'sm') : '');
     var d = document.createElement('div'); d.id = 'wdbub'; d.innerHTML = h; document.body.appendChild(d);
     var btn = document.querySelector('#panel .dipbtn'), r = btn ? btn.getBoundingClientRect() : { left: 12, top: innerHeight - 80, width: 120 };

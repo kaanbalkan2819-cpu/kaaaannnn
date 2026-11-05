@@ -1,0 +1,11 @@
+/* V198 — Diplomasi penceresi: büyük üst görsel kaldırıldı; Kalkınma penceresi gibi yalnızca başlık + küçük madalyonlu satırlar.
+   (v194.js artık .d38-art eklemiyor; bu dosya yalnızca güvence olarak, varsa eski görseli gizler.) */
+.box:has(.d38) .d38-art{display:none!important}
+
+/* V198: siyah-beyaz zar (beyaz yüz, siyah çerçeve ve noktalar) — her zeminde okunur */
+.wdi{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.2em;margin:0 .05em;
+  background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1.5' y='1.5' width='21' height='21' rx='5' fill='%23fff' stroke='%23111' stroke-width='2'/%3E%3Cg fill='%23111'%3E%3Ccircle cx='7.6' cy='7.6' r='2'/%3E%3Ccircle cx='16.4' cy='7.6' r='2'/%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3Ccircle cx='7.6' cy='16.4' r='2'/%3E%3Ccircle cx='16.4' cy='16.4' r='2'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat}
+
+/* V198: net madalyon simgeleri (🕊 ⚔ 🏗 🛡 yerine) */
+.wdm{display:inline-block;width:1.3em;height:1.3em;vertical-align:-.32em;margin:0 .1em;border-radius:50%;background-size:cover;background-position:center;background-repeat:no-repeat;box-shadow:0 0 0 1px rgba(205,176,106,.55)}
+.wdm.dip{background-image:url(assets/art/dip.webp)}.wdm.army{background-image:url(assets/art/army.webp)}.wdm.city{background-image:url(assets/art/city.webp)}.wdm.guard{background-image:url(assets/art/guard.webp)}

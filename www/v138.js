@@ -14,7 +14,7 @@
 (function () {
   'use strict';
   /* ================= AYARLAR ================= */
-  var COSTS = { friend: 3, pact: 2, pact2: 3, tribute: 2, guard: 3, prot: 3, incite: 3, renew: 2 };   // zar bedeli
+  var COSTS = { friend: 3, pact: 2, pact2: 3, tribute: 1, guard: 3, prot: 3, incite: 3, renew: 2 };   // zar bedeli
   var ALLY_TURNS = 8, MAXCO = 4, PACT_TURNS = 4, PACT_MAX = 2;   // v40/v20 ile aynı değerler (v40: ALLY_TURNS=8, MAXCO=4; v20: PACT_TURNS=4)
   var ALLY_MIN_REL = -9, ALLY_MIN_TRUST = 30, ENVOY_BLOCK_REL = -60, PACT_BLOCK_REL = -45, FRIEND_BLOCK_REL = -20;
   var TRUST_START = 70, TRUST_REGEN = 1, AGG_DECAY = .3, REL_DECAY = 1.5;
@@ -286,7 +286,13 @@
   function row(ic, tt, ds, right, on_, extra) {
     return '<button class="d38-r' + (on_ ? '' : ' off') + '" ' + (on_ ? 'onclick="' + on_ + '"' : 'disabled') + '><span class="d38-i">' + ic + '</span><span class="d38-t"><b>' + tt + '</b><small>' + ds + '</small>' + (extra ? '<small class="d38-no">' + extra + '</small>' : '') + '</span><em>' + right + '</em></button>';
   }
-  function sheet(e) {
+    /* V198: Kalkınma penceresiyle aynı kart biçimi (madalyon + başlık + açıklama + altın düğme) */
+  function prow(ic, tt, ds, right, on_, extra) {
+    var btn = on_ ? '<button class="polgo gold" onclick="' + on_ + '">' + right + '</button>' : '<button class="polgo' + (/^[✔✓]/.test(right) ? ' on' : '') + '" disabled>' + right + '</button>';
+    return '<div class="pcard d38p" style="--pc:#cdb06a"><div class="pic">' + ic + '</div><div class="pbd"><div class="ptt"><b>' + tt + '</b></div><div class="pds">' + ds + '</div>' +
+      (extra ? '<div class="pst"><span class="pchip" style="color:#ffa79c">' + extra + '</span></div>' : '') + btn + '</div></div>';
+  }
+function sheet(e) {
     if (!canAct() || !e) return;
     var d = D2(), r = relOf(e), al = allied(e), pl = pactLeft(e), gu = G.guard23 && G.guard23[e] >= turn(), pr = G.prot55 && G.prot55[e] >= turn();
     var chips = '';
@@ -296,20 +302,21 @@
     if (pr) chips += '<span class="d38-chip">🛡 ' + X('Koruma ', 'Protect ') + (G.prot55[e] - turn()) + X(' tur', ' t') + '</span>';
     var fc = chFriend(e), pc = chPact(e), tl = 0; try { tl = WCD.tribLeft(); } catch (x) { }
     var friendRow;
-    if (al) { var left = myCoLeft(); friendRow = left <= 2 ? row('🔄', X('İttifakı Yenile', 'Renew Alliance'), X('Süreyi ' + ALLY_TURNS + ' tura uzatır · ilişki en az Nötr olmalı', 'Extends to ' + ALLY_TURNS + ' turns · relations must be at least Neutral'), COSTS.renew + ' 🎲', 'v138Renew()') : row('🤝', X('İttifak', 'Alliance'), X('Müttefik · ' + left + ' tur kaldı', 'Allied · ' + left + ' turns left'), '✔', null); }
-    else friendRow = row('🤝', X('İttifak', 'Alliance'), X('Savaşta değerler toplanır · müttefik başına ticaret geliri · ' + ALLY_TURNS + ' tur', 'Stats add in war · trade income per ally · ' + ALLY_TURNS + ' turns'), fc.p ? pct(fc.p) + ' · ' + COSTS.friend + ' 🎲' : '—', fc.p ? 'wcdFriend()' : null, fc.p ? '' : fc.why);
-    var pactRow = pl ? row('🛡', X('Saldırmazlık', 'Non-Aggression'), X(pl + ' tur kaldı', pl + ' turns left'), '✔', null) :
-      row('🛡', X('Saldırmazlık', 'Non-Aggression'), X(PACT_TURNS + ' tur saldıramazsınız · aktif ' + pactCount() + '/' + PACT_MAX, PACT_TURNS + ' turns without attacks · active ' + pactCount() + '/' + PACT_MAX), pc.p ? pct(pc.p) + ' · ' + pactCost() + ' 🎲' : '—', pc.p ? 'wcdNap()' : null, pc.p ? '' : pc.why);
-    var more = row('💰', X('Haraç Talep Et', 'Demand Tribute'), X('Zayıf devletten ödeme iste · reddederse ilişki bozulur', 'Demand payment from weaker states · refusal sours relations'), tl + '/2 · ' + COSTS.tribute + ' 🎲', 'wcdTribute()') +
-      row('🛡', X('Güvenlik Garantisi', 'Security Guarantee'), X('İki güçlü devlet arasındaysan sana saldıranla savaşır', 'Fights whoever attacks you if you sit between two strong states'), COSTS.guard + ' 🎲', 'v138Via(\'v23Guard\')') +
-      row('🤲', X('Koruma Talebi', 'Request Protection'), X('Sana saldırılırsa seninle birlikte savaşa girer', 'Joins the war with you if you are attacked'), COSTS.prot + ' 🎲', 'v138Via(\'v55GuardJoint\')') +
-      row('🔥', X('Kışkırt', 'Incite'), X('İki ülkeyi birbirine düşür · ortaya çıkarsa ilişki bozulur', 'Turn two states on each other · may sour relations if exposed'), COSTS.incite + ' 🎲', 'v138Via(\'v23Incite\')') +
-      (pl ? row('✂', X('Paktı Boz', 'Break Pact'), X('İlişki −30, güven −15; hedef intikam alabilir', 'Relations −30, trust −15; target may retaliate'), X('Ücretsiz', 'Free'), 'v138BreakAsk()') : '') +
-      (al ? row('🚪', X('İttifaktan Çık', 'Leave Alliance'), X('Süre dolmadan çıkmak ilişkiyi ve güveni düşürür', 'Leaving early costs relations and trust'), X('Ücretsiz', 'Free'), 'wcdLeave()') : '');
-    modal('<div class="d38">' + '<h3>🕊 ' + esc(nm(e)) + '</h3><div class="d38-hd">' + fl(G.pl) + '<span>⇄</span>' + fl(e) + '</div>' + relBar(r) + why(e) + (chips ? '<div class="d38-chips">' + chips + '</div>' : '') +
-      '<div class="d38-dice">🎲 ' + X('Kalan zar: ', 'Dice left: ') + '<b>' + ((G.T && G.T.moves) || 0) + '</b></div>' +
-      friendRow + pactRow + '<details class="d38-more"><summary>' + X('Diğer işlemler', 'More actions') + '</summary>' + more + '</details>' +
-      '<button class="big" onclick="closeMod()">' + X('Kapat', 'Close') + '</button></div>');
+    if (al) { var left = myCoLeft(); friendRow = left <= 2 ? prow('🔄', X('İttifakı Yenile', 'Renew Alliance'), X('Süreyi ' + ALLY_TURNS + ' tura uzatır · ilişki en az Nötr olmalı', 'Extends to ' + ALLY_TURNS + ' turns · relations must be at least Neutral'), COSTS.renew + ' 🎲', 'v138Renew()') : prow('🤝', X('İttifak', 'Alliance'), X('Müttefik · ' + left + ' tur kaldı', 'Allied · ' + left + ' turns left'), '✔', null); }
+    else friendRow = prow('🤝', X('İttifak', 'Alliance'), X('Savaşta değerler toplanır · müttefik başına ticaret geliri · ' + ALLY_TURNS + ' tur', 'Stats add in war · trade income per ally · ' + ALLY_TURNS + ' turns'), fc.p ? pct(fc.p) + ' · ' + COSTS.friend + ' 🎲' : '—', fc.p ? 'wcdFriend()' : null, fc.p ? '' : fc.why);
+    var pactRow = pl ? prow('🛡', X('Saldırmazlık', 'Non-Aggression'), X(pl + ' tur kaldı', pl + ' turns left'), '✔', null) :
+      prow('🛡', X('Saldırmazlık', 'Non-Aggression'), X(PACT_TURNS + ' tur saldıramazsınız · aktif ' + pactCount() + '/' + PACT_MAX, PACT_TURNS + ' turns without attacks · active ' + pactCount() + '/' + PACT_MAX), pc.p ? pct(pc.p) + ' · ' + pactCost() + ' 🎲' : '—', pc.p ? 'wcdNap()' : null, pc.p ? '' : pc.why);
+    var more = prow('💰', X('Haraç Talep Et', 'Demand Tribute'), X('Zayıf devletten ödeme iste · reddederse ilişki bozulur', 'Demand payment from weaker states · refusal sours relations'), tl + '/2 · ' + COSTS.tribute + ' 🎲', 'wcdTribute()') +
+      prow('🛡', X('Güvenlik Garantisi', 'Security Guarantee'), X('İki güçlü devlet arasındaysan sana saldıranla savaşır', 'Fights whoever attacks you if you sit between two strong states'), COSTS.guard + ' 🎲', 'v138Via(\'v23Guard\')') +
+      prow('🤲', X('Koruma Talebi', 'Request Protection'), X('Sana saldırılırsa seninle birlikte savaşa girer', 'Joins the war with you if you are attacked'), COSTS.prot + ' 🎲', 'v138Via(\'v55GuardJoint\')') +
+      prow('🔥', X('Kışkırt', 'Incite'), X('İki ülkeyi birbirine düşür · ortaya çıkarsa ilişki bozulur', 'Turn two states on each other · may sour relations if exposed'), COSTS.incite + ' 🎲', 'v138Via(\'v23Incite\')') +
+      (pl ? prow('✂', X('Paktı Boz', 'Break Pact'), X('İlişki −30, güven −15; hedef intikam alabilir', 'Relations −30, trust −15; target may retaliate'), X('Ücretsiz', 'Free'), 'v138BreakAsk()') : '') +
+      (al ? prow('🚪', X('İttifaktan Çık', 'Leave Alliance'), X('Süre dolmadan çıkmak ilişkiyi ve güveni düşürür', 'Leaving early costs relations and trust'), X('Ücretsiz', 'Free'), 'wcdLeave()') : '');
+    modal('<div class="polx"><div class="polhd"><b>🕊 ' + X('Diplomasi', 'Diplomacy') + '</b><span class="polsub">' + esc(nm(e)) + '</span>' +
+      '<button class="polcl" onclick="closeMod()" aria-label="close">✕</button></div>' +
+      '<div class="polbar"><span>🎲 <b>' + ((G.T && G.T.moves) || 0) + '</b></span><span>🤝 ' + X('Güven', 'Trust') + ' <b>' + trustInfo() + '</b></span></div>' +
+      relBar(r) + why(e) + (chips ? '<div class="d38-chips">' + chips + '</div>' : '') +
+      '<div class="polscroll">' + friendRow + pactRow + more + '</div></div>');
   }
   window.v138Sheet = function (e) { sheet(e || selE()); };
   window.v138Via = function (fn) {   // v23.js içindeki eski elçi alt ekranlarını (ENV gerektirir) tek sayfadan aç

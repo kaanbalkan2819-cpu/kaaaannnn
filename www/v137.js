@@ -252,16 +252,16 @@
         else if (used) btn = '<button class="polgo" disabled>⛔ ' + X('Bu tur kullanıldı', 'Used this turn') + '</button>';
         else if (lv >= DEV_MAXLV) btn = '<button class="polgo on" disabled>' + X('Azami seviye', 'Max level') + '</button>';
         else if (eco - cost < DEV_MIN_ECO) btn = '<button class="polgo" disabled>💰 ' + X('Hazine yetersiz', 'Not enough treasury') + ' · ' + cost + '</button>';
-        else btn = '<button class="polgo gold" onclick="dev137Ask(\'' + d.k + '\')">💰 −' + cost + ' · ' + ICON[d.i] + ' +' + gain + '</button>';
+        else btn = '<button class="polgo gold" onclick="dev137Ask(\'' + d.k + '\')">' + X('Geliştir', 'Upgrade') + ' · ' + cost + ' 💰</button>';
         h += '<div class="pcard" style="--pc:' + PCL[d.i] + ';animation-delay:' + (ix * .05) + 's"><div class="pic">' + ICON[d.i] + '</div><div class="pbd"><div class="ptt"><b>' + X(d.tr, d.en) + '</b> <small>' + X('Sv.', 'Lv.') + ' ' + lv + '/' + DEV_MAXLV + '</small></div>' +
-          '<div class="pds">' + X(d.dtr, d.den) + '</div><div class="pst"><span class="pchip">' + sn[d.i] + ' ' + r1(cur) + ' → <b>' + r1(Math.min(STAT_MAX, cur + gain)) + '</b></span><span class="pchip">' + sideTxt(d.side) + '</span></div>' + btn + '</div></div>';
+          '<div class="pds">' + X(d.dtr, d.den) + '</div><div class="pst"><span class="pchip">' + sn[d.i] + ' ' + r1(cur) + ' → <b>' + r1(Math.min(STAT_MAX, cur + gain)) + '</b></span><span class="pchip">' + X('Yan etki: ', 'Side effect: ') + sideTxt(d.side) + '</span></div>' + btn + '</div></div>';
       });
       var tl = G.trade137 || 0, tc = tradeCost(), tb;
       if (!can) tb = '<button class="polgo" disabled>' + X('Kendi turunda', 'On your turn') + '</button>';
       else if (used) tb = '<button class="polgo" disabled>⛔ ' + X('Bu tur kullanıldı', 'Used this turn') + '</button>';
       else if (tl >= TRADE_MAXLV) tb = '<button class="polgo on" disabled>' + X('Azami seviye', 'Max level') + '</button>';
       else if (eco - tc < DEV_MIN_ECO) tb = '<button class="polgo" disabled>💰 ' + X('Hazine yetersiz', 'Not enough treasury') + ' · ' + tc + '</button>';
-      else tb = '<button class="polgo gold" onclick="dev137Ask(\'trade\')">💰 −' + tc + ' · +' + TRADE_INC + ' ' + X('/tur', '/turn') + '</button>';
+      else tb = '<button class="polgo gold" onclick="dev137Ask(\'trade\')">' + X('Geliştir', 'Upgrade') + ' · ' + tc + ' 💰</button>';
       h += '<div class="pcard" style="--pc:' + PCL[2] + '"><div class="pic">💼</div><div class="pbd"><div class="ptt"><b>' + X('Ticaret Koridoru', 'Trade Corridor') + '</b> <small>' + X('Sv.', 'Lv.') + ' ' + tl + '/' + TRADE_MAXLV + '</small></div>' +
         '<div class="pds">' + X('Uzun vadeli yatırım: her seviye tur gelirine kalıcı +' + TRADE_INC + ' ekler. Şimdi güç yerine ileride kaynak.', 'Long-term bet: each level adds +' + TRADE_INC + ' to turn income permanently. Resources later instead of power now.') + '</div>' +
         '<div class="pst"><span class="pchip">' + X('Tur geliri', 'Turn income') + ' +' + r2(tl * TRADE_INC) + ' → <b>+' + r2((tl + 1) * TRADE_INC) + '</b></span></div>' + tb + '</div></div>';

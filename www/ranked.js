@@ -215,8 +215,10 @@
   function clearT() { timers.forEach(function (t) { clearTimeout(t); clearInterval(t); }); timers = []; }
   /* V117: tüm Rank ekranları ortak "savaş çerçevesi" ile açılır; başka pencereler açılınca çerçeve sınıfı kalkar */
   var _m0 = window.modal;
-  window.modal = function (h) { var b = $i('box'); if (b) b.classList.remove('wcr-box'); return _m0.apply(this, arguments); };
-  function rmodal(h) { _m0(h); var b = $i('box'); if (b) b.classList.add('wcr-box'); }
+  window.modal = function (h) { var b = $i('box'); if (b) b.classList.remove('wcr-box'); var m0 = $i('mod'); if (m0) m0.classList.remove('wcr156'); return _m0.apply(this, arguments); };
+  function rmodal(h) { _m0(h); var b = $i('box'); if (b) b.classList.add('wcr-box'); var m = $i('mod'); if (m) m.classList.add('wcr156'); }
+  /* V195: duraklatma kartıyla (v156 "Siper Defteri") aynı köşe işlemesi */
+  var CORNER = '<svg viewBox="0 0 46 46" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M2 44V14Q2 2 14 2H44"/><path d="M8 44V18Q8 8 18 8H44" stroke-width=".8" opacity=".6"/><path d="M13 13l4-4 4 4-4 4z" fill="currentColor" stroke="none"/><circle cx="2" cy="44" r="1.6" fill="currentColor" stroke="none"/><circle cx="44" cy="2" r="1.6" fill="currentColor" stroke="none"/></svg>';
   function art() { return window.WCArt || { medal: function () { return ''; }, mini: function () { return ''; }, ic: function () { return ''; }, crossed: function () { return ''; } }; }
   function M_(txt) { return '<div style="text-align:center;padding:10px;color:var(--tx2)">' + txt + '</div>'; }
 
@@ -237,26 +239,26 @@
     var A = art(), lg = league(P.rating), nx = lg.i < LG.length - 1 ? league(LG[lg.i + 1].min) : null,
       pct = lg.hi ? Math.max(3, Math.round((P.rating - lg.lo) / (lg.hi - lg.lo) * 100)) : 100, left = lg.hi ? lg.hi - P.rating : 0;
     rmodal('<div class="wcr-hub">' +
-      '<div class="wcr-corner c-tl">' + A.ic('rose', 26, 26) + '</div><div class="wcr-corner c-tr">' + A.ic('rose', 26, 26) + '</div><div class="wcr-corner c-bl">' + A.ic('rose', 26, 26) + '</div><div class="wcr-corner c-br">' + A.ic('rose', 26, 26) + '</div>' +
-      '<div class="wcr-title">' + A.crossed(34) + '<h3>' + X('RANK MAÇI', 'RANKED MATCH') + '</h3>' + A.crossed(34) + '</div>' +
-      '<div class="wcr-div"><i></i>' + A.ic('rose', 18, 18) + '<i></i></div>' +
+      '<span class="wcr-k wk1">' + CORNER + '</span><span class="wcr-k wk2">' + CORNER + '</span><span class="wcr-k wk3">' + CORNER + '</span><span class="wcr-k wk4">' + CORNER + '</span>' +
+      '<div class="wcr-title"><h3>' + X('RANK MAÇI', 'RANKED MATCH') + '</h3></div>' +
+      '<div class="wcr-div" aria-hidden="true"><i></i><s></s><b class="wcr-dia"></b><s></s><i></i></div>' +
       '<div class="wcr-stage" style="--c:' + lg.c + '"><div class="wcr-m3d">' + A.medal(lg, 230) + '</div></div>' +
       '<div class="wcr-plate"><b>' + esc(P.nick || '—') + '</b></div>' +
       '<div class="wcr-lgn" style="color:' + lg.c + '">' + esc(lg.label.toUpperCase()) + '</div>' +
-      '<div class="wcr-rat">★ ' + P.rating + '</div>' +
-      '<div class="wcr-prog"><span class="pm">' + A.mini(lg, 34) + '</span><div class="wcr-bar2"><i style="width:' + pct + '%"></i><em></em></div><span class="pm dim">' + (nx ? A.mini(nx, 34) : A.ic('rose', 30, 30)) + '</span></div>' +
+      '<div class="wcr-rat"><svg class="wcr-sp" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0l1.2 3.8L10 5 6.2 6.2 5 10 3.8 6.2 0 5l3.8-1.2z"/></svg>' + P.rating + '</div>' +
+      '<div class="wcr-prog"><span class="pm">' + A.mini(lg, 34) + '</span><div class="wcr-bar2"><i style="width:' + pct + '%"></i><em></em></div><span class="pm dim">' + (nx ? A.mini(nx, 34) : '<b class="wcr-dia"></b>') + '</span></div>' +
       '<div class="wcr-sm">' + (lg.hi ? X('Sonraki lige ', 'To next league: ') + left + X(' puan', ' pts') : X('En üst lig', 'Top league')) + '</div>' +
       strip(lg.i) + ledger() +
       (cfgOk() ? '' : '<div class="wcr-note">' + X('Firebase ayarlanmamış: gerçek rakip aranmaz, liderlik tablosu kapalı.', 'Firebase is not configured: no live opponents, leaderboard disabled.') + '</div>') +
-      '<button class="big pri wcr-go" onclick="WCRank.find()">' + A.crossed(26) + '<span>' + X('Maç Bul', 'Find Match') + '</span>' + A.crossed(26) + '</button>' +
-      '<div class="wcr-two"><button class="big" onclick="WCRank.board()">' + A.ic('shield', 18, 22) + '<span>' + X('Liderlik', 'Leaderboard') + '</span></button>' +
-      '<button class="big" onclick="WCRank.nick()">' + A.ic('rose', 20, 20) + '<span>' + X('Takma Ad', 'Nickname') + '</span></button></div>' +
+      '<button class="big pri wcr-go" onclick="WCRank.find()"><span>' + X('Maç Bul', 'Find Match') + '</span></button>' +
+      '<div class="wcr-two"><button class="big" onclick="WCRank.board()">' + '<span>' + X('Liderlik', 'Leaderboard') + '</span></button>' +
+      '<button class="big" onclick="WCRank.nick()">' + '<span>' + X('Takma Ad', 'Nickname') + '</span></button></div>' +
       acctHtml() +
       '<button class="big ghost wcr-x2" onclick="closeMod()">' + X('Kapat', 'Close') + '</button></div>');
   }
   function openHub() {
     if (!window.WCStats || !WCStats.ready()) return toast(X('Ülke verisi yükleniyor, birazdan tekrar dene', 'Country data is loading, try again shortly'));
-    rmodal('<h3>★ ' + X('Rank Maçı', 'Ranked Match') + '</h3>' + M_(X('Bağlanılıyor…', 'Connecting…')));
+    rmodal('<h3>' + X('Rank Maçı', 'Ranked Match') + '</h3>' + M_(X('Bağlanılıyor…', 'Connecting…')));
     fbInit(function () {
       syncProfile(function () {
         if (!P.nick) return askNick(true);
@@ -589,7 +591,7 @@
     var ttl = out === 'win' ? X('ZAFER', 'VICTORY') : out === 'loss' ? X('YENİLGİ', 'DEFEAT') : out === 'draw' ? X('BERABERLİK', 'DRAW') : X('MAÇ GEÇERSİZ', 'MATCH VOID');
     rmodal('<div class="wcr-res ' + out + '"><h2>' + ttl + '</h2>' + (reason ? '<div class="wcr-sm">' + esc(reason) + '</div>' : '') +
       (out === 'invalid' ? M_(X('İki taraf çelişkili sonuç bildirdi; puan değişmedi.', 'Both sides reported conflicting results; rating unchanged.')) :
-        '<div class="wcr-d ' + (r.d > 0 ? 'p' : r.d < 0 ? 'n' : '') + '">' + (r.d > 0 ? '+' : '') + r.d + '</div><div class="wcr-rt">★ ' + r.after + '</div>') +
+        '<div class="wcr-d ' + (r.d > 0 ? 'p' : r.d < 0 ? 'n' : '') + '">' + (r.d > 0 ? '+' : '') + r.d + '</div><div class="wcr-rt">' + r.after + '</div>') +
       (changed ? '<div class="wcr-lg ' + (up ? 'up' : 'down') + '"><span>' + (up ? X('LİG ATLADIN', 'PROMOTED') : X('LİG DÜŞTÜN', 'DEMOTED')) + '</span>' + badge(a, 1) + '<b style="color:' + a.c + '">' + esc(a.label) + '</b></div>' : '<div class="wcr-sm" style="color:' + a.c + '">' + esc(a.label) + '</div>') +
       '</div><button class="big pri" onclick="location.reload()">' + X('Ana Menü', 'Main Menu') + '</button>');
   }
