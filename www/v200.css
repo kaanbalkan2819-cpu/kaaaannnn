@@ -43,3 +43,23 @@ button.pri{background:linear-gradient(180deg,#e6c46a,#b8902f);border-color:#f0dc
 button.pri:hover{background:linear-gradient(180deg,#f0d07a,#c49a38)}
 .box button.big{font-family:Georgia,'Times New Roman',serif;letter-spacing:.06em;border-radius:4px}
 @media (prefers-reduced-motion:reduce){#mod,#panel{animation:none}}
+
+/* V202 — KASMA: küre (canlı WebGL) üstündeki pahalı efektler kaldırıldı */
+/* kontrol düğmeleri: her karede küreyi yeniden bulanıklaştıran backdrop-filter kapatıldı; arka plan biraz daha opak */
+#ctl button{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#2d281ff0}
+/* "Yükselt" düğmesi: box-shadow animasyonu (her karede yeniden boyama) yerine yalnızca opaklık animasyonu (GPU) */
+.hb.up{animation:none;position:relative}
+.hb.up::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 14px #34d39988;opacity:0;pointer-events:none;will-change:opacity;animation:wc202glow 1.6s infinite}
+@keyframes wc202glow{50%{opacity:1}}
+body.rm .hb.up::after{animation:none}
+
+/* V203 — KASMA 3. TUR: ana menü küresi üstündeki tam ekran mix-blend-mode:overlay gren telefonda (dokunmatik) kapatıldı; küre üstünde her karede ayrı birleştirme yüzeyi gerektiriyordu. Geri almak için bu bloğu silin. */
+@media (pointer:coarse){#wcm .grain{display:none!important}}
+
+/* V204 — KASMA 4. TUR: savaş panelinde kılıçlar çarpışırken kasma. Çarpışma anında .b7h (iki bayrak + metinler) ekran sarsıntısıyla her karede yeniden boyanıyordu, .s7 kutuları "transition:all" ile, kılıç/kıvılcım ise yeni katman olarak o anda ayrılıyordu.
+   Çözüm: .b7h ve kılıç alanı en baştan GPU katmanı (will-change), sarsıntı translate3d ile, .s7 geçişi yalnız opaklık/kenar rengi. Görünüm aynı. Geri almak için bu bloğu silin. */
+.b7h{will-change:transform;transform:translateZ(0)}
+.sx .sl,.sx .sr,.sx .spk{will-change:transform,opacity;backface-visibility:hidden}
+.s7{transition:opacity .4s,border-color .4s,box-shadow .4s}
+#bs.shake .b7h{animation:shk204 .28s linear}
+@keyframes shk204{20%{transform:translate3d(-3px,2px,0)}40%{transform:translate3d(3px,-2px,0)}60%{transform:translate3d(-2px,-1px,0)}80%{transform:translate3d(2px,1px,0)}100%{transform:translateZ(0)}}

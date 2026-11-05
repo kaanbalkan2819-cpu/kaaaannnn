@@ -215,7 +215,7 @@
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1 : 1.25)); renderer.setClearColor(0x000000, 0);
       scene = new T3.Scene(); camera = new T3.PerspectiveCamera(40, 1, .1, 100); camera.position.set(0, 0, 3.8);
       var sun = new T3.DirectionalLight(0xffd9a0, 2.6); sun.position.set(-3, 1.5, 3); scene.add(sun);
-      var rim = new T3.DirectionalLight(0xb3201a, 3.2); rim.position.set(4, 1, -3); scene.add(rim);
+      var rim = new T3.DirectionalLight(0xb3201a, 3.2); rim.position.set(4, 1, -3); if (!coarse) scene.add(rim);   /* V203: kırmızı kenar ışığı telefonda yok */
       scene.add(new T3.AmbientLight(0x4a3040, .9));
       globe = new T3.Group(); scene.add(globe); spin = new T3.Group(); globe.add(spin);
       var cs = earthCanvases(sv), map = new T3.CanvasTexture(cs[0]), glow = new T3.CanvasTexture(cs[1]);

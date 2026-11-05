@@ -3,18 +3,10 @@
 
 /* zemin: siyah uzay yerine sıcak taş (tuval artık saydam; v30.js alpha:true) */
 #g3d{background:radial-gradient(ellipse at 50% 40%,#74634a 0,#5a4c38 30%,#3d352b 62%,#2a251e 100%)}
-#g3d::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at center,transparent 58%,rgba(14,9,2,.3) 100%)}   /* hafif kenar karartması (tuvalin üstünde) */
 
-/* tuvalin arkasında: ince altın harita halkaları (çok yavaş döner) + kağıt grenı */
-#wc199d{position:absolute;left:50%;top:44%;width:150vmin;height:150vmin;margin:-75vmin 0 0 -75vmin;pointer-events:none}
-#wc199d svg{width:100%;height:100%;animation:wc199spin 300s linear infinite}
-@keyframes wc199spin{to{transform:rotate(360deg)}}
-#wc199g{position:absolute;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:overlay;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .8 0 0 0 0 .7 0 0 0 0 .5 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")}
-#g3d canvas{position:relative;z-index:1}
+/* V201: halka/gren/karartma katmanları CSS'ten kaldırıldı; v30.js bg199() sahne içinde çizer. */
 
 /* yükleme kapağı (V96-V102): lacivert uzay + mavi şafak yerine aynı taş zemin + altın toz ve altın şafak */
 #g3d.v91cover{background:radial-gradient(ellipse at 50% 45%,#5a4c38 0,#3d352b 45%,#2a251e 100%)}
 #g3d.v91cover::before{background-image:radial-gradient(1.6px 1.6px at 8% 18%,#e6cf8e 50%,transparent 52%),radial-gradient(1.2px 1.2px at 21% 71%,#cdb06a 50%,transparent 52%),radial-gradient(1.8px 1.8px at 33% 34%,#f3e8c8 50%,transparent 52%),radial-gradient(1.2px 1.2px at 47% 86%,#cdb06a 50%,transparent 52%),radial-gradient(1.5px 1.5px at 58% 12%,#f3e8c8 50%,transparent 52%),radial-gradient(1.3px 1.3px at 72% 62%,#e6cf8e 50%,transparent 52%),radial-gradient(1.7px 1.7px at 85% 27%,#cdb06a 50%,transparent 52%),radial-gradient(1.2px 1.2px at 93% 80%,#f3e8c8 50%,transparent 52%)}
 #g3d.v91cover::after{background:radial-gradient(circle,#f3e8c8 0,#cdb06a 8%,#8f7b4c 24%,rgba(143,123,76,.35) 48%,transparent 70%);z-index:0}
-#g3d.v91cover #wc199d{opacity:.6}
-body.rm #wc199d svg{animation:none}

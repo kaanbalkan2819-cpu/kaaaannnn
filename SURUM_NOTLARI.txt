@@ -1,3 +1,33 @@
+=================== V204 ===================
+V204 — KASMA 4. TUR: SAVAŞ PANELİNDE KILIÇ ÇARPIŞMASI (ölçüm yok; yalnızca CSS)
+v200.css sonu: .b7h baştan GPU katmanı, sarsıntı translate3d, kılıç/kıvılcım will-change, .s7 "transition:all" -> yalnız opaklık/kenar/gölge.
+GERİ ALMAK İÇİN: v200.css'teki "V204" bloğunu silin.
+
+=================== V203 ===================
+V203 — KASMA 3. TUR (ana menü küresi; ölçüm yok; node --check geçti)
+Not: V201/V202 oyun sahnesindeki dört nedeni (dönen halka, mix-blend gren, alpha tuval, 3. ışık + ızgara) zaten gideriyordu; bu sürümde menü küresindeki aynı maliyetler kapatıldı.
+1) v200.css: telefonda (pointer:coarse) ana menüdeki mix-blend-mode:overlay gren katmanı kapalı.
+2) v35.js: menü küresinin kırmızı kenar ışığı telefonda eklenmiyor.
+GERİ ALMAK İÇİN: v200.css sonundaki "V203" bloğunu silin; v35.js'te "if (!coarse) scene.add(rim)" -> "scene.add(rim)".
+
+=================== V202 ===================
+V202 — KASMA 2. TUR (kod incelemesi; ölçüm yok; yalnızca node --check geçti)
+1) #ctl düğmeleri (app.css:63): backdrop-filter:blur(6px) canlı küre üstünde her karede yeniden bulanıklaştırma yapıyordu -> kapatıldı (v200.css; arka plan #2d281ff0).
+2) .hb.up (Yükselt) düğmesi: box-shadow animasyonu her karede boyama yapıyordu -> ::after opaklık animasyonuna çevrildi (GPU).
+3) v30.js: altın toz noktaları telefonda (coarse) eklenmiyor (V201'de kenar ışığı/ızgara zaten masaüstüne alınmıştı).
+GERİ ALMAK İÇİN: v200.css'in sonundaki "V202" bloğunu silin; v30.js'te "if (!coarse) scene.add(dust)" -> "scene.add(dust)".
+
+=================== V201 ===================
+V201 — KASMA DÜZELTMESİ (V199'DA EKLENEN AĞIR KATMANLAR KALDIRILDI; ölçüm yapılmadı, kod incelemesiyle; yalnızca node --check geçti)
+Şüpheli nedenler (hepsi V199'un dünya zemini):
+ 1) #wc199d: 150vmin x 150vmin dönen SVG katmanı, sonsuz animasyon -> telefonda (dpr 3) çok büyük GPU dokusu + kürenin "durunca çizme" tasarrufunu boşa çıkaran sürekli kare.
+ 2) #wc199g: tam ekran mix-blend-mode:overlay gren -> her karede ayrı birleştirme yüzeyi.
+ 3) alpha:true tuval + #g3d::after kenar karartması -> saydam WebGL tuvali her karede 3-4 DOM katmanıyla alfa-birleştirme (opak tuvalde yok).
+ 4) Ek: 3. ışık (kenar ışığı) ve enlem/boylam ızgarası telefonda piksel/çizim maliyeti.
+Çözüm: tuval yine alpha:false. Zemin + altın halkalar + gren + karartma tek seferlik 2B tuvale çizilip scene.background yapıldı (v30.js bg199(); boyut değişince yeniden çizilir). Dönen halka animasyonu YOK (halkalar sabit). DOM halka/gren/karartma katmanları ve ilgili CSS silindi. Kenar ışığı ve ızgara yalnızca masaüstünde (coarse pointer = telefon: yok).
+Hâlâ kasarsa: v30.js'te WC199_TILT=0 deneyin; bg199() çağrısını (build ve resize içinde) yorumlayıp zemini düz renge çevirin; kasma ancak V198 ile geçiyorsa v199.css bağlantısını silin.
+GERİ ALMAK İÇİN: V199 sürümü: v30.js ve v199.css'in önceki hali bu zip'te yok; V198 için yedek_v198_oncesi + orijinal V198 zip.
+
 =================== V200 ===================
 V200 — KALAN PANEL/MENÜLER DURAKLATMA KARTI TEMASINA (SİPER DEFTERİ) ÇEVRİLDİ (TEST EDİLMEDİ; yalnızca node --check ve CSS parantez dengesi kontrolü geçti)
 Zaten şablondaydı: duraklatma (v156), sıralamalı (v195), ülke paneli #panel (v196), politika/kalkınma kutuları (v197), dünya sahnesi (v199).

@@ -430,23 +430,46 @@
   function loadScript(src) { if (_scC[src]) return _scC[src]; return _scC[src] = new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function () { delete _scC[src]; no(new Error(src)); }; document.head.appendChild(s); }); }
   var _pre = false;
   function preload() { if (_pre || READY || BAD) return; _pre = true; try { Promise.all([loadScript('globe/three.min.js'), loadScript('globe/data.js'), loadScript('globe/tri.js').catch(function () { })]).then(function () { var T = window.WC_TEX || {}; for (var k in T) { try { loadImg(T[k]); } catch (e) { } } }).catch(function () { _pre = false; }); } catch (e) { } }
+  var _bg199 = null;
+  /* V201: taş/parşömen zemin + altın harita halkaları + hafif gren + kenar karartması TEK SEFERLİK 2B tuvale çizilir, scene.background olur (opak tuval; DOM katmanı/animasyon yok). Boyut değişince yeniden çizilir. */
+  function bg199() {
+    try {
+      if (!scene || !THREE || !stage) return;
+      var w = stage.clientWidth || window.innerWidth, h = stage.clientHeight || window.innerHeight; if (!w || !h) return;
+      var k = Math.min(0.6, 900 / Math.max(w, h)), cw = Math.max(64, Math.round(w * k)), ch = Math.max(64, Math.round(h * k));
+      if (_bg199 && _bg199.w === cw && _bg199.h === ch) return;
+      var c = document.createElement('canvas'); c.width = cw; c.height = ch; var x = c.getContext('2d'), cx = cw / 2, cy = ch * 0.44, m = Math.min(cw, ch), far = Math.hypot(Math.max(cx, cw - cx), Math.max(ch * 0.4, ch * 0.6));
+      var g = x.createRadialGradient(cx, ch * 0.4, 0, cx, ch * 0.4, far); g.addColorStop(0, '#74634a'); g.addColorStop(0.3, '#5a4c38'); g.addColorStop(0.62, '#3d352b'); g.addColorStop(1, '#2a251e'); x.fillStyle = g; x.fillRect(0, 0, cw, ch);
+      var sc = (1.5 * m) / 600; x.save(); x.translate(cx, cy); x.strokeStyle = '#e6cf8e';
+      function ring(r, a, lw, dash) { x.globalAlpha = a; x.lineWidth = lw; x.setLineDash(dash || []); x.beginPath(); x.arc(0, 0, r * sc, 0, 6.2832); x.stroke(); }
+      ring(130, 0.3, Math.max(1, sc)); ring(180, 0.22, Math.max(1, sc)); ring(240, 0.3, Math.max(1, sc)); ring(290, 0.18, Math.max(1, sc)); ring(262, 0.4, 8 * sc, [sc, 11.2 * sc]);
+      x.setLineDash([]); x.lineWidth = Math.max(1, sc); x.globalAlpha = 0.16; x.beginPath(); x.moveTo(0, -300 * sc); x.lineTo(0, 300 * sc); x.moveTo(-300 * sc, 0); x.lineTo(300 * sc, 0); x.stroke();
+      x.globalAlpha = 0.1; x.beginPath(); x.moveTo(-209 * sc, -209 * sc); x.lineTo(209 * sc, 209 * sc); x.moveTo(209 * sc, -209 * sc); x.lineTo(-209 * sc, 209 * sc); x.stroke(); x.restore(); x.globalAlpha = 1;
+      var t = document.createElement('canvas'); t.width = t.height = 96; var tx = t.getContext('2d'), id = tx.createImageData(96, 96), q; for (q = 0; q < id.data.length; q += 4) { id.data[q] = 204; id.data[q + 1] = 176; id.data[q + 2] = 106; id.data[q + 3] = Math.random() * 20; } tx.putImageData(id, 0, 0);
+      x.fillStyle = x.createPattern(t, 'repeat'); x.fillRect(0, 0, cw, ch);
+      var vg = x.createRadialGradient(cx, ch / 2, 0, cx, ch / 2, Math.hypot(cx, ch / 2)); vg.addColorStop(0.58, 'rgba(14,9,2,0)'); vg.addColorStop(1, 'rgba(14,9,2,.3)'); x.fillStyle = vg; x.fillRect(0, 0, cw, ch);
+      var tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.generateMipmaps = false; tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
+      var old = scene.background; scene.background = tex; if (old && old.dispose) old.dispose(); _bg199 = { w: cw, h: ch };
+    } catch (e) { }
+  }
   function build() {
     THREE = window.THREE; TEX = window.WC_TEX;
     var _c = performance.now(); function CP(l) { PF('build:' + l, _c); _c = performance.now(); }
     ovC = mk(OW, OH); ov = ovC.getContext('2d'); liftC = mk(LW, LH); lift = liftC.getContext('2d'); reliefC = mk(LW, LH); var YLD = function () { return new Promise(function (r) { setTimeout(r, 24); }); };   /* V149: ağır adımlar arasında ana iş parçacığı serbest bırakılır */
     nsmall = mk(NW, NH); nsx = nsmall.getContext('2d', { willReadFrequently: true }); nC = mk(NW, NH); nx = nC.getContext('2d'); nImg = nx.createImageData(NW, NH); topoH = new Float32Array(NW * NH);
     var coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches || document.body.classList.contains('fxlow');
-    renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: true });   /* V199: tuval saydam; taş/parşömen zemin #g3d CSS'inde */
+    renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: false });   /* V201: tuval yine OPAK (V199'daki alpha:true her karede DOM katmanlarıyla birleştirme yapıyordu -> kasma). Zemin sahne içinde (bg199) */
     /* V127: hareket sırasında düşük (akıcı), 260 ms durunca yüksek çözünürlük (net). Telefonda sabit 1.25 yüzünden küre bulanıktı. */
     PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5);   /* V162: masaüstünde hareket/savaş animasyonu sırasında en çok 1.5x (eskiden 2x) */ PRHI = coarse ? Math.max(PRLO, Math.min(window.devicePixelRatio || 1, PR_IDLE_PHONE)) : Math.min(window.devicePixelRatio || 1, 2);   /* V183: telefonda da durunca netleş (PR_IDLE_PHONE) */   /* V147: telefonda çözünürlük değişimi yok (setPR 238-266 ms donma + 1.5x karede ~150 ms) */ curPR = PRLO; idleSince = performance.now();
-    renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.setClearColor(0x000000, 0);   /* V199 */
+    renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.setClearColor(0x2a251e, 1);   /* V201 */
     stage.appendChild(renderer.domElement); try { renderer.domElement.style.opacity = '0'; } catch (e) { } /* V150: build() içindeki ön çizim (kamera 3.4, tam boy küre) perde kalkınca bir an görünüyordu; tuval doIntro/show açana kadar gizli */ CP('renderer');
     scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200); camera.position.set(0, 0, camZ);
     /* V199: duraklatma menüsü (Siper Defteri) teması: sıcak krem güneş sol üstten, sıcak taş dolgu, arkadan ince altın kenar ışığı.
        ESKİ DEĞERLER: güneş 0xffffff/2.4 (3,2,4), ortam 0x6b7fa8/0.9, kenar ışığı yok, kamera yuvarlanması yok. */
     var sun = new THREE.DirectionalLight(0xffeccb, 2.3); sun.position.set(-3, 2.4, 4); scene.add(sun); scene.add(new THREE.AmbientLight(0x857a68, 0.95));
-    var rim199 = new THREE.DirectionalLight(0xcdb06a, 0.7); rim199.position.set(-2.5, 1.2, -3.5); scene.add(rim199);
+    if (!coarse) { var rim199 = new THREE.DirectionalLight(0xcdb06a, 0.7); rim199.position.set(-2.5, 1.2, -3.5); scene.add(rim199); }   /* V201: üçüncü ışık yalnızca masaüstünde (telefonda piksel başına maliyet) */
     camera.rotation.z = WC199_TILT * Math.PI / 180;   /* V199: küre -14° eğik görünür (menü kartındaki küre motifi); 0 yaparsanız düz */
+    bg199();   /* V201 */
     globe = new THREE.Group(); scene.add(globe);
     ovTex = new THREE.CanvasTexture(ovC); ovTex.colorSpace = THREE.SRGBColorSpace; ovTex.anisotropy = 8; if (LOWQ) { ovTex.generateMipmaps = false; ovTex.minFilter = THREE.LinearFilter; ovTex.anisotropy = 1; }   /* V142: telefonda her seçimde 2048x1024 kaplamanın mipmap'i yeniden üretilmesin (seçim anı takılması) */ liftTex = new THREE.CanvasTexture(liftC); normTex = new THREE.CanvasTexture(nC);
     var marble, water, sky, clouds, geo; return Promise.all([loadImg(TEX.marble), loadImg(TEX.topo), loadImg(TEX.water), loadImg(TEX.sky), loadImg(TEX.clouds)]).then(function (im) {
@@ -466,11 +489,11 @@
       try {
         var dp = [], di, du, dt2, dr; for (di = 0; di < 380; di++) { du = Math.random() * 2 - 1; dt2 = Math.random() * 6.2832; dr = Math.sqrt(1 - du * du); dp.push(40 * dr * Math.cos(dt2), 40 * du, 40 * dr * Math.sin(dt2)); }
         var dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
-        var dust = new THREE.Points(dg, new THREE.PointsMaterial({ color: 0xcdb06a, size: 0.1, transparent: true, opacity: 0.3, depthWrite: false })); dust.frustumCulled = false; scene.add(dust);
+        var dust = new THREE.Points(dg, new THREE.PointsMaterial({ color: 0xcdb06a, size: 0.1, transparent: true, opacity: 0.3, depthWrite: false })); dust.frustumCulled = false; if (!coarse) scene.add(dust);   /* V202: toz telefonda yok */
         var gp = [], ga, gb, gk, R = 1.004; for (ga = -60; ga <= 60; ga += 30) { for (gk = 0; gk < 96; gk++) { var l1 = gk / 96 * 6.2832, l2 = (gk + 1) / 96 * 6.2832, la = ga * Math.PI / 180, cr = Math.cos(la) * R, sy = Math.sin(la) * R; gp.push(cr * Math.cos(l1), sy, cr * Math.sin(l1), cr * Math.cos(l2), sy, cr * Math.sin(l2)); } }
         for (gb = 0; gb < 180; gb += 30) { var lo = gb * Math.PI / 180, co = Math.cos(lo), so = Math.sin(lo); for (gk = 0; gk < 96; gk++) { var p1 = gk / 96 * 6.2832, p2 = (gk + 1) / 96 * 6.2832; gp.push(Math.cos(p1) * R * co, Math.sin(p1) * R, Math.cos(p1) * R * so, Math.cos(p2) * R * co, Math.sin(p2) * R, Math.cos(p2) * R * so); } }
         var gg = new THREE.BufferGeometry(); gg.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3));
-        var grat = new THREE.LineSegments(gg, new THREE.LineBasicMaterial({ color: 0xcdb06a, transparent: true, opacity: 0.2, depthWrite: false })); grat.frustumCulled = false; globe.add(grat);
+        var grat = new THREE.LineSegments(gg, new THREE.LineBasicMaterial({ color: 0xcdb06a, transparent: true, opacity: 0.2, depthWrite: false })); grat.frustumCulled = false; if (!coarse) globe.add(grat);   /* V201: ızgara telefonda yok */
         if (earth && earth.material && earth.material.color) earth.material.color.setHex(0xffe6c2);   /* V199: deniz/kara dokusuna hafif sıcak ton */
       } catch (e) { }
       CP('meshes');
@@ -493,7 +516,7 @@
   }
 
   /* ---------- Kamera ve etkileşim ---------- */
-  function resize() { if (!renderer) return; var w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h); camera.aspect = w / h; camera.fov = w < h ? 52 : 40; camera.updateProjectionMatrix(); }
+  function resize() { if (!renderer) return; var w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h); bg199(); camera.aspect = w / h; camera.fov = w < h ? 52 : 40; camera.updateProjectionMatrix(); }
   function rotateBy(dx, dy) { var k = 0.0042 * camZ / 3.4; globe.quaternion.premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(dy * k, dx * k, 0, 'XYZ'))); }
   function stepCamera(dt) {
     if (focusQ) { globe.quaternion.slerp(focusQ, Math.min(1, dt * 5)); if (globe.quaternion.angleTo(focusQ) < 0.002) focusQ = null; }
@@ -688,8 +711,7 @@
     var ctl = $$('ctl'), map = $$('map'); if (!ctl || !map || $$('v30b')) return;
     var b = document.createElement('button'); b.id = 'v30b'; b.type = 'button'; b.textContent = '3B'; b.title = X('3B küre', '3D globe'); b.setAttribute('onclick', 'void 0'); b.style.display = 'none'; ctl.appendChild(b);
     stage = document.createElement('div'); stage.id = 'g3d'; stage.style.display = 'none'; map.insertBefore(stage, map.firstChild);
-    /* V199: tuvalin ARKASINDA ince altın harita halkaları + hafif kağıt grenı (CSS: v199.css) */
-    try { stage.innerHTML = '<div id="wc199d"><svg viewBox="0 0 600 600" fill="none" stroke="#e6cf8e" stroke-opacity=".3"><circle cx="300" cy="300" r="130"/><circle cx="300" cy="300" r="180" stroke-opacity=".22"/><circle cx="300" cy="300" r="240"/><circle cx="300" cy="300" r="290" stroke-opacity=".18"/><circle cx="300" cy="300" r="262" stroke-width="8" stroke-dasharray="1 11.2" stroke-opacity=".4"/><path d="M300 4V596M4 300H596" stroke-opacity=".16"/><path d="M91 91L509 509M509 91L91 509" stroke-opacity=".1"/></svg></div><div id="wc199g"></div>'; } catch (e) { }
+    /* V201: V199'daki DOM halka/gren katmanları kaldırıldı (150vmin dönen SVG + mix-blend-mode gren = kasma). Aynı görüntü tek seferlik çizilen arka plan dokusu olarak sahnede (bg199). */
     if (window.ResizeObserver) new ResizeObserver(function () { if (ON) resize(); }).observe(stage); else window.addEventListener('resize', function () { if (ON) resize(); });
     /* V90: ana menü (v35, body.wcm-on) açıkken oyunun 3B küresi kurulmaz. Kurulum ~sn'lik ana-thread yükü; menü küresini kasıyordu.
        Menü kapanınca (oyun başlar / devam) kurulur. */
