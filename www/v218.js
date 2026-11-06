@@ -22,6 +22,7 @@
     x.drawImage(img, GX - GR, GY - GR, N, N, 0, 0, N, N);
     var src = x.getImageData(0, 0, N, N).data, n = N * N, i, S = new Float32Array(n);
     for (i = 0; i < n; i++) S[i] = src[i * 4] * .3 + src[i * 4 + 1] * .59 + src[i * 4 + 2] * .11;
+    var L0 = new Float32Array(S);   /* V221: fotoğrafın ince dokusu (vernik, çizik, eskime) */
     function blur(a, rad) {
       var t = new Float32Array(n), y, xx, s, k;
       for (y = 0; y < N; y++) { s = 0; for (k = -rad; k <= rad; k++) s += a[y * N + Math.min(N - 1, Math.max(0, k))]; for (xx = 0; xx < N; xx++) { t[y * N + xx] = s / (2 * rad + 1); s += a[y * N + Math.min(N - 1, xx + rad + 1)] - a[y * N + Math.max(0, xx - rad)]; } }
@@ -29,7 +30,7 @@
     }
     blur(S, 16); blur(S, 16); blur(S, 16);
     var sum = 0, cnt = 0; for (var y = 0; y < N; y++) for (var xx = 0; xx < N; xx++) { var u = (xx + .5 - GR) / GR, v = (y + .5 - GR) / GR; if (u * u + v * v < .7) { sum += S[y * N + xx]; cnt++; } }
-    return { S: S, mean: cnt ? sum / cnt : 80 };
+    return { S: S, L0: L0, mean: cnt ? sum / cnt : 80 };
   }
   /* antika atlas dokusu: koyu deniz, parşömen kara, ince sınırlar, enlem-boylam ağı, mürekkep lekesi dokusu */
   function buildTex() {
@@ -69,7 +70,10 @@
       row[i] = Math.max(0, Math.min(TH - 1, Math.round((.5 - lat / Math.PI) * TH))) * TW; lon[i] = lo;
       var sx = (xx + .5) / rn * N - .5, sy = (y + .5) / rn * N - .5, x0 = Math.max(0, Math.min(N - 2, sx | 0)), y0 = Math.max(0, Math.min(N - 2, sy | 0)), fx = sx - x0, fy = sy - y0;
       var s = (S[y0 * N + x0] * (1 - fx) + S[y0 * N + x0 + 1] * fx) * (1 - fy) + (S[(y0 + 1) * N + x0] * (1 - fx) + S[(y0 + 1) * N + x0 + 1] * fx) * fy;
-      shade[i] = Math.min(1.7, s * K) * (.55 + .45 * Math.pow(z, .6));   /* fotoğrafın ışığı + kenara doğru yumuşak kararma */
+      var l0 = (photo.L0[y0 * N + x0] * (1 - fx) + photo.L0[y0 * N + x0 + 1] * fx) * (1 - fy) + (photo.L0[(y0 + 1) * N + x0] * (1 - fx) + photo.L0[(y0 + 1) * N + x0 + 1] * fx) * fy;
+      var det = Math.max(.72, Math.min(1.3, .55 + .45 * l0 / Math.max(6, s)));   /* V221: gerçek kürenin dokusu haritanın üstüne biner */
+      var spec = Math.max(0, s / photo.mean - 1.15) * .35;   /* parlak bölgelerde hafif cila parlaması */
+      shade[i] = Math.min(1.8, s * K * det + spec) * (.55 + .45 * Math.pow(z, .6));   /* fotoğrafın ışığı + kenara doğru yumuşak kararma */
     }
     return { row: row, lon: lon, shade: shade, m: msk };
   }

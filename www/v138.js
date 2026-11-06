@@ -300,7 +300,22 @@
     return '<div class="pcard d38p" style="--pc:#cdb06a"><div class="pic">' + ic + '</div><div class="pbd"><div class="ptt"><b>' + tt + '</b></div><div class="pds">' + ds + '</div>' +
       (extra ? '<div class="pst"><span class="pchip" style="color:#ffa79c">' + extra + '</span></div>' : '') + btn + '</div></div>';
   }
-function sheet(e) {
+  /* V221: dünyadaki tüm ittifaklar (üye bayrakları) ve aktif paktlar */
+  function worldDeals221() {
+    var h = '', tn = turn(), seen = {};
+    try {
+      (D().co || []).forEach(function (c) {
+        var m = (c.m || []).filter(function (x) { return ownedN(x) > 0 && M[x]; }); if (m.length < 2) return;
+        h += '<div class="wd221"><span class="wd221k">🤝</span><span class="wd221f">' + m.map(function (x) { return '<i title="' + esc(nm(x)) + '">' + fl(x) + '</i>'; }).join('') + '</span><small>' + m.map(function (x) { return esc(nm(x)); }).join(', ') + '</small></div>';
+      });
+      for (var k in (G.pacts || {})) {
+        if (!(G.pacts[k] > tn)) continue; var p = k.split('|'); if (p.length < 2 || seen[k] || !M[p[0]] || !M[p[1]]) continue; seen[k] = 1;
+        h += '<div class="wd221"><span class="wd221k">🛡</span><span class="wd221f"><i>' + fl(p[0]) + '</i><i>' + fl(p[1]) + '</i></span><small>' + esc(nm(p[0])) + ' — ' + esc(nm(p[1])) + ' · ' + (G.pacts[k] - tn) + X(' tur', ' t') + '</small></div>';
+      }
+    } catch (x) { }
+    return '<div class="d38-sec wd221h">' + X('Dünyadaki anlaşmalar', 'World treaties') + '</div>' + (h || '<div class="d38-empty">' + X('Şu an dünyada ittifak ya da pakt yok.', 'No alliances or pacts in the world right now.') + '</div>');
+  }
+  function sheet(e) {
     if (!canAct() || !e) return;
     var d = D2(), r = relOf(e), al = allied(e), pl = pactLeft(e), gu = G.guard23 && G.guard23[e] >= turn(), pr = G.prot55 && G.prot55[e] >= turn();
     var chips = '';
@@ -320,11 +335,11 @@ function sheet(e) {
       prow('🔥', X('Kışkırt', 'Incite'), X('İki ülkeyi birbirine düşür · ortaya çıkarsa ilişki bozulur', 'Turn two states on each other · may sour relations if exposed'), COSTS.incite + ' 🎲', 'v138Via(\'v23Incite\')') +
       (pl ? prow('✂', X('Paktı Boz', 'Break Pact'), X('İlişki −30, güven −15; hedef intikam alabilir', 'Relations −30, trust −15; target may retaliate'), X('Ücretsiz', 'Free'), 'v138BreakAsk()') : '') +
       (al ? prow('🚪', X('İttifaktan Çık', 'Leave Alliance'), X('Süre dolmadan çıkmak ilişkiyi ve güveni düşürür', 'Leaving early costs relations and trust'), X('Ücretsiz', 'Free'), 'wcdLeave()') : '');
-    modal('<div class="polx"><div class="polhd"><b>🕊 ' + X('Diplomasi', 'Diplomacy') + '</b><span class="polsub">' + esc(nm(e)) + '</span>' +
+    /* V221: başlık "Elçi Gönder"; üstteki Güven/Zar şeridi kaldırıldı; altta DÜNYADAKİ ANLAŞMALAR (kim kimle müttefik / paktlı) */
+    modal('<div class="polx"><div class="polhd"><b>✉ ' + X('Elçi Gönder', 'Send Envoy') + '</b><span class="polsub">' + esc(nm(e)) + '</span>' +
       '<button class="polcl" onclick="closeMod()" aria-label="close">✕</button></div>' +
-      '<div class="polbar"><span>🎲 <b>' + ((G.T && G.T.moves) || 0) + '</b></span><span>🤝 ' + X('Güven', 'Trust') + ' <b>' + trustInfo() + '</b></span></div>' +
       relBar(r) + why(e) + (chips ? '<div class="d38-chips">' + chips + '</div>' : '') +
-      '<div class="polscroll">' + friendRow + pactRow + more + '</div></div>');
+      '<div class="polscroll">' + friendRow + pactRow + more + worldDeals221() + '</div></div>');
   }
   window.v138Sheet = function (e) { sheet(e || selE()); };
   window.v138Via = function (fn) {   // v23.js içindeki eski elçi alt ekranlarını (ENV gerektirir) tek sayfadan aç

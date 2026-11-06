@@ -12,7 +12,8 @@
       var nm = (window.M && M[id] && M[id].name) || id, en = lang() === 'en';
       var old = document.getElementById('fact23'); if (old) old.remove();
       var d = document.createElement('div'); d.id = 'fact23'; d.className = 'fact23';
-      d.innerHTML = '<small>🔍 ' + (en ? 'Scouting complete · ' : 'Keşif yapıldı · ') + nm + '</small>' + (txt ? '💡 ' + txt : (en ? 'Intel gathered on this nation.' : 'Bu ülke hakkında istihbarat toplandı.'));
+      var fl221 = ''; try { fl221 = fimg(id, 'sm'); } catch (x) { }   /* V221: süslü casus raporu kartı */
+      d.innerHTML = '<div class="f221h">' + fl221 + '<div><small>' + (en ? 'SPY REPORT' : 'CASUS RAPORU') + '</small><b>' + nm + '</b></div><span class="f221s">' + (en ? 'Scouted' : 'Keşfedildi') + '</span></div>' + '<p>' + (txt || (en ? 'Our agents mapped its army and economy. No notable secret this time.' : 'Ajanlarımız ordusunu ve ekonomisini haritaladı. Bu sefer dikkat çekici bir sır yok.')) + '</p>';
       d.onclick = function () { d.remove(); }; document.body.appendChild(d);
       setTimeout(function () { if (d.parentNode) d.remove(); }, 7000);
     } catch (e) { }

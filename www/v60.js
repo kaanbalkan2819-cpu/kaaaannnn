@@ -7,7 +7,7 @@
    Atlanır: 2B harita, "hareketi azalt" (SET.rm), hızı 0 olan ayar, dosya yüklenemezse. */
 (function () {
   'use strict';
-  var SC = 0.054;        // V218: 0.046 -> 0.054 (sığdığı sürece daha büyük; sınır denetimleri gerekirse küçültür). birim ölçeği (küre yarıçapı = 1): büyütürsen modeller büyür
+  var SC = 0.06;         // V221: 0.054 -> 0.06 (saldıranın ülkesine göre biraz daha büyük; hedefe sığma denetimleri aynen). V218: 0.046 -> 0.054 (sığdığı sürece daha büyük; sınır denetimleri gerekirse küçültür). birim ölçeği (küre yarıçapı = 1): büyütürsen modeller büyür
   var ZOOM = 3.5;        // V71: başlangıç kamera uzaklığı biraz artırıldı (eski 2.7). Küçük = daha yakın; 1.5 en yakın. Sonra serbest
   var ZMIN = 3.0;        // V71: en yakın başlangıç uzaklığı (eski 2.2)
   var TINY = 4;   // V141: eski 7 -> 4. Küçük ülkelerin çoğu artık tank/piyade/uçak sahnesi alır; füze yalnızca gerçekten minik ülkelerde ve bazen

@@ -106,7 +106,7 @@
         var sm = smallNbs(id); if (!sm.length) return r;
         var box = el.querySelector('.v15p') || el, act = box.querySelector('.v15a');
         var h = '<div class="nb220"><small>' + X('Yakındaki küçük ülkeler', 'Small neighbours') + '</small>' + sm.map(function (n) { var f = ''; try { f = fimg(n, 'sm'); } catch (e) { } return '<button type="button" onclick="v220Go(\'' + n + '\')">' + f + '<span>' + esc(nm(n)) + '</span></button>'; }).join('') + '</div>';
-        if (act) act.insertAdjacentHTML('beforebegin', h); else box.insertAdjacentHTML('beforeend', h);
+        if (act) act.insertAdjacentHTML('afterend', h); else box.insertAdjacentHTML('beforeend', h);   /* V221: düğmelerin altına (üstüne binmesin) */
       } catch (e) { }
       return r;
     };

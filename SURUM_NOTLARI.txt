@@ -1107,3 +1107,31 @@ V220 — Denge, küçük devletler, diplomasi, isyan, savaş bayrakları, koleks
    bayrakları ülke koduna çevirir; izleyen cihaz kendi SVG bayrağını çizer (test: TR, SY doğru).
  - Taşan yazı düzeltici, CSS'teki !important boyutları da ezer (duraklatma menüsü "ANA MENÜ", "OYUNDAN ÇIK" artık sığar). Diplomasi, dükkan, ayarlar, online odada taşma yok.
  - Koleksiyon: 175 ülke, açılanlar önde, Hollanda'ya özel mühür ve açıklaması görünüyor. Gizli diplomasi sayacı her işlemde artıyor (3 ittifak → 3).
+
+=================== V221 ===================
+V221 — İstek listesi (masaüstü Chrome, telefon görünümü ile kontrol edildi)
+ - Ülke seçme ekranında kısa süre eski simgeler: yeni madalyon simgeleri sayfa açılırken önceden yüklenir (index.html preload + v221.js).
+ - Ana menü amblemi (küçük atlas) yarı saydamdı: arkası koyu altınla dolgun (v221.css).
+ - Arkadaşınla oyna: oda kodu kutusu "Oda Kur" düğmesiyle aynı boyda.
+ - Dereceli: önerilen oyuncu adları çeşitli (Kara/Demir/Gök + Han/Bey/Kılıç…, Fatih + Selim, Batu42…); eski "Oyuncu1234" önerisi yenilenir.
+ - Keşif: her ülkeye bir ek bilgi (facts221.js, 175 ülke); her keşifte daha önce görülmemiş TEK bilgi gösterilir.
+ - Bilgilendirme kartları: bildirim (toast) ve casus raporu yeniden tasarlandı (altın çerçeve, başlık şeridi, bayrak, "Casus Raporu · Keşfedildi").
+ - Türkiye–Azerbaycan (Nahçıvan) kara sınırı eklendi; Türkiye artık Azerbaycan'a saldırabilir (v221.js).
+ - "Silahlanma Programı" (Kalkınma) artık "Yıldırım Seferberliği"nden farklı görsel (kale/kalkan) kullanır; yeni madalyon simgeleri kart görselleriyle yeniden eşlendi (v194.js).
+ - Sağ taraf: tek kare düğme (4 kare simgesi) -> altta açılan kare düğmeler: Elçi Gönder · Diplomasi · Kalkınma (oyundaki görsellerle); +/− ve küre dışarıda.
+   Figma AI kredisi bittiği için (1 Aralık'ta yenilenir) Elçi Gönder için yeni görsel üretilemedi; mevcut elçi görseli kullanıldı.
+ - Savaş animasyonu ölçeği 0.054 -> 0.06 (saldıranın ülkesine göre; hedefe sığma denetimleri aynen).
+ - Sol üst "Ülkem": yeni madalyon simgeleri, Diplomasi satırı ve 📊 simgesi kaldırıldı (v99.js).
+ - Elçi Gönder penceresi (eski adı Diplomasi): üstteki Güven/Zar şeridi kaldırıldı; altta "Dünyadaki anlaşmalar" (tüm ittifaklar bayraklarıyla + aktif paktlar).
+ - Ana menü küresi: fotoğraftaki gerçek kürenin dokusu (vernik, çizik, eskime) ve cila parlaması haritanın üstüne biner; yapıştırılmış harita görüntüsü gitti (v218.js).
+ - Dereceli lobi baştan tasarlandı: iki komutan kartı (kare portre, büyük bayrak, ülke, unvan·lig, 5 değer), ortada geri sayım halkası + VS, "Onayla ve Başla" / "Ülkeyi Değiştir".
+ - Panama bayrağında beyaz yoktu (SVG'de beyaz alan çizilmemiş): beyaz zemin eklendi; tüm bayraklara beyaz zemin.
+ - Dereceli eşleşme: iki ülke arası sınır adımı en az 4, en çok 6 (v221.js WCStats.pickNear). Test: Peru–Guatemala = 6.
+ - Dereceli tur limiti: kazanan puanla belirlenir = sahip olunan toprağın yüzey alanı + fethedilen ülke sayısı (×6) + fethedilen ülkelerin zorluğu (5 değer toplamı/40) (ranked.js score221).
+ - Altın: tek kişilik oyunda bakiye 9999'a tamamlanır (test ayarı — yayın öncesi kaldırın: v221.js "altın 9999").
+ - "Sefer Başlıyor" yükleme simgesi: dönen altın usturlap (v35.js LD221).
+ - Küçük komşu düğmeleri artık KEŞİF/SALDIRI düğmelerinin altında (üstüne binmiyordu).
+ - YENİ LOGO (vektör, el tasarımı): bordo zemin + altın ışınlar, çapraz çelik kılıçlar, altın defne çelengi, gerçek kıtalı (oyunun harita verisinden) küre,
+   perçinli altın halka, mücevherli taç, altın yıldız. Figma dosyasına PNG + düzenlenebilir vektör olarak yüklendi (Figma AI kredisi bittiği için elle çizildi).
+   Uygulama simgeleri (tüm mipmap, yuvarlak, uyarlanabilir), Play Store 512 simgesi, kapak görseli amblemi ve açılış ekranları yenilendi.
+   Dosyalar: play_store/gorseller/logo-1024.png, logo-vektor.svg.

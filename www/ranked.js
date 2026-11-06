@@ -119,9 +119,19 @@
 
   /* V122 — ad sürtünmesi: ekran boş açılmaz, hazır öneriyle ("Oyuncu4821") açılır; değiştirilebilir.
      Google Play Games oyuncu adı varsa (native köprü: window.WCPlayGames.getDisplayName) otomatik doldurulur. */
-  function newSuggestion() { return X('Oyuncu', 'Player') + Math.floor(rnd(1000, 10000)); }
+  /* V221: çeşitli ad önerileri (unvan + isim, isim + sayı, lakap) */
+  var NK1 = ['Kara', 'Demir', 'Altın', 'Gök', 'Kızıl', 'Bozkır', 'Yalın', 'Akın', 'Fırtına', 'Yıldırım', 'Kurt', 'Şahin', 'Aslan', 'Ejder', 'Gölge', 'Tunç', 'Çelik', 'Ateş'],
+    NK2 = ['Han', 'Bey', 'Paşa', 'Kılıç', 'Kalkan', 'Akıncı', 'Atlı', 'Yay', 'Mızrak', 'Sancak', 'Tuğ', 'Kartal', 'Hakan', 'Şövalye', 'Lord', 'Baron', 'Kont', 'Dük'],
+    NK3 = ['Fatih', 'Sultan', 'Kaptan', 'Komutan', 'Vezir', 'Hükümdar', 'Stratejist', 'Kral', 'Mareşal', 'Lord'],
+    NK4 = ['Orhan', 'Alp', 'Tuna', 'Atlas', 'Kaan', 'Doruk', 'Arda', 'Eren', 'Mete', 'Batu', 'Selim', 'Kerem', 'Leon', 'Viktor', 'Aurel', 'Darius', 'Cyrus', 'Ragnar'];
+  function pickA(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function newSuggestion() {
+    var r = Math.random(), s;
+    if (r < .35) s = pickA(NK1) + pickA(NK2); else if (r < .6) s = pickA(NK3) + pickA(NK4); else if (r < .82) s = pickA(NK4) + Math.floor(rnd(10, 100)); else s = pickA(NK1) + pickA(NK4);
+    s = s.slice(0, 14); return goodNick(s) ? s : X('Oyuncu', 'Player') + Math.floor(rnd(1000, 10000));
+  }
   function suggestNick() {
-    var v = jget('wcr_nicksug', ''); if (goodNick(v)) return v;
+    var v = jget('wcr_nicksug', ''); if (goodNick(v) && !/^(Oyuncu|Player)\d+$/.test(v)) return v;   /* V221: eski düz öneri yenilenir */
     v = newSuggestion(); jset('wcr_nicksug', v); return v;
   }
   function cleanNick(n) {   // dış kaynaktan gelen adı izinli karakterlere ve 14 sınırına getirir; geçersizse ''
@@ -480,18 +490,25 @@
       });
     }
     draw(); iset(tick, 250);
-    function tick() { if (!LB) return; var l = Math.ceil((LB.end - Date.now()) / 1000); var e = $i('wcr-lbt'); if (e) e.textContent = Math.max(0, l); if (l <= 0) launch(); }
+    function tick() { if (!LB) return; var l = Math.ceil((LB.end - Date.now()) / 1000); var e = $i('wcr-lbt'); if (e) { e.textContent = Math.max(0, l); try { e.parentNode.style.setProperty('--p', Math.max(0, Math.min(1, l / (CFG.lobbySec || 30))).toFixed(3)); } catch (x) { } } if (l <= 0) launch(); }
   }
   function draw() {
-    if (!LB) return; var lg = league(LB.opRating);
-    rmodal('<h3>' + X('Rakip Bulundu!', 'Opponent Found!') + '</h3>' +
-      '<div class="wcr-vs"><div class="wcr-side">' + avTag(P.av, true) + fimg(LB.myC, 'lg') + '<b>' + esc(M[LB.myC].name) + '</b><small>' + esc(P.nick || X('Sen', 'You')) + '</small></div><div class="wcr-x">VS</div>' +
-      '<div class="wcr-side">' + avTag(LB.opAv, true) + fimg(LB.opC, 'lg') + '<b>' + esc(M[LB.opC].name) + '</b><small>' + esc(LB.opNick) + ' · ' + esc(titleOf(LB.opTi)) + ' · ' + esc(lg.label) + '</small></div></div>' +
-      '<div class="wcr-cd">' + X('Maç başlıyor: ', 'Match starts: ') + '<b id="wcr-lbt">' + Math.max(0, Math.ceil((LB.end - Date.now()) / 1000)) + '</b></div>' +
-      '<button class="big pri" ' + (LB.myOk ? 'disabled' : '') + ' onclick="WCRank.confirmC()">' + (LB.myOk ? (LB.opOk ? '✓' : X('✓ Onaylandı — rakip bekleniyor…', '✓ Confirmed — waiting for rival…')) : '✓ ' + X('Ülkeyi Onayla (hemen başla)', 'Confirm Country (start now)')) + '</button>' +
-      (LB.opOk && !LB.myOk ? '<div class="wcr-sm">' + X('Rakip hazır!', 'Rival is ready!') + '</div>' : '') +
-      '<button class="big" ' + (LB.swapped || LB.myOk ? 'disabled' : '') + ' onclick="WCRank.swap()">' + (LB.swapped ? X('Ülke değiştirildi (hak bitti)', 'Country changed (used)') : X('Ülkeyi Değiştir — ', 'Change Country — ') + CFG.swapCost + ' 🪙') + '</button>' +
-      '<div class="wcr-sm">🪙 ' + gold() + ' · ' + X('Bir kez, aynı güç grubundan rastgele.', 'Once, random from the same strength group.') + '</div>');
+    /* V221: lobi yeniden tasarlandı — iki komutan kartı (kare portre, büyük bayrak, ülke, oyuncu/unvan/lig, 5 değer), ortada çapraz kılıç + geri sayım halkası,
+       altta "Onayla ve Başla" ve "Ülkeyi Değiştir" (altın bedeli ve bakiye düğmenin içinde). */
+    if (!LB) return; var lg = league(LB.opRating), mlg = league(P.rating), left = Math.max(0, Math.ceil((LB.end - Date.now()) / 1000));
+    function vals(c) { var v = []; try { v = st(c); } catch (e) { v = BASE[c] || []; } var ic = ['pop', 'army', 'eco', 'tech', 'dip']; return '<div class="lb221v">' + ic.map(function (k, i) { return '<span><img class="wci" alt="" src="' + ((window.WC_ICONS && WC_ICONS[k]) || '') + '"><b>' + Math.round(+v[i] || 0) + '</b></span>'; }).join('') + '</div>'; }
+    function side(av, c, nick, sub, me) {
+      return '<div class="lb221s' + (me ? ' me' : '') + '"><div class="lb221t"><span class="lb221a" style="background-image:url(' + avUrl(av) + ')"></span><div><b>' + esc(nick) + '</b><small>' + sub + '</small></div></div>' +
+        '<div class="lb221f">' + fimg(c, 'lg') + '</div><div class="lb221n">' + esc(M[c].name) + '</div>' + vals(c) + '</div>';
+    }
+    var tot = CFG.lobbySec || 30, pct = Math.max(0, Math.min(1, left / tot));
+    rmodal('<div class="lb221"><div class="lb221h">' + X('RAKİP BULUNDU', 'OPPONENT FOUND') + '</div>' +
+      '<div class="lb221r">' + side(P.av, LB.myC, P.nick || X('Sen', 'You'), esc(titleOf(autoTi())) + ' · ' + esc(mlg.label), true) +
+      '<div class="lb221m"><div class="lb221c" style="--p:' + pct.toFixed(3) + '"><b id="wcr-lbt">' + left + '</b><small>' + X('sn', 's') + '</small></div><div class="lb221vs">VS</div></div>' +
+      side(LB.opAv, LB.opC, LB.opNick, esc(titleOf(LB.opTi)) + ' · ' + esc(lg.label), false) + '</div>' +
+      (LB.opOk && !LB.myOk ? '<div class="lb221i">✔ ' + X('Rakip hazır', 'Rival is ready') + '</div>' : '') +
+      '<div class="lb221b"><button class="big pri" ' + (LB.myOk ? 'disabled' : '') + ' onclick="WCRank.confirmC()">' + (LB.myOk ? (LB.opOk ? '✓' : X('Onaylandı · rakip bekleniyor', 'Confirmed · waiting for rival')) : X('Onayla ve Başla', 'Confirm & Start')) + '</button>' +
+      '<button class="big" ' + (LB.swapped || LB.myOk ? 'disabled' : '') + ' onclick="WCRank.swap()">' + (LB.swapped ? X('Ülke değiştirildi', 'Country changed') : X('Ülkeyi Değiştir', 'Change Country') + '<small>' + CFG.swapCost + ' 🪙 · ' + X('bakiye ', 'balance ') + gold() + '</small>') + '</button></div></div>');
   }
   function swap() {
     if (!LB || LB.swapped || LB.locked || LB.myOk) return;
@@ -536,11 +553,19 @@
       if (window.V20 && V20.run) V20.run();
     }, d);
   }
+  var AREA221 = {};
+  function area221(id) { if (AREA221[id] != null) return AREA221[id]; var v = 0; try { for (var i = 0; i < R.length; i++) if (R[i].id === id) { v = d3.geo.area(R[i].f); break; } } catch (e) { } return (AREA221[id] = v); }
+  function score221(side) {
+    var s = 0; try { for (var k in G.owner) if (G.owner[k] === side) { s += area221(k) * 600; if (k !== side) { s += 6; var b = BASE[k] || []; s += ((+b[0] || 0) + (+b[1] || 0) + (+b[2] || 0) + (+b[3] || 0) + (+b[4] || 0)) / 40; } } } catch (e) { }
+    return Math.round(s * 10) / 10;
+  }
+  window.WCScore221 = score221;
   function beforeHandoff() {   // tur limiti: her oyuncu CFG.turnLimit tur oynayınca toplam güce göre karar
     var m = G.mp; if (!m || !m.rank || G.over) return;
     var T = (G.T && G.T.turn) || 0, lim = CFG.turnLimit, hit = m.bot ? (m.act === 'guest' && T >= lim) : (T >= lim * 2);
+    /* V221: tur limitinde kazanan PUANLA belirlenir: sahip olunan toprağın yüzey alanı + fethedilen ülke sayısı + fethedilen ülkelerin zorluğu */
     if (!hit) return;
-    var a = sum5(st(m.host)), b = sum5(st(m.guest)), side = ONs().side, actorHost = m.bot ? true : side === 'host';
+    var a = score221(m.host), b = score221(m.guest), side = ONs().side, actorHost = m.bot ? true : side === 'host';
     if (Math.abs(a - b) < .5) G.over = { w: 1, draw: 1, tl: 1 };
     else G.over = { w: ((a > b) === actorHost) ? 0 : -1, tl: 1 };
     G.ph = 'over';

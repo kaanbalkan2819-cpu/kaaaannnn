@@ -144,11 +144,13 @@
   askNew = function () { if (live()) return subNew(); return _ask35.apply(this, arguments); };
   modes = function () { if (live()) return subModes(); return _modes35.apply(this, arguments); };
 
+  /* V221: yükleme simgesi — dönen altın usturlap (dış halka, iç halka, ibre, ortada küçük dünya) */
+  var LD221 = '<svg class="ld221" viewBox="0 0 64 64"><g fill="none" stroke="#e9c25a"><g class="r1"><circle cx="32" cy="32" r="29" stroke-width="2" stroke-dasharray="4 3"/><path d="M32 1v6M32 57v6M1 32h6M57 32h6" stroke-width="2"/></g><g class="r2"><ellipse cx="32" cy="32" rx="21" ry="9" stroke-width="1.6"/><ellipse cx="32" cy="32" rx="9" ry="21" stroke-width="1.6"/></g><circle cx="32" cy="32" r="12" fill="#3d352b" stroke-width="1.6"/><path d="M23 30c4-3 6 2 10-1s4 3 8 2M24 36c3 1 5-2 8 0s5 1 7-1" stroke="#cdb06a" stroke-width="1.3"/><g class="nd"><path d="M32 6l3 26h-6z" fill="#f5c75a" stroke="none"/></g><circle cx="32" cy="32" r="2.4" fill="#f5c75a" stroke="none"/></g></svg>';
   var launching = false;
   function launch(m) {
     if (launching) return; launching = true;
     var d = document.createElement('div'); d.className = 'launch';
-    d.innerHTML = '<div class="lb"><b>' + (m === 1 ? X('Sefer Başlıyor', 'Campaign Begins') : X('İki Hâkan, Tek Taht', 'Two Rulers, One Throne')) + '</b><i></i></div>';
+    d.innerHTML = '<div class="lb"><b>' + (m === 1 ? X('Sefer Başlıyor', 'Campaign Begins') : X('İki Hâkan, Tek Taht', 'Two Rulers, One Throne')) + '</b><i></i>' + LD221 + '</div>';
     root.appendChild(d); root.classList.add('go');
     /* V102: perde, hem en az 1,1 sn hem de 3B oyun küresi hazır olana kadar (en çok 9 sn) kalır. Kurulum bu sürede perdenin altında yapılır;
        menü kapanınca "dünya uzaktan yaklaşır" sinematiği boş bekleme olmadan hemen başlar. */

@@ -29,7 +29,8 @@
     root.querySelectorAll('.pcard .pic').forEach(function (p) {
       if (p.getAttribute('data-wa')) return;
       var h = (p.innerHTML || ''), k = null;
-      if (/pop\.svg|👥/.test(h)) k = 'city'; else if (/army\.svg|🎖/.test(h)) k = 'army'; else if (/tech\.svg|🔬/.test(h)) k = 'tech'; else if (/💼/.test(h)) k = 'trade'; else if (/dip\.svg|🕊/.test(h)) k = 'dip';
+      var tt220 = ''; try { tt220 = p.closest('.pcard').querySelector('.ptt b').textContent; } catch (e) { }   /* V220: Silahlanma Programı ayrı görsel; yeni madalyon simgeleri de eşlenir */
+      if (/Silahlanma|Armament/i.test(tt220)) k = 'guard'; else if (/pop(218)?.(svg|png)|👥/.test(h)) k = 'city'; else if (/army(218)?.(svg|png)|🎖/.test(h)) k = 'army'; else if (/tech(218)?.(svg|png)|🔬/.test(h)) k = 'tech'; else if (/💼/.test(h)) k = 'trade'; else if (/dip(218)?.(svg|png)|🕊/.test(h)) k = 'dip';
       if (k) { p.setAttribute('data-wa', k); p.classList.add('wa-s'); p.innerHTML = img(k); }
     });
   }
