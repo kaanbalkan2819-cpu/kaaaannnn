@@ -1,0 +1,37 @@
+/* V214 — yeni "Oyun Bitti" kartı (duraklatma menüsü şablonu). Eski yenilgi ekranları hiç görünmez.
+   Geri almak için index.html'den v214.css ve v214.js bağlantılarını silin. */
+#v38over,#v139over.lose{display:none!important}
+#mod.go214m{background:#0b0a07e6!important}
+.go214 .c141h .p{display:inline!important;font-size:18px;color:#e98a7a;opacity:1}
+.go214 .c141h h3{color:#f0b8a8!important;font-size:15px!important;letter-spacing:.34em!important}
+.go214 .sub214{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 12px;font:500 13.5px/1.35 Georgia,'Times New Roman',serif;color:#f3e8c8;text-align:left}
+.go214 .sub214 .fi{width:30px!important;height:20px!important;border-radius:2px!important;box-shadow:0 0 0 1px #cdb06a88!important;flex:0 0 auto;filter:grayscale(.55) brightness(.9)}
+.go214 .sub214 b{color:#fff}
+.go214 .c141s small{font-size:8px!important}
+.go214 .c141g .c141b{grid-column:1/-1}
+.go214 .c141g .c141b:not(.pri){padding:11px 8px}
+
+/* ---------- barış / pakt tekliflerinde taahhüt kutusu (yüzde yerine somut söz) ---------- */
+.pledge214{display:flex;align-items:center;gap:10px;margin:4px 0 12px;padding:10px 12px;border:1px solid #8f7b4c;border-radius:4px;background:linear-gradient(180deg,#3d352bcc,#2a251ecc);text-align:left}
+.pledge214 img.wci{width:34px;height:34px;flex:0 0 34px}
+.pledge214 span{font:500 13.5px/1.4 Georgia,'Times New Roman',serif;color:#f3e8c8}
+.pledge214 small{display:block;font:700 9.5px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.28em;color:#cdb06a;margin-bottom:2px}
+
+/* ---------- sade bildirim kartı (politika vb.) ---------- */
+#note214{position:fixed;left:50%;top:calc(66px + var(--safe-t,0px));z-index:60;transform:translate(-50%,-8px);opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:12px;min-width:220px;max-width:min(92vw,360px);padding:10px 16px 10px 10px;border:2px solid #8f7b4c;border-radius:4px;
+  background:linear-gradient(180deg,#3d352b,#2a251e);box-shadow:0 14px 34px #000a;transition:opacity .22s ease,transform .22s ease}
+#note214.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#note214::after{content:"";position:absolute;inset:4px;border:1px solid rgba(143,123,76,.35);pointer-events:none}
+#note214 .ic{width:40px;height:40px;flex:0 0 40px;display:flex;align-items:center;justify-content:center;font-size:24px}
+#note214 .ic img{width:40px;height:40px}
+#note214 .tx{display:flex;flex-direction:column;min-width:0}
+#note214 .tx small{font:700 9.5px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.28em;color:#cdb06a;text-transform:uppercase}
+#note214 .tx b{font:700 15px/1.25 Georgia,'Times New Roman',serif;color:#f3e8c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#note214 .tx em{font:600 12.5px system-ui,-apple-system,Roboto,sans-serif;font-style:normal;color:#9fd78a;margin-top:1px}
+
+/* ---------- yeni oyun açılışı: küre belirmeden önceki kapak, oyundaki sahne zeminiyle aynı ----------
+   Eski kapak (V30/V199 "uzay" teması): uçuşan yıldızlar + ortada açılan parlak "şafak" lekesi; sahne zeminine uymadığı için
+   küre belirirken sıçrama/parlama görünüyordu. Artık sahnenin (v30.js bg199) degradesinin aynısı, süs yok. */
+#g3d.v91cover{background:radial-gradient(farthest-corner at 50% 40%,#74634a 0,#5a4c38 30%,#3d352b 62%,#2a251e 100%)!important}
+#g3d.v91cover::before,#g3d.v91cover::after,#g3d.v95out::before,#g3d.v95out::after{display:none!important;animation:none!important}

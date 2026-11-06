@@ -261,15 +261,18 @@
       modal('<h3>' + (isA ? '🤝 ' + X('İttifak Teklifi', 'Alliance Offer') : '🛡 ' + X('Saldırmazlık Teklifi', 'Pact Offer')) + '</h3><div style="text-align:center;margin:8px 0">' + fl(o.from) + ' <b>' + esc(nm(o.from)) + '</b></div>' +
         '<p style="color:var(--tx2)">' + (isA ? X('<b>' + esc(nm(o.from)) + '</b> seninle ittifak kurmak istiyor (' + ALLY_TURNS + ' tur). Savaşlarda değerler toplanır, her müttefik küçük bir ticaret geliri getirir; ama müttefike saldırmak ihanettir.',
           '<b>' + esc(nm(o.from)) + '</b> wants an alliance (' + ALLY_TURNS + ' turns). Stats add up in war and each ally brings a little trade income; attacking an ally is betrayal.') :
-          X('<b>' + esc(nm(o.from)) + '</b> ' + PACT_TURNS + ' tur boyunca birbirinize saldırmamayı öneriyor. Ücret yok.', '<b>' + esc(nm(o.from)) + '</b> proposes ' + PACT_TURNS + ' turns without attacks. Free of charge.')) + '</p>' +
+          X('<b>' + esc(nm(o.from)) + '</b> ' + PACT_TURNS + ' tur boyunca birbirinize saldırmamayı öneriyor.', '<b>' + esc(nm(o.from)) + '</b> proposes ' + PACT_TURNS + ' turns without attacks.')) + '</p>' +
+        /* V214: teklifte karşı taraf somut bir şey taahhüt eder (kabul edilip antlaşma kurulursa o alan +%5) */
+        (function () { try { if (o.k == null) o.k = 1 + Math.floor(Math.random() * 4); return window.WCPledge ? '<div class="pledge214"><img class="wci" src="' + ((window.WC_ICONS || {})[['pop', 'army', 'eco', 'tech', 'dip'][o.k]] || '') + '" alt=""><span><small>' + X('KARŞILIĞINDA', 'IN RETURN') + '</small>' + WCPledge(o) + '</span></div>' : ''; } catch (e) { return ''; } })() +
         '<button class="big pri" onclick="v138Offer(1)">✔ ' + X('Kabul Et', 'Accept') + '</button><button class="big" onclick="v138Offer(0)">✖ ' + X('Reddet', 'Decline') + '</button>');
     } catch (x) { OFF = false; }
   }
   window.v138Offer = function (yes) {
     var d = G && G.dip2, o = d && d.offer; OFF = false; closeMod(); if (!o) return; d.offer = null;
     if (yes) {
-      if (o.kind === 'ally') { if (canJoin(G.pl, o.from) && addAlly(G.pl, o.from, null)) { addRel(o.from, 10); say('🤝 ' + nm(o.from) + ' — ' + X('ittifak kuruldu', 'alliance formed')); } else say(X('İttifak kurulamadı (üye sınırı)', 'Alliance not possible (member limit)')); }
-      else if (pactCount() < PACT_MAX) { G.pacts = G.pacts || {}; G.pacts[key(G.pl, o.from)] = turn() + PACT_TURNS + 1; addRel(o.from, 8); say('🛡 ' + nm(o.from) + ' — ' + X('saldırmazlık paktı imzalandı', 'pact signed')); }
+      var gift214 = function () { if (o.k == null) return; try { var cur = st(G.pl); G.es = G.es || {}; G.es[G.pl] = cur.map(function (v, i) { return i === o.k ? Math.round(v * 1.05 * 1e6) / 1e6 : v; }); if (G.ed) G.ed[G.pl] = 0; } catch (x) { } };   /* V214: taahhüt edilen katkı */
+      if (o.kind === 'ally') { if (canJoin(G.pl, o.from) && addAlly(G.pl, o.from, null)) { addRel(o.from, 10); gift214(); say('🤝 ' + nm(o.from) + ' — ' + X('ittifak kuruldu', 'alliance formed')); } else say(X('İttifak kurulamadı (üye sınırı)', 'Alliance not possible (member limit)')); }
+      else if (pactCount() < PACT_MAX) { G.pacts = G.pacts || {}; G.pacts[key(G.pl, o.from)] = turn() + PACT_TURNS + 1; addRel(o.from, 8); gift214(); say('🛡 ' + nm(o.from) + ' — ' + X('saldırmazlık paktı imzalandı', 'pact signed')); }
       else say(X('Aktif pakt sınırına ulaştın', 'Active pact limit reached'));
     } else addRel(o.from, -3);
     save2(); try { render(); } catch (x) { }

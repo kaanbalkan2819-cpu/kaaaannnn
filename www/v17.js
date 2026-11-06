@@ -203,7 +203,9 @@
     else { if (!G.T || G.T.moves < POL_MOVES) { toast(T('Yeterli hamle yok', 'Not enough moves')); return; } G.T.moves -= POL_MOVES; }
     pl.act[key] = { rem: DICE, f: areaF(G.pl), land: land }; pl.ut = pl.ut || {}; pl.ut[land] = G.T.turn; if (land === G.pl) pl.usedTurn = G.T.turn;   // V104: bu zarda bir daha politika yok
     save(); render();
-    toast('📜 ' + T(p.tr + ' (' + lname(land) + ') uygulandı: ' + statTxt(p) + ' +%10 (3 zar)', p.en + ' applied: ' + statTxt(p) + ' +10% (3 dice)') + ' · 🌍×' + areaF(G.pl).toFixed(2));
+    /* V214: sade bildirim kartı (simge + politika adı + tek kısa satır); kart yoksa eski toast */
+    if (window.wcNote) wcNote({ icon: ['pop', 'army', 'eco', 'tech', 'dip'][p.st[0]] || '📜', kick: T('Politika uygulandı', 'Policy applied'), title: T(p.tr, p.en), line: statTxt(p) + ' ▲ · ' + T('3 tur', '3 turns') });
+    else toast('📜 ' + T(p.tr + ' (' + lname(land) + ') uygulandı: ' + statTxt(p) + ' +%10 (3 zar)', p.en + ' applied: ' + statTxt(p) + ' +10% (3 dice)') + ' · 🌍×' + areaF(G.pl).toFixed(2));
   };
   window.WC = window.WC || {}; window.WC.policies = function () { return JSON.parse(JSON.stringify(G && (G.mp ? (G.polBy || {})[G.pl] : G.pol) || null)); };
 })();

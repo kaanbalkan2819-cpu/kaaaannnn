@@ -424,7 +424,9 @@
     return P || B.clone().normalize();
   }
   function pickKind() {   // V124: kara saldırısı çeşitliliği: tank+piyade / iki tank / uçaklar (çok küçük hedefte füze atar ayrıca devreye girer)
-    var x = Math.random(); return x < .38 ? 'tankInf' : (x < .65 ? 'twoTank' : 'air');
+    /* V214: uçak sahnesi pratikte nadiren görünüyordu (yalnızca kara savaşı + %35). Artık %45; üst üste 2 kara savaşında uçak çıkmazsa 3.'sünde kesin uçak. */
+    var miss = window.__air214 | 0, x = Math.random(), k = (miss >= 2) ? 'air' : (x < .30 ? 'tankInf' : (x < .55 ? 'twoTank' : 'air'));
+    window.__air214 = k === 'air' ? 0 : miss + 1; return k;
   }
   function buildScene(a, f, o, tg, r) {
     if (!o.land) return null;   // V70: deniz aşırı saldırı yedek ateş sahnesini kullanır
@@ -511,7 +513,7 @@
     var tk = tankK(a, o.ids, tg, sc), win = !!r.win, V = function (x, y, zz) { return { x: x, y: y, z: zz }; };
     var I = pickImpacts(a, fr, sc, tg, 3, 0, lc, Math.max(2, lc - 6), lc + 6), tos = I.pts.map(function (q) { return up(q, .15); });
     var air = false, dur;
-    if (o.land && Math.random() < .4) {   // V124: yedek sahnede de bazen uçaklar
+    if (o.land && (Math.random() < .45 || (window.__air214 | 0) >= 2)) { window.__air214 = 0;   // V214: şans sayacı; V124: yedek sahnede de bazen uçaklar
       var dA = f.planeAttack(fxo({ from: V(0, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2], tos[0]], color: o.color, scale: .95, planes: 2, bombs: 2, dud: !win, blast: win ? 1.9 : 1.3 }));
       dur = dA && dA.duration || 9; air = true;
     } else {

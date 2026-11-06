@@ -933,3 +933,20 @@ V213 — İTTİFAK BAYRAKLARI, ÖZELLİK SEÇİMİ, RAKİP TURU, ANA MENÜ, BAŞ
 GERİ ALMAK İÇİN: index.html'den v213.css ve v213.js bağlantılarını silin (v7.js/v20.js/v30.js/v35.js'teki "V213" satırları zararsız kalır).
 V213 (ek) — "Geç" düğmesi yalnızca geçilecek bir şey varken görünür (rakip kartı, rakip zarı, YZ↔YZ savaşı). Olay penceresi (ör. darbe teklifi), haraç kararı ve oyuncuya yönelen savaş sırasında gizli.
 Yenilgi donması için ek denemeler: tam doğal rakip turu (zar, kartlar, 2-3 haraç reddi, savaş, Haritaya Dön) ve son toprağın isyanla kaybı — ikisinde de oyun sonu ekranı açıldı. Donma yeniden üretilemedi; V213 bekçisi yine de yerinde.
+
+=================== V214 ===================
+V214 — OYUN BİTTİ MENÜSÜ, AÇILIŞ, MENÜ ORANLARI, UÇAK, BİLDİRİM, TEKLİFLER (masaüstü Chrome'da telefon görünümüyle test edildi)
+1) YENİ OYUN BİTTİ MENÜSÜ (v214.js/.css): son toprak kaybedilince eski yenilgi ekranlarının hiçbiri (V139 "İmparatorluk Düştü", V38 katmanı, app.js showOver) görünmez;
+   duraklatma menüsü şablonuyla (aynı kart + V156 köşe/amblem süsleri; v156.js'e window.v156Decorate eklendi) "OYUN BİTTİ" kartı açılır: tur, fetih, zafer/yenilgi, süre.
+   Düğmeler: Tekrar Başla (aynı ülke kendiliğinden seçilir) · Yeni Ülke Seç · Oyun Geçmişi · Ana Menü. Karartılmış alana dokunmak kartı kapatmaz.
+   V139 yalnızca oyun geçmişine kayıt için çalışır. Savaş sonucu açıksa "Haritaya Dön" beklenir (en çok 8 sn), sonra kendiliğinden geçilir.
+   Test: kendi saldırısında yenilgi -> kart; Tekrar Başla -> Türkiye ile yeni oyun; yine yenilgi -> kart; Yeni Ülke Seç -> seçim ekranı; savaş dışı toprak kaybı -> kart; Ana Menü -> menü.
+2) Açılış: ana menüden önce görünen parlak kahverengi perde (#boot) artık menünün arka planının aynısı (aynı fotoğraf, konum, karartma) — yanıp sönme yok (index.html #bootcss).
+3) Ana menü yazı oranı: WORLD 16 px / CONQUEST 32 px (2x), CONQUEST süs çizgisi genişliğinde (v213.css).
+4) Yeni oyun yaklaşması: küre belirmeden önceki kapak katmanının uçuşan yıldızları ve parlak "şafak" lekesi kaldırıldı, zemin sahneyle aynı degrade (v214.css);
+   telefonda da kenar yumuşatma (v30.js antialias) — küre silueti tırtıklı görünüyordu.
+5) Uçak animasyonu: kara savaşlarında olasılık %35 -> %45; üst üste 2 kara savaşında uçak çıkmazsa 3.'sünde kesin uçak (v60.js pickKind, __air214).
+6) Politika bildirimi: tek satırlık karmaşık yazı yerine sade kart (simge + "POLİTİKA UYGULANDI" + politika adı + "Nüfus ▲ · 3 tur") (v214.js wcNote, v17.js).
+7) Barış teklifi (v40.js): "+%8 Teknoloji" yerine somut taahhüt ("son çıkan yapay zekâ teknolojilerini seninle paylaşmayı taahhüt ediyor" vb., alan başına 2-3 metin); etki aynı.
+   YZ'nin pakt/ittifak tekliflerinde de (v138.js) artık karşılığında bir taahhüt var; kabul edilip antlaşma kurulursa o alan +%5.
+GERİ ALMAK İÇİN: index.html'den v214.css ve v214.js bağlantılarını silin (oyun bitti, kapak, bildirim kartı); diğerleri ilgili dosyalarda "V214" satırları.

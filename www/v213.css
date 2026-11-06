@@ -54,9 +54,9 @@
 #skip213.all{border-color:#f5c75a}
 
 /* ---------- (4) ana menü başlığı: CONQUEST, WORLD'ün 2 katı büyüklükte ve daha geniş ---------- */
-#wcm.flat h1{width:min(430px,100vw);max-width:100%;margin-left:auto!important;margin-right:auto!important;letter-spacing:.42em!important;text-indent:.42em!important}
+#wcm.flat h1{width:min(430px,100vw);max-width:100%;margin-left:auto!important;margin-right:auto!important;letter-spacing:.55em!important;text-indent:.55em!important}
 #wcm.flat h1>span{font-size:min(2em,calc((min(430px,100vw) - 40px) / 6.9))!important;letter-spacing:.16em!important;text-indent:.16em!important;margin-top:.18em!important;line-height:1}
 #wcm.flat .bgimg canvas.spin213,#wcm .bgimg canvas.spin213{position:absolute!important;pointer-events:none!important;display:block!important;visibility:visible!important;opacity:1!important;z-index:0!important;right:auto!important;bottom:auto!important;transform:none!important;filter:none!important}
-#wcm.flat h1{font-size:21px!important}
-@media (max-height:760px){#wcm.flat h1{font-size:19px!important}}
-@media (orientation:landscape) and (max-height:520px){#wcm.flat h1{font-size:15px!important}}
+#wcm.flat h1{font-size:16px!important}   /* V214: orantı — WORLD 16 / CONQUEST 32 (süs çizgisi genişliğinde) */
+@media (max-height:760px){#wcm.flat h1{font-size:15px!important}}
+@media (orientation:landscape) and (max-height:520px){#wcm.flat h1{font-size:12px!important}}

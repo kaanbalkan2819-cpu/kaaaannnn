@@ -430,6 +430,24 @@
       }
     });
   }
+  /* V214: barış teklifindeki hediye artık "+%8 Teknoloji" gibi yüzdeyle değil, karşı tarafın somut bir taahhüdü olarak anlatılır
+     (etki aynı: seçilen alan +%8). Metin teklif başına bir kez seçilir (o.pv). */
+  var PLEDGES = {
+    1: [['{e}, son nesil insansız hava araçlarını ve askerî danışmanlarını orduna göndermeyi taahhüt ediyor.', '{e} pledges to send its latest drones and military advisers to your army.'],
+      ['{e}, hava savunma sistemlerini ve subay eğitim programlarını seninle paylaşmayı taahhüt ediyor.', '{e} pledges to share its air-defence systems and officer training with you.']],
+    2: [['{e}, limanlarını ticaretine açmayı ve gümrük vergilerini kaldırmayı taahhüt ediyor.', '{e} pledges to open its ports to your trade and lift its customs duties.'],
+      ['{e}, enerji koridorlarından seninle ayrıcalıklı fiyatla pay paylaşmayı taahhüt ediyor.', '{e} pledges you a privileged share of its energy corridors.']],
+    3: [['{e}, son çıkan yapay zekâ teknolojilerini seninle paylaşmayı taahhüt ediyor.', '{e} pledges to share its newest artificial-intelligence technology with you.'],
+      ['{e}, yarı iletken fabrikalarının üretim bilgisini seninle paylaşmayı taahhüt ediyor.', '{e} pledges to share its chip-fabrication know-how with you.'],
+      ['{e}, uzay ve uydu programına seni ortak etmeyi taahhüt ediyor.', '{e} pledges to make you a partner in its space and satellite programme.']],
+    4: [['{e}, uluslararası zirvelerde seni desteklemeyi ve elçiliklerini sana açmayı taahhüt ediyor.', '{e} pledges to back you at international summits and open its embassies to you.'],
+      ['{e}, müttefiklerine senin lehine arabuluculuk yapmayı taahhüt ediyor.', '{e} pledges to mediate with its allies in your favour.']]
+  };
+  function pledge(o) {
+    var L0 = PLEDGES[o.k] || PLEDGES[3]; if (o.pv == null || o.pv >= L0.length) o.pv = Math.floor(Math.random() * L0.length);
+    return T(L0[o.pv][0], L0[o.pv][1]).replace(/\{e\}/g, '<b>' + nm(o.from) + '</b>');
+  }
+  window.WCPledge = pledge;   /* V214: v138 pakt/ittifak teklifleri de aynı taahhüt metinlerini kullanır */
   var OFFERING = false;
   function maybeOffer() {
     if (OFFERING || !is5() || !G.dip || !G.dip.offer || !canAct()) return;
@@ -438,8 +456,9 @@
     if (!M[o.from] || ownedN(o.from) === 0) { delete G.dip.offer; return; }
     OFFERING = true;
     modal('<h3>🕊 ' + T(BLOC[o.b][0] + ' Devletlerinden Teklif', 'Offer from the ' + BLOC[o.b][1]) + '</h3><div style="text-align:center;margin:8px 0">' + fl(o.from) + ' <b>' + nm(o.from) + '</b></div>' +
-      '<p style="color:var(--tx2)">' + T('<b>' + nm(o.from) + '</b>, ilerleyişini durdurmak için saldırmazlık antlaşması öneriyor. Kabul edersen ' + (window.v20PactTurns || 6) + ' tur birbirinize saldıramazsınız ve karşılığında <b>' + SN[o.k] + ' +%8</b> hediye eder.',
-        '<b>' + nm(o.from) + '</b> offers a non-aggression pact to halt your advance: ' + (window.v20PactTurns || 6) + ' turns without attacks, plus a gift of <b>' + SN[o.k] + ' +8%</b>.') + '</p>' +
+      '<p style="color:var(--tx2)">' + T('<b>' + nm(o.from) + '</b>, ilerleyişini durdurmak için ' + (window.v20PactTurns || 6) + ' tur sürecek bir saldırmazlık antlaşması öneriyor.',
+        '<b>' + nm(o.from) + '</b> offers a ' + (window.v20PactTurns || 6) + '-turn non-aggression pact to halt your advance.') + '</p>' +
+      '<div class="pledge214"><img class="wci" src="' + ((window.WC_ICONS || {})[['pop', 'army', 'eco', 'tech', 'dip'][o.k]] || '') + '" alt=""><span><small>' + T('KARŞILIĞINDA', 'IN RETURN') + '</small>' + pledge(o) + '</span></div>' +
       '<button class="big pri" onclick="wcdOffer(1)">🤝 ' + T('Kabul Et', 'Accept') + '</button><button class="big" onclick="wcdOffer(0)">' + T('Reddet', 'Decline') + '</button>');
   }
   window.wcdOffer = function (yes) {

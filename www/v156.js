@@ -43,6 +43,7 @@
     if (h) h.insertAdjacentHTML('afterend', '<div class="d156" aria-hidden="true"><i></i><s></s><b></b><s></s><i></i></div>');
   }
 
+  window.v156Decorate = decorate;   /* V214: oyun bitti kartı da aynı süslemeyi kullanır */
   var _menu = menu;
   menu = function () {
     var r = _menu.apply(this, arguments);
