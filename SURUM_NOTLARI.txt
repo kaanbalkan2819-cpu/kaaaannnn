@@ -1081,3 +1081,29 @@ V219b — Düzeltmeler
  - Dereceli profil: 2 yeni kadın savaşçı portresi (Figma: av10 Türk okçu, av11 şövalye komutan) — toplam 11. Portreler kare ve çerçevesiz.
    Unvan bölümü kaldırıldı; unvan isim altında puanla otomatik değişir. Yazılar panele sığar. firestore.rules: av 1-11 (Firebase Konsolu'na yeniden yapıştırın).
  - Dereceli maç sonu panelinde unvan değiştiyse "YENİ UNVAN: Şövalye → Komutan" gösterilir (ranked.js showResult).
+
+=================== V220 ===================
+V220 — Denge, küçük devletler, diplomasi, isyan, savaş bayrakları, koleksiyon, dükkan, simge
+ - UYGULAMA SİMGESİ / AÇILIŞ EKRANI: .gitignore'daki "android/" satırı resources/android/ klasörünü de dışlıyordu; simge ve açılış görselleri hiç
+   GitHub'a gitmediği için APK'da varsayılan Capacitor simgesi vardı. Satır "/android/" (yalnızca kök) yapıldı; bir sonraki derlemede simge gelir.
+ - DENGE (v5.js aiPlan): YZ oyuncuya yalnızca kazanma şansı ≥%40 iken saldırır; oyuncu hedef puanı -0.10 (4 ve altı toprakta -0.18).
+ - KÜÇÜK DEVLETLER (v220.js): başlangıç ülkesi küçükse (5 değer toplamı <230/<180/<120) Nüfus/Ordu/Teknoloji/Diplomasi +%4/+%10/+%16; toprak arttıkça azalır, 9 toprakta biter.
+ - DİPLOMASİ (v138.js): her diplomatik işlem gizli deneyim (G.dx220) verir; YZ'nin ittifak/pakt kabul ihtimali görünmeden en çok +%18 artar, sana teklif sıklığı da artar.
+ - İSYAN daha nadir: hızlı genişleme isyanı eşik 3.5→4.5, olasılık %45→%25, bekleme 4→7 tur (v23.js); kurtarılan toprak isyanı %50→%30 (v76.js).
+ - SAVAŞ PANELİ: ittifakta en çok 3 bayrak (asıl ülke + 2 müttefik) yan yana eşit boyutta; fazlası altta küçük bayraklar (v220.js allyFlags).
+ - ONLINE/DERECELİ İZLEME: rakibin turunda bitmap bayraklar resim verisi olarak gönderiliyor ve izleyen cihazda kayboluyordu; artık ülke koduyla gider (v7.js data-fl, online_spec.js).
+ - Dereceli "Maç Bul" kırmızı düğme. Online "Oda Kur" yazısı kısaltıldı (alt satır), oda kodu ekrana sığar.
+ - Kayıt silme onayında (Yeni Fetih) "Mühürler" düğmesi görünmez; yalnızca ana menüde (gs219.js).
+ - MÜHÜR KOLEKSİYONU: normal mühürler artık ÜLKE ülke (175), ülke adıyla; dokununca ülkeye özel açıklama.
+   Figma ile 11 ülkeye kendine özgü mühür (assets/stamps/c: NLD NOR CZE IRN ETH KEN LKA MAR SEN SWZ BGR); Figma AI kredisi bitti (1 Aralık'ta yenilenir), diğerleri hayvan mührünü paylaşır.
+ - YENİ DÜKKAN (v220.js, v220.css): Avantajlar — +1 Hamle 25, Paralı Askerler (sonraki savaş Ordu +%12) 40, Sınır Kaleleri (2 tur saldırı yok) 55,
+   Casus Ağı (menzildeki değerler açılır) 30, Huzur Fermanı (5 tur isyan yok) 35, Elçi Hediyesi (gizli diplomasi bonusu) 30 · Altın Al — Google Play paketleri.
+ - YAZILAR: pencere/panel/savaş ekranında taşan tek satırlık yazılar otomatik küçültülür (en çok %70'e) (v220.js fit).
+ - KÜÇÜK KOMŞULAR: ülke panelinde yakınında çok küçük ülke varsa "Yakındaki küçük ülkeler" düğmeleri (ör. Kongo DC → Burundi, Ruanda).
+ V220 test turu (masaüstü Chrome, telefon görünümü):
+ - 3 müttefikle (altınla kesin anlaşma: Gürcistan, Ermenistan, Bulgaristan) Suriye'ye saldırı: savaş kartında 3 eşit bayrak + altta 🤝 küçük bayrak;
+   SONUÇ ekranında da aynı düzen eklendi (önceden yalnızca ana ülke bayrağı vardı) — 3 bayrak 47x32 eşit.
+ - İzleyici bayrak hatasının asıl sebebi bulundu: bayraklar telefona özel "blob:" adresleriydi (karşı cihazda açılmaz). online_spec.js artık data: ve blob:
+   bayrakları ülke koduna çevirir; izleyen cihaz kendi SVG bayrağını çizer (test: TR, SY doğru).
+ - Taşan yazı düzeltici, CSS'teki !important boyutları da ezer (duraklatma menüsü "ANA MENÜ", "OYUNDAN ÇIK" artık sığar). Diplomasi, dükkan, ayarlar, online odada taşma yok.
+ - Koleksiyon: 175 ülke, açılanlar önde, Hollanda'ya özel mühür ve açıklaması görünüyor. Gizli diplomasi sayacı her işlemde artıyor (3 ittifak → 3).

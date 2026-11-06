@@ -87,6 +87,9 @@
   function trustInfo() { var t = D2().trust; return t >= 60 ? X('Yüksek', 'High') : t >= 35 ? X('Orta', 'Medium') : X('Düşük', 'Low'); }
   function aggInfo() { var a = D2().agg; return a < 1.5 ? X('Barışçıl', 'Peaceful') : a < 3.5 ? X('Sert', 'Firm') : a < 6 ? X('Saldırgan', 'Aggressive') : X('Tehdit', 'Menace'); }
   function mods(e) { var d = D2(); return (d.trust - TRUST_START) / 250 - Math.min(.25, d.agg * .03) + relOf(e) / 300; }
+  /* V220: GİZLİ diplomasi deneyimi — her diplomatik işlem (G.dx220) YZ'nin kabul ihtimalini görünmeden artırır (en çok +%18) */
+  function hid220() { try { return Math.min(.18, (G.dx220 || 0) * .02); } catch (x) { return 0; } }
+  function dx220() { try { G.dx220 = (G.dx220 || 0) + 1; } catch (x) { } }
   function pct(p) { return Math.round(p * 100) + '%'; }
   function peaceIncome() { var d = D2(); if (d.agg >= PEACE_AGG_MAX) return 0; return INC_PACT * Math.min(PACT_MAX, pactCount()) + INC_ALLY * Math.min(INC_ALLY_MAX, allyList().length); }
 
@@ -130,6 +133,7 @@
         '<button class="big pri" onclick="' + fn + '(\'ad\')">▶ ' + X('Reklam izle ve kullan', 'Watch an ad to use it') + '<small style="display:block;opacity:.75">' + X('Zar yerine kısa bir video', 'A short video instead of dice') + '</small></button>';
     };
     W.spend = function (how, ok) {
+      dx220();
       function fin() { try { ok(); } catch (x) { console.error(x); } var p = POST; POST = null; if (p) { try { p(how); } catch (y) { console.error(y); } } }
       if (how === 'ad') {
         origAd(function (watched) { if (watched) fin(); else { POST = null; say('📺 ' + X('Reklam tamamlanmadı, ödül verilmedi', 'Ad not completed, no reward')); } });
@@ -238,7 +242,7 @@
   }
   function aiOffer(d, tn) {
     if (d.offer) { if (tn - d.offer.t > 2 || ownedN(d.offer.from) === 0) d.offer = null; else return; }
-    if (G.dip && G.dip.offer) return; if (tn - d.lastOffer < 3 || Math.random() > .4) return;
+    if (G.dip && G.dip.offer) return; if (tn - d.lastOffer < 3 || Math.random() > .4 + hid220()) return;
     var c = [], pl = power(G.pl);
     neighboursOfPl().forEach(function (e) {
       if (allied(e) || pactLeft(e) > 0) return; var r = relOf(e);
@@ -346,7 +350,7 @@ function sheet(e) {
   function friendRun(e, how) {
     if (!canAct()) return; var c = chFriend(e); if (!c.p) return;
     D().cd['f' + e] = turn();
-    if (how === 'gold218' || Math.random() < c.p) {   /* V218: altınla kesin anlaşma */
+    dx220(); if (how === 'gold218' || Math.random() < Math.min(.97, c.p + hid220())) {   /* V218: altınla kesin anlaşma */
       addAlly(G.pl, e, null); addRel(e, 15); save2();
       try {   // rakip tepkisi: ittifaktan rahatsız olan güçlü komşu
         var riv = neighboursOfPl().concat([]).filter(function (x) { return x !== e && !allied(x) && ownedN(x) > 0; }).sort(function (a, b) { return power(b) - power(a); })[0];
@@ -380,7 +384,7 @@ function sheet(e) {
     if (!canAct()) { closeMod(); return; } var e = selE(); if (!e) { closeMod(); return; } var c = chPact(e); if (!c.p) { closeMod(); return; }
     G.pactNo24 = G.pactNo24 || {}; var rec = G.pactNo24[e], tn = turn();
     if (rec && rec.t === tn) { closeMod(); say('🚫 ' + nm(e) + ' — ' + X('bu tur tekrar deneyemezsin', 'cannot retry this turn')); return; }
-    if (Math.random() >= c.p) {
+    dx220(); if (Math.random() >= Math.min(.98, c.p + hid220())) {
       G.pactNo24[e] = { t: tn }; addRel(e, -1); save2(); closeMod();
       say('🚫 ' + nm(e) + ' — ' + X('şimdilik pakt istemedi (ücret alınmadı)', 'declined for now (no charge)')); try { render(); } catch (x) { } return;
     }

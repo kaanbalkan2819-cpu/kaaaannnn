@@ -323,11 +323,14 @@
     var out = [];
     cands.forEach(function (c) {
       var wp = winProb(c.ae, c.de, cache); if (wp < (c.de === 'ISR' ? 0.08 : 0.2)) return;            // mantıksız saldırı yok
+      if (c.de === G.pl && wp < 0.4) return;
+      if (c.de === G.pl && G.fort220 > ((G.T && G.T.turn) || 0)) return;   /* V220: dükkan "Sınır Kaleleri" */   /* V220 denge: YZ oyuncuya ancak kazanma şansı yüksekse saldırır */
       var nb = M[c.tg].nb, n = Math.max(1, nb.length), mine = 0, notPl = 0;
       nb.forEach(function (x) { if (G.owner[x] === c.ae) mine++; if (G.owner[x] !== G.pl) notPl++; });
       var sq = c.de === G.pl ? Math.min(1, 0.5 * cutsPlayer(c.tg) + 0.5 * (notPl / n)) : (pT[c.tg] ? 0.5 : 0);
       var sc = 0.30 * (c.v / maxV) + 0.25 * wp + 0.20 * sq + 0.15 * (mine / n) + 0.10 * rnd();
       if (G.aiFocus && G.aiFocus.e === c.de && G.aiFocus.n >= 2) sc -= 0.08;   // aynı rakibe takılıp kalma
+      if (c.de === G.pl) { var pn220 = 0; for (var k220 in G.owner) if (G.owner[k220] === G.pl) pn220++; sc -= 0.10; if (pn220 <= 4) sc -= 0.08; }   /* V220 denge: oyuncu daha az hedef alınır; küçük oyuncu daha da az */
       if (c.de === 'ISR' && c.ae !== 'ISR') sc += 0.45;   // V83: İsrail'e karşı genel birlik: tüm YZ devletleri onu hedef alır
       c.wp = wp; c.sq = sq; c.sc = sc; out.push(c);
     });

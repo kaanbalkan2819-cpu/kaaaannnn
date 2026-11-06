@@ -203,7 +203,7 @@
       im.src = flagBlob7(code, false, true) || FLAGSVG[code];   /* gri sürüm de renkli SVG'den soldurularak üretilir */
     } catch (e) { }
   }
-  try { if (typeof fimg === 'function' && !fimg.v212) { var _fimg212 = fimg; fimg = function (id, c) { var cd = window.FL && FL[id], r = cd && FR7[cd]; if (r) return '<img class="fi ' + (c || '') + '" src="' + r + '" alt="" draggable="false">'; return _fimg212.apply(this, arguments); }; fimg.v212 = 1; } } catch (e) { }   /* V212: diğer ekranlar da hazırsa bitmap bayrak kullanır */
+  try { if (typeof fimg === 'function' && !fimg.v212) { var _fimg212 = fimg; fimg = function (id, c) { var cd = window.FL && FL[id], r = cd && FR7[cd]; if (r) return '<img class="fi ' + (c || '') + '" data-fl="' + cd + '" src="' + r + '" alt="" draggable="false">'; return _fimg212.apply(this, arguments); }; fimg.v212 = 1; } } catch (e) { }   /* V212: diğer ekranlar da hazırsa bitmap bayrak kullanır */
   window.wcFlagWarm = function (ids, gray) { try { (ids || []).forEach(function (id) { var cd = window.FL && FL[id]; if (cd) rasterFlag7(cd, gray); }); } catch (e) { } };
   /* boşta tüm bayraklar sırayla bitmap'e çevrilir (ilk savaştan önce hazır olsunlar) */
   (function () {

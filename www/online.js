@@ -36,7 +36,7 @@
   function open() {
     modal('<h3>' + X('Online — arkadaşına karşı', 'Online — versus a friend') + '</h3>' +
       '<div style="color:var(--tx2);margin-bottom:8px">' + X('Her biri ayrı bir ülkeyi yönetir; sırayla oynarsınız. İkiniz de aynı anda açık olmalısınız.', 'Each of you rules a separate country; you take turns. Both must be online at the same time.') + '</div>' +
-      '<button class="big pri" onclick="WCOnline.host(0)">' + X('Oda kur — Karşılıklı (ayrı ülkeler)', 'Create room — Head-to-head (separate countries)') + '</button>' +
+      '<button class="big pri" onclick="WCOnline.host(0)">' + X('Oda Kur', 'Create Room') + '<small class="sub220">' + X('Karşılıklı · ayrı ülkeler', 'Head-to-head · separate countries') + '</small>' + '</button>' +
       '<div style="display:flex;gap:8px;margin:8px 0"><input id="onc" maxlength="5" placeholder="' + X('Oda kodu', 'Room code') + '" style="flex:1;padding:12px;border-radius:10px;border:1px solid #6b5420;background:#1a1408;color:#f2c14e;font-size:18px;text-transform:uppercase;letter-spacing:4px;text-align:center">' +
       '<button class="big" style="flex:1;margin:0" onclick="WCOnline.join()">' + X('Katıl', 'Join') + '</button></div>' +
       '<button class="big ghost" onclick="WCOnline.cancel()">' + X('Vazgeç', 'Cancel') + '</button>');
@@ -53,7 +53,7 @@
       (function tryOpen(n) {
         var code = mkCode(), p = new Peer(PID + code); ON.peer = p;
         p.on('open', function () {
-          status(X('Oda kodu', 'Room code') + '<div style="font-size:42px;letter-spacing:8px;color:#f2c14e;margin:10px 0"><b>' + code + '</b></div>' + X('Arkadaşın bu kodu girince oyun başlar.', 'The game starts when your friend enters this code.'));
+          status(X('Oda kodu', 'Room code') + '<div style="font-size:clamp(26px,9vw,42px);letter-spacing:.18em;color:#f2c14e;margin:10px 0;white-space:nowrap"><b>' + code + '</b></div>' + X('Arkadaşın bu kodu girince oyun başlar.', 'The game starts when your friend enters this code.'));
         });
         p.on('connection', function (c) {
           if (ON.net) { try { c.close(); } catch (e) { } return; }

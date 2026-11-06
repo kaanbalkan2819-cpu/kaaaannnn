@@ -5,7 +5,7 @@
    Veri: G.ev76 = {last, prev}, G.lib76 = {ülke: {since, rolled, at}} (kayıtla saklanır). */
 (function () {
   'use strict';
-  var EVT_P = .6, EVT_GAP = 2, EVT_FIRST = 2,   /* V215: eskiden .16 / 4 / 3 (çok seyrek); artık en erken 2 turda bir, %60 olasılık */ LIB_REVOLT_CHANCE = .5, LIB_POWER_CUT = 10;
+  var EVT_P = .6, EVT_GAP = 2, EVT_FIRST = 2,   /* V215: eskiden .16 / 4 / 3 (çok seyrek); artık en erken 2 turda bir, %60 olasılık */ LIB_REVOLT_CHANCE = .3 /* V220: .5 -> .3 */, LIB_POWER_CUT = 10;
   function T(tr, en) { return (typeof L !== 'undefined' && L === 'en') ? en : tr; }
   function nm(e) { return (M[e] && M[e].name) || e; }
   /* V215: Türkçe bulunma eki (ses uyumu + sertleşme): İran'da, Almanya'da, Mısır'da, Türkiye'de, Fas'ta */

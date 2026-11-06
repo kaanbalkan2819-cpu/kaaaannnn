@@ -17,6 +17,7 @@
   var REV = null;
   function rev() { if (REV) return REV; REV = {}; try { var F = window.FLAGSVG || {}; for (var c in F) REV[F[c]] = c; } catch (e) { } return REV; }
   function pack(html, out) {
+    html = String(html || '').replace(/data-fl="([A-Za-z0-9_-]+)" src="(?:data|blob):[^"]+"/g, function (a, c) { return 'data-fl="' + c + '" src="@:' + c + '@@"'; });   /* V220: bitmap bayraklar kodla gider (izleyen cihazda görünmüyordu) */
     return String(html || '').replace(/data:[a-z]+\/[a-z0-9.+-]+;base64,[A-Za-z0-9+\/=]+/gi, function (u) {
       var fc = rev()[u]; if (fc) return '@@F:' + fc + '@@';   // bayrak: kod gider, resim izleyen cihazdaki flags.js'den gelir
       var k = hash(u); if (!SENT[k]) { SENT[k] = 1; (out.u = out.u || {})[k] = u; } return '@@' + k + '@@';

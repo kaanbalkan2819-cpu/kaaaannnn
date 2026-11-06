@@ -33,7 +33,11 @@
   function animalOf(c) { var s = S(); return s ? s.animal(c) : 'eagle'; }
   function countriesOf(a) { var s = S(); if (!s) return []; return (s.A[a] && s.A[a][2] ? s.A[a][2].split(' ') : []); }
   function gotAnimals() { var o = {}; gotC().forEach(function (c) { o[animalOf(c)] = 1; }); return o; }
-  function nNormal() { var g = gotAnimals(); return animals().filter(function (a) { return g[a]; }).length; }
+  /* V220: normal mühürler ÜLKE başına (175): her ülkenin kendi mührü */
+  function allC() { var o = []; animals().forEach(function (a) { countriesOf(a).forEach(function (c) { if (o.indexOf(c) < 0) o.push(c); }); }); return o; }
+  function surlC(c) { var s = S(); return s && s.url ? s.url(c) : 'assets/stamps/' + animalOf(c) + '.png'; }
+  function nNormal() { var g = gotC(), all = allC(); return all.filter(function (c) { return g.indexOf(c) >= 0; }).length; }
+  function nAll() { return allC().length || 175; }
   function cname(c) {
     try { if (window.I18N) { var t = en() ? I18N.nameEN : I18N.nameTR; if (t && t[c]) return t[c]; } } catch (e) { }
     try { return (window.M && M[c] && M[c].name) || c; } catch (e) { return c; }
@@ -57,13 +61,11 @@
       (ok ? X('Yeni oyunda bu mühürle başlarsan ' + esc(d[4]) + ' bölgesinden seçtiğin ülkenin tüm değerleri <b>+%2</b>.', 'Start a new game with it: your ' + esc(d[5]) + ' country gets <b>+2%</b> to all stats.')
         : X('Açmak için aynı oyunda fethet: ', 'To unlock, conquer in one game: ') + esc(names)) + '</span></div>';
   }
-  function infoNormal(a) {
-    var s = S(), nmA = s && s.A[a] ? X(s.A[a][0], s.A[a][1]) : a, got = gotC(), list = countriesOf(a), done = list.filter(function (c) { return got.indexOf(c) >= 0; });
-    var ok = done.length > 0, line = s && s.animalInfo ? s.animalInfo(a) : '';
-    var cs = list.map(function (c) { return got.indexOf(c) >= 0 ? '<b>' + esc(cname(c)) + '</b>' : esc(cname(c)); }).join(', ');
-    return '<i class="' + (ok ? '' : 'lk') + '" style="background-image:url(assets/stamps/' + a + '.png)"></i><div><b>' + esc(nmA) + '</b>' +
-      '<small>' + (ok ? '✔ ' + X('AÇILDI', 'UNLOCKED') : '🔒 ' + X('KİLİTLİ', 'LOCKED')) + ' · ' + done.length + '/' + list.length + ' ' + X('ülke', 'lands') + '</small>' +
-      '<span>' + esc(line) + (list.length ? '<br>' + X('Ülkeler: ', 'Countries: ') + cs : '') + '</span></div>';
+  function infoNormal(c) {
+    var s = S(), a = animalOf(c), nmA = s && s.A[a] ? X(s.A[a][0], s.A[a][1]) : a, ok = gotC().indexOf(c) >= 0, line = s && s.countryInfo ? s.countryInfo(c) : '';
+    return '<i class="' + (ok ? '' : 'lk') + '" style="background-image:url(' + surlC(c) + ')"></i><div><b>' + esc(cname(c)) + ' <em>· ' + esc(nmA) + '</em></b>' +
+      '<small>' + (ok ? '✔ ' + X('AÇILDI', 'UNLOCKED') : '🔒 ' + X('KİLİTLİ · bu ülkeyi fethet', 'LOCKED · conquer this country')) + '</small>' +
+      '<span>' + esc(line) + '</span></div>';
   }
   /* ---- sayfa ---- */
   function cnt(n, t, lb) { return '<div class="cnt219"><b>' + n + '<i>/' + t + '</i></b><span>' + lb + '</span><div class="bar219"><span style="width:' + (t ? n * 100 / t : 0).toFixed(1) + '%"></span></div></div>'; }
@@ -77,24 +79,23 @@
     return cnt(nGold(), GIDS.length, X('altın mühür açıldı', 'golden seals unlocked')) + '<div class="grid219">' + h + '</div>';
   }
   function gridNormal() {
-    var s = S(), g = gotAnimals(), list = animals(), h = '';
-    /* açılanlar önde */
-    list.sort(function (x, y) { return (g[y] ? 1 : 0) - (g[x] ? 1 : 0); });
-    list.forEach(function (a, i) {
-      var ok = !!g[a];
-      h += '<button type="button" class="col219i n' + (ok ? ' ok' : '') + '" style="animation-delay:' + Math.min(.8, i * .015).toFixed(3) + 's" onclick="GS219.info(\'n\',\'' + a + '\',this)">' +
-        '<i style="background-image:url(assets/stamps/' + a + '.png)"></i><b>' + esc(s ? X(s.A[a][0], s.A[a][1]) : a) + '</b></button>';
+    var g = gotC(), list = allC(), h = '';
+    /* açılanlar önde, sonra ülke adına göre */
+    list.sort(function (x, y) { var a = g.indexOf(x) >= 0 ? 0 : 1, b = g.indexOf(y) >= 0 ? 0 : 1; return a - b || cname(x).localeCompare(cname(y), en() ? 'en' : 'tr'); });
+    list.forEach(function (c, i) {
+      var ok = g.indexOf(c) >= 0;
+      h += '<button type="button" class="col219i n' + (ok ? ' ok' : '') + '" style="animation-delay:' + Math.min(.6, i * .006).toFixed(3) + 's" onclick="GS219.info(\'n\',\'' + c + '\',this)">' +
+        '<i style="background-image:url(' + surlC(c) + ')"></i><b>' + esc(cname(c)) + '</b></button>';
     });
-    return cnt(nNormal(), list.length, X('mühür açıldı', 'seals unlocked')) + '<div class="grid219 nn">' + h + '</div>';
+    return cnt(nNormal(), list.length, X('ülke mührü açıldı', 'country seals unlocked')) + '<div class="grid219 nn">' + h + '</div>';
   }
   function page() {
     var hint = TAB === 'gold' ? X('Bir mühre dokun: bölgesi, açma koşulu ve avantajı. Bir bölgenin tüm ülkelerini aynı oyunda fethedersen mühür açılır ve canlı rengine döner.',
       'Tap a seal for its region, unlock rule and bonus. Conquer a whole region in one game to unlock it; it turns to full color.')
-      : X('Bir ülkeyi fethettiğinde o ülkenin hayvan mührü koleksiyona kalıcı olarak girer. Mühre dokun: hangi ülkelerden kazanılır.',
-        'Conquering a country adds its animal seal to the collection for good. Tap a seal to see which countries grant it.');
+      : X('Her ülkenin kendi mührü var; ülkeyi fethettiğinde mührü koleksiyona kalıcı olarak girer. Mühre dokun: açıklaması.',         'Conquering a country adds its animal seal to the collection for good. Tap a seal to see which countries grant it.');
     return '<div class="wb-wrap still"><div class="wb-panel wb-pause wc141p col219"><div class="c141h"><span class="p">⚜</span><h3>' + X('MÜHÜR KOLEKSİYONU', 'SEAL COLLECTION') + '</h3></div>' +
       '<div class="tabs219"><button type="button" class="' + (TAB === 'gold' ? 'on' : '') + '" onclick="GS219.tab(\'gold\')">' + X('Altın Mühürler', 'Golden Seals') + ' <i>' + nGold() + '/' + GIDS.length + '</i></button>' +
-      '<button type="button" class="' + (TAB === 'norm' ? 'on' : '') + '" onclick="GS219.tab(\'norm\')">' + X('Mühürler', 'Seals') + ' <i>' + nNormal() + '/' + animals().length + '</i></button></div>' +
+      '<button type="button" class="' + (TAB === 'norm' ? 'on' : '') + '" onclick="GS219.tab(\'norm\')">' + X('Mühürler', 'Seals') + ' <i>' + nNormal() + '/' + nAll() + '</i></button></div>' +
       '<div class="body219">' + (TAB === 'gold' ? gridGold() : gridNormal()) + '</div>' +
       '<div class="inf219" id="inf219">' + hint + '</div>' +
       '<div class="c141g"><button type="button" class="c141b pri" onclick="GS219.close()"><span class="ic">‹</span><span class="lb">' + X('Geri', 'Back') + '</span></button></div></div></div>';
@@ -121,13 +122,14 @@
     try {
       var w = document.getElementById('wcm'); if (!w || !document.body.classList.contains('wcm-on')) return;
       var mn = w.querySelector('.menu'); if (!mn) return;
-      var b = mn.querySelector('.mb219'), txt = X('Altın ', 'Gold ') + nGold() + '/' + GIDS.length + ' · ' + X('Mühür ', 'Seals ') + nNormal() + '/' + (animals().length || 63);
+      var b = mn.querySelector('.mb219'), txt = X('Altın ', 'Gold ') + nGold() + '/' + GIDS.length + ' · ' + X('Mühür ', 'Seals ') + nNormal() + '/' + nAll();
       if (b) { var s = b.querySelector('.sub218'); if (s && s.textContent !== txt) s.textContent = txt; return; }
-      var set = mn.querySelector('[data-a="set"]');
+      var set = mn.querySelector('[data-a="set"]'); if (!set) return;   /* V220: yalnızca ana menüde (kayıt silme onayında değil) */
       b = document.createElement('button'); b.type = 'button'; b.className = 'mb mb219';
       b.innerHTML = X('MÜHÜRLER', 'SEALS') + '<small class="sub218">' + txt + '</small>';
-      b.addEventListener('click', function (e) { e.stopPropagation(); GS219.open(); });
-      if (set) mn.insertBefore(b, set); else mn.appendChild(b);
+      mn.insertBefore(b, set);
     } catch (e) { }
   }, 400);
 })();
+/* V220: menü HTML'i yeniden kurulunca (alt menüden geri dönüş) düğmenin tıklaması kaybolmasın: belge düzeyinde dinlenir */
+document.addEventListener('click', function (e) { try { var b = e.target && e.target.closest && e.target.closest('#wcm .mb219'); if (b) { e.stopPropagation(); e.preventDefault(); GS219.open(); } } catch (x) { } }, true);

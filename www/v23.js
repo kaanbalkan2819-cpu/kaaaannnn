@@ -46,7 +46,7 @@
   };
 
   // ---- İSYAN: çok saldırgan oynarsan, eskiden yok ettiğin bir ülke topraklarını geri alıp bağımsızlığını ilan eder ----
-  var REV_HEAT = 3.5, REV_P = 0.45, REV_COOL = 4;   // <<< AYAR: isyan eşiği / olasılığı / bekleme (tur)
+  var REV_HEAT = 4.5, REV_P = 0.25, REV_COOL = 7;   // V220: isyan daha nadir (eski 3.5 / 0.45 / 4). <<< AYAR: isyan eşiği / olasılığı / bekleme (tur)
   function ownedCount(e) { var n = 0; for (var k in G.owner) if (G.owner[k] === e) n++; return n; }
   function revolt() {
     try {
