@@ -1056,7 +1056,8 @@ V218d — Dereceli profil, menü küresi, ilk seçim görüntüsü, simgeler
  - Kendi toprağında ve fethettiğin yerlerde ülke panelinde o toprağın kronolojisi ("Tarihçe", yatay ekranda da görünür). Diğer ülkelerde eski tanıtım cümlesi.
  - Altın simgesi: Figma'da üretilen gerçekçi altın düka (assets/icons/gold218.png); 🪙 geçen her yer (üst çubuk, politikalar, dükkan, haraç, diplomasi) bu sikkeyi gösterir.
  - 5 değerin (Nüfus, Ordu, Ekonomi, Teknoloji, Diplomasi) simgeleri: Figma'da üretilen bronz madalyonlar (assets/icons/*218.png, assets/icons.js).
-V218e — Ana menü, logo, savaş animasyonu ölçeği, oyun geçmişi, sade ayarlar, ALTIN MÜHÜRLER
+=================== V219 ===================
+V219 — Ana menü, logo, savaş animasyonu ölçeği, oyun geçmişi, sade ayarlar, ALTIN MÜHÜRLER
  - Ana menü: logo başlığın üstünde (assets/menu/logo218.png), düğmeler arası boşluk, dikeyde ortalı. Tur/Fethedilen/Dünya kutuları bazı ekran boylarında
    menünün üstüne biniyordu -> kaldırıldı; bilgi "Seferi Sürdür" altında küçük yazı (Tur n · n ülke). Duraklatma kartında kesilen düğme yazıları ("ANA …") düzeltildi.
  - Savaş animasyonu (v60.js): küçük hedefte tüm birlikler aynı noktaya gidip üst üste biniyordu -> noktalar hedefin içine dağıtılır.
