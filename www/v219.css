@@ -59,3 +59,40 @@
   .inf219>i{flex-basis:40px;width:40px;height:40px}
   .inf219{font-size:11px;padding:5px 8px}
 }
+
+/* V219b — mühür sayfası yalnızca aşağı doğru kayar (yana kayma yok) */
+#box:has(.col219){overflow-x:hidden!important;overflow-y:auto!important}
+#box .wb-panel.col219{max-width:96vw!important;box-sizing:border-box;overflow:hidden}
+.body219{overflow-x:hidden!important;overflow-y:auto!important;touch-action:pan-y}
+.grid219{grid-template-columns:repeat(auto-fill,minmax(82px,1fr))!important;min-width:0}
+.grid219.nn{grid-template-columns:repeat(auto-fill,minmax(62px,1fr))!important}
+.col219i{min-width:0}
+.col219i b,.col219i small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs219{max-width:100%}
+.tabs219 button{white-space:nowrap;padding:6px 10px}
+
+/* V219b — dereceli profil: kare, çerçevesiz portreler; yazılar panele sığar */
+.pf215 .grid{grid-template-columns:repeat(auto-fill,minmax(54px,1fr))!important;gap:6px!important}
+.pf215 .grid button{border-radius:0!important;border:0!important;aspect-ratio:1;box-shadow:0 3px 8px #000a!important;transform:none!important}
+.pf215 .grid button.on{outline:3px solid #f5c75a;outline-offset:-3px;box-shadow:0 0 14px #f5c75a66!important}
+.pf215 .grid button.on::after{right:3px!important;bottom:3px!important}
+.pf215 .hd .av,.pf215 #pfav{border-radius:0!important;border:0!important}
+.pf215,.pf215 *{box-sizing:border-box}
+.pf215{max-width:100%;overflow-x:hidden}
+.pf215 h3{letter-spacing:.12em!important}
+.pf215 h4{letter-spacing:.12em!important;font-size:10.5px!important;white-space:normal}
+.pf215 .hd b,#pfnm{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:clamp(17px,4.6vw,24px)!important}
+.pf215 .st{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.pf215 .st small{letter-spacing:.04em!important;font-size:8.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.pf215 .act .big{white-space:normal}
+.pf215 input.nm{width:100%;max-width:100%}
+/* maç sonu: unvan değişimi */
+.wcr-ti219{margin:8px auto 4px;padding:8px 12px;border-radius:8px;border:1px solid rgba(245,199,90,.55);background:rgba(245,199,90,.12);text-align:center}
+.wcr-ti219 span{display:block;font:700 10px system-ui,sans-serif;letter-spacing:.24em;color:#f5c75a}
+.wcr-ti219 b{display:block;font:700 17px Georgia,serif;color:#fff;margin-top:2px}
+.wcr-ti219.down{border-color:rgba(226,120,100,.5);background:rgba(226,120,100,.1)}
+.wcr-ti219.down span{color:#f0a090}
+#box:has(.pf215)::-webkit-scrollbar,#box:has(.col219)::-webkit-scrollbar{width:4px}
+#box:has(.pf215)::-webkit-scrollbar-thumb,#box:has(.col219)::-webkit-scrollbar-thumb{background:rgba(205,176,106,.55);border-radius:2px}
+#box:has(.pf215)::-webkit-scrollbar-button,#box:has(.col219)::-webkit-scrollbar-button{display:none;height:0}
+#box:has(.pf215)::-webkit-scrollbar-track,#box:has(.col219)::-webkit-scrollbar-track{background:transparent}

@@ -1075,3 +1075,9 @@ V219 — Ana menü, logo, savaş animasyonu ölçeği, oyun geçmişi, sade ayar
    Altın Mühürler n/12: açılanlar canlı altın + parıltı, açılmayanlar soluk; dokununca bölge, açma koşulu (ülkeler) ve +%2 avantajı.
    Mühürler n/62: tek kişilik oyunda fethedilen her ülkenin hayvan mührü KALICI olarak koleksiyona girer (localStorage wc_seals219); açılanlar canlı kırmızı,
    açılmayanlar soluk; dokununca hayvanın açıklaması ve hangi ülkelerden kazanıldığı (fethedilenler kalın). Menüdeki düğmenin altında iki sayaç.
+V219b — Düzeltmeler
+ - Ana menü: eklenen logo kaldırıldı, oyunun küçük atlas amblemi ve sütun hizası eski yerinde (v218.js/v218.css).
+ - Mühür koleksiyonu yalnızca aşağı doğru kayar (yana kayma yok), ızgara ekrana göre sarar (v219.css).
+ - Dereceli profil: 2 yeni kadın savaşçı portresi (Figma: av10 Türk okçu, av11 şövalye komutan) — toplam 11. Portreler kare ve çerçevesiz.
+   Unvan bölümü kaldırıldı; unvan isim altında puanla otomatik değişir. Yazılar panele sığar. firestore.rules: av 1-11 (Firebase Konsolu'na yeniden yapıştırın).
+ - Dereceli maç sonu panelinde unvan değiştiyse "YENİ UNVAN: Şövalye → Komutan" gösterilir (ranked.js showResult).

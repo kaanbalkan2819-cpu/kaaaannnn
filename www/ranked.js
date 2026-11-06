@@ -68,7 +68,7 @@
   /* ---------------- V215: PROFİL EKRANI ----------------
      Dereceli oynamak için profil: şövalye portresi (assets/avatars/av1-8.jpg, Figma ile üretildi), oyuncu adı, unvan, kariyer.
      İlk girişte zorunlu. Portre + unvan Firestore oyuncu kaydına, eşleşme kuyruğuna ve maç kaydına yazılır; rakip lobide ve liderlik tablosunda görür. */
-  var AVN = 9, TITLES = [['Şövalye', 'Knight'], ['Komutan', 'Commander'], ['Fatih', 'Conqueror'], ['Lord', 'Lord'], ['Muhafız', 'Guardian'], ['Stratejist', 'Strategist']];
+  var AVN = 11, TITLES = [['Şövalye', 'Knight'], ['Komutan', 'Commander'], ['Fatih', 'Conqueror'], ['Lord', 'Lord'], ['Muhafız', 'Guardian'], ['Stratejist', 'Strategist']];
   function avNum(n) { n = n | 0; return (n >= 1 && n <= AVN) ? n : 1; }
   function avUrl(n) { return 'assets/avatars/av' + avNum(n) + '.jpg'; }
   function avTag(n, big) { return '<span class="av215' + (big ? ' lg' : '') + '" style="background-image:url(' + avUrl(n) + ')"></span>'; }
@@ -88,7 +88,6 @@
       '<div class="hd"><span class="av" id="pfav" style="background-image:url(' + avUrl(PF.av) + ')"></span><div><b id="pfnm">' + esc(pre) + '</b><small id="pfti">' + esc(titleOf(PF.ti).toLocaleUpperCase('tr')) + '</small><em>' + esc(lg.label) + ' · ' + P.rating + '</em></div></div>' +
       '<h4>' + X('PROFİL FOTOĞRAFI', 'PORTRAIT') + '</h4><div class="grid">' + g + '</div>' +
       '<h4>' + X('OYUNCU ADI', 'PLAYER NAME') + '</h4><input id="wcrn" class="nm" maxlength="14" value="' + esc(pre) + '" oninput="this.dataset.d=1;var h=document.getElementById(\'pfnm\');if(h)h.textContent=this.value"><div id="wcre" class="err"></div>' +
-      '<h4>' + X('UNVAN · PUANINLA YÜKSELİR', 'TITLE · RISES WITH YOUR RATING') + '</h4><div class="ti">' + ti + '</div>' +
       '<h4>' + X('KARİYER', 'CAREER') + '</h4><div class="st"><div><b>' + P.rating + '</b><small>' + X('PUAN', 'RATING') + '</small></div><div><b>' + (P.games | 0) + '</b><small>' + X('MAÇ', 'GAMES') + '</small></div><div><b>' + (P.w | 0) + '</b><small>' + X('GALİBİYET', 'WINS') + '</small></div><div><b>' + (P.l | 0) + '</b><small>' + X('YENİLGİ', 'LOSSES') + '</small></div></div>' +
       '<div class="act"><button class="big pri" onclick="WCRank.pfSave()">' + (first ? X('Profili Oluştur', 'Create Profile') : X('Kaydet', 'Save')) + '</button>' +
       (first ? '<button class="big" onclick="WCRank.reroll()">🎲 ' + X('Başka Ad Öner', 'Suggest Another Name') + '</button>' : '') +
@@ -645,6 +644,8 @@
     rmodal('<div class="wcr-res ' + out + '"><h2>' + ttl + '</h2>' + (reason ? '<div class="wcr-sm">' + esc(reason) + '</div>' : '') +
       (out === 'invalid' ? M_(X('İki taraf çelişkili sonuç bildirdi; puan değişmedi.', 'Both sides reported conflicting results; rating unchanged.')) :
         '<div class="wcr-d ' + (r.d > 0 ? 'p' : r.d < 0 ? 'n' : '') + '">' + (r.d > 0 ? '+' : '') + r.d + '</div><div class="wcr-rt">' + r.after + '</div>') +
+      /* V219: puanla unvan değiştiyse maç sonu panelinde gösterilir */
+      (tiFor(r.before) !== tiFor(r.after) && out !== 'invalid' ? '<div class="wcr-ti219 ' + (up ? 'up' : 'down') + '"><span>' + (up ? X('YENİ UNVAN', 'NEW TITLE') : X('UNVANIN DEĞİŞTİ', 'TITLE CHANGED')) + '</span><b>' + esc(titleOf(tiFor(r.before))) + ' → ' + esc(titleOf(tiFor(r.after))) + '</b></div>' : '') +
       (changed ? '<div class="wcr-lg ' + (up ? 'up' : 'down') + '"><span>' + (up ? X('LİG ATLADIN', 'PROMOTED') : X('LİG DÜŞTÜN', 'DEMOTED')) + '</span>' + badge(a, 1) + '<b style="color:' + a.c + '">' + esc(a.label) + '</b></div>' : '<div class="wcr-sm" style="color:' + a.c + '">' + esc(a.label) + '</div>') +
       '</div><button class="big pri" onclick="location.reload()">' + X('Ana Menü', 'Main Menu') + '</button>');
   }

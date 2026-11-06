@@ -148,14 +148,9 @@ img.die218{display:inline-block;width:1.35em;height:1.35em;vertical-align:-.3em;
 
 /* V218e — ana menü yeniden: logo + başlık + aralıklı düğmeler, dikeyde ortalı; tur/fethedilen kutuları menünün üstüne binmesin diye
    kaldırıldı, bilgi "Seferi Sürdür"ün altında küçük yazı (v218.js) */
-#wcm .col{justify-content:center!important;padding-top:8px!important;padding-bottom:12px!important}
 #wcm .stats,#wcm .quote{display:none!important}
-#wcm .col>h1{margin-top:0!important}
 #wcm .menu{gap:clamp(4px,1.9vh,12px)!important;margin-top:clamp(8px,2.6vh,18px)!important}
-#wcm .logo218{display:block;width:clamp(40px,14vh,80px);height:clamp(40px,14vh,80px);margin:0 auto clamp(4px,1.6vh,10px);border-radius:50%;
-  border:2px solid #cdb06a;box-shadow:0 0 0 3px rgba(0,0,0,.45),0 6px 18px #000c,0 0 22px rgba(205,176,106,.25);object-fit:cover;animation:wcmIn .8s ease-out both;flex:0 0 auto}
 #wcm .mb .sub218{display:block;margin-top:2px;font:600 10px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.14em;color:#cdb06a;opacity:.85;text-transform:none}
-@media (max-height:340px){#wcm .logo218{display:none}}
 #wcm .mb:has(.sub218){flex-direction:column!important;line-height:1.1}
 /* duraklatma / oyun bitti kartı: düğme yazıları kesilmesin ("ANA …", "AYAR…") */
 .wc141p .c141g .c141b .lb{overflow:visible!important;text-overflow:clip!important;font-size:13px!important;letter-spacing:.1em!important}

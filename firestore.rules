@@ -9,7 +9,7 @@ service cloud.firestore {
     function isMe(uid) { return signedIn() && request.auth.uid == uid; }
     function okNick(n) { return n is string && n.size() >= 3 && n.size() <= 14; }
     // V215: profil portresi (1-8) ve unvan (0-5) isteğe bağlı; varsa geçerli olmalı
-    function okProf(d) { return (!("av" in d) || (d.av is int && d.av >= 1 && d.av <= 9)) && (!("ti" in d) || (d.ti is int && d.ti >= 0 && d.ti <= 5)); }
+    function okProf(d) { return (!("av" in d) || (d.av is int && d.av >= 1 && d.av <= 11)) && (!("ti" in d) || (d.ti is int && d.ti >= 0 && d.ti <= 5)); }
 
     // ---- Oyuncu profili + liderlik tablosu ----
     match /players/{uid} {

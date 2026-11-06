@@ -150,7 +150,6 @@
     try {
       var w = document.getElementById('wcm'); if (!w || !document.body.classList.contains('wcm-on')) return;
       var col = w.querySelector('.col'), h1 = col && col.querySelector('h1');
-      if (h1 && !col.querySelector('.logo218')) { var im = document.createElement('img'); im.className = 'logo218'; im.alt = ''; im.src = 'assets/menu/logo218.png'; im.draggable = false; col.insertBefore(im, h1); }
       var cont = Array.prototype.find.call(w.querySelectorAll('.mb'), function (b) { return /SEFER|CONTINUE|CAMPAIGN/i.test(b.textContent); });
       if (cont && !cont.disabled && !cont.querySelector('.sub218')) { var i = info(); if (i) cont.insertAdjacentHTML('beforeend', '<small class="sub218">' + X('Tur ' + i.t + ' · ' + i.n + ' ülke', 'Turn ' + i.t + ' · ' + i.n + ' lands') + '</small>'); }
     } catch (e) { }
