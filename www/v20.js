@@ -93,15 +93,25 @@
   }
 
   // ---- animasyon kartı ----
+  /* V213: RAKİP TURUNU GEÇ. CUR = şu anki hamleyi (kart / zar penceresi) hemen bitiren işlev; SKIPALL = turun kalanı atlanır
+     (kartlar ve zarlar gösterilmez, YZ↔YZ savaşları hızlı modda çözülüp kendiliğinden kapanır; oyuncuya yönelen savaş normal gösterilir).
+     Sağ alttaki düğme (v213.js): dokun -> bu hamleyi geç, basılı tut -> turun tamamını geç. */
+  var CUR = null, SKIPALL = false, RM213 = null;
+  function skipReset() {
+    SKIPALL = false; CUR = null; window.__v213aa = false;
+    if (RM213 !== null) { try { SET.rm = RM213; } catch (e) { } RM213 = null; }
+  }
   function card(a, b, icon, cls, text, after) {
     var old = document.getElementById('ai20'); if (old) old.remove();
+    if (SKIPALL) { CUR = null; setTimeout(function () { try { after && after(); } catch (e2) { console.error(e2); } }, 0); return; }
     var d = document.createElement('div'); d.id = 'ai20'; d.className = 'ai20 ' + cls + (rmOn() ? ' rm' : '');
-    d.innerHTML = '<div class="ai20-row"><span class="ai20-f l">' + fimg(a, 'sm') + '</span><span class="ai20-ic">' + icon + '</span>' +
-      (b ? '<span class="ai20-f r">' + fimg(b, 'sm') + '</span>' : '') + '</div><div class="ai20-tx">' + text + '</div>' +
-      '<div class="ai20-mv">' + T('Hamle ', 'Move ') + (SEQ.n - SEQ.left) + '/' + SEQ.n + '</div>';
+    d.innerHTML = '<div class="ai20-mv">' + T('Rakip hamlesi ', 'Rival move ') + (SEQ.n - SEQ.left) + '/' + SEQ.n + '</div>' +
+      '<div class="ai20-row"><span class="ai20-f l">' + fimg(a, 'sm') + '</span><span class="ai20-ic">' + icon + '</span>' +
+      (b ? '<span class="ai20-f r">' + fimg(b, 'sm') + '</span>' : '') + '</div><div class="ai20-tx">' + text + '</div>';
     document.body.appendChild(d);
     var ms = rmOn() ? 500 : 1900, fired = false, tm;
-    function go() { if (fired) return; fired = true; clearTimeout(tm); var e = document.getElementById('ai20'); if (e === d) e.remove(); try { after && after(); } catch (e2) { console.error(e2); } }
+    function go() { if (fired) return; fired = true; if (CUR === go) CUR = null; clearTimeout(tm); var e = document.getElementById('ai20'); if (e === d) e.remove(); try { after && after(); } catch (e2) { console.error(e2); } }
+    CUR = go;
     d.style.pointerEvents = 'auto'; d.style.cursor = 'pointer'; d.addEventListener('click', go);   // V26: karta dokununca rakip hamle animasyonu atlanır
     tm = setTimeout(go, ms);
   }
@@ -109,12 +119,14 @@
 
   // ---- zar penceresi ----
   function rollModal(title, sub, val, after) {
+    if (SKIPALL) { CUR = null; setTimeout(after, 0); return; }   /* V213 */
     modal('<h3>' + title + '</h3><div style="text-align:center;padding:10px">' + die3d('v20d', '') + '</div><div id="v20r" style="text-align:center;min-height:70px;color:var(--tx2)">' + T('Zar atılıyor…', 'Rolling…') + '</div>');
     var fin = false, gone = false, tm = 0;
     function leave() { if (gone) return; gone = true; clearTimeout(tm); var bx = $('box'); if (bx) bx.onclick = null; closeMod(); after(); }
     function done() { if (fin) return; fin = true; setDie3('v20d', val); var r = $('v20r'); if (r) r.innerHTML = '<div class="big2">' + val + '</div>' + sub; tm = setTimeout(leave, rmOn() ? 300 : 1000); }
     // V26: zara / pencereye dokununca animasyon atlanır (1. dokunuş sonucu gösterir, 2. dokunuş hemen devam ettirir)
     var bx0 = $('box'); if (bx0) bx0.onclick = function () { if (!fin) { done(); clearTimeout(tm); tm = setTimeout(leave, 350); } else leave(); };
+    CUR = function () { CUR = null; if (!fin) done(); leave(); };   /* V213: "geç" düğmesi zar penceresini hemen kapatır */
     var hint = $('v20r'); if (hint) hint.innerHTML += '<div style="font-size:12px;opacity:.55;margin-top:6px">' + T('Geçmek için dokun', 'Tap to skip') + '</div>';
     AU.play('dice'); if (rmOn()) done(); else rollDie('v20d', val, 1200, 1, done);
   }
@@ -170,14 +182,14 @@
   pickActors = function (n) { var q = _pickA114(n); try { if (window.WCRank && WCRank.botTurnNow()) q = [G.mp.guest].concat(q.filter(function (x) { return x !== G.mp.guest; })); } catch (e) { } return q; };
   function run() {
     if (!is5() || G.ph != 'v5ai' || G.aiBusy) return;
-    G.aiBusy = 1; SEQ = null; QUEUE = pickActors(G.mp && !G.mp.coop ? 1 : AI_TURNS); QI = 0;   // V104: online karşılıklı: oyuncu 1 → 1 YZ ülkesi → oyuncu 2 → 1 YZ ülkesi
+    skipReset(); G.aiBusy = 1; SEQ = null; QUEUE = pickActors(G.mp && !G.mp.coop ? 1 : AI_TURNS); QI = 0;   // V104: online karşılıklı: oyuncu 1 → 1 YZ ülkesi → oyuncu 2 → 1 YZ ülkesi
     nextActor();
   }
   function nextActor() {
     if (!is5() || !G || G.ph != 'v5ai') { SEQ = null; return; }
     var ai = null;
     while (QI < QUEUE.length && !ai) { var c = QUEUE[QI++]; if (ownedN(c) > 0) ai = c; }
-    if (!ai) { SEQ = null; G.aiBusy = 0; if (QUEUE.length == 0) toast(T('Rakip hamle yapamadı', 'The rival could not act')); if (!G.over) { save(); window.V5.start(); } return; }
+    if (!ai) { skipReset(); SEQ = null; G.aiBusy = 0; if (QUEUE.length == 0) toast(T('Rakip hamle yapamadı', 'The rival could not act')); if (!G.over) { save(); window.V5.start(); } return; }
     /* V68: rakibin tur zarı TEK zardır; yalnızca 6 gelirse aynı zar yeniden atılır (toplam hamle hakkı; en çok 3 atış) */
     var rolls = [d6()];   /* V80: tur zarında 6 gelince tekrar atma YOK; bu kural yalnızca savaş panelindeki zarlar içindir (d6b/d6c) */
     var roll = rolls.reduce(function (p, q) { return p + q; }, 0);
@@ -224,6 +236,9 @@
         var okT = targets(ai, G.owner)[c2.tg] && G.owner[c2.tg] === c2.de;
         if (!okT) { step(); return; }
         if (c2.de === G.pl && ownedN(G.pl) === 1 && window.Gold) { tribute(ai, c2); return; }   // son toprak: haraç talebi
+        /* V213: tur atlanıyorsa YZ↔YZ savaşı hızlı modda (anında sonuç, animasyon yok); oyuncuya yönelen savaş normal hızda gösterilir */
+        window.__v213aa = c2.de !== G.pl;
+        if (SKIPALL && window.SET) { if (c2.de !== G.pl) { if (RM213 === null) RM213 = SET.rm; SET.rm = 1; } else if (RM213 !== null) { SET.rm = RM213; RM213 = null; } }
         if (!window.V5.attack(ai, c2.tg, true)) step();
       });
     } else {
@@ -353,5 +368,8 @@
   }, 1000);
   window.addEventListener('load', function () { setTimeout(function () { try { sync(); } catch (e) { } }, 50); });
   function reTribute() { var m = $('mod'); if (TR && is5() && G.ph == 'v5ai' && m && m.style.display == 'none') tribute(TR.ai, TR.c); }
-  window.V20 = { reTribute: reTribute, run: run, after: after, plan: plan, seq: function () { return SEQ; } };   // V123: seq() → güvenlik garantisi zinciri (v123.js) kalan hamleyi okur/düşer
+  window.V20 = { reTribute: reTribute, run: run, after: after, plan: plan, seq: function () { return SEQ; },
+    /* V213: skip(false) = şu anki hamleyi geç; skip(true) = turun kalanını geç */
+    skip: function (all) { if (all) SKIPALL = true; var f = CUR; CUR = null; var c = document.getElementById('ai20'); if (f) { try { f(); } catch (e) { console.error(e); } } else if (c) { try { c.click(); } catch (e) { } } },
+    skipping: function () { return SKIPALL; }, skipReset: skipReset };   // V123: seq() → güvenlik garantisi zinciri (v123.js) kalan hamleyi okur/düşer
 })();

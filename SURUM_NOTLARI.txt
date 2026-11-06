@@ -920,3 +920,16 @@ V212 — SAVAŞ ANİMASYONU KALİTESİ + SAVAŞ PANELİ KASMASI (masaüstü Chro
 4) Küre savaş animasyonu: tank/asker/gemi/uçak/patlama shader'ları ilk sahnede derleniyordu (~160-400 ms donma). Boşta önceden derlenir (v60.js precompile212).
 5) Kamera kadrajı: savaşta kamera hedefin ~17° güneyine bakıyordu; savaşan ülkeler ekranın en üstüne, üst çubuğun altına kaçıyordu. Savaş animasyonu artık ortalanır; yatay ekranda normal seçim de daha ortada (v30.js latOff). Sahne ekranın daha büyük kısmını kaplar (v60.js camFor 0.55 -> 0.72).
 6) v30.js: kamera her karede panel genişliğini okuyordu (zorunlu yerleşim hesabı) -> 250 ms'de bir. countryAt (birlik yerleşimi) 10° ızgarayla ~2x hızlı, sonuç birebir aynı (16.376 noktada doğrulandı).
+
+=================== V213 ===================
+V213 — İTTİFAK BAYRAKLARI, ÖZELLİK SEÇİMİ, RAKİP TURU, ANA MENÜ, BAŞLANGIÇ YÖNÜ, YENİLGİ (masaüstü Chrome'da telefon görünümüyle denendi; gerçek telefonda denenmedi)
+1) Savaş paneli: tarafın ittifak üyelerinin bayrakları ana bayrağın altında tek satırda (🤝). V120'nin "savaşa katılanlar" satırı bununla birleştirildi (bayrak iki kez görünmez). v7.js allyFlags, v213.js mergeAllies.
+2) Zafer sonrası özellik seçimi: küçük ekranda panel taşıyordu, onay düğmesi ekranın altında kalıyordu. Onay düğmesi panelin altına yapışık (her zaman görünür), seçince görünür alana kayar, kartlar kısa ekranda sıkışır; doğal kaydırma çalışmazsa parmakla sürükleme yedeği (v213.js). 360x640'ta doğrulandı.
+3) Rakip turu bildirimi duraklatma menüsü (Siper Defteri) temasında. Sağ altta "Geç" düğmesi: dokun = o hamleyi geç, basılı tut (0,6 sn) = turun kalanını geç (kartlar/zarlar gösterilmez, YZ↔YZ savaşları hızlı modda çözülüp kapanır; oyuncuya yönelen savaş normal gösterilir). v20.js (CUR/SKIPALL), v213.js.
+4) Ana menü: CONQUEST yazısı her zaman en küçük boyuta (16 px) iniyordu (v35.js fitTitle koşulu hep doğruydu). Düzeltildi; CONQUEST WORLD'ün 2 katı (42 px / 21 px), tüm genişliğe yayılır.
+5) Ana menü: arkadaki atlas küresine dokununca %18 tur (65°) döner. Fotoğraftan ışık haritası ayrılır, yalnızca yüzey deseni küre geometrisine göre döner; önündeki halka korunur (v213.js).
+6) Yeni oyunda küre baştan Türkiye'ye bakar (v30.js doIntro).
+7) Yenilgi bekçisi: oyuncunun toprağı 3,5 sn boyunca 0 kalır ve ne savaş sonucu ne oyun sonu ekranı görünürse oyun sonu ekranı açılır (toprağın savaş dışında kaybı, panelin geri gelmemesi). Test edilen dört yenilgi yolunda (kendi saldırısında, animasyon atlanarak/atlanmadan, YZ saldırısında) oyun sonu ekranı zaten açılıyordu; kullanıcının gördüğü donma yeniden üretilemedi.
+GERİ ALMAK İÇİN: index.html'den v213.css ve v213.js bağlantılarını silin (v7.js/v20.js/v30.js/v35.js'teki "V213" satırları zararsız kalır).
+V213 (ek) — "Geç" düğmesi yalnızca geçilecek bir şey varken görünür (rakip kartı, rakip zarı, YZ↔YZ savaşı). Olay penceresi (ör. darbe teklifi), haraç kararı ve oyuncuya yönelen savaş sırasında gizli.
+Yenilgi donması için ek denemeler: tam doğal rakip turu (zar, kartlar, 2-3 haraç reddi, savaş, Haritaya Dön) ve son toprağın isyanla kaybı — ikisinde de oyun sonu ekranı açıldı. Donma yeniden üretilemedi; V213 bekçisi yine de yerinde.

@@ -66,7 +66,7 @@
     try {
       var s = root && root.querySelector('h1 span'); if (!s) return;
       s.style.removeProperty('font-size');
-      var lim = s.clientWidth - 2, fs = parseFloat(getComputedStyle(s).fontSize) || 40, g = 0;
+      /* V213: blok ogede yazi sigsa da scrollWidth == clientWidth olur; eski "scrollWidth > clientWidth - 2" kosulu hep dogruydu ve CONQUEST hep en kucuk boyuta (16 px) iniyordu. Artik yalnizca gercekten tasinca kucultulur. */ var lim = s.clientWidth + 1, fs = parseFloat(getComputedStyle(s).fontSize) || 40, g = 0;
       while (lim > 20 && s.scrollWidth > lim && fs > 16 && g++ < 40) { fs -= 1; s.style.setProperty('font-size', fs + 'px', 'important'); }
     } catch (e) { }
   }

@@ -270,8 +270,17 @@
       vb + 'sr">' + gr('sgr') + '<g transform="rotate(-45)">' + SWORD.replace(/#sg\)/g, '#sgr)') + '</g></svg>' +
       vb + 'spk"><circle r="3" fill="#fff"/><path d="' + d + '" fill="none" stroke="#ffd067" stroke-width="2.4" stroke-linecap="round"/></svg>';
   })();
-  function side(cls, role, id, name, s, m, bon) {
-    return '<div class="s7 ' + cls + '" id="' + (cls == 'a' ? 'sa' : 'sdf') + '"><div class="rl">' + role + '</div>' + fimg7(id, 'lg') + '<div class="nm">' + esc(name) + '</div>' +
+  /* V213: İTTİFAK BAYRAKLARI. Tarafın ittifak üyeleri (WCD.allies) ana bayrağın altında küçük bayraklarla yan yana gösterilir. */
+  function allyFlags(o) {
+    try {
+      if (!window.WCD || !WCD.allies || typeof o !== 'string') return '';
+      var al = WCD.allies(o) || []; if (!al.length) return '';
+      return '<div class="al213" title="' + esc(X('İttifak: ', 'Alliance: ') + [o].concat(al).map(nm).join(' + ')) + '"><span class="al213k">🤝</span>' +
+        al.slice(0, 3).map(function (a) { return '<span class="al213c" data-c="' + esc(String(a)) + '" title="' + esc(nm(a)) + '">' + fimg7(flagId(a), 'sm') + '</span>'; }).join('') + (al.length > 3 ? '<span class="al213m">+' + (al.length - 3) + '</span>' : '') + '</div>';
+    } catch (e) { return ''; }
+  }
+  function side(cls, role, id, name, s, m, bon, owner) {
+    return '<div class="s7 ' + cls + '" id="' + (cls == 'a' ? 'sa' : 'sdf') + '"><div class="rl">' + role + '</div>' + fimg7(id, 'lg') + allyFlags(owner) + '<div class="nm">' + esc(name) + '</div>' +
       '<div class="ln">👥 ' + X('Nüfus', 'Pop.') + ' <b>' + v1(s[0]) + '</b></div><div class="ln">🎖 ' + X('Ordu', 'Army') + ' <b>' + v1(s[1]) + '</b></div>' +
       '<div class="mx" id="m' + cls + '">×' + (m * (bon ? PREV_WIN : 1)).toFixed(2) + '</div><div class="pt">' + X('PUAN', 'POINTS') + '<b id="p' + cls + '">0</b></div></div>';
   }
@@ -281,7 +290,7 @@
     var fa = flagId(p), fd = flagId(e);
     BT = { a: att, d: tg }; BSH = true; try { document.body.classList.add('bsh'); } catch (e) { } $('panel').style.display = 'none'; $('hint').style.display = 'none'; var eb = $('v7end'); if (eb) eb.style.display = 'none';
     bs.className = 'b7'; G.lastRep = r.rep;
-    var h = '<div class="b7h">' + side('a', t('A'), fa, nm(p), r.A, r.mA, r.bA) + '<div class="sx" id="sx">' + SWORDS + '</div>' + side('d', t('D'), fd, nm(e), r.D, r.mD, r.bD) + '</div>' +
+    var h = '<div class="b7h">' + side('a', t('A'), fa, nm(p), r.A, r.mA, r.bA, p) + '<div class="sx" id="sx">' + SWORDS + '</div>' + side('d', t('D'), fd, nm(e), r.D, r.mD, r.bD, e) + '</div>' +
       '<div class="dr"><div class="dc" id="dca">' + die7('da') + '<b class="dsm" id="dsa"></b></div><div class="dm" id="mu">' + X('Savaş başlıyor…', 'Battle begins…') + '</div><div class="dc" id="dcd">' + die7('db') + '<b class="dsm" id="dsd"></b></div></div><div class="cmp">';
     for (var i = 0; i < 5; i++) h += '<div class="sr7" id="r' + i + '"><b class="v"></b><div class="mid"><span class="lbl">' + SI[i] + ' ' + SNm(i) + '</span><div class="bar"><i class="a"></i><i class="d"></i></div></div><b class="v"></b></div>';
     bs.innerHTML = h + '</div><div class="ul" id="ul"></div><div class="fin" id="fn"></div>'; bs.style.display = 'block'; bs.scrollTop = 0; paint(); fitBattle(tg, att);
@@ -411,6 +420,7 @@
     if (!G || !G.pend || G.pend.done) return; pickSel = i;
     for (var k = 0; k < 5; k++) { var c = $('cd' + k); if (c) c.classList.toggle('on', k == i); }
     $('cdok').disabled = false; AU.play('click');
+    try { $('cdok').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) { }   /* V213: seçince onay düğmesi görünür alana gelir */
   };
   window.v7Ok = function () {
     if (pickSel < 0 || !G || !G.pend || G.pend.done) return;
