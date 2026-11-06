@@ -1033,3 +1033,14 @@ V218b — Mühür koleksiyonu: önizleme + "Hepsini Gör" + dokununca bilgi (v21
  - Herhangi bir mühre dokununca alttan kısa bilgi kartı: büyük mühür, "#sıra · FETHEDİLDİ", bayrak + ülke · hayvan, tek satırlık açıklama
    (63 hayvana ayrı satır; Türkiye, İtalya, İngiltere, Rusya, Fransa, ABD, Çin, Meksika, Butan, Macaristan için ülkeye özel). 4,2 sn sonra ya da dokununca kapanır.
    Savaş sonucundaki mühür de dokunulabilir. Test: 102 fetihli oyun sonu, pencere 102 mühür, bilgi kartı açıldı.
+V218c — İstek düzeltmeleri
+ - Oyun sonu mühür önizlemesi: en az 8 mühür (son fethedilenler) + "+N Hepsi" (v217.js PV=9, küçük önizleme mühürleri).
+ - Irak mührü: aslan yerine ulusal kuşu keklik (Figma, assets/stamps/chukar.png).
+ - Ülke paneli (haritada dokununca) yine eski tek cümlelik ülke tanıtımını gösterir. Seçim ekranında önce eski cümle, altında 3 tarihli madde.
+ - Kronoloji yalnızca ülkenin devlet tarihi: İsrail (Balfour 1917 · 1948 kuruluş · 1967), Kazakistan (Gagarin yerine 1731 Rus himayesi), BAE, Katar, Uruguay,
+   Trinidad, Jamaika, İsveç, Yunanistan, İsviçre, Ekvador, Cibuti, Nepal, ABD, Haiti, Fransız Guyanası, Zambiya, Fildişi, Hollanda, Özbekistan, Antarktika düzeltildi.
+   Türkiye: "1923 · Atatürk önderliğinde Cumhuriyet rejimine geçildi", "Malazgirt Zaferi ile Anadolu'nun kapıları Türklere açıldı", "Fatih Sultan Mehmet İstanbul'u fethetti".
+ - Savaş panelindeki kılıçlar: Figma kılıç görseli kaldırıldı, eski çizim (iki kılıç ortada çapraz birleşir) geri geldi (v208.js sprite:null). Rakip saldırı kartında da aynısı.
+ - Diplomasi: İttifak ve Saldırmazlık teklif pencerelerinde ayrı "Kesin Anlaşma %100" baloncuğu — altınla öde, zar ve şans yok
+   (fiyat: ittifak 30 + (1-şans)x120, pakt 20 + (1-şans)x80 altın). v138.js gold218 / v218Gold. Test: 500 altın -> 36 altınla pakt kuruldu.
+ - Diplomasideki 🎲 yerine Figma'da üretilen gerçekçi fildişi zar (assets/art/die218.png).

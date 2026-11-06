@@ -35,7 +35,7 @@
     el.innerHTML = '<div class="v15p"><button class="cls" onclick="deselect()">' + IC.x + '</button>' +
       '<div class="v15h">' + fimg(dd) + '<div class="v15n"><div class="nm">' + esc(M[dd].name) + (ally218 ? ' <span class="ally218" title="' + X('Dostluk anlaşması', 'Friendship pact') + '">🤝</span>' : '') + '</div><div class="v15b">' + badge(o, p) + tag + '</div></div></div>' +
       (info ? '<div class="v15st">' + info + '</div>' : '') + more +
-      '<blockquote class="v15q"><small>' + X('Tarih Notu', 'History Note') + '</small>' + ((window.hist218HTML && hist218HTML(dd)) || esc(quote)) + '</blockquote>' +
+      '<blockquote class="v15q"><small>' + X('Tarih Notu', 'History Note') + '</small>' + esc(quote) + '</blockquote>' +
       '<div class="v15a"><button onclick="v15Explore()"' + (scoutDis ? ' disabled' : '') + '>🔍 ' + X('KEŞİF', 'SCOUT') + '</button>' +
       '<button class="pri" onclick="v15Attack()"' + (atk ? '' : ' disabled') + '>⚔ ' + X('SALDIRI', 'ATTACK') + '</button></div></div>';
     el.style.display = 'block';

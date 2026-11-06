@@ -23,8 +23,8 @@
       if (!window.WCSwordClash) return '';
       var host = document.createElement('div'); host.style.cssText = 'position:fixed;left:-500px;top:0;width:10px;height:10px;opacity:0;pointer-events:none';
       document.body.appendChild(host);
-      var sc = WCSwordClash.mount(host, { width: 130, height: 130, scale: .66, originY: .40, holdFinal: true, sound: false, sprite: window.WCSWORD217 });
-      sc._spriteOk = true; sc.active = true; sc.mode = 'once'; sc.animT = 1e6; sc._now = 0; sc._render();
+      var sc = WCSwordClash.mount(host, { width: 130, height: 130, scale: .66, originY: .40, holdFinal: true, sound: false, sprite: null });   /* V218: savaş paneliyle aynı çizim kılıçlar */
+      sc.active = true; sc.mode = 'once'; sc.animT = 1e6; sc._now = 0; sc._render();
       swordURL = sc.canvas.toDataURL('image/png');
       sc.destroy(); host.remove();
     } catch (e) { swordURL = ''; }
@@ -48,7 +48,7 @@
   var A = {
     eagle: ['Kartal', 'Eagle', 'USA DEU MEX POL AUT EGY ALB ARM GHA MNE PAN SRB SSD ZMB ZWE NGA KAZ IDN LBN'],
     falcon: ['Şahin', 'Falcon', 'ARE SAU QAT KWT HUN ISL SYR UZB LBY'],
-    lion: ['Aslan', 'Lion', 'GBR NLD NOR BEL CZE LUX IRN BDI BGR CMR ETH GEO IRQ KEN LKA MAR MKD MLI SEN SLE SWZ TCD TGO GMB'],
+    lion: ['Aslan', 'Lion', 'GBR NLD NOR BEL CZE LUX IRN BDI BGR CMR ETH GEO KEN LKA MAR MKD MLI SEN SLE SWZ TCD TGO GMB'],
     tiger: ['Kaplan', 'Tiger', 'IND KOR MYS BGD BRN'],
     wolf: ['Bozkurt', 'Grey Wolf', 'TUR ITA EST SVK BIH'],
     bear: ['Ayı', 'Bear', 'RUS TWN FIN GRL'],
@@ -106,7 +106,8 @@
     sable: ['Samur Antilobu', 'Sable Antelope', 'AGO'],
     kagu: ['Kagu', 'Kagu', 'NCL'],
     coqui: ['Koki Kurbağası', 'Coquí Frog', 'PRI'],
-    hornero: ['Fırıncı Kuşu', 'Hornero', 'ARG']
+    hornero: ['Fırıncı Kuşu', 'Hornero', 'ARG'],
+    chukar: ['Keklik', 'Chukar Partridge', 'IRQ']   /* V218: Irak'ın ulusal kuşu */
   };
   var OF = {};
   Object.keys(A).forEach(function (k) { A[k][2].split(' ').forEach(function (c) { OF[c] = k; }); });
@@ -227,7 +228,8 @@
     sable: ['"Palanca Negra"; neslinden kurtarılan ulusal gurur.', '"Palanca Negra"; a national pride saved from extinction.'],
     kagu: ['Neredeyse uçamayan, köpek gibi havlayan kuş.', 'An almost flightless bird that barks like a dog.'],
     coqui: ['Geceleri "ko-ki" diye öten minik kurbağa.', 'The tiny frog that sings "ko-kee" at night.'],
-    hornero: ['Çamurdan fırın biçiminde yuva yapan çalışkan kuş.', 'The hard-working bird that builds an oven-shaped mud nest.']
+    hornero: ['Çamurdan fırın biçiminde yuva yapan çalışkan kuş.', 'The hard-working bird that builds an oven-shaped mud nest.'],
+    chukar: ['Irak\'ın ulusal kuşu; Dicle ve Fırat dağlarının kekliği.', 'Iraq\'s national bird, the partridge of the Tigris and Euphrates hills.']
   };
   var INFO_C = {
     TUR: ['Ergenekon\'dan çıkışta yol gösteren Bozkurt Asena.', 'Asena the Grey Wolf, who led the Turks out of Ergenekon.'],
@@ -260,7 +262,7 @@
       '><i style="background-image:url(' + surl(c) + ')"></i><small>' + esc2(nm2(c)) + '</small></button>';
   }
   /* V218: oyun sonunda yalnızca son fethedilen birkaç mühür; kalanları "Hepsini Gör" penceresinde */
-  var PV = 5;
+  var PV = 9;   /* V218: en az 8 mühür + "+N Hepsi" */
   function gridHTML(list) {
     var h = '<div class="sg217"><div class="sgh217"><span>' + X('MÜHÜR KOLEKSİYONU', 'SEAL COLLECTION') + '</span>' +
       (list.length > PV ? '<button type="button" class="sga218" data-all218="1">' + X('Hepsini Gör', 'See All') + ' ›</button>' : '') + '<b>' + list.length + '</b></div>';

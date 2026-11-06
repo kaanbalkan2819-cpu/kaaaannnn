@@ -13,6 +13,7 @@
    Online (G.mp) oyunlarda v138 DEVRE DIŞI. Geri almak için index.html'den v138.js ve v138.css bağlantılarını silin. */
 (function () {
   'use strict';
+/* V218: diplomasi pencerelerindeki 🎲 yerine Figma'da üretilen gerçekçi fildişi zar (assets/art/die218.png) */  var DIE218 = '<img class="die218" src="assets/art/die218.png" alt="" draggable="false">';  function modal(h) { return window.modal(typeof h === 'string' ? h.replace(/🎲/g, DIE218) : h); }
   /* ================= AYARLAR ================= */
   var COSTS = { friend: 3, pact: 2, pact2: 3, tribute: 1, guard: 3, prot: 3, incite: 3, renew: 2 };   // zar bedeli
   var ALLY_TURNS = 8, MAXCO = 4, PACT_TURNS = 4, PACT_MAX = 2;   // v40/v20 ile aynı değerler (v40: ALLY_TURNS=8, MAXCO=4; v20: PACT_TURNS=4)
@@ -335,7 +336,7 @@ function sheet(e) {
     modal('<div class="d38"><h3>🤝 ' + X('İttifak', 'Alliance') + ' — ' + esc(nm(e)) + '</h3><div class="d38-hd">' + fl(G.pl) + '<span>⇄</span>' + fl(e) + '</div>' + relBar(relOf(e)) +
       '<p style="color:var(--tx2)">' + X('Kabul şansı: <b>' + pct(c.p) + '</b>. Reddedilirse zarın yarısı iade edilir. ' + ALLY_TURNS + ' tur sürer; savaşlarda değerler toplanır, ittifak üyelerine saldıramazsın. Müttefike saldırmak <b>ihanettir</b>: o savaşta 2 kat güçlü olur, güvenin ve itibarın çöker.',
         'Chance: <b>' + pct(c.p) + '</b>. Half the dice are refunded if refused. Lasts ' + ALLY_TURNS + ' turns; stats add up in war and you cannot attack members. Attacking an ally is <b>betrayal</b>: it fights at 2x and your trust and reputation collapse.') + '</p>' +
-      '<p>' + WCPay.costLine() + '</p>' + WCPay.rows('v138FriendGo') + '<button class="big" onclick="v138Sheet()">‹ ' + X('Geri', 'Back') + '</button></div>');
+      '<p>' + WCPay.costLine() + '</p>' + WCPay.rows('v138FriendGo') + gold218('friend', c.p) + '<button class="big" onclick="v138Sheet()">‹ ' + X('Geri', 'Back') + '</button></div>');
   }
   window.v138FriendGo = function (how) {
     if (!canAct()) { closeMod(); return; } var e = selE(); if (!e || !chFriend(e).p) { closeMod(); return; }
@@ -345,7 +346,7 @@ function sheet(e) {
   function friendRun(e, how) {
     if (!canAct()) return; var c = chFriend(e); if (!c.p) return;
     D().cd['f' + e] = turn();
-    if (Math.random() < c.p) {
+    if (how === 'gold218' || Math.random() < c.p) {   /* V218: altınla kesin anlaşma */
       addAlly(G.pl, e, null); addRel(e, 15); save2();
       try {   // rakip tepkisi: ittifaktan rahatsız olan güçlü komşu
         var riv = neighboursOfPl().concat([]).filter(function (x) { return x !== e && !allied(x) && ownedN(x) > 0; }).sort(function (a, b) { return power(b) - power(a); })[0];
@@ -373,7 +374,7 @@ function sheet(e) {
     modal('<div class="d38"><h3>🛡 ' + X('Saldırmazlık', 'Non-Aggression') + ' — ' + esc(nm(e)) + '</h3><div class="d38-hd">' + fl(G.pl) + '<span>⇄</span>' + fl(e) + '</div>' + relBar(relOf(e)) +
       '<p style="color:var(--tx2)">' + X('Kabul şansı: <b>' + pct(c.p) + '</b>. Reddedilirse ücret alınmaz. ' + PACT_TURNS + ' tur birbirinize saldıramazsınız (aktif pakt ' + pactCount() + '/' + PACT_MAX + '). Süresi dolmadan bozarsan ilişki −30, güven −15 olur ve hedef intikam alır.',
         'Chance: <b>' + pct(c.p) + '</b>. No charge if refused. ' + PACT_TURNS + ' turns without attacks (active ' + pactCount() + '/' + PACT_MAX + '). Breaking it early: relations −30, trust −15 and the target may retaliate.') + '</p>' +
-      '<p>' + WCPay.costLine() + '</p>' + WCPay.rows('v138PactGo') + '<button class="big" onclick="v138Sheet()">‹ ' + X('Geri', 'Back') + '</button></div>');
+      '<p>' + WCPay.costLine() + '</p>' + WCPay.rows('v138PactGo') + gold218('pact', c.p) + '<button class="big" onclick="v138Sheet()">‹ ' + X('Geri', 'Back') + '</button></div>');
   }
   window.v138PactGo = function (how) {
     if (!canAct()) { closeMod(); return; } var e = selE(); if (!e) { closeMod(); return; } var c = chPact(e); if (!c.p) { closeMod(); return; }
@@ -389,6 +390,28 @@ function sheet(e) {
       G.pacts = G.pacts || {}; G.pacts[key(G.pl, e)] = tn + PACT_TURNS + 1; addRel(e, 8); G.sel = null; save2(); try { render(); } catch (x) { }
       try { if (window.v23Fx) v23Fx('pact', e); } catch (x) { } say('🤝 ' + nm(e) + ' — ' + X('saldırmazlık paktı imzalandı', 'pact signed'));
     });
+  };
+  /* V218: diplomasi isteklerinde ayrı bir "Kesin Anlaşma" baloncuğu: altınla öde, %100 kabul (zar ve şans yok).
+     Fiyat kabul şansı düştükçe artar. Altın: Gold (v18.js). */
+  function goldPrice(kind, p) { p = Math.max(0, Math.min(1, p || 0)); return kind === 'friend' ? Math.round(30 + (1 - p) * 120) : Math.round(20 + (1 - p) * 80); }
+  function gold218(kind, p) {
+    var n = goldPrice(kind, p), have = 0; try { have = Gold.get(); } catch (x) { }
+    var ok = have >= n;
+    return '<div class="g218"><div class="g218i">🪙</div><div class="g218t"><b>' + X('Kesin Anlaşma', 'Guaranteed Deal') + ' <i>%100</i></b>' +
+      '<small>' + X('Altınla öde · zar ve şans gerekmez · altının: ', 'Pay in gold · no dice, no luck · your gold: ') + '<b>' + have + '</b></small></div>' +
+      '<button class="g218b" ' + (ok ? 'onclick="v218Gold(\'' + kind + '\')"' : 'disabled') + '>' + n + ' ' + X('altın', 'gold') + '</button></div>';
+  }
+  window.v218Gold = function (kind) {
+    try {
+      if (!canAct()) { closeMod(); return; } var e = selE(); if (!e) { closeMod(); return; }
+      var c = kind === 'friend' ? chFriend(e) : chPact(e); if (!c.p) { closeMod(); return; }
+      var n = goldPrice(kind, c.p);
+      if (!window.Gold || !Gold.spend(n, 'dip218-' + kind)) { say('🪙 ' + X('Yeterli altının yok', 'Not enough gold')); return; }
+      closeMod();
+      if (kind === 'friend') { friendRun(e, 'gold218'); return; }
+      var tn = turn(); G.pacts = G.pacts || {}; G.pacts[key(G.pl, e)] = tn + PACT_TURNS + 1; addRel(e, 8); G.sel = null; save2(); try { render(); } catch (x) { }
+      try { if (window.v23Fx) v23Fx('pact', e); } catch (x) { } say('🤝 ' + nm(e) + ' — ' + X('saldırmazlık paktı imzalandı', 'pact signed'));
+    } catch (x) { console.error(x); }
   };
   window.v138BreakAsk = function () {
     if (!canAct()) return; var e = selE(); if (!e || pactLeft(e) <= 0) return;
