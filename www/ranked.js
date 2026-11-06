@@ -68,22 +68,27 @@
   /* ---------------- V215: PROFİL EKRANI ----------------
      Dereceli oynamak için profil: şövalye portresi (assets/avatars/av1-8.jpg, Figma ile üretildi), oyuncu adı, unvan, kariyer.
      İlk girişte zorunlu. Portre + unvan Firestore oyuncu kaydına, eşleşme kuyruğuna ve maç kaydına yazılır; rakip lobide ve liderlik tablosunda görür. */
-  var AVN = 8, TITLES = [['Şövalye', 'Knight'], ['Komutan', 'Commander'], ['Fatih', 'Conqueror'], ['Lord', 'Lord'], ['Muhafız', 'Guardian'], ['Stratejist', 'Strategist']];
+  var AVN = 9, TITLES = [['Şövalye', 'Knight'], ['Komutan', 'Commander'], ['Fatih', 'Conqueror'], ['Lord', 'Lord'], ['Muhafız', 'Guardian'], ['Stratejist', 'Strategist']];
   function avNum(n) { n = n | 0; return (n >= 1 && n <= AVN) ? n : 1; }
   function avUrl(n) { return 'assets/avatars/av' + avNum(n) + '.jpg'; }
   function avTag(n, big) { return '<span class="av215' + (big ? ' lg' : '') + '" style="background-image:url(' + avUrl(n) + ')"></span>'; }
+  /* V218: unvan seçilmez; lig (puan) yükseldikçe kendiliğinden değişir. Bronz Muhafız · Gümüş Şövalye · Altın Komutan · Platin Stratejist · Elmas Fatih · Şampiyon Lord */
+  var TMAP = [4, 0, 1, 5, 2, 3];
+  function tiFor(r) { return TMAP[league(r == null ? CFG.start : r).i] | 0; }
+  function autoTi() { return tiFor(P.rating); }
   function titleOf(i) { var t = TITLES[i | 0] || TITLES[0]; return X(t[0], t[1]); }
   var PF = null;
   function profile(first) {
-    PF = { av: P.av ? avNum(P.av) : 1 + Math.floor(Math.random() * AVN), ti: P.ti | 0, first: !!first };
+    PF = { av: P.av ? avNum(P.av) : 1 + Math.floor(Math.random() * AVN), ti: autoTi(), first: !!first };
     var pre = P.nick || suggestNick(), lg = league(P.rating), g = '', ti = '', i;
     for (i = 1; i <= AVN; i++) g += '<button type="button" data-av="' + i + '" class="' + (i === PF.av ? 'on' : '') + '" style="background-image:url(' + avUrl(i) + ')" onclick="WCRank.pfAv(' + i + ')" aria-label="' + X('Portre ', 'Portrait ') + i + '"></button>';
-    TITLES.forEach(function (t, k) { ti += '<button type="button" class="' + (k === PF.ti ? 'on' : '') + '" onclick="WCRank.pfTi(' + k + ')">' + esc(X(t[0], t[1])) + '</button>'; });
+    var li0 = league(P.rating).i;   /* V218: unvan merdiveni (seçilemez, lig yükseldikçe açılır) */
+    TMAP.forEach(function (k, li) { var t = TITLES[k], got = li <= li0; ti += '<span class="' + (k === PF.ti ? 'on' : '') + (got ? '' : ' lk') + '"><b>' + (got ? '' : '🔒 ') + esc(X(t[0], t[1])) + '</b><small>' + esc(X(LG[li].tr, LG[li].en)) + ' · ' + LG[li].min + '+</small></span>'; });
     rmodal('<div class="pf215"><h3>' + (first ? X('Profilini Oluştur', 'Create Your Profile') : X('Profil', 'Profile')) + '</h3>' +
       '<div class="hd"><span class="av" id="pfav" style="background-image:url(' + avUrl(PF.av) + ')"></span><div><b id="pfnm">' + esc(pre) + '</b><small id="pfti">' + esc(titleOf(PF.ti).toLocaleUpperCase('tr')) + '</small><em>' + esc(lg.label) + ' · ' + P.rating + '</em></div></div>' +
       '<h4>' + X('PROFİL FOTOĞRAFI', 'PORTRAIT') + '</h4><div class="grid">' + g + '</div>' +
       '<h4>' + X('OYUNCU ADI', 'PLAYER NAME') + '</h4><input id="wcrn" class="nm" maxlength="14" value="' + esc(pre) + '" oninput="this.dataset.d=1;var h=document.getElementById(\'pfnm\');if(h)h.textContent=this.value"><div id="wcre" class="err"></div>' +
-      '<h4>' + X('UNVAN', 'TITLE') + '</h4><div class="ti">' + ti + '</div>' +
+      '<h4>' + X('UNVAN · PUANINLA YÜKSELİR', 'TITLE · RISES WITH YOUR RATING') + '</h4><div class="ti">' + ti + '</div>' +
       '<h4>' + X('KARİYER', 'CAREER') + '</h4><div class="st"><div><b>' + P.rating + '</b><small>' + X('PUAN', 'RATING') + '</small></div><div><b>' + (P.games | 0) + '</b><small>' + X('MAÇ', 'GAMES') + '</small></div><div><b>' + (P.w | 0) + '</b><small>' + X('GALİBİYET', 'WINS') + '</small></div><div><b>' + (P.l | 0) + '</b><small>' + X('YENİLGİ', 'LOSSES') + '</small></div></div>' +
       '<div class="act"><button class="big pri" onclick="WCRank.pfSave()">' + (first ? X('Profili Oluştur', 'Create Profile') : X('Kaydet', 'Save')) + '</button>' +
       (first ? '<button class="big" onclick="WCRank.reroll()">🎲 ' + X('Başka Ad Öner', 'Suggest Another Name') + '</button>' : '') +
@@ -103,13 +108,13 @@
   function pfSave() {
     if (!PF) return; var v = (($i('wcrn') || {}).value || '').trim();
     if (!goodNick(v)) { var e = $i('wcre'); if (e) e.textContent = X('Ad 3–14 karakter olmalı (harf, rakam, boşluk, _ . -)', 'Name must be 3–14 characters (letters, digits, space, _ . -)'); return; }
-    var first = !P.nick; P.nick = v; P.av = PF.av; P.ti = PF.ti; saveP();
+    var first = !P.nick; P.nick = v; P.av = PF.av; P.ti = autoTi(); saveP();
     function done() { if (first) importGold(); hub(); toast('✔ ' + X('Profil kaydedildi', 'Profile saved')); }
     if (!FB.ok) return done();
     var ref = FB.db.collection('players').doc(FB.uid);
     ref.get().then(function (s) {
-      if (s.exists) return ref.update({ nick: v, av: P.av, ti: P.ti });
-      return ref.set({ nick: v, av: P.av, ti: P.ti, rating: CFG.start, games: 0, w: 0, l: 0, d: 0, updated: ts() });
+      if (s.exists) return ref.update({ nick: v, av: P.av, ti: autoTi() });
+      return ref.set({ nick: v, av: P.av, ti: autoTi(), rating: CFG.start, games: 0, w: 0, l: 0, d: 0, updated: ts() });
     }).then(done).catch(done);
   }
 
@@ -291,7 +296,7 @@
       '<div class="wcr-title"><h3>' + X('RANK MAÇI', 'RANKED MATCH') + '</h3></div>' +
       '<div class="wcr-div" aria-hidden="true"><i></i><s></s><b class="wcr-dia"></b><s></s><i></i></div>' +
       '<div class="wcr-stage" style="--c:' + lg.c + '"><div class="wcr-m3d">' + A.medal(lg, 230) + '</div></div>' +
-      '<div class="wcr-plate">' + avTag(P.av, true) + '<b>' + esc(P.nick || '—') + '</b><small style="display:block;font:700 10px system-ui;letter-spacing:.24em;color:#cdb06a;margin-top:2px">' + esc(titleOf(P.ti).toLocaleUpperCase('tr')) + '</small></div>' +
+      '<div class="wcr-plate">' + avTag(P.av, true) + '<b>' + esc(P.nick || '—') + '</b><small style="display:block;font:700 10px system-ui;letter-spacing:.24em;color:#cdb06a;margin-top:2px">' + esc(titleOf(autoTi()).toLocaleUpperCase('tr')) + '</small></div>' +
       '<div class="wcr-lgn" style="color:' + lg.c + '">' + esc(lg.label.toUpperCase()) + '</div>' +
       '<div class="wcr-rat"><svg class="wcr-sp" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0l1.2 3.8L10 5 6.2 6.2 5 10 3.8 6.2 0 5l3.8-1.2z"/></svg>' + P.rating + '</div>' +
       '<div class="wcr-prog"><span class="pm">' + A.mini(lg, 34) + '</span><div class="wcr-bar2"><i style="width:' + pct + '%"></i><em></em></div><span class="pm dim">' + (nx ? A.mini(nx, 34) : '<b class="wcr-dia"></b>') + '</span></div>' +
@@ -382,7 +387,7 @@
     paint(); MM.clk = setInterval(function () { if (MM && !MM.got) paint(); }, 1000);
     if (!FB.ok) { MM.botT = setTimeout(toBot, 3500); return; }
     var q = FB.db.collection('queue').doc(FB.uid);
-    q.set({ uid: FB.uid, nick: P.nick, av: avNum(P.av), ti: P.ti | 0, rating: P.rating, status: 'waiting', mid: null, ts: ts() }).then(function () {
+    q.set({ uid: FB.uid, nick: P.nick, av: avNum(P.av), ti: autoTi(), rating: P.rating, status: 'waiting', mid: null, ts: ts() }).then(function () {
       if (!MM || MM.stop) { q.delete().catch(function () { }); return; }
       MM.unsub = q.onSnapshot(function (s) { var d = s.data(); if (MM && d && d.status === 'matched' && d.mid && !MM.got) { MM.got = true; gotMatch(d.mid); } });
       MM.poll = setInterval(claim, 2000); MM.hb = setInterval(function () { q.update({ ts: ts() }).catch(function () { }); }, 8000);
@@ -412,7 +417,7 @@
         return Promise.all([t.get(qa), t.get(qb)]).then(function (r) {
           var a = r[0].data(), b = r[1].data(); if (!a || !b || a.status !== 'waiting' || b.status !== 'waiting') throw new Error('gone');
           var tier = WCStats.randomTier(), pr = WCStats.pickPair(tier), hc = pr.hc, gc = pr.gc;
-          t.set(mref, { players: [FB.uid, b.uid], host: { uid: FB.uid, nick: P.nick, av: avNum(P.av), ti: P.ti | 0, rating: P.rating }, guest: { uid: b.uid, nick: b.nick, av: avNum(b.av), ti: b.ti | 0, rating: b.rating || CFG.start }, tier: tier, hc: hc, gc: gc, hsw: false, gsw: false, hok: false, gok: false, code: mkCode(), rh: null, rg: null, created: ts() });
+          t.set(mref, { players: [FB.uid, b.uid], host: { uid: FB.uid, nick: P.nick, av: avNum(P.av), ti: autoTi(), rating: P.rating }, guest: { uid: b.uid, nick: b.nick, av: avNum(b.av), ti: b.ti | 0, rating: b.rating || CFG.start }, tier: tier, hc: hc, gc: gc, hsw: false, gsw: false, hok: false, gok: false, code: mkCode(), rh: null, rg: null, created: ts() });
           t.update(qa, { status: 'matched', mid: mref.id }); t.update(qb, { status: 'matched', mid: mref.id });
         });
       }).then(function () { if (MM && !MM.got) { MM.got = true; gotMatch(mref.id); } });
@@ -460,7 +465,7 @@
     stopMM();
     if (FB.ok) FB.db.collection('queue').doc(FB.uid).delete().catch(function () { });
     var b = botIdentity(), tier = WCStats.randomTier(), pr = WCStats.pickPair(tier);
-    lobby({ mid: 'bot-' + Date.now(), role: 'host', myC: pr.hc, opC: pr.gc, opNick: b.nick, opAv: 1 + Math.floor(Math.random() * AVN), opTi: Math.floor(Math.random() * TITLES.length), opRating: b.rating, tier: tier, code: null, ref: null, bot: true });
+    lobby({ mid: 'bot-' + Date.now(), role: 'host', myC: pr.hc, opC: pr.gc, opNick: b.nick, opAv: 1 + Math.floor(Math.random() * AVN), opTi: tiFor(b.rating), opRating: b.rating, tier: tier, code: null, ref: null, bot: true });
   }
 
   /* ---- "rakip bulundu" + tek seferlik ülke değiştirme ---- */

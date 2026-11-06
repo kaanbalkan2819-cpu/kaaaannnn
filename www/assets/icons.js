@@ -6,3 +6,7 @@ window.WC_ICONS = {
   envoy:'assets/icons/envoy.svg', guard:'assets/icons/guard.svg', incite:'assets/icons/incite.svg', pact:'assets/icons/pact.svg', policy:'assets/icons/policy.svg', env:'assets/icons/env.svg'
 };
 window.WC_EMOJI = { '👥':'pop', '🎖':'army', '💰':'eco', '🔬':'tech', '🕊':'dip', '🛡':'guard', '🔥':'incite', '📜':'policy', '🤝':'pact', '✉':'envoy', '📨':'envoy' };
+/* V218: Figma ile üretilen gerçekçi bronz madalyonlar (5 değer) ve altın sikke. 🪙 her yerde bu sikkeyle değişir (v31 ikon değiştiricisi). */
+WC_ICONS.pop = 'assets/icons/pop218.png'; WC_ICONS.army = 'assets/icons/army218.png'; WC_ICONS.eco = 'assets/icons/eco218.png';
+WC_ICONS.tech = 'assets/icons/tech218.png'; WC_ICONS.dip = 'assets/icons/dip218.png'; WC_ICONS.gold = 'assets/icons/gold218.png';
+WC_EMOJI['🪙'] = 'gold';

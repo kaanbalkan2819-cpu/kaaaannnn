@@ -1044,3 +1044,15 @@ V218c — İstek düzeltmeleri
  - Diplomasi: İttifak ve Saldırmazlık teklif pencerelerinde ayrı "Kesin Anlaşma %100" baloncuğu — altınla öde, zar ve şans yok
    (fiyat: ittifak 30 + (1-şans)x120, pakt 20 + (1-şans)x80 altın). v138.js gold218 / v218Gold. Test: 500 altın -> 36 altınla pakt kuruldu.
  - Diplomasideki 🎲 yerine Figma'da üretilen gerçekçi fildişi zar (assets/art/die218.png).
+V218d — Dereceli profil, menü küresi, ilk seçim görüntüsü, simgeler
+ - Dereceli profil: 9. portre "kuzu şövalye" (Figma, assets/avatars/av9.jpg). firestore.rules: av 1-9 — Firebase Konsolu'na yeniden yapıştırılmalı.
+ - Unvan artık SEÇİLMEZ; lig yükseldikçe kendiliğinden değişir: Bronz Muhafız · Gümüş Şövalye · Altın Komutan · Platin Stratejist · Elmas Fatih · Şampiyon Lord.
+   Profilde unvan merdiveni (kilitli olanlar 🔒, gereken puanla). Kuyruk/maç kayıtlarına otomatik unvan yazılır; YZ rakiplerin unvanı da puanlarına göre (ranked.js tiFor/autoTi).
+ - Ana menü küresi NET: yüzey oyunun ülke sınırlarından çizilen 2048x1024 antika atlas dokusu, ekranın gerçek piksel yoğunluğunda (en çok 680 px) çizilir;
+   ışık/gölge fotoğraftan. Ayrıca küre hiç başlamıyordu (requestIdleCallback bağlamsız çağrılıyordu, yalnızca dokununca çalışıyordu) — düzeltildi (v218.js).
+ - Ana menü başlığı ve "Yeni Fetih" daha yukarıda (v218.css, -9vh).
+ - İlk ülke seçiminden sonra 1 sn beliren görüntü: savaş modelleri/efektleri gölgelendirici ön derlemesi için sahneye ekleniyordu; telefonda derleme ~1 sn sürdüğü için
+   kürede görünüyorlardı. Artık derleme süresince kamera görüşünün dışında ve küçültülmüş (v60.js compileAll).
+ - Kendi toprağında ve fethettiğin yerlerde ülke panelinde o toprağın kronolojisi ("Tarihçe", yatay ekranda da görünür). Diğer ülkelerde eski tanıtım cümlesi.
+ - Altın simgesi: Figma'da üretilen gerçekçi altın düka (assets/icons/gold218.png); 🪙 geçen her yer (üst çubuk, politikalar, dükkan, haraç, diplomasi) bu sikkeyi gösterir.
+ - 5 değerin (Nüfus, Ordu, Ekonomi, Teknoloji, Diplomasi) simgeleri: Figma'da üretilen bronz madalyonlar (assets/icons/*218.png, assets/icons.js).

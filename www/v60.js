@@ -735,6 +735,8 @@
     try {
       var r = a.renderer(), cam = a.camera(), scn = a.globe(); while (scn.parent) scn = scn.parent;
       f.root.visible = true; objs.forEach(function (o) { f.root.add(o); keep.push(o); });
+      /* V218: derleme süresince (telefonda ~1 sn) modeller/efektler ekranda görünmesin: kamera görüşünün çok dışına, küçültülmüş. Gölgelendirici derlemesi konumdan bağımsızdır. */
+      objs.forEach(function (o) { try { o.position.set(0, -5000, 0); o.scale.setScalar(1e-4); o.frustumCulled = true; } catch (e) { } });
       var mine = [];
       var done = function () {
         try {

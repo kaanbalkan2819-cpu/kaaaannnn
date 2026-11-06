@@ -130,3 +130,19 @@ body.go214on #rollbtn23,body.go214on #skip213,body.go214on #endbtn,body.go214on 
 .g218b:disabled{filter:grayscale(.7) brightness(.7);opacity:.7}
 img.die218{display:inline-block;width:1.35em;height:1.35em;vertical-align:-.3em;object-fit:contain;filter:drop-shadow(0 1px 2px #0009)}
 .pki .hs .h218:first-of-type{margin-top:6px;padding-top:5px;border-top:1px solid rgba(205,176,106,.25)}
+
+/* V218 — dereceli profil: 9 portre (kuzu şövalye), unvan merdiveni (seçilemez) */
+.pf215 .grid{grid-template-columns:repeat(5,1fr)!important;gap:7px!important}
+.pf215 .ti{display:grid!important;grid-template-columns:repeat(3,1fr);gap:6px}
+.pf215 .ti span{display:flex;flex-direction:column;align-items:center;padding:6px 6px;border-radius:8px;border:1px solid #6e5f3c;background:#ffffff0a;text-align:center}
+.pf215 .ti span b{font:700 12.5px Georgia,serif;color:#e6dac0}
+.pf215 .ti span small{font:600 9.5px system-ui,sans-serif;color:#a99a76;margin-top:1px}
+.pf215 .ti span.on{border-color:#f5c75a;background:#f5c75a22;box-shadow:0 0 0 2px #f5c75a33}
+.pf215 .ti span.on b{color:#fff}
+.pf215 .ti span.lk{opacity:.5}
+/* V218 — kendi/fethedilen toprakta panel kronolojisi: yatay ekranda da görünür */
+#panel .v15q.h218q,#panel .v15p:has(.v15r) .v15q.h218q{display:block!important;max-height:none!important;margin:6px 0 4px;padding:5px 8px}
+#panel .v15q.h218q .h218{font-size:11.5px;margin:1px 0}
+#panel .v15q.h218q .h218 b{min-width:50px;font-size:11px}
+/* V218c — ana menü: başlık ve "Yeni Fetih" daha yukarıda (sütun alta yaslanıyordu) */
+#wcm .col>h1,#wcm .col>.menu{position:relative;top:-9vh}
