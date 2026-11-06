@@ -135,3 +135,71 @@
   window.__glb218 = function () { return { photo: !!photo, tex: !!tex, busy: busy, RN: RN, raf: !!raf, drawn: drawn }; };
   window.addEventListener('resize', function () { try { if (cv && tex) ensure(); } catch (e) { } });
 })();
+
+/* V218e — ana menü: logo (assets/menu/logo218.png) başlığın üstünde; "Seferi Sürdür" altında kayıt bilgisi (tur · ülke). */
+(function () {
+  'use strict';
+  function X(tr, en) { return (typeof L !== 'undefined' && L == 'en') ? en : tr; }
+  function info() {
+    try {
+      var raw = localStorage.getItem(typeof SV !== 'undefined' ? SV : 'wc_save'); if (!raw) return null; var g = JSON.parse(raw); if (!g || !g.owner) return null;
+      var n = 0; for (var k in g.owner) if (g.owner[k] === g.pl) n++; return { t: (g.T && g.T.turn) || g.turn || 1, n: n };
+    } catch (e) { return null; }
+  }
+  setInterval(function () {
+    try {
+      var w = document.getElementById('wcm'); if (!w || !document.body.classList.contains('wcm-on')) return;
+      var col = w.querySelector('.col'), h1 = col && col.querySelector('h1');
+      if (h1 && !col.querySelector('.logo218')) { var im = document.createElement('img'); im.className = 'logo218'; im.alt = ''; im.src = 'assets/menu/logo218.png'; im.draggable = false; col.insertBefore(im, h1); }
+      var cont = Array.prototype.find.call(w.querySelectorAll('.mb'), function (b) { return /SEFER|CONTINUE|CAMPAIGN/i.test(b.textContent); });
+      if (cont && !cont.disabled && !cont.querySelector('.sub218')) { var i = info(); if (i) cont.insertAdjacentHTML('beforeend', '<small class="sub218">' + X('Tur ' + i.t + ' · ' + i.n + ' ülke', 'Turn ' + i.t + ' · ' + i.n + ' lands') + '</small>'); }
+    } catch (e) { }
+  }, 400);
+})();
+
+/* V218e — SADE AYARLAR: tek kart (duraklatma kartı şablonu), iki sütun.
+   Ses: Müzik, Efektler (0 = kapalı). Oyun: Savaş animasyonu (Normal/Hızlı/Atla), Animasyonları azalt, Dil. Altta Nasıl Oynanır + yasal bağlantılar.
+   Kaldırılanlar: Genel ses (sabit), Müzik/Efekt aç-kapa düğmeleri (kaydırıcı 0 = kapalı), Büyük yazı, Tam ekran, Efekt kalitesi (otomatik).
+   Eski ayarlar penceresinin üzerine kurulan eklentiler (v8, v28, v29, v121, v125, wc_legal) yeniden bağlanmasın diye işaretler konur. */
+(function () {
+  'use strict';
+  function X(tr, en) { return (typeof L !== 'undefined' && L == 'en') ? en : tr; }
+  function sv() { try { SET.musOn = SET.mus > 0.001 ? 1 : 0; SET.sfxOn = SET.sfx > 0.001 ? 1 : 0; if (SET.vol < .5) SET.vol = .8; setSave(); } catch (e) { } }
+  function isOn(k, v) { var s = +SET[k] || 0; if (k === 'spd') return v === 0 ? s === 0 : v === 2 ? s >= 1.5 : (s > 0 && s < 1.5); return s == v; }
+  function seg(k, opts) { return '<div class="seg218">' + opts.map(function (o) { return '<button type="button" class="' + (isOn(k, o[0]) ? 'on' : '') + '" onclick="v218Set(\'' + k + '\',' + o[0] + ')">' + o[1] + '</button>'; }).join('') + '</div>'; }
+  function row(lb, ctl) { return '<div class="row218"><span>' + lb + '</span>' + ctl + '</div>'; }
+  function sl(k) { return '<input type="range" min="0" max="1" step=".05" value="' + (SET[k] || 0) + '" oninput="SET.' + k + '=+this.value;v218Sv()">'; }
+  function html() {
+    return '<div class="wb-wrap still"><div class="wb-panel wb-pause wc141p set218">' +
+      '<div class="c141h"><span class="p">⚙</span><h3>' + X('AYARLAR', 'SETTINGS') + '</h3></div>' +
+      '<div class="cols218"><div><div class="sec218">' + X('Ses', 'Sound') + '</div>' +
+      row('🎵 ' + X('Müzik', 'Music'), sl('mus')) + row('🔊 ' + X('Efektler', 'Effects'), sl('sfx')) + '</div>' +
+      '<div><div class="sec218">' + X('Oyun', 'Game') + '</div>' +
+      row(X('Savaş animasyonu', 'Battle animation'), seg('spd', [[1, X('Normal', 'Normal')], [2, X('Hızlı', 'Fast')], [0, X('Atla', 'Skip')]])) +
+      row(X('Animasyonları azalt', 'Reduce motion'), seg('rm', [[0, X('Kapalı', 'Off')], [1, X('Açık', 'On')]])) +
+      row(X('Dil', 'Language'), '<div class="seg218"><button type="button" class="' + (L == 'tr' ? 'on' : '') + '" onclick="v218Lang(\'tr\')">TR</button><button type="button" class="' + (L == 'en' ? 'on' : '') + '" onclick="v218Lang(\'en\')">EN</button></div>') +
+      '</div></div>' +
+      '<div class="foot218">' + (window.WCTut ? '<button type="button" onclick="WCTut.open()">📖 ' + X('Nasıl Oynanır', 'How to Play') + '</button>' : '') +
+      (window.wcLegalOpen ? '<button type="button" onclick="wcLegalOpen(\'priv\')">' + X('Gizlilik', 'Privacy') + '</button><button type="button" onclick="wcLegalOpen(\'terms\')">' + X('Koşullar', 'Terms') + '</button><button type="button" onclick="wcLegalOpen(\'lic\')">' + X('Lisanslar', 'Licenses') + '</button>' : '') + '</div>' +
+      '<div class="c141g"><button type="button" class="c141b pri" onclick="menu()"><span class="ic">‹</span><span class="lb">' + X('Geri', 'Back') + '</span></button></div></div></div>';
+  }
+  window.v218Sv = sv;
+  window.v218Set = function (k, v) { try { SET[k] = v; sv(); show(); } catch (e) { } };
+  window.v218Lang = function (l) { try { if (L !== l) { L = 'tr' === l ? 'en' : 'tr'; setLang(); } } catch (e) { } show(); };
+  function show() {
+    var m = document.getElementById('mod'), bx = document.getElementById('box'); if (!m || !bx) return;
+    try { window.__wbOn = true; modal('<div></div>'); } catch (e) { } finally { window.__wbOn = false; }
+    m.classList.add('wbm'); bx.classList.remove('mm'); bx.innerHTML = html();
+    try { if (window.v156Decorate) v156Decorate(); } catch (e) { }
+    m.style.display = 'flex';
+  }
+  function install() {
+    if (typeof settings !== 'function' || typeof SET === 'undefined' || typeof setSave !== 'function') return setTimeout(install, 500);
+    var f = function () { show(); };
+    f.wc121 = f.wc125 = f.wc111 = f.v139 = f.v218 = 1;   /* eski eklentiler tekrar sarmasın */
+    settings = f; window.settings = f;
+  }
+  setTimeout(install, 1200);
+  /* başka bir dosya sonradan sararsa geri al */
+  setInterval(function () { try { if (typeof settings === 'function' && !settings.v218) install(); } catch (e) { } }, 2000);
+})();

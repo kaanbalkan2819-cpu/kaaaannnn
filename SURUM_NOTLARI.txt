@@ -1056,3 +1056,17 @@ V218d — Dereceli profil, menü küresi, ilk seçim görüntüsü, simgeler
  - Kendi toprağında ve fethettiğin yerlerde ülke panelinde o toprağın kronolojisi ("Tarihçe", yatay ekranda da görünür). Diğer ülkelerde eski tanıtım cümlesi.
  - Altın simgesi: Figma'da üretilen gerçekçi altın düka (assets/icons/gold218.png); 🪙 geçen her yer (üst çubuk, politikalar, dükkan, haraç, diplomasi) bu sikkeyi gösterir.
  - 5 değerin (Nüfus, Ordu, Ekonomi, Teknoloji, Diplomasi) simgeleri: Figma'da üretilen bronz madalyonlar (assets/icons/*218.png, assets/icons.js).
+V218e — Ana menü, logo, savaş animasyonu ölçeği, oyun geçmişi, sade ayarlar, ALTIN MÜHÜRLER
+ - Ana menü: logo başlığın üstünde (assets/menu/logo218.png), düğmeler arası boşluk, dikeyde ortalı. Tur/Fethedilen/Dünya kutuları bazı ekran boylarında
+   menünün üstüne biniyordu -> kaldırıldı; bilgi "Seferi Sürdür" altında küçük yazı (Tur n · n ülke). Duraklatma kartında kesilen düğme yazıları ("ANA …") düzeltildi.
+ - Savaş animasyonu (v60.js): küçük hedefte tüm birlikler aynı noktaya gidip üst üste biniyordu -> noktalar hedefin içine dağıtılır.
+   Kara sahnesi sınır taşmasına artık HİÇ izin vermez (eskiden 2 nokta); sığmazsa daha da küçülür (ölçek 0.08'e kadar), olmazsa yedek sahne.
+   Taban ölçek 0.046 -> 0.054 (sığdığı sürece daha büyük). Uçaklar sınır kuralı dışında, 0.95 -> 1.2. Ateş sahnesi alt sınırı SC*.3 -> SC*.1.
+ - Oyun geçmişi: yenilgi kartından açılınca v213 ve v36 bekçileri 3 sn sonra kartı geri açıyordu -> geçmiş açıkken dokunulmaz (v213.js, v214.js hist214).
+ - Ayarlar sadeleşti (v218.js): Müzik ve Efekt kaydırıcısı · Savaş animasyonu (Normal/Hızlı/Atla) · Animasyonları azalt · Dil · Nasıl Oynanır + yasal bağlantılar.
+   Kaldırılan: Genel ses, aç/kapa düğmeleri (kaydırıcı 0 = kapalı), Büyük yazı, Tam ekran, Efekt kalitesi. Modallar açıkken "Zar At" gizli.
+ - ALTIN MÜHÜRLER (gold218.js, assets/goldseals, Figma): 12 bölge — Hicaz (deve; SAU YEM OMN ARE QAT KWT), Viking (kuzgun; NOR SWE DNK FIN ISL),
+   Amazon (jaguar), Balkan (vaşak), Nil (timsah), Savan (aslan), Bozkır (at), Mezopotamya (kanatlı boğa), Hint (kaplan), Ejder (Uzak Doğu), Sahra (çöl tilkisi), And (kondor).
+   Bölgenin tüm ülkeleri aynı oyunda senin olunca mühür kalıcı açılır (bildirim kartı). Tek kişilik yeni oyunda açık mührün varsa seçim ekranında öğretici yerine
+   "Altın Mühür" penceresi; mühür seçilirse yalnızca o bölgeden ülke seçilebilir, oyun başlayınca ülkenin 5 değeri +%2. Test: Hicaz ile Türkiye seçilemedi, Suudi Arabistan +%2;
+   İskandinavya fethedilince Viking mührü açıldı.

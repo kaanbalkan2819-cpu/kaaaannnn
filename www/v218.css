@@ -145,4 +145,67 @@ img.die218{display:inline-block;width:1.35em;height:1.35em;vertical-align:-.3em;
 #panel .v15q.h218q .h218{font-size:11.5px;margin:1px 0}
 #panel .v15q.h218q .h218 b{min-width:50px;font-size:11px}
 /* V218c — ana menü: başlık ve "Yeni Fetih" daha yukarıda (sütun alta yaslanıyordu) */
-#wcm .col>h1,#wcm .col>.menu{position:relative;top:-9vh}
+
+/* V218e — ana menü yeniden: logo + başlık + aralıklı düğmeler, dikeyde ortalı; tur/fethedilen kutuları menünün üstüne binmesin diye
+   kaldırıldı, bilgi "Seferi Sürdür"ün altında küçük yazı (v218.js) */
+#wcm .col{justify-content:center!important;padding-top:8px!important;padding-bottom:12px!important}
+#wcm .stats,#wcm .quote{display:none!important}
+#wcm .col>h1{margin-top:0!important}
+#wcm .menu{gap:clamp(4px,1.9vh,12px)!important;margin-top:clamp(8px,2.6vh,18px)!important}
+#wcm .logo218{display:block;width:clamp(40px,14vh,80px);height:clamp(40px,14vh,80px);margin:0 auto clamp(4px,1.6vh,10px);border-radius:50%;
+  border:2px solid #cdb06a;box-shadow:0 0 0 3px rgba(0,0,0,.45),0 6px 18px #000c,0 0 22px rgba(205,176,106,.25);object-fit:cover;animation:wcmIn .8s ease-out both;flex:0 0 auto}
+#wcm .mb .sub218{display:block;margin-top:2px;font:600 10px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.14em;color:#cdb06a;opacity:.85;text-transform:none}
+@media (max-height:340px){#wcm .logo218{display:none}}
+#wcm .mb:has(.sub218){flex-direction:column!important;line-height:1.1}
+/* duraklatma / oyun bitti kartı: düğme yazıları kesilmesin ("ANA …", "AYAR…") */
+.wc141p .c141g .c141b .lb{overflow:visible!important;text-overflow:clip!important;font-size:13px!important;letter-spacing:.1em!important}
+.wc141p .c141g .c141b.pri .lb{font-size:15px!important}
+/* V218e — sade ayarlar kartı */
+.set218{width:min(94vw,620px)!important;text-align:left!important}
+.set218 .cols218{display:grid;grid-template-columns:1fr 1.25fr;gap:8px 18px}
+.set218 .sec218{font:700 10px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:#cdb06a;margin:2px 0 6px}
+.set218 .row218{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px;border-bottom:1px solid rgba(205,176,106,.16)}
+.set218 .row218>span{font:500 13.5px Georgia,'Times New Roman',serif;color:#efe3c6;white-space:nowrap}
+.set218 input[type=range]{width:min(150px,26vw);accent-color:#e8b030}
+.seg218{display:inline-flex;border:1px solid rgba(205,176,106,.5);border-radius:999px;overflow:hidden;flex:0 0 auto}
+.seg218 button{appearance:none;border:0;margin:0;min-height:0;padding:5px 10px;background:transparent;color:#d9cba6;font:600 11.5px system-ui,-apple-system,Roboto,sans-serif;cursor:pointer;box-shadow:none;width:auto}
+.seg218 button+button{border-left:1px solid rgba(205,176,106,.35)}
+.seg218 button.on{background:linear-gradient(180deg,#f4c95a,#d49a1f);color:#2b1c00}
+.set218 .foot218{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0 8px}
+.set218 .foot218 button{appearance:none;margin:0;min-height:0;width:auto;padding:5px 10px;border-radius:999px;border:1px solid rgba(205,176,106,.35);background:rgba(0,0,0,.2);color:#cfc4a4;font:600 11px system-ui,sans-serif;box-shadow:none;cursor:pointer}
+.set218 .c141g{grid-template-columns:1fr!important}
+@media (max-width:560px) and (orientation:portrait){.set218 .cols218{grid-template-columns:1fr}}
+
+/* V218e — ALTIN MÜHÜRLER: başlangıç seçimi + açılma bildirimi (gold218.js) */
+.gs218{width:min(96vw,700px)!important}
+.gs218 .gs218s{margin:0 0 8px;font:500 12.5px/1.4 Georgia,serif;color:#e4d8b8;text-align:center}
+.gs218 .gs218s b{color:#ffd76a}
+.gs218g{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.gs218i{appearance:none;display:flex;flex-direction:column;align-items:center;gap:2px;margin:0;padding:5px 2px 6px;min-height:0;width:auto;border-radius:8px;border:1px solid rgba(205,176,106,.3);
+  background:rgba(0,0,0,.22);color:#efe3c6;cursor:pointer;box-shadow:none;-webkit-tap-highlight-color:transparent}
+.gs218i i{display:block;width:clamp(36px,9vh,54px);height:clamp(36px,9vh,54px);background:center/contain no-repeat;filter:drop-shadow(0 2px 4px #000a)}
+.gs218i b{font:700 10.5px Georgia,serif;line-height:1.15;text-align:center}
+.gs218i small{font:600 8.5px system-ui,sans-serif;color:#a99a76;text-align:center;line-height:1.1}
+.gs218i.lk i{filter:grayscale(1) brightness(.45) contrast(.9)}
+.gs218i.lk b{color:#8d8268}
+.gs218i.on{border-color:#ffd76a;background:rgba(255,215,106,.14);box-shadow:0 0 0 2px rgba(255,215,106,.35),0 0 16px rgba(255,215,106,.25)}
+.gs218w{min-height:30px;margin:8px 0 8px;padding:6px 9px;border-radius:6px;background:rgba(0,0,0,.22);font:500 11.5px/1.35 Georgia,serif;color:#d9cba6;text-align:left}
+.gs218w b{color:#ffd76a}
+.gs218 .c141g{grid-template-columns:1fr 1fr!important}
+.gs218 .c141g .c141b{grid-column:auto!important}
+.gs218 .c141b:disabled{opacity:.45}
+@media (max-width:560px) and (orientation:portrait){.gs218g{grid-template-columns:repeat(4,1fr)}}
+#gs218n{position:fixed;left:50%;top:calc(58px + var(--safe-t,0px));z-index:2147483300;display:flex;align-items:center;gap:12px;width:min(92vw,440px);padding:10px 14px 10px 10px;box-sizing:border-box;
+  border:2px solid #e9c25a;border-radius:8px;background:linear-gradient(180deg,#4a3c20,#2a2214);box-shadow:0 16px 36px #000c,0 0 30px rgba(233,194,90,.3);color:#f3e8c8;
+  transform:translate(-50%,-14px) scale(.96);opacity:0;transition:opacity .3s ease,transform .3s cubic-bezier(.3,1.4,.5,1)}
+#gs218n.on{opacity:1;transform:translate(-50%,0) scale(1)}
+#gs218n>i{flex:0 0 70px;width:70px;height:70px;background:center/contain no-repeat;filter:drop-shadow(0 3px 6px #000b)}
+#gs218n small{display:block;font:700 9.5px system-ui,sans-serif;letter-spacing:.26em;color:#ffd76a}
+#gs218n b{display:block;font:700 17px Georgia,serif;color:#fff}
+#gs218n span{display:block;font:500 12px/1.35 Georgia,serif;color:#e4d8b8}
+#box:has(.gs218),#box:has(.set218){width:auto!important;max-width:97vw!important;max-height:calc(100dvh - 12px)!important;overflow:auto!important}
+#box .wb-panel.gs218{width:min(96vw,720px)!important;max-width:none!important}
+#box .wb-panel.set218{width:min(94vw,620px)!important;max-width:none!important}
+.gs218 .c141g .c141b .lb,.set218 .c141g .c141b .lb{font-size:13px!important;letter-spacing:.08em!important;white-space:nowrap}
+@media (max-height:440px){.gs218 .gs218s{font-size:11.5px;margin-bottom:5px}.gs218i{padding:3px 2px 4px}.gs218w{margin:5px 0;min-height:0}}
+body:has(#mod[style*="display: flex"]) #rollbtn23{visibility:hidden!important}

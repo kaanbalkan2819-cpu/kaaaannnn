@@ -7,7 +7,7 @@
    Atlanır: 2B harita, "hareketi azalt" (SET.rm), hızı 0 olan ayar, dosya yüklenemezse. */
 (function () {
   'use strict';
-  var SC = 0.046;        // birim ölçeği (küre yarıçapı = 1): büyütürsen modeller büyür
+  var SC = 0.054;        // V218: 0.046 -> 0.054 (sığdığı sürece daha büyük; sınır denetimleri gerekirse küçültür). birim ölçeği (küre yarıçapı = 1): büyütürsen modeller büyür
   var ZOOM = 3.5;        // V71: başlangıç kamera uzaklığı biraz artırıldı (eski 2.7). Küçük = daha yakın; 1.5 en yakın. Sonra serbest
   var ZMIN = 3.0;        // V71: en yakın başlangıç uzaklığı (eski 2.2)
   var TINY = 4;   // V141: eski 7 -> 4. Küçük ülkelerin çoğu artık tank/piyade/uçak sahnesi alır; füze yalnızca gerçekten minik ülkelerde ve bazen
@@ -252,7 +252,7 @@
     var la = a.ll(from), lt = a.ll(tg); if (!la || !lt) return null;
     var T = a.THREE(), va = a.sph(la[0], la[1], 1), vt = a.sph(lt[0], lt[1], 1);
     var mid = va.clone().add(vt); if (mid.lengthSq() < 1e-6) mid = va.clone(); mid.normalize();
-    var scales = land ? [1, .75, .56, .42, .32, .24, .18] : [1, .75, .56, .42, .32, .24, .18, .13]   /* V92: kara sahnesi sığana kadar küçülür */, best = null, cands = [], zs = [];
+    var scales = land ? [1, .75, .56, .42, .32, .24, .18, .13, .1, .08] : [1, .75, .56, .42, .32, .24, .18, .13]   /* V92: kara sahnesi sığana kadar küçülür */, best = null, cands = [], zs = [];
     if (land && !MIDPT) { try { cands = borderCands(a, from, tg, va, vt); } catch (e) { cands = []; } }
     if (!cands.length) cands = [mid];
     if (land && MIDPT) {   /* V100: orta noktadan başla; birlik ayak izi savunan ülkeye/denize/3. ülkeye değerse saldıranın merkezine doğru çek */
@@ -290,9 +290,9 @@
           if (badB === 0) return best;
         }
       }
-      return best.bad <= 2 ? best : null;
+      return best.bad === 0 ? best : null;   /* V218: sınır taşmasına hiç izin yok (eskiden 2 nokta); sığmazsa yedek sahne */
     }
-    if (best && land && MIDPT) return best;   /* V99: orta nokta sabit; sığmazsa en az hatalı ölçek kullanılır */
+    if (best && land && MIDPT) return best.bad === 0 ? best : null;   /* V218: taşan sahne yerine yedek sahne. V99: orta nokta sabit; sığmazsa en az hatalı ölçek kullanılır */
     if (best && !land && FORCE_SEA) return best;   /* V101: son çare: deniz sahnesi en az hatalı konumda */
     return best && best.bad <= (land ? 2 : 0) ? best : null;   /* V93b: kara tolerans 2 (animasyon kapanmasın) */   /* V92: kara sahnesinde de hata toleransı sıfır: birlik ayak izi başka ülkeye taşmaz; sığmazsa yedek sahne (kendi sınırına göre küçültülür) */   // V84: deniz sahnesinde hiç hata yok (gemi karaya taşmaz); kurulamazsa yedek sahne   // V67: başka ülkeye taşan sahne kurulmaz (en çok 2 kenar noktası hoşgörü)
   }
@@ -344,7 +344,9 @@
     top.forEach(function (q) { if (out.length < n && out.every(function (r) { return Math.hypot(r.x - q.x, r.z - q.z) >= .9; })) out.push(q); });
     if (!out.length) {   // ızgara hedefi yakalayamadı (çok küçük/ince): hedefin merkezi
       var c = llOf(a, tg), l = c ? localOf(a, fr, sc, c) : { x: cx, y: 0, z: cz };
-      var one = [l]; for (i = 1; i < n; i++) one.push(l);
+      /* V218: küçük hedefte tüm birlikler AYNI noktaya gidip üst üste biniyordu; noktalar hedefin içinde merkez çevresine dağıtılır */
+      var rr = .5; try { rr = Math.max(.18, Math.min(.9, extRad(a, tg) / sc * .35)); } catch (eR) { }
+      var one = [l]; for (i = 1; i < n; i++) { var an = i * 2.4; one.push({ x: l.x + Math.cos(an) * rr, y: l.y, z: l.z + Math.sin(an) * rr }); }
       return { pts: one, pool: function () { return [l]; } };
     }
     for (i = 0; out.length < n; i++) out.push(out[i % out.length]);
@@ -443,7 +445,7 @@
       var kind = pickKind(), air = false;
       if (kind === 'air') {   // V124: HAVA SALDIRISI — 2 savaş uçağı hedefin üstünden alçalıp bomba bırakır
         var IA = pickImpacts(a, pl.fr, pl.sc, tg, 4, 0, 5.6, 3.6, 10), tosA = IA.pts.map(function (q) { return up(q, .15); });
-        var dA = f.planeAttack(fxo({ from: V(0, 0, -5), to: tosA[0], tos: tosA, color: o.color, scale: .95, planes: 2, bombs: 2, dud: !win, blast: win ? 1.7 : 1.2 }));
+        var dA = f.planeAttack(fxo({ from: V(0, 0, -5), to: tosA[0], tos: tosA, color: o.color, scale: 1.2, planes: 2, bombs: 2, dud: !win, blast: win ? 1.7 : 1.2 }));
         dur = dA && dA.duration || 9; air = true;
       } else if (kind === 'twoTank') {   // V124: iki tank
         var T1 = pickImpacts(a, pl.fr, pl.sc, tg, 2, -1.4, 5.6, 3.6, 10), T2 = pickImpacts(a, pl.fr, pl.sc, tg, 2, 1.4, 5.4, 3.6, 10);
@@ -505,7 +507,7 @@
     var sc = Math.max(SC * .4, Math.min(SC * 1.2 * sizeF(o.ids), dt / 9, ownExt(a, o.ids) / 5));   // V91: saldıran ülkeyle orantılı, kendi ülkesine sığar   // V71: sizeF artık mesafeye çarpılmaz (eskiden ateş hedefi aşıyordu)
     if (dt / sc > 18) sc = Math.min(SC * 2.6, dt / 18);                       // uzak hedefte ölçek büyür: menzil ~18 birimi geçmez
     var fr = frameAt(a, P, vt.clone().sub(P));
-    try { sc = fitFireScale(a, P, fr, sc, o.ids, tg, SC * .3); } catch (eF) { }   // V92: birlikler kendi ülke sınırını aşmasın
+    try { sc = fitFireScale(a, P, fr, sc, o.ids, tg, SC * .1); } catch (eF) { }   // V92: birlikler kendi ülke sınırını aşmasın
     var lc = dt / sc;
     f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(fr.x, P, fr.z));
     if (!f.root.parent) a.globe().add(f.root);
@@ -514,7 +516,7 @@
     var I = pickImpacts(a, fr, sc, tg, 3, 0, lc, Math.max(2, lc - 6), lc + 6), tos = I.pts.map(function (q) { return up(q, .15); });
     var air = false, dur;
     if (o.land && (Math.random() < .45 || (window.__air214 | 0) >= 2)) { window.__air214 = 0;   // V214: şans sayacı; V124: yedek sahnede de bazen uçaklar
-      var dA = f.planeAttack(fxo({ from: V(0, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2], tos[0]], color: o.color, scale: .95, planes: 2, bombs: 2, dud: !win, blast: win ? 1.9 : 1.3 }));
+      var dA = f.planeAttack(fxo({ from: V(0, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2], tos[0]], color: o.color, scale: 1.2, planes: 2, bombs: 2, dud: !win, blast: win ? 1.9 : 1.3 }));
       dur = dA && dA.duration || 9; air = true;
     } else {
       var d1 = f.tankAttack(fxo({ from: V(-1.3, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2]], color: o.color, scale: 1.15 * tk, shots: 3, dud: !win, blast: win ? 1.9 : 1.3 }));
@@ -576,7 +578,7 @@
     var sc = Math.max(SC * .5, Math.min(SC * 1.6 * sizeF(o.ids), dt / 6, ownExt(a, o.ids) / 4));   // V91: saldıran ülkeyle orantılı   // V72: küçük ülkede de büyük/okunur sahne
     if (dt / sc > 20) sc = Math.min(SC * 2.6, dt / 20);
     var fr = frameAt(a, P, vt.clone().sub(P)), pts = spread(tinyPts(a, tg), 6);
-    try { sc = fitFireScale(a, P, fr, sc, o.ids, tg, SC * .3); } catch (eF) { }   // V92: füze kamyonu / izi kendi ülke sınırını aşmasın
+    try { sc = fitFireScale(a, P, fr, sc, o.ids, tg, SC * .1); } catch (eF) { }   // V92: füze kamyonu / izi kendi ülke sınırını aşmasın
     if (!pts.length) return null;
     var tos = pts.map(function (q) { return up(localOf(a, fr, sc, q), .12); }), cen = { x: 0, y: 0, z: 0 };
     tos.forEach(function (q) { cen.x += q.x / tos.length; cen.z += q.z / tos.length; });

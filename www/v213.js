@@ -111,7 +111,7 @@
     var since = 0;
     function ownedN(e) { var n = 0; try { for (var k in G.owner) if (G.owner[k] === e) n++; } catch (x) { } return n; }
     function lost() { try { return !!G && !G.mp && G.v5 === 1 && typeof G.pl === 'string' && !!G.owner && G.T && ownedN(G.pl) === 0 && ['pick', 'v7pick', 'v5intro', 'wheel'].indexOf(G.ph) < 0; } catch (e) { return false; } }
-    function endShown() { return !!(document.getElementById('v139over') || document.getElementById('v38over') || document.querySelector('#box .go214')); }   /* V218: yeni oyun bitti kartı (v214) da sayılır; yoksa kart her 4 sn kapatılıp yeniden açılıyordu */
+    function endShown() { return !!(document.getElementById('v139over') || document.getElementById('v38over') || document.querySelector('#box .go214') || document.querySelector('#box .h139')); }   /* V218: yeni oyun bitti kartı (v214) da sayılır; yoksa kart her 4 sn kapatılıp yeniden açılıyordu */
     function resultVisible() {
       try { var bs = document.getElementById('bs'); return !!(typeof BSH !== 'undefined' && BSH && bs && bs.style.display !== 'none' && bs.style.visibility !== 'hidden' && document.querySelector('#fn button')); } catch (e) { return false; }
     }

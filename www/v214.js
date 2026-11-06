@@ -68,6 +68,7 @@
     shown = true;
     try { document.body.classList.add('go214on'); } catch (e) { }
   }
+  function hist214() { var bx = document.getElementById('box'), m = document.getElementById('mod'); return !!(bx && m && m.style.display === 'flex' && bx.querySelector('.h139')); }   /* V218: oyun geçmişi açık mı */
   function open214() { var bx = document.getElementById('box'), m = document.getElementById('mod'); return !!(bx && m && m.style.display === 'flex' && bx.querySelector('.go214')); }
   function reset() { shown = false; snap = null; lostAt = 0; resAt = 0; try { document.body.classList.remove('go214on'); var m = document.getElementById('mod'); if (m) m.classList.remove('go214m'); } catch (e) { } }
 
@@ -106,17 +107,17 @@
   /* V217: yenilgiden sonra ana menüye atılma düzeltmesi. V20 bekçisi her saniye "oyun bitti + pencere kapalı" durumunda menu() çağırıyordu;
      savaş paneli kapanıp oyun bitti kartı açılmadan önceki kısa anda bu tetiklenince oyuncu ana menüye düşüyordu. Artık yenilgi
      durumunda menu() oyun bitti kartını açar; ana menüye yalnızca kartın "Ana Menü" düğmesiyle gidilir. */
-  try { var _mn = menu; menu = function () { if (lost()) { if (!open214()) show(); return; } return _mn.apply(this, arguments); }; } catch (e) { }
+  try { var _mn = menu; menu = function () { if (lost()) { if (!open214() && !hist214()) show(); return; } return _mn.apply(this, arguments); }; } catch (e) { }
 
   /* eski yenilgi giriş noktaları yeni karta yönlendirilir */
-  try { var _so = showOver; showOver = function () { if (lost()) { if (!open214()) show(); return; } return _so.apply(this, arguments); }; } catch (e) { }
+  try { var _so = showOver; showOver = function () { if (lost()) { if (!open214() && !hist214()) show(); return; } return _so.apply(this, arguments); }; } catch (e) { }
   (function wrap() {
     if (!window.v139Show) return setTimeout(wrap, 400);
     if (window.v139Show.v214) return;
     var _vs = window.v139Show;
     window.v139Show = function (f) {
       /* V218: kart açıkken bekçilerin (v213, v36) tekrar tekrar çağırdığı eski ekran kartı kapatıp yeniden kurduruyordu -> yanıp sönme */
-      if (!window.__v214in && open214() && lost()) return;
+      if (!window.__v214in && (open214() || hist214()) && lost()) return;
       var r = _vs.apply(this, arguments); if (lost()) { killOld(); if (!open214() && !(window.__v214in)) { window.__v214in = 1; try { show(); } finally { window.__v214in = 0; } } } return r; };
     window.v139Show.v214 = 1;
   })();
