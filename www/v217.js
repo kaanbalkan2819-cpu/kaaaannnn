@@ -113,7 +113,7 @@
   Object.keys(A).forEach(function (k) { A[k][2].split(' ').forEach(function (c) { OF[c] = k; }); });
   function animal(c) { return OF[c] || 'eagle'; }   /* listede olmayan (yeni eklenen) ülke: kartal */
   function surl(c) { return 'assets/stamps/' + animal(c) + '.png'; }
-  window.WCStamp = { of: function (c) { return OF[c] || null; }, url: surl };
+  window.WCStamp = { of: function (c) { return OF[c] || null; }, url: surl, A: A, animal: function (c) { return animal(c); } };   /* V219: koleksiyon sayfası (gs219.js) için tablo da açık */
 
   function nm2(c) { try { return nm(c); } catch (e) { return (window.M && M[c] && M[c].name) || c; } }
   function counts(tg) {
@@ -244,6 +244,7 @@
     HUN: ['Turul, Macar hanedanının efsanevi atası.', 'The Turul, legendary ancestor of the Hungarian dynasty.']
   };
   function infoOf(c) { var a = animal(c), t = INFO_C[c] || INFO[a] || ['', '']; return { a: a, an: X(A[a][0], A[a][1]), t: X(t[0], t[1]) }; }
+  window.WCStamp.animalInfo = function (a) { var t = INFO[a] || ['', '']; return X(t[0], t[1]); };   /* V219: hayvan başına tek satır */
   function flag2(c) { try { return fimg(c, 'sm'); } catch (e) { return ''; } }
   function esc2(s) { return String(s).replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; }); }
   /* bilgi kartı: ekranın altında, dokununca / 4 sn sonra kapanır */

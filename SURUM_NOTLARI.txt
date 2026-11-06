@@ -1071,3 +1071,7 @@ V219 — Ana menü, logo, savaş animasyonu ölçeği, oyun geçmişi, sade ayar
    Bölgenin tüm ülkeleri aynı oyunda senin olunca mühür kalıcı açılır (bildirim kartı). Tek kişilik yeni oyunda açık mührün varsa seçim ekranında öğretici yerine
    "Altın Mühür" penceresi; mühür seçilirse yalnızca o bölgeden ülke seçilebilir, oyun başlayınca ülkenin 5 değeri +%2. Test: Hicaz ile Türkiye seçilemedi, Suudi Arabistan +%2;
    İskandinavya fethedilince Viking mührü açıldı.
+ - MÜHÜR KOLEKSİYONU (ana menü > MÜHÜRLER; gs219.js, v219.css): iki sekme.
+   Altın Mühürler n/12: açılanlar canlı altın + parıltı, açılmayanlar soluk; dokununca bölge, açma koşulu (ülkeler) ve +%2 avantajı.
+   Mühürler n/62: tek kişilik oyunda fethedilen her ülkenin hayvan mührü KALICI olarak koleksiyona girer (localStorage wc_seals219); açılanlar canlı kırmızı,
+   açılmayanlar soluk; dokununca hayvanın açıklaması ve hangi ülkelerden kazanıldığı (fethedilenler kalın). Menüdeki düğmenin altında iki sayaç.
