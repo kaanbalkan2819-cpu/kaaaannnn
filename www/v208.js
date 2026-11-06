@@ -19,7 +19,8 @@
         width: 220, height: 150, scale: .62, originY: .38, intensity: 1,
         quality: (navigator.hardwareConcurrency || 4) <= 4 ? 'low' : 'high',
         timeScale: sp, holdFinal: true, sound: !!S.sfxOn, volume: vol,
-        attacker: '#3b82f6', defender: '#ef4444'
+        attacker: '#3b82f6', defender: '#ef4444',
+        sprite: window.WCSWORD217 || null   /* V217: Figma'da üretilen gerçekçi çelik kılıç (assets/art/sword217.png); çizgi film görünümlü çizim yerine */
       });
       prev.playOnce();
     } catch (e) { try { var s2 = document.getElementById('sx'); if (s2) { s2.removeAttribute('data-wcsc'); Array.prototype.forEach.call(s2.querySelectorAll('.swd'), function (n) { n.style.display = ''; }); } } catch (x) { } }

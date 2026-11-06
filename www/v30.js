@@ -677,16 +677,19 @@
   function focusHome(instant) { var id = null; try { id = homeId(); } catch (e) { } if (id && cMap[id]) focusOn(cMap[id], instant); else if (cMap.TUR && G && G.ph === 'v7pick') focusOn(cMap.TUR, instant); else { globe.quaternion.identity(); zoomT = 3.4; if (instant) camZ = zoomT; } }
   /* V81: küçük ülkelere dokunma toleransı. Ekranda ~22 px içindeki küçük ülke (sınır kutusu toleransın ~2 katından küçük) seçilir.
      Denizde veya büyük bir komşunun içinde, küçük ülkenin merkezine yeterince yakınsa büyük olanı değil küçük olanı alır. */
-  var PICK_PX = 22;
+  var PICK_PX = 26;   /* V218: 22 -> 26 px */
   function pickNear(lon, lat, c0, h) {
     try {
       var tol = PICK_PX * 2 * Math.max(0.3, camZ - 1) * Math.tan(20 * Math.PI / 180) / Math.max(200, h) / DEG;   /* derece */
-      var best = null, bd = 1e9, rad = Math.PI / 180;
+      /* V218: parmak doğrudan küçük bir ülkenin İÇİNE değdiyse o ülke seçilir. Eskiden Ruanda'ya dokununca Burundi'nin (yakın, küçük)
+         sınır dairesi de "uzaklık 0" veriyor, eşitlikte listede önce gelen Burundi seçiliyordu. Eşitlikte merkeze yakın olan kazanır. */
+      if (c0 && c0.bb && Math.max(c0.bb[2] - c0.bb[0], c0.bb[3] - c0.bb[1]) <= tol * 2) return c0;
+      var best = null, bd = 1e9, bc = 1e9, rad = Math.PI / 180;
       for (var i = 0; i < C.length; i++) {
         var c = C[i], b = c.bb, sp = Math.max(b[2] - b[0], b[3] - b[1]); if (sp > tol * 2) continue;
         var cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, dl = Math.abs(lon - cx); if (dl > 180) dl = 360 - dl;
-        var d = Math.hypot(dl * Math.cos(lat * rad), lat - cy) - sp / 2; if (d < 0) d = 0;
-        var lim = (c0 && c0 !== c) ? tol * 0.6 : tol; if (d <= lim && d < bd) { bd = d; best = c; }
+        var dc = Math.hypot(dl * Math.cos(lat * rad), lat - cy), d = dc - sp / 2; if (d < 0) d = 0;
+        var lim = (c0 && c0 !== c) ? tol * 0.6 : tol; if (d <= lim && (d < bd || (d === bd && dc < bc))) { bd = d; bc = dc; best = c; }
       }
       return best || c0;
     } catch (e) { return c0; }

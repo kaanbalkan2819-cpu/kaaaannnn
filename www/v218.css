@@ -1,0 +1,112 @@
+/* V218 — diplomasi merkezi düzeni, oyun sonu kartı (yatay ekran), tarih notu maddeleri, dostluk 🤝.
+   Geri almak için index.html'den v218.css ve v218.js bağlantılarını silin. */
+
+/* ---------- Diplomasi merkezi: başlık şeridi + iki sütun ---------- */
+#box:has(.d218){width:min(94vw,720px)!important;max-width:none!important;padding:10px 12px 12px!important;overflow:hidden!important}
+.d38.d218{max-height:none;overflow:visible;display:flex;flex-direction:column;height:100%}
+.d218h{position:relative;display:flex;align-items:center;justify-content:center;margin:0 0 8px;padding:0 34px 6px;border-bottom:1px solid rgba(205,176,106,.3)}
+.d218h h3{margin:0!important;font-size:15px!important;letter-spacing:.06em}
+.d218x{position:absolute;right:0;top:-2px;width:30px;height:30px;padding:0!important;margin:0!important;border-radius:50%!important;border:1px solid rgba(205,176,106,.45)!important;
+  background:rgba(0,0,0,.25)!important;color:#e9dcbc!important;font-size:14px!important;line-height:28px!important;min-height:0!important;box-shadow:none!important}
+.d218c{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:12px;min-height:0}
+.d218l,.d218r{min-width:0;min-height:0;max-height:calc(min(78vh,100dvh - 96px) - 46px);overflow:auto;-webkit-overflow-scrolling:touch;padding-right:6px}
+.d218l::-webkit-scrollbar-button,.d218r::-webkit-scrollbar-button{display:none;height:0}
+.d218l::-webkit-scrollbar,.d218r::-webkit-scrollbar,.d218 .d38-list::-webkit-scrollbar{width:4px}
+.d218l::-webkit-scrollbar-thumb,.d218r::-webkit-scrollbar-thumb,.d218 .d38-list::-webkit-scrollbar-thumb{background:rgba(205,176,106,.55);border-radius:2px}
+.d218l::-webkit-scrollbar-track,.d218r::-webkit-scrollbar-track{background:transparent}
+.d218 .d38-list{max-height:none;overflow:visible}
+.d218 .d38-sec{margin:4px 0 6px}
+.d218l .d38-sec{margin-top:10px}
+.d218 .d38-stats{flex-wrap:wrap;justify-content:flex-start;gap:5px;margin:0 0 6px}
+.d218 .d38-stats span{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;font-size:11px;border-radius:6px;background:rgba(0,0,0,.22);border:1px solid rgba(205,176,106,.25);white-space:nowrap}
+.d218 .d38-inc{text-align:left;padding:6px 9px;border-radius:6px;background:rgba(205,176,106,.08);border-left:2px solid rgba(205,176,106,.6);margin:0}
+.d218 .d38-c{margin:0 0 5px;padding:6px 8px;border-radius:6px!important;min-height:40px;box-sizing:border-box}
+.d218 .d38-c .fi,.d218 .d38-c img{flex:0 0 auto}
+.d218 .d38-cn b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d218 .d38-empty{padding:8px 9px;border-radius:6px;background:rgba(0,0,0,.18)}
+.d218 .d38-rules{margin-top:8px}
+@media (max-width:560px) and (orientation:portrait){
+  .d218c{grid-template-columns:1fr}
+  .d218l,.d218r{max-height:none;overflow:visible}
+  #box:has(.d218){overflow:auto!important}
+}
+
+/* ---------- Oyun bitti kartı ---------- */
+/* kartın üstünde oyun içi düğmeler görünmesin */
+body.go214on #rollbtn23,body.go214on #skip213,body.go214on #endbtn,body.go214on .endbtn,body.go214on #panel{display:none!important}
+/* kart bir kez kurulur; açılış animasyonu yalnızca ilk açılışta oynar */
+#mod.go214m .go214{animation:go218in .32s ease-out both}
+@keyframes go218in{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+/* yatay telefon: iki sütun (sol: özet + mühürler, sağ: düğmeler) — her şey kaydırmadan sığar */
+@media (orientation:landscape) and (max-height:560px){
+  #box:has(.go214){max-height:calc(100dvh - 16px)!important;overflow:hidden!important;width:auto!important;max-width:96vw!important}
+  #box .wb-panel.go214,body .wc141p.go214{width:min(94vw,660px)!important;max-width:none!important;display:grid!important;grid-template-columns:minmax(0,1fr) 220px;column-gap:16px;align-items:start;padding:12px 14px!important}
+  #mod.go214m #box{max-height:calc(100dvh - 12px)!important}
+  .go214>*{grid-column:1}
+  .go214>svg,.go214>.kick156{position:absolute!important}
+  .go214>.c141g{grid-column:2;grid-row:1/span 8;align-self:center;grid-template-columns:1fr!important;gap:7px!important}
+  .go214 .c141h{margin-bottom:4px!important}
+  .go214 .sub214{margin:0 0 8px!important;font-size:12.5px!important;justify-content:flex-start}
+  .go214 .c141s{margin-bottom:6px!important}
+  .go214 .sg217{margin:4px 0 0}
+  .go214 .sgg217{max-height:118px;grid-template-columns:repeat(auto-fill,minmax(50px,1fr))}
+  .go214 .c141g .c141b{padding:10px 8px!important;font-size:13px!important;letter-spacing:.12em!important}
+  .go214 .d156{margin:2px 0 6px!important}
+}
+
+/* ---------- Tarih notu: tarihli maddeler ---------- */
+.h218{display:flex;align-items:baseline;gap:8px;font-style:normal;line-height:1.3;margin:2px 0}
+.h218 b{flex:0 0 auto;min-width:40px;font:700 11.5px Georgia,'Times New Roman',serif;color:#e0b45a;text-align:right;white-space:nowrap}
+.h218 i{font-style:normal;min-width:0}
+.v15q .h218{font-size:12px}
+.v15q{font-style:normal!important;max-height:none!important}
+.pki .hs:has(.h218){max-height:none!important;overflow:visible!important;-webkit-mask-image:none!important;mask-image:none!important;margin-top:4px}
+#v7hs .h218,.hs .h218{font-size:11.5px;line-height:1.25;margin:0 0 3px}
+#v7hs .h218 b,.hs .h218 b{font-size:11px;min-width:34px}
+
+/* ---------- Dostluk anlaşması 🤝 ---------- */
+.ally218{display:inline-block;margin-left:4px;font-size:.9em;vertical-align:1px;filter:drop-shadow(0 0 4px rgba(255,210,120,.45))}
+
+/* ---------- Ana menü küresi (v218.js) ---------- */
+#wcm .bgimg canvas.glb218{position:absolute!important;pointer-events:none!important;display:block!important;z-index:0!important;opacity:0;transition:opacity .6s ease;transform:none!important;filter:none!important}
+#wcm .bgimg canvas.glb218.on{opacity:1}
+#wcm .crest{cursor:pointer;pointer-events:auto!important;-webkit-user-select:none;user-select:none}
+
+/* ---------- Mühür koleksiyonu: önizleme + "Hepsini Gör" + dokununca bilgi (v217.js) ---------- */
+.stp217[data-c218s]{pointer-events:auto!important;cursor:pointer}
+.sgi217{appearance:none;-webkit-appearance:none;background:none;border:0;padding:2px 0;margin:0;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:6px}
+.sgi217:active{background:rgba(205,176,106,.14)}
+.sgh217 .sga218{margin-left:auto;margin-right:8px;padding:2px 9px;border-radius:999px;border:1px solid rgba(205,176,106,.55);background:rgba(205,176,106,.1);
+  color:#e9d49a;font:700 10.5px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.06em;cursor:pointer;min-height:0;box-shadow:none}
+.sgg217.pv218{display:flex!important;gap:4px;max-height:none!important;overflow:hidden!important;justify-content:flex-start}
+.sgg217.pv218>*{flex:1 1 0;min-width:0;max-width:72px}
+.sgm218{appearance:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;margin:2px 0 0;padding:0;border-radius:50%;  flex:0 0 48px!important;width:48px;height:48px;max-width:48px!important;align-self:flex-start;border:1px dashed rgba(205,176,106,.7);background:rgba(205,176,106,.08);color:#f3e8c8;cursor:pointer;opacity:0;animation:sgi217 .42s cubic-bezier(.3,1.4,.5,1) .6s forwards}
+.sgm218 b{font:700 14px Georgia,serif}.sgm218 small{font:600 8.5px system-ui,sans-serif;letter-spacing:.1em;color:#cdb06a;text-transform:uppercase}
+.sgt218{margin:4px 0 0;font:600 9.5px system-ui,sans-serif;color:#a99a76;text-align:center;letter-spacing:.04em}
+
+#sgall218{position:fixed;inset:0;z-index:2147483100;display:flex;align-items:center;justify-content:center;padding:10px;background:rgba(8,6,4,.78);opacity:0;transition:opacity .2s ease}
+#sgall218.on{opacity:1}
+#sgall218 .in{position:relative;width:min(96vw,760px);max-height:calc(100dvh - 20px);display:flex;flex-direction:column;padding:12px 14px 12px;border:2px solid #8f7b4c;border-radius:6px;
+  background:linear-gradient(180deg,#3d352b,#2a251e);box-shadow:0 18px 40px #000c;transform:translateY(8px);transition:transform .2s ease;box-sizing:border-box}
+#sgall218.on .in{transform:none}
+#sgall218 .in::after{content:"";position:absolute;inset:4px;border:1px solid rgba(143,123,76,.35);pointer-events:none;border-radius:3px}
+#sgall218 .hd{display:flex;align-items:center;gap:10px;padding:0 0 6px;border-bottom:1px solid rgba(205,176,106,.3)}
+#sgall218 .hd span{font:700 11px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.26em;color:#cdb06a}
+#sgall218 .hd b{font:700 15px Georgia,serif;color:#fff;padding:1px 8px;border-radius:999px;background:rgba(226,64,52,.25);border:1px solid rgba(226,64,52,.55)}
+#sgall218 .hd .x{margin-left:auto;width:30px;height:30px;border-radius:50%;border:1px solid rgba(205,176,106,.45);background:rgba(0,0,0,.25);color:#e9dcbc;font-size:14px;cursor:pointer;position:relative;z-index:1}
+#sgall218 .sub{margin:6px 0 6px;font:600 11px system-ui,sans-serif;color:#a99a76}
+#sgall218 .all218{max-height:none!important;flex:1 1 auto;min-height:0;overflow:auto!important;grid-template-columns:repeat(auto-fill,minmax(64px,1fr))!important;gap:8px 6px!important;padding:2px 2px 6px}
+#sgall218 .all218 .sgi217 i{width:54px;height:54px}
+#sgall218 .all218::-webkit-scrollbar{width:4px}#sgall218 .all218::-webkit-scrollbar-thumb{background:rgba(205,176,106,.55);border-radius:2px}
+
+#sginfo218{position:fixed;left:50%;bottom:calc(14px + var(--safe-b,0px));z-index:2147483200;display:flex;align-items:center;gap:12px;width:min(92vw,420px);padding:10px 14px 10px 10px;box-sizing:border-box;
+  border:2px solid #8f7b4c;border-radius:6px;background:linear-gradient(180deg,#3d352b,#2a251e);box-shadow:0 14px 34px #000c;color:#f3e8c8;
+  transform:translate(-50%,12px);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease}
+#sginfo218.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#sginfo218>i{flex:0 0 62px;width:62px;height:62px;background:center/contain no-repeat;transform:rotate(-10deg)}
+#sginfo218>div{min-width:0;display:flex;flex-direction:column;gap:2px}
+#sginfo218 small{font:700 9.5px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.24em;color:#cdb06a}
+#sginfo218 b{display:flex;align-items:center;gap:6px;font:700 15px/1.2 Georgia,'Times New Roman',serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sginfo218 b .fi,#sginfo218 b img{width:22px!important;height:15px!important;border-radius:2px;flex:0 0 auto}
+#sginfo218 b em{font-style:normal;color:#e7b3a3;font-size:13px}
+#sginfo218 span{font:500 12.5px/1.35 Georgia,serif;color:#e4d8b8}

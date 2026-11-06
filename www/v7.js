@@ -87,7 +87,7 @@
   function pickPanel() {
     var el = $('panel'), id = G.sel;
     if (!id) { el.style.display = 'none'; return; }
-    var b = st(id), h = '<div class="pk"><div class="pkh">' + fimg(id, 'lg') + '<div class="pki"><div class="nm">' + esc(M[id].name) + '</div><div class="hs" id="v7hs" tabindex="0" role="region" aria-label="' + esc(M[id].name) + '">' + esc(hist(id)) + '</div></div></div>' +
+    var b = st(id), h = '<div class="pk"><div class="pkh">' + fimg(id, 'lg') + '<div class="pki"><div class="nm">' + esc(M[id].name) + '</div><div class="hs" id="v7hs" tabindex="0" role="region" aria-label="' + esc(M[id].name) + '">' + ((window.hist218HTML && hist218HTML(id)) || esc(hist(id))) + '</div></div></div>' +
       '<div class="pkb">' + radar(b, 150) + '<div class="pkl">';
     for (var i = 0; i < 5; i++) h += '<div class="pr"><span>' + SI[i] + ' ' + SNm(i) + '</span><b>' + v1(b[i]) + '</b></div>';
     h += '</div></div><div class="pkf"><button class="pri" onclick="v7Confirm()">' + X('Bu Ülkeyle Başla', 'Start With This Country') + '</button><button onclick="v7Other()">' + X('Başka Ülke Seç', 'Choose Another') + '</button></div></div>';

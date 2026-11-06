@@ -433,16 +433,17 @@ function sheet(e) {
 
   /* ---- Diplomasi Merkezi ---- */
   function listRows(qs) {
-    var qq = (qs || '').trim().toLocaleLowerCase(X('tr', 'en')), arr;
-    if (qq) arr = aliveEmp().filter(function (e) { return e !== G.pl && ownedN(e) > 0 && M[e] && nm(e).toLocaleLowerCase(X('tr', 'en')).indexOf(qq) >= 0; });
-    else arr = neighboursOfPl().concat(allyList()).filter(function (e, i, a) { return a.indexOf(e) === i && ownedN(e) > 0 && M[e]; });
+    /* V218: listede YALNIZCA işlem yapılabilecek ülkeler = şu an saldırı menzilinde olanlar (oyunun targets() kuralı: kara komşusu,
+       kara komşusu yoksa deniz yolu). Arama kutusu kaldırıldı; uzak ülkeler listelenmez. */
+    var rs = {}; try { var tg = targets(G.pl, G.owner); for (var k in tg) { var o = G.owner[k]; if (typeof o === 'string' && o !== G.pl && ownedN(o) > 0 && M[o]) rs[o] = (tg[k] === 'land' || rs[o] === 'land') ? 'land' : 'sea'; } } catch (x) { }
+    var arr = Object.keys(rs);
     arr.sort(function (a, b) { return (allied(b) - allied(a)) || relOf(b) - relOf(a); });
-    if (!arr.length) return '<div class="d38-empty">' + X('Sonuç yok.', 'No results.') + '</div>';
-    return arr.slice(0, 60).map(countryRow).join('');
+    if (!arr.length) return '<div class="d38-empty">' + X('Menzilinde ülke yok.', 'No country in reach.') + '</div>';
+    return arr.map(function (e) { return countryRow(e, rs[e]); }).join('');
   }
-  function countryRow(e) {
-    var r = relOf(e), i = relInfo(r), pl = pactLeft(e), sub = allied(e) ? X('Müttefik', 'Ally') : pl ? X('Pakt · ' + pl + ' tur', 'Pact · ' + pl + ' t') : '';
-    return '<button class="d38-c" onclick="v138Go(\'' + e + '\')">' + fl(e) + '<span class="d38-cn"><b>' + esc(nm(e)) + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span><span class="d38-badge" style="--c:' + i.c + '">' + i.n + ' <i>' + (r > 0 ? '+' : '') + r + '</i></span></button>';
+  function countryRow(e, via) {
+    var r = relOf(e), i = relInfo(r), pl = pactLeft(e), sub = allied(e) ? '🤝 ' + X('Müttefik', 'Ally') : pl ? '🛡 ' + X('Pakt · ' + pl + ' tur', 'Pact · ' + pl + ' t') : (via === 'sea' ? '⚓ ' + X('Deniz yolu', 'By sea') : '⛰ ' + X('Kara komşusu', 'Land border'));
+    return '<button class="d38-c" onclick="v138Go(\'' + e + '\')">' + fl(e) + '<span class="d38-cn"><b>' + esc(nm(e)) + '</b><small>' + sub + '</small></span><span class="d38-badge" style="--c:' + i.c + '">' + i.n + ' <i>' + (r > 0 ? '+' : '') + r + '</i></span></button>';
   }
   function activeDeals() {
     var o = [], tn = turn();
@@ -456,20 +457,18 @@ function sheet(e) {
   function openHub() {
     if (!canAct()) { say(X('Şu an diplomasi yapılamaz', 'Diplomacy is not available now')); return; }
     var inc = peaceIncome(), d = D2();
-    modal('<div class="d38"><h3>🕊 ' + X('Diplomasi', 'Diplomacy') + '</h3>' +
+    /* V218: düzen — başlık şeridi + iki sütun (sol: durum, gelir, aktif anlaşmalar, kurallar · sağ: menzildeki ülkeler). Dar ekranda alt alta. */
+    modal('<div class="d38 d218"><div class="d218h"><h3>🕊 ' + X('Diplomasi', 'Diplomacy') + '</h3><button class="d218x" onclick="closeMod()" aria-label="close">✕</button></div><div class="d218c"><div class="d218l">' +
       '<div class="d38-stats"><span>🎲 <b>' + ((G.T && G.T.moves) || 0) + '</b></span><span>🤝 ' + X('Güven', 'Trust') + ' <b>' + trustInfo() + '</b></span><span>⚔ ' + X('İtibar', 'Rep.') + ' <b>' + aggInfo() + '</b></span></div>' +
       '<div class="d38-inc">' + (inc > 0 ? '🪙 ' + X('Barış geliri: ', 'Peace income: ') + '<b>+' + (Math.round(inc * 100) / 100) + '</b>' + X(' / tur', ' / turn') : (d.agg >= PEACE_AGG_MAX ? '⚠ ' + X('Saldırgan itibarın barış gelirini kesti', 'Your aggressive reputation cut the peace income') : X('Pakt ve ittifaklar tur başına gelir getirir', 'Pacts and alliances bring income each turn'))) + '</div>' +
       '<div class="d38-sec">' + X('Aktif anlaşmalar', 'Active deals') + '</div>' + activeDeals() +
-      '<div class="d38-sec">' + X('Ülkeler', 'Countries') + '</div>' +
-      '<input class="wdh-q d38-q" id="d38q" type="search" autocomplete="off" placeholder="' + X('Ülke ara… (boşsa komşular)', 'Search… (empty = neighbours)') + '" oninput="v138Filter(this.value)">' +
-      '<div class="d38-list" id="d38l">' + listRows('') + '</div>' +
       '<details class="d38-rules"><summary>' + X('Kurallar', 'Rules') + '</summary><ul>' +
       '<li>' + X('<b>İlişki</b> −100…+100: ittifak/pakt/yardım artırır; savaş, haraç, kışkırtma düşürür; zamanla sıfıra yaklaşır.', '<b>Relations</b> −100…+100: alliances/pacts/help raise; war, tribute and incitement lower; they drift to zero.') + '</li>' +
       '<li>' + X('<b>İttifak</b>: ilişki en az Nötr ve güven ≥ 30; ' + ALLY_TURNS + ' tur; en çok ' + MAXCO + ' devlet. Süre dolunca cezasız biter, erken çıkış güveni düşürür.', '<b>Alliance</b>: relations at least Neutral, trust ≥ 30; ' + ALLY_TURNS + ' turns; max ' + MAXCO + ' states. Expiry is free; leaving early costs trust.') + '</li>' +
       '<li>' + X('<b>İhanet</b>: müttefike saldırırsan o savaşta 2 kat güçlü olur; güven −25, ilişki −40, herkesle −4.', '<b>Betrayal</b>: attacking an ally makes it 2x stronger in that war; trust −25, relations −40, −4 with everyone.') + '</li>' +
       '<li>' + X('<b>Pakt</b>: ' + PACT_TURNS + ' tur, en çok ' + PACT_MAX + ' aktif. Bozmak ilişkiyi −30, güveni −15 yapar. Güçlü YZ da zayıf partneri bırakabilir.', '<b>Pact</b>: ' + PACT_TURNS + ' turns, max ' + PACT_MAX + ' active. Breaking costs relations −30, trust −15. A strong AI may drop a weak partner too.') + '</li>' +
-      '<li>' + X('<b>İtibar</b>: her saldırı artırır, zamanla düşer. Yüksekken barış geliri kesilir, teklifler zorlaşır.', '<b>Reputation</b>: every attack raises it, it fades over time. When high, peace income stops and offers get harder.') + '</li></ul></details>' +
-      '<button class="big" style="margin-top:10px" onclick="closeMod()">' + X('Kapat', 'Close') + '</button></div>');
+      '<li>' + X('<b>İtibar</b>: her saldırı artırır, zamanla düşer. Yüksekken barış geliri kesilir, teklifler zorlaşır.', '<b>Reputation</b>: every attack raises it, it fades over time. When high, peace income stops and offers get harder.') + '</li></ul></details></div>' +
+      '<div class="d218r"><div class="d38-sec">' + X('Menzilindeki ülkeler', 'Countries in reach') + '</div><div class="d38-list" id="d38l">' + listRows() + '</div></div></div></div>');
   }
   window.v138Filter = function (v) { var l = document.getElementById('d38l'); if (l && on()) l.innerHTML = listRows(v); };
   window.v138Go = function (e) {

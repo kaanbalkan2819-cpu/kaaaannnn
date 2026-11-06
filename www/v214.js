@@ -109,12 +109,15 @@
   try { var _mn = menu; menu = function () { if (lost()) { if (!open214()) show(); return; } return _mn.apply(this, arguments); }; } catch (e) { }
 
   /* eski yenilgi giriş noktaları yeni karta yönlendirilir */
-  try { var _so = showOver; showOver = function () { if (lost()) return show(); return _so.apply(this, arguments); }; } catch (e) { }
+  try { var _so = showOver; showOver = function () { if (lost()) { if (!open214()) show(); return; } return _so.apply(this, arguments); }; } catch (e) { }
   (function wrap() {
     if (!window.v139Show) return setTimeout(wrap, 400);
     if (window.v139Show.v214) return;
     var _vs = window.v139Show;
-    window.v139Show = function (f) { var r = _vs.apply(this, arguments); if (lost()) { killOld(); if (!open214() && !(window.__v214in)) { window.__v214in = 1; try { show(); } finally { window.__v214in = 0; } } } return r; };
+    window.v139Show = function (f) {
+      /* V218: kart açıkken bekçilerin (v213, v36) tekrar tekrar çağırdığı eski ekran kartı kapatıp yeniden kurduruyordu -> yanıp sönme */
+      if (!window.__v214in && open214() && lost()) return;
+      var r = _vs.apply(this, arguments); if (lost()) { killOld(); if (!open214() && !(window.__v214in)) { window.__v214in = 1; try { show(); } finally { window.__v214in = 0; } } } return r; };
     window.v139Show.v214 = 1;
   })();
 

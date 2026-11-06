@@ -2,7 +2,7 @@
    Her dokunuşta bir turun %15'i (54°), yumuşak yavaşlayarak. Küre yüzeyi (kıtalar) yatayda küresel eşlemeyle kayar; ışık/gölge (düşük frekans) yerinde kalır,
    pirinç halka ve kenar bölgesi dokunulmaz. Resim okunamazsa (canvas kısıtı) sessizce hiçbir şey yapmaz.
    Menü yeniden kurulunca tuval yeniden eklenir ve son açıyla çizilir. Geri almak için index.html'den v158.js bağlantısını silin (veya V192 sürümüyle değiştirin). */
-(function () {
+(function () { return;   /* V218: küre döndürme v218.js'e taşındı */
   'use strict';
   var CX = 401, CY = 255, R = 155, D = R * 2, STEP = Math.PI * 2 * 0.15, DUR = 900;   /* küre: bg.webp (800x1200) üzerinde merkez/yarıçap */
   var ang = 0, from = 0, to = 0, t0 = 0, raf = 0, ready = 0, cv = null, ctx = null, out = null;

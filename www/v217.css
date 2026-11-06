@@ -19,3 +19,16 @@
   filter:drop-shadow(0 0 1px rgba(255,90,70,.35));opacity:0;animation:stp217 .5s cubic-bezier(.3,1.4,.5,1) .3s forwards}
 @keyframes stp217{0%{opacity:0;transform:scale(2.3) rotate(-30deg)}55%{opacity:1;transform:scale(.92) rotate(-10deg)}100%{opacity:.95;transform:scale(1) rotate(-12deg)}}
 .crf .arr:has(.x217){font-size:0;line-height:0}.x217.sm{width:52px;height:52px;animation:none}
+
+/* V217 — oyun sonu mühür koleksiyonu (yenilgi kartı + zafer ekranı) */
+.sg217{margin:10px 0 8px;padding:8px 10px 10px;border:1px solid rgba(205,176,106,.45);border-radius:6px;background:rgba(26,22,17,.55);text-align:left}
+.sgh217{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.sgh217 span{font:700 9.5px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.24em;color:#cdb06a}
+.sgh217 b{font:700 15px Georgia,serif;color:#fff;min-width:26px;text-align:center;padding:1px 7px;border-radius:999px;background:rgba(226,64,52,.25);border:1px solid rgba(226,64,52,.55)}
+.sge217{margin:2px 0;font:600 12px Georgia,serif;color:#cfc4a4}
+.sgg217{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px 4px;max-height:200px;overflow:auto;-webkit-overflow-scrolling:touch;padding:2px}
+.sgi217{display:flex;flex-direction:column;align-items:center;min-width:0;opacity:0;animation:sgi217 .42s cubic-bezier(.3,1.4,.5,1) forwards}
+.sgi217 i{display:block;width:46px;height:46px;background:center/contain no-repeat;transform:rotate(-10deg)}
+.sgi217:nth-child(even) i{transform:rotate(8deg)}
+.sgi217 small{display:block;max-width:100%;margin-top:1px;font:600 9px system-ui,sans-serif;color:#d9ceb0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes sgi217{0%{opacity:0;transform:scale(1.9)}60%{opacity:1;transform:scale(.93)}100%{opacity:1;transform:none}}

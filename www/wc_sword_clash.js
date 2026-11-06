@@ -206,6 +206,7 @@
       var me = this; this._img = new Image();
       this._img.onload = function () { me._spriteOk = true; };
       this._img.src = o.sprite.src;
+      if (this._img.complete && this._img.naturalWidth) this._spriteOk = true;   /* V217: önbellekteyse ilk karede hazır */
     }
   };
 

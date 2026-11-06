@@ -28,13 +28,14 @@
     for (var i = 0; i < 5; i++) if (knw(i)) info += '<span class="v15s" title="' + esc(t('S')[i]) + '">' + SI[i] + ' <b>' + rangeTxt(p, o, i) + '</b></span>';
     var more = '';
     if (expanded === id) for (i = 0; i < 5; i++) if (knw(i)) { var v = st(o)[i], kn = true; more += '<div class="v15r"><span>' + SI[i] + ' ' + t('S')[i] + '</span><i><u style="width:' + (kn ? Math.min(100, v) : [10, 30, 50, 70, 90][relTier(p, v)]) + '%"></u></i><b>' + rangeTxt(p, o, i) + '</b></div>'; }
+    var ally218 = false; try { ally218 = typeof o == 'string' && o !== G.pl && !!window.WCD && !!WCD.allied(G.pl, o); } catch (e) { }   /* V218: dostluk (ittifak) anlaşması varsa ad yanında 🤝 */
     var dd = (typeof o == 'string' && M[o]) ? o : id;   // V28: fethedilen bölgede eski ülke değil, sahibi (fetheden ülke) gösterilir
     var quote = (window.I18N ? I18N.hist(dd, L) : '');
     var scoutDis = (G.ph == 'act' && atk) ? !canScout(id) : false;
     el.innerHTML = '<div class="v15p"><button class="cls" onclick="deselect()">' + IC.x + '</button>' +
-      '<div class="v15h">' + fimg(dd) + '<div class="v15n"><div class="nm">' + esc(M[dd].name) + '</div><div class="v15b">' + badge(o, p) + tag + '</div></div></div>' +
+      '<div class="v15h">' + fimg(dd) + '<div class="v15n"><div class="nm">' + esc(M[dd].name) + (ally218 ? ' <span class="ally218" title="' + X('Dostluk anlaşması', 'Friendship pact') + '">🤝</span>' : '') + '</div><div class="v15b">' + badge(o, p) + tag + '</div></div></div>' +
       (info ? '<div class="v15st">' + info + '</div>' : '') + more +
-      '<blockquote class="v15q"><small>' + X('Tarih Notu', 'History Note') + '</small>' + esc(quote) + '</blockquote>' +
+      '<blockquote class="v15q"><small>' + X('Tarih Notu', 'History Note') + '</small>' + ((window.hist218HTML && hist218HTML(dd)) || esc(quote)) + '</blockquote>' +
       '<div class="v15a"><button onclick="v15Explore()"' + (scoutDis ? ' disabled' : '') + '>🔍 ' + X('KEŞİF', 'SCOUT') + '</button>' +
       '<button class="pri" onclick="v15Attack()"' + (atk ? '' : ' disabled') + '>⚔ ' + X('SALDIRI', 'ATTACK') + '</button></div></div>';
     el.style.display = 'block';

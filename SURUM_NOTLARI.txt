@@ -991,3 +991,45 @@ V217 — Açılış, küre yaklaşması, öğretici, saldırı simgesi, fetih sa
     "Tekrar Başla" aynı ülkeyi seçip oyunu başlatır (test edildi).
  7) "Yeni Ülke Seç" sonrası yaklaşma takılması: harita yeniden boyanırken küre gizli bekler, sonra akıcı yaklaşır (madde 2 ile).
  Geri almak: index.html'den v217.js/v217.css bağlantılarını silin; v30.js/v214.js/wc_tour.js içindeki "V217" satırları.
+V217b — Mühürler tüm ülkelerde + oyun sonu mühür koleksiyonu + gerçekçi kılıç
+ - Mühür artık 174 ülkenin hepsinde (36 hayvan; yeni: leopar, at, deve, tavus kuşu, zebra, goril, timsah, papağan, bizon, yunus, gergedan, vaşak).
+   Eşleme v217.js içindeki A tablosunda; listede olmayan ülke kartal mührü alır.
+ - Fethedilen ülkeler oyun kaydına yazılır (G.cq217). Oyun bitti kartında ve zafer ekranında "MÜHÜR KOLEKSİYONU": kaç ülke fethedildiyse o kadar mühür.
+ - Savaş panelindeki kılıçlar: çizgi film görünümlü çizim yerine Figma'da üretilen gerçekçi çelik kılıç (assets/art/sword217.png; v208.js sprite).
+   Rakip saldırı kartındaki çapraz kılıçlar da aynı görselden. Geri almak: v208.js'de "sprite: window.WCSWORD217" satırını silin.
+
+=================== V218 ===================
+V218 — Gerçek sembol hayvanı mühürleri, oyun sonu yanıp sönmesi, akıcı menü küresi, logo/kapak, diplomasi, tarih notları (masaüstü Chrome'da telefon görünümüyle kontrol edildi)
+ 1) MÜHÜRLER: her ülkeye gerçek ulusal / hanedan sembol hayvanı (v217.js A tablosu; 63 hayvan). Figma ile 27 yeni mühür üretildi:
+    kar leoparı (AFG KGZ TJK), inek (CHE NPL), sansar (HRV), bülbül (UKR), ketzal (GTM), sinekkuşu (JAM), flamingo (BHS), oriks (OMN JOR NAM),
+    springbok (ZAF), markhor (PAK), tapir (BLZ), vikunya (PER), çöl tilkisi (DZA), zürafa (TZA), okapi (COD), lemur (MDG), cennet kuşu (PNG),
+    sekreter kuşu (SDN), trogon (CUB HTI), muflon (CYP), kızıl ibis (TTO), motmot (SLV NIC), trupial (VEN), samur antilobu (AGO), kagu (NCL), koki (PRI), fırıncı kuşu (ARG).
+    Ayrıca: Romanya vaşak, Filipinler manda (karabao), Ruanda goril, Fas/Bulgaristan/Etiyopya aslan, Türkiye bozkurt, Rusya ayı, İngiltere aslan. 175 ülkenin hepsi eşli; kullanılmayan ibex/rhino silindi.
+    Mühür hatası: koleksiyon yalnızca oyuncunun kendi kazandığı saldırıları yazıyordu; imparatorluk yıkınca toplu geçen topraklar ve olay/diplomasiyle
+    gelen ülkeler eksik kalıyor, "FETHEDİLEN ÜLKE n/173" ile koleksiyon tutmuyordu. Artık sahiplik değişiminden izlenir (v217.js prevOwn).
+ 2) OYUN BİTTİ yanıp sönmesi: kart her ~1 sn sıfırdan kuruluyor (giriş animasyonu baştan oynuyor = beyaz parlama, ekran oynuyordu).
+    Sebepler: v36 bekçisi showOver()'ı, v213 donma bekçisi v139Show()'u sürekli çağırıyordu; v214 her çağrıda kartı yeniden kuruyordu,
+    v213 de pencereyi gizliyordu. v214.js: kart açıkken yeniden kurulmaz; v213.js endShown() yeni kartı tanır. Ölçüm: 4 sn'de 0 yeniden kurulum.
+    Yatay telefonda kart iki sütun (özet + mühür koleksiyonu | düğmeler), Zar At / Geç düğmeleri kartın üstünde görünmez (v218.css).
+ 3) ANA MENÜ KÜRESİ (v218.js): eski dönüş kıtaları ±60°'de aynalıyordu (geri dönüyor gibi), en yakın piksel örneklemesi titretiyordu.
+    Yeni: tek yönde akan yüzey (120° bantlar, yumuşak geçiş), çift doğrusal örnekleme, çok yavaş sürekli dönüş + dokununca yumuşak ivme ve yavaşlama.
+    Pirinç halka maskesi eğik halkaya göre. v158.js ve v213.js'teki eski dönüşler devre dışı ("V218" return satırları).
+ 4) LOGO / KAPAK (Figma, gerçekçi Rönesans-Makyavelist): kılıçla delinmiş taçlı bronz küre simgesi; resources/android/mipmap-* (normal, yuvarlak, uyarlanabilir ön plan),
+    play_store/gorseller/uygulama-simgesi-512.png, ozellik-grafigi-1024x500.png (savaş konseyi masası + WORLD CONQUEST başlığı), açılış (splash) ekranları,
+    www/assets/menu/logo218.png. Uyarlanabilir simge arka planı #000000 (release_setup.js).
+ 5) DİPLOMASİ MERKEZİ (v138.js + v218.css): yalnızca işlem yapılabilen ülkeler = şu an saldırı menzilindekiler (targets(): kara komşusu / deniz yolu),
+    arama kutusu kaldırıldı. Başlık şeridi + kapatma ✕, iki sütun (sol: durum, gelir, aktif anlaşmalar, kurallar | sağ: menzildeki ülkeler), ince altın kaydırma çubuğu.
+ 6) TARİH NOTLARI (hist218.js): 175 ülkenin her birine 3 kısa tarihli madde (ör. 1071 Malazgirt · 1453 İstanbul'un fethi · 1923 Cumhuriyet), TR + EN.
+    Ülke seçme ekranında ve ülke panelinde madde madde.
+ 7) "Geç" düğmesi alt yazısı: "Bas veya basılı tut" (v213.js).
+ 8) Bilgi panelinde dostluk (ittifak) anlaşması olan ülkenin adı yanında 🤝 (v15.js).
+ 9) Burundi'nin yanındaki Ruanda'ya dokunmak: küçük ülke toleransında eşitlikte listede önce gelen Burundi seçiliyordu (Ruanda'nın üstüne dokunsan bile).
+    Artık parmak doğrudan küçük ülkenin içindeyse o seçilir, eşitlikte merkeze yakın olan kazanır; tolerans 22 -> 26 px (v30.js pickNear).
+ Geri almak: index.html'den v218.js, v218.css, hist218.js bağlantılarını silin; diğerleri ilgili dosyalarda "V218" satırları.
+V218b — Mühür koleksiyonu: önizleme + "Hepsini Gör" + dokununca bilgi (v217.js, v218.css)
+ - Oyun sonu kartında (ve zafer ekranında) artık yalnızca SON fethedilen 4 mühür + "+N Hepsi" kutusu; başlıkta "Hepsini Gör ›".
+   (Eskiden 102 fetihte 102 mühür yan yana diziliyordu.)
+ - "Hepsini Gör": tam ekran koleksiyon penceresi, fetih sırasıyla tüm mühürler, kaydırılabilir; ✕ ya da boşluğa dokununca kapanır.
+ - Herhangi bir mühre dokununca alttan kısa bilgi kartı: büyük mühür, "#sıra · FETHEDİLDİ", bayrak + ülke · hayvan, tek satırlık açıklama
+   (63 hayvana ayrı satır; Türkiye, İtalya, İngiltere, Rusya, Fransa, ABD, Çin, Meksika, Butan, Macaristan için ülkeye özel). 4,2 sn sonra ya da dokununca kapanır.
+   Savaş sonucundaki mühür de dokunulabilir. Test: 102 fetihli oyun sonu, pencere 102 mühür, bilgi kartı açıldı.

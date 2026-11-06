@@ -84,7 +84,7 @@ run('node', [path.join(__dirname, 'fix_android_splash.js')]);   // V217: açıl�
 const resSrc = path.join(ROOT, 'resources', 'android');
 if (fs.existsSync(resSrc)) {
   copyDir(resSrc, A('app', 'src', 'main', 'res'));
-  fs.writeFileSync(A('app', 'src', 'main', 'res', 'values', 'ic_launcher_background.xml'), '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#0A1B45</color>\n</resources>\n');
+  fs.writeFileSync(A('app', 'src', 'main', 'res', 'values', 'ic_launcher_background.xml'), '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#000000</color>\n</resources>\n');
   log('Simgeler ve açılış ekranı uygulandı');
 }
 

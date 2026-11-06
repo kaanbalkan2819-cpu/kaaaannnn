@@ -30,7 +30,7 @@
   function mkBtn() {
     btn = document.createElement('button'); btn.id = 'skip213'; btn.type = 'button';
     btn.innerHTML = '<span class="rg"><svg viewBox="0 0 30 30"><circle class="bg" cx="15" cy="15" r="13"/><circle class="fg" cx="15" cy="15" r="13"/></svg><b>⏭</b></span>' +
-      '<span class="tx">' + X('Geç', 'Skip') + '<small>' + X('Basılı tut: tüm tur', 'Hold: whole turn') + '</small></span>';
+      '<span class="tx">' + X('Geç', 'Skip') + '<small>' + X('Bas veya basılı tut', 'Tap or hold') + '</small></span>';
     function stop(e) { try { e.stopPropagation(); } catch (x) { } }
     btn.addEventListener('pointerdown', function (e) {
       stop(e); try { e.preventDefault(); } catch (x) { } held = false; clearTimeout(holdT);
@@ -111,7 +111,7 @@
     var since = 0;
     function ownedN(e) { var n = 0; try { for (var k in G.owner) if (G.owner[k] === e) n++; } catch (x) { } return n; }
     function lost() { try { return !!G && !G.mp && G.v5 === 1 && typeof G.pl === 'string' && !!G.owner && G.T && ownedN(G.pl) === 0 && ['pick', 'v7pick', 'v5intro', 'wheel'].indexOf(G.ph) < 0; } catch (e) { return false; } }
-    function endShown() { return !!(document.getElementById('v139over') || document.getElementById('v38over')); }
+    function endShown() { return !!(document.getElementById('v139over') || document.getElementById('v38over') || document.querySelector('#box .go214')); }   /* V218: yeni oyun bitti kartı (v214) da sayılır; yoksa kart her 4 sn kapatılıp yeniden açılıyordu */
     function resultVisible() {
       try { var bs = document.getElementById('bs'); return !!(typeof BSH !== 'undefined' && BSH && bs && bs.style.display !== 'none' && bs.style.visibility !== 'hidden' && document.querySelector('#fn button')); } catch (e) { return false; }
     }
@@ -139,7 +139,7 @@
      Küre arka plan fotoğrafının (assets/menu/bg.webp, 800x1200) parçası. Dokununca kürenin bölgesi bir tuvalde yeniden çizilir:
      ışık/gölge (bulanık parlaklık haritası) yerinde kalır, yüzey deseni küre geometrisine göre (enlem satırlarında boylam kaydırılarak) döner.
      Önündeki yatay halka olduğu gibi korunur. Her dokunuş ~%18 tur (65°), 1,4 sn yumuşak duruş. */
-  (function () {
+  (function () { return;   /* V218: küre döndürme v218.js'e taşındı (akıcı sürüm) */
     var IW = 800, IH = 1200, GX = 401, GY = 248, GR = 160, BAND0 = 252, BAND1 = 290, TURN = 0.18 * 2 * Math.PI, DUR = 1400, FL = 60 * Math.PI / 180;
     var data = null, phase = 0, anim = null, cv = null, ctx = null, out = null;
     function bgEl() { return document.querySelector('#wcm.flat .bgimg'); }

@@ -2,7 +2,7 @@
 /* V217 — Açılışta parlak (beyaz) ekran yanıp sönmesi düzeltmesi.
    Capacitor'ün Android şablonunda pencere arka planı açık renkli temadan (DayNight / Theme.SplashScreen) gelir:
    sistem açılış ekranı ve WebView'in ilk karesi çizilene kadar bir an BEYAZ görünür, sonra koyu ana menü gelir = "ışık açılıp kapanması".
-   Bu betik android/app/src/main/res/values*/styles.xml içindeki tüm AppTheme stillerine koyu arka plan (#05060D, menüyle aynı) yazar,
+   Bu betik android/app/src/main/res/values-xxx/styles.xml içindeki tüm AppTheme stillerine koyu arka plan (#05060D, menüyle aynı) yazar,
    açılış (splash) temasına da aynı rengi verir. Tekrar çalıştırmak zararsızdır.
    Kullanım: node scripts/fix_android_splash.js   (build_debug_apk.bat ve release_setup.js bunu zaten çağırır)
    Geri almak için: styles.xml içindeki "V217" yorumlu satırları ve values/wc_colors.xml dosyasını silin. */
@@ -31,6 +31,6 @@ for (const d of fs.readdirSync(RES)) {
     }
     return '<style name="' + name + '"' + attrs + '>' + body.replace(/\s*$/, '\n') + add.join('\n') + '\n    </style>';
   });
-  if (s !== before) { fs.writeFileSync(f + '.bak217', before); fs.writeFileSync(f, s); n++; console.log('• V217: ' + path.relative(ROOT, f) + ' yamalandı (yedek: styles.xml.bak217)'); }
+  if (s !== before) { fs.writeFileSync(path.join(ROOT, 'android', d + '-styles.xml.bak217'), before); fs.writeFileSync(f, s); n++; console.log('• V217: ' + path.relative(ROOT, f) + ' yamalandı (yedek: android/' + d + '-styles.xml.bak217)'); }
 }
 if (!n) console.log('• V217: styles.xml zaten yamalı (veya bulunamadı).');
