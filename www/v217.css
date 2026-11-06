@@ -1,0 +1,21 @@
+/* V217 — rakip saldırı kartında çapraz kılıçlar + fetih sayacı ve hayvan damgası. Geri almak için index.html'den v217.css/v217.js bağlantılarını silin. */
+.ai20.atk .ai20-ic:has(.x217){animation:none;font-size:0;line-height:0}
+.x217{display:inline-block;width:72px;height:72px;filter:drop-shadow(0 0 6px rgba(255,200,120,.35)) drop-shadow(0 2px 3px #000a);background:center/contain no-repeat;vertical-align:middle;animation:x217 .9s ease-in-out infinite alternate;transform-origin:50% 46%}
+@keyframes x217{from{transform:scale(1)}to{transform:scale(1.1)}}
+.ai20.rm .x217{animation:none}
+
+.st217{position:relative;display:flex;align-items:center;gap:10px;margin:8px 0 6px;padding:9px 12px;border:1px solid rgba(205,176,106,.45);border-radius:6px;
+  background:linear-gradient(180deg,rgba(61,53,43,.92),rgba(42,37,30,.92));color:#f3e8c8;text-align:left;min-height:62px;box-sizing:border-box;animation:st217in .35s ease-out both}
+@keyframes st217in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.st217.has{padding-right:96px}
+.cnt217{flex:1;min-width:0}
+.cnt217 small{display:block;font:700 9.5px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.24em;color:#cdb06a}
+.cnt217 b{display:block;font:700 24px/1.1 Georgia,'Times New Roman',serif;color:#fff}
+.cnt217 b i{font-style:normal;font-size:15px;color:#cfc4a4;margin-left:1px}
+.cnt217 em{display:block;font-style:normal;font:600 11.5px Georgia,serif;color:#e7b3a3;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar217{display:block;height:4px;margin-top:5px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden}
+.bar217 span{display:block;height:100%;background:linear-gradient(90deg,#cdb06a,#f5c75a)}
+.stp217{position:absolute;right:8px;top:50%;width:84px;height:84px;margin-top:-42px;background:center/contain no-repeat;pointer-events:none;
+  filter:drop-shadow(0 0 1px rgba(255,90,70,.35));opacity:0;animation:stp217 .5s cubic-bezier(.3,1.4,.5,1) .3s forwards}
+@keyframes stp217{0%{opacity:0;transform:scale(2.3) rotate(-30deg)}55%{opacity:1;transform:scale(.92) rotate(-10deg)}100%{opacity:.95;transform:scale(1) rotate(-12deg)}}
+.crf .arr:has(.x217){font-size:0;line-height:0}.x217.sm{width:52px;height:52px;animation:none}

@@ -78,6 +78,7 @@ if (!/screenOrientation/.test(m)) { m = m.replace('<activity', '<activity\n     
 
 // ---- 3b) V158: alt gezinme çubuğu butonları örtmesin (Android 15/16 uçtan uca ekran) ----
 run('node', [path.join(__dirname, 'fix_android_insets.js')]);
+run('node', [path.join(__dirname, 'fix_android_splash.js')]);   // V217: açılışta beyaz parlama olmasın
 
 // ---- 4) simge + açılış ekranı ----
 const resSrc = path.join(ROOT, 'resources', 'android');

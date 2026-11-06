@@ -103,6 +103,11 @@
   };
   window.v214Hist = function () { try { if (window.v139Hist) v139Hist(); } catch (e) { } };   /* "Kapat" denince oyun bitti kartı geri gelir (bekçi) */
 
+  /* V217: yenilgiden sonra ana menüye atılma düzeltmesi. V20 bekçisi her saniye "oyun bitti + pencere kapalı" durumunda menu() çağırıyordu;
+     savaş paneli kapanıp oyun bitti kartı açılmadan önceki kısa anda bu tetiklenince oyuncu ana menüye düşüyordu. Artık yenilgi
+     durumunda menu() oyun bitti kartını açar; ana menüye yalnızca kartın "Ana Menü" düğmesiyle gidilir. */
+  try { var _mn = menu; menu = function () { if (lost()) { if (!open214()) show(); return; } return _mn.apply(this, arguments); }; } catch (e) { }
+
   /* eski yenilgi giriş noktaları yeni karta yönlendirilir */
   try { var _so = showOver; showOver = function () { if (lost()) return show(); return _so.apply(this, arguments); }; } catch (e) { }
   (function wrap() {

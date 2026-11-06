@@ -975,3 +975,19 @@ yanan yapılarda ardışık patlamalar; sonra isyancılar kaybolur, ülke yerine
 Zar penceresi, olay kartı, savaş veya menü açıksa kapanmaları beklenir. Yeni/yüklenen oyunda eski isyanlar oynatılmaz. Birden çok isyan sırayla oynar.
 Savaş efekt motoru (wc_battle_fx.js) ayrı bir örnekle kullanılır; savaş animasyonuna dokunulmaz. v30.js: animasyon süresince her kare çizilir (window.__anim216).
 GERİ ALMAK İÇİN: index.html'den v216.js bağlantısını silin.
+
+V217 — Açılış, küre yaklaşması, öğretici, saldırı simgesi, fetih sayacı/damga, yenilgi sonrası
+ 1) Açılıştaki parlak ekran: web tarafı (menü öncesi) koyu; parlama Android'in açık renkli temasından geliyordu.
+    Yeni scripts/fix_android_splash.js styles.xml'e koyu pencere/açılış arka planı (#05060D) yazar; build_debug_apk.bat ve
+    release_setup.js bunu otomatik çağırır. Geri almak: styles.xml içindeki V217 satırlarını ve values/wc_colors.xml'i silin.
+ 2) Küre yaklaşırken "ışınlanma": 1,5. sn'de Türkiye odağı hedef yakınlığı değiştiriyor, kamera bir karede ~0,5 birim sıçrıyordu.
+    v30.js: hedef değişimi yumuşatılır (introZ). Küre ilk ağır kareler + harita boyaması bitince 0,45 sn'de solarak belirir.
+ 3) Öğreticideki 🎲/⚔ titremesi: wc_tour.js balon metnini her 0,45 sn'de yeniden yazıyordu (V198 simgeleri her seferinde yeniden takılıyordu).
+    Metin artık yalnızca değişince yazılır.
+ 4) Rakip saldırı kartında ⚔ yerine savaş panelindeki çapraz kılıçlar (v217.js; zafer penceresindeki ⚔ de).
+ 5) Her fetihte "FETHEDİLEN ÜLKE n/173" sayacı + ilerleme çubuğu (savaş sonucu ve özellik seçme penceresi). En güçlü 60 ülkede
+    sembol hayvanı kırmızı mühür olarak basılır (assets/stamps, 24 hayvan, Figma). Eşleme v217.js içindeki A tablosunda.
+ 6) Yenilgiden sonra ana menüye atılma: V20 bekçisi oyun bitince menu() çağırıyordu. v214.js: yenilgide menu() oyun bitti kartını açar.
+    "Tekrar Başla" aynı ülkeyi seçip oyunu başlatır (test edildi).
+ 7) "Yeni Ülke Seç" sonrası yaklaşma takılması: harita yeniden boyanırken küre gizli bekler, sonra akıcı yaklaşır (madde 2 ile).
+ Geri almak: index.html'den v217.js/v217.css bağlantılarını silin; v30.js/v214.js/wc_tour.js içindeki "V217" satırları.

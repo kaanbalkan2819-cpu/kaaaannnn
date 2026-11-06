@@ -96,7 +96,7 @@
   function show(k) {
     build(); var d = $i('wctour'), ring = $i('wctr'), bub = $i('wctb'), bb = $i('wctbb');
     var rc = rectFor(k), isDone = (k === 'done');
-    $i('wctt').innerHTML = X(TXT[k][0], TXT[k][1]);
+    var _tx = X(TXT[k][0], TXT[k][1]); if (S.tx !== _tx) { S.tx = _tx; $i('wctt').innerHTML = _tx; }   /* V217: metin yalnızca değişince yazılır. Eskiden her 0,45 sn'de yeniden yazılıyor, V198 🎲/⚔ simgelerini her seferinde yeniden takıyordu = simgeler titriyordu */
     if (S.shown !== k) {   // düğmeleri yalnızca adım değişince kur
       S.shown = k;
       if (isDone) bb.innerHTML = '<button id="wctg">' + X('Kural Rehberi', 'Rule Guide') + '</button><button class="pri" id="wctk">' + X('Kapat', 'Close') + '</button>';

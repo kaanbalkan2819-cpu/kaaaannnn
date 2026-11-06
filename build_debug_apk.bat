@@ -15,6 +15,7 @@ if not exist android\gradlew.bat (
   exit /b 1
 )
 call node scripts\fix_android_insets.js
+call node scripts\fix_android_splash.js
 echo [1/3] Capacitor dosyalari senkronize ediliyor...
 call npx cap sync android
 if errorlevel 1 (echo HATA: Capacitor sync basarisiz. & pause & exit /b 1)
