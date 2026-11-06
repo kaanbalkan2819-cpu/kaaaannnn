@@ -950,3 +950,28 @@ V214 — OYUN BİTTİ MENÜSÜ, AÇILIŞ, MENÜ ORANLARI, UÇAK, BİLDİRİM, TE
 7) Barış teklifi (v40.js): "+%8 Teknoloji" yerine somut taahhüt ("son çıkan yapay zekâ teknolojilerini seninle paylaşmayı taahhüt ediyor" vb., alan başına 2-3 metin); etki aynı.
    YZ'nin pakt/ittifak tekliflerinde de (v138.js) artık karşılığında bir taahhüt var; kabul edilip antlaşma kurulursa o alan +%5.
 GERİ ALMAK İÇİN: index.html'den v214.css ve v214.js bağlantılarını silin (oyun bitti, kapak, bildirim kartı); diğerleri ilgili dosyalarda "V214" satırları.
+
+=================== V215 ===================
+V215 — AÇILIŞ YAKLAŞMASI KASMASI, HIZLI OYUN BİTTİ, DERECELİ PROFİL, YENİ OLAYLAR (masaüstü Chrome'da telefon görünümüyle ölçüldü/test edildi)
+1) Yeni oyunun küre yaklaşmasındaki kasma (ölçüldü):
+   - V212 shader ön derlemesi (precompile212) tam yaklaşma sırasında tüm modelleri tek seferde kuruyordu (4x yavaş işlemcide ~0,6 sn). Artık yaklaşma/menü/savaş bitince, her boşta bir model kurulur (v60.js busy215/idle215).
+   - Ülke blok üretimi (warmEx, warmHome) yaklaşma sırasında ve sonraki 1,2 sn bekler (v30.js). Bayrak bitmap üretimi de bekler (v7.js).
+   - V214'te telefonda açılan kenar yumuşatma (MSAA) yaklaşmada düzenli 80-150 ms kare kaybı yapıyordu -> geri alındı.
+   - Harita kaplaması küre görünmeden (perde altında) boyanır (v30.js prePaint215); yaklaşma kare süresine göre ilerler, yavaş karede sıçramaz.
+   Sonuç: normal işlemcide yaklaşma orijinal v209 kadar akıcı; yaklaşma sırasında ana iş parçacığı neredeyse boş.
+2) Oyun bitti kartı hızlı gelir: yenilgide savaş animasyonu atlanır, zar/karşılaştırma hızlandırılır, "YENİLGİ" 1,2 sn görünür, kart açılır (saldırıdan ~4 sn; eskiden 10+ sn) (v214.js).
+3) Dereceli mücadele PROFİL EKRANI (ranked.js, v215.css): 8 şövalye portresi (assets/avatars, Figma ile üretildi), oyuncu adı, unvan (Şövalye/Komutan/Fatih/Lord/Muhafız/Stratejist), kariyer.
+   İlk girişte zorunlu. Hub'da avatarlı isim plakası + "Profil" düğmesi. Portre/unvan Firestore'a (players, queue, matches) yazılır; rakip lobide ve liderlik tablosunda görünür.
+   firestore.rules: av (1-8) / ti (0-5) doğrulaması eklendi — Firebase Konsolu'na yeniden yapıştırılmalı.
+4) OLAYLAR (v76.js): artık 2 turda bir çıkabilir (%60; eskiden %16, 4 turda bir). Duraklatma menüsü şablonunda, üst ortada dikdörtgen görsel (assets/events, Figma ile üretildi).
+   Yeni: Azınlık Lideri (Ekonomi −%7; o ülkeyle savaşta o ülke −%15 — azınlıklar katılmaz), Tüccar Loncası Kredisi, Sınır Kalesi, Kraliyet Akademisi, Firari Askerler, Hanedan Evliliği, Casus Şebekesi.
+   Sığınma Talebi (dini lider): Diplomasi +%10, Nüfus +%3, komşularla ilişki kötüleşir / reddedilirse Diplomasi −%2. Türkçe ek uyumu: İran'daki, Fas'ta.
+
+=================== V216 ===================
+V216 — İSYAN ANİMASYONU (v216.js; masaüstü Chrome'da telefon görünümüyle test edildi)
+Bir toprak isyan edip bağımsızlığını ilan edince (V23 hızlı genişleme isyanı, V76 kurtarılan toprak isyanı) küre o ülkeye döner ve ~5 sn'lik sahne oynar:
+ülke kırmızıya boyanıp yükselir, ortasında kırmızı "bağımsızlık" ışık sütunu, ülkenin içinde meşaleli kırmızı isyancılar (her birinde kısa ışık sütunu + toz),
+yanan yapılarda ardışık patlamalar; sonra isyancılar kaybolur, ülke yerine iner ve yeni rengini alır.
+Zar penceresi, olay kartı, savaş veya menü açıksa kapanmaları beklenir. Yeni/yüklenen oyunda eski isyanlar oynatılmaz. Birden çok isyan sırayla oynar.
+Savaş efekt motoru (wc_battle_fx.js) ayrı bir örnekle kullanılır; savaş animasyonuna dokunulmaz. v30.js: animasyon süresince her kare çizilir (window.__anim216).
+GERİ ALMAK İÇİN: index.html'den v216.js bağlantısını silin.

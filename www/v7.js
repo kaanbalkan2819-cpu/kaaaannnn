@@ -208,7 +208,7 @@
   /* boşta tüm bayraklar sırayla bitmap'e çevrilir (ilk savaştan önce hazır olsunlar) */
   (function () {
     var idle = window.requestIdleCallback ? function (f) { requestIdleCallback(f, { timeout: 2000 }); } : function (f) { setTimeout(f, 120); };
-    function go() { var ks = window.FLAGSVG ? Object.keys(FLAGSVG) : null; if (!ks) return setTimeout(go, 1500); var i = 0; (function step() { if (i >= ks.length) return; rasterFlag7(ks[i++], false); idle(step); })(); }
+    function go() { var ks = window.FLAGSVG ? Object.keys(FLAGSVG) : null; if (!ks) return setTimeout(go, 1500); var i = 0; (function step() { if (i >= ks.length) return; if ((window.v30IntroBusy && v30IntroBusy()) || (window.__v30introEnd && performance.now() - window.__v30introEnd < 1200)) return setTimeout(step, 700); rasterFlag7(ks[i++], false); idle(step); })();   /* V215: yaklaşma sırasında bekler */ }
     setTimeout(go, 3000);
     /* V212: İSTATİSTİK SİMGELERİ (assets/icons/*.svg) de bitmap'e çevrilir. Her biri SVG filtresi (gölge + bulanık parlama) içeriyor ve savaş
        panelinde ~20 tane var: panelin her yeniden taranmasında filtreleriyle baştan çiziliyorlardı (ölçüm: savaş açılışındaki kare kaybının yarısından fazlası).

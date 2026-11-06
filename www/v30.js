@@ -178,6 +178,16 @@
     basePrev = nb; baseValid = true;   /* V176 */
   }
   var hvLF = 0, hvStep = -1, hvPaint = false;   /* V178: kare sayacı / bu karede taban dilimi ve kaplama boyaması yapıldı mı */
+  /* V215: ÖN BOYAMA. Harita kaplaması (ülke renkleri + birleşik sınırlar) eskiden küre ekrana gelince, yeni oyunun yaklaşmasının ilk
+     karelerinde boyanıyordu (yavaş cihazda 100-250 ms'lik kareler). Artık küre kurulunca, görünmeden önce (menü/perde altında) dilim dilim boyanır.
+     Küre zaten açıksa (ON) normal döngü yapar; burada bir şey yapılmaz. */
+  function prePaint215() {
+    try {
+      if (ON || !READY || !G) { if (!ON && READY && !G) setTimeout(prePaint215, 400); return; }
+      if (!baseC || baseJob || ownSig() !== baseSig) { if (!baseJob) paintOverlay(); else stepBase(); setTimeout(prePaint215, 20); return; }
+      if (needPaint) { needPaint = false; paintOverlay(); try { C.forEach(function (c) { if (EX[c.id]) colorEx(c); }); } catch (e) { } }
+    } catch (e) { }
+  }
   function stepBase() {
     if (!baseJob) return; hvStep = hvLF; var t0 = performance.now(), r;
     do { r = baseJob.next(); } while (!r.done && performance.now() - t0 < 9);
@@ -420,7 +430,7 @@
     function later(f) { if (window.requestIdleCallback) requestIdleCallback(f, { timeout: 250 }); else setTimeout(f, 30); }
     (function step(dl) {
       if (!C.length || !ON && !READY) return;
-      if (down || anyMoving()) { later(step); return; }   /* V140: dokunma/animasyon sırasında blok üretimi ana iş parçacığını meşgul etmez */
+      if (down || anyMoving() || introStart || (window.__v30introEnd && performance.now() - window.__v30introEnd < 1200)) { later(step); return; }   /* V215: yeni oyunun küre yaklaşması sırasında da bekler; V140: dokunma/animasyon sırasında blok üretimi ana iş parçacığını meşgul etmez */
       var _w0 = performance.now(), t0 = performance.now(), budget = (dl && dl.timeRemaining) ? Math.max(3, Math.min(8, dl.timeRemaining() - 1)) : 4;
       while (performance.now() - t0 < budget) {
         if (!cur) {
@@ -464,7 +474,7 @@
       function flush() { if (pend.length) { var a = pend; pend = []; preUpMany(a); } }
       (function step() {
         if (!ON || !READY) { HW = null; return; }
-        if (down || anyMoving() || introStart || (typeof BSH !== 'undefined' && BSH)) { setTimeout(step, 120); return; }
+        if (down || anyMoving() || introStart || (window.__v30introEnd && performance.now() - window.__v30introEnd < 1200) || (typeof BSH !== 'undefined' && BSH)) { setTimeout(step, 120); return; }   /* V215 */
         var t0 = performance.now();
         while (performance.now() - t0 < 4) {
           if (!cur) {
@@ -565,7 +575,7 @@
     ovC = mk(OW, OH); ov = ovC.getContext('2d'); liftC = mk(LW, LH); lift = liftC.getContext('2d'); reliefC = mk(LW, LH); var YLD = function () { return new Promise(function (r) { setTimeout(r, 24); }); };   /* V149: ağır adımlar arasında ana iş parçacığı serbest bırakılır */
     nsmall = mk(NW, NH); nsx = nsmall.getContext('2d', { willReadFrequently: true }); nC = mk(NW, NH); nx = nC.getContext('2d'); nImg = nx.createImageData(NW, NH); topoH = new Float32Array(NW * NH);
     var coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches || document.body.classList.contains('fxlow');
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });   /* V214: telefonda da kenar yumuşatma (eskiden !coarse): parlak kenar ışığının önünde küre silueti tırtıklı görünüyordu; mobil (döşemeli) GPU larda 4x MSAA ucuzdur */   /* V201: tuval yine OPAK (V199'daki alpha:true her karede DOM katmanlarıyla birleştirme yapıyordu -> kasma). Zemin sahne içinde (bg199) */
+    renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: false });   /* V215: V214 telefonda kenar yumuşatmayı (MSAA) açmıştı; yeni oyun yaklaşmasında düzenli 80-150 ms kare kaybına yol açtığı ölçüldü -> geri alındı */
     /* V127: hareket sırasında düşük (akıcı), 260 ms durunca yüksek çözünürlük (net). Telefonda sabit 1.25 yüzünden küre bulanıktı. */
     PRLO = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5);   /* V162: masaüstünde hareket/savaş animasyonu sırasında en çok 1.5x (eskiden 2x) */ PRHI = coarse ? Math.max(PRLO, Math.min(window.devicePixelRatio || 1, PR_IDLE_PHONE)) : Math.min(window.devicePixelRatio || 1, 2);   /* V183: telefonda da durunca netleş (PR_IDLE_PHONE) */   /* V147: telefonda çözünürlük değişimi yok (setPR 238-266 ms donma + 1.5x karede ~150 ms) */ curPR = PRLO; idleSince = performance.now();
     renderer.setPixelRatio(PRLO); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.setClearColor(0x2a251e, 1);   /* V201 */
@@ -612,6 +622,7 @@
     }).then(YLD).then(function () {   /* V149 */
       var cA = null; bindInput(); resize(); READY = true;
       try { warm207(); } catch (e) { }   /* V206 */
+      setTimeout(prePaint215, 30);   /* V215: harita kaplaması küre görünmeden (menü/perde altında) boyanır */
       /* V132: shader derlemesi + ilk kare ve büyük ülke blokları perdenin altında hazırlanır (ilk dokunuşta/animasyonda takılma olmasın) */
       try {   /* V140: ülke bloklarının shader'ları (Lambert + çizgi) küre kurulurken, perdenin altında derlenir; ilk seçimde derleme takılması/donması olmasın */
         var dgm = new THREE.BufferGeometry(); dgm.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 1.3, .01, 0, 1.3, 0, .01, 1.3], 3)); dgm.setAttribute('normal', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1], 3));
@@ -633,7 +644,7 @@
   function rotateBy(dx, dy) { var k = 0.0042 * camZ / 3.4; globe.quaternion.premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(dy * k, dx * k, 0, 'XYZ'))); if (ringM) { ringRot += dx * k * 0.06; ringM.rotation.z = ringRot; } }   /* V210: zemin halkaları sürüklerken küreyle hafifçe döner (derinlik hissi) */
   /* V210: odaklanma artık süreye bağlı, yumuşak hızlanıp yavaşlayan (easeInOut) bir geçiş: eskiden ilk karede ani sıçrayıp sonda sürünüyordu.
      Savurma, yakınlaştırma ve odaklanma kare hızından bağımsız (120 Hz ekranda iki kat hızlı/uzun dönmez). */
-  var fq0 = null, fqT = 0, fqD = 0.8, _pnT = -1e9, _pnV = false;
+  var fq0 = null, fqT = 0, fqD = 0.8, _pnT = -1e9, _pnV = false, introP = 0, introP0 = 0;
   function ease210(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
   function stepCamera(dt) {
     if (!focusQ) fq0 = null;
@@ -643,7 +654,7 @@
       if (fqT >= 1) { globe.quaternion.copy(focusQ); focusQ = null; fq0 = null; }
     }
     else if (!down && (Math.abs(vel.x) > 0.05 || Math.abs(vel.y) > 0.05)) { var _f = dt * 60; rotateBy(vel.x * _f, vel.y * _f); var _d = Math.pow(0.93, _f); vel.x *= _d; vel.y *= _d; }
-    if (introStart) { var _k = Math.max(0, Math.min(1, (performance.now() - introStart) / introDur)); camZ = introFrom + (zoomT - introFrom) * (1 - Math.pow(1 - _k, 4)); if (_k >= 1) introStart = 0; } else { var _zd = zoomT - camZ; camZ = Math.abs(_zd) < 1e-4 ? zoomT : camZ + _zd * (1 - Math.exp(-dt * 7)); }   /* V56: yeni oyunda küre uzaktan yaklaşır; V210: yaklaşma eğrisi daha yumuşak iniş (quart) */
+    if (introStart) { if (introP0 !== introStart) { introP0 = introStart; introP = 0; } if (!(baseJob || needPaint) || performance.now() - introStart > 1500) introP += Math.min(dt, 1 / 30) * 1000 / introDur; var _k = Math.max(0, Math.min(1, introP));   /* V215: yaklaşma kare süresine göre ilerler (yavaş karede sıçramaz) ve harita boyanması bitene kadar başlangıçta bekler */ camZ = introFrom + (zoomT - introFrom) * (1 - Math.pow(1 - _k, 4)); if (_k >= 1) { introStart = 0; window.__v30introEnd = performance.now(); } }   /* V215: yaklaşma bitiş anı (ön hazırlıklar buna göre bekler) */ else { var _zd = zoomT - camZ; camZ = Math.abs(_zd) < 1e-4 ? zoomT : camZ + _zd * (1 - Math.exp(-dt * 7)); }   /* V56: yeni oyunda küre uzaktan yaklaşır; V210: yaklaşma eğrisi daha yumuşak iniş (quart) */
      camera.position.z = camZ * (window.innerWidth > window.innerHeight ? 0.7 : 1);   /* V57: yatayda küre daha da yakın (0.86 -> 0.70) */
     // savaş paneli açıkken görüntüyü panelin dışındaki alana kaydır (telefonda yukarı, geniş ekranda sola)
     /* V212: panelin görünürlüğü (offsetWidth = zorunlu yerleşim hesabı) her karede değil, en çok 250 ms'de bir okunur; savaş paneli animasyonlarında kare başına yerleşim hesabı yapılmaz */
@@ -779,7 +790,7 @@
       /* V72: sahnede hiçbir şey değişmediyse (kamera/küre/yükselen ülke/animasyon yok) kareyi tekrar çizme; bulutlar için ~4 kare/sn yeter -> ülke seçiminde GPU/pil yükü ve kasma azalır */
       var q = globe.quaternion, k = camera.position.z.toFixed(4) + '|' + q.x.toFixed(4) + '|' + q.y.toFixed(4) + '|' + q.z.toFixed(4) + '|' + q.w.toFixed(4) + '|' + vo.toFixed(3) + '|' + window.innerWidth + 'x' + window.innerHeight;
       var _bsh = (typeof BSH !== 'undefined' && BSH && !window.v60Active);   /* V161: savaş paneli açıkken küre her karede çizilmez (eskiden BSH her kareyi zorluyordu -> panelde kasma) */
-      var busy = k !== lastRK || window.v60Active || anyMoving() || (now - lastRT) > (_bsh ? (LOWQ ? 1e9 : 1200) : (curPR > PRLO ? 1500 : (LOWQ ? 1000 : 250))) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
+      var busy = k !== lastRK || window.v60Active || (window.__anim216 && now < window.__anim216) || anyMoving() || (now - lastRT) > (_bsh ? (LOWQ ? 1e9 : 1200) : (curPR > PRLO ? 1500 : (LOWQ ? 1000 : 250))) || forceR > 0;   /* V143: yüksek çözünürlükte (kare ~150 ms) yalnızca bulut için sık çizme */
       var _mv = k !== lastRK || window.v60Active || anyMoving() || introStart;
       if (_mv) { idleSince = now; if (curPR !== PRLO) setPR(PRLO); busy = true; }
       else if (_bsh) { idleSince = now + 900; if (curPR !== PRLO) { setPR(PRLO); busy = true; } }   /* panel kapanınca PRHI'ye ~1,2 sn sonra geç: tuval yeniden ayırma kapanış geçişiyle çakışmasın */   /* V161: panel açıkken yüksek çözünürlüğe geçip tuvali yeniden ayırma */

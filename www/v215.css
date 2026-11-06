@@ -1,0 +1,57 @@
+/* V215 — (1) olay penceresi: duraklatma menüsü şablonu + üst ortada dikdörtgen görsel (assets/events, Figma)
+          (2) dereceli mücadele profil ekranı (şövalye avatarları, assets/avatars, Figma)
+   Geri almak için index.html'den v215.css ve v215.js bağlantılarını silin. */
+
+/* ---------- (1) olay penceresi ---------- */
+#ev76.ev215o{background:#0b0a07d9;padding:12px}
+.ev215{position:relative;width:min(92vw,420px);max-height:calc(100% - 16px);overflow:auto;padding:14px 16px 14px;border:2px solid #8f7b4c;border-radius:4px;
+  background:linear-gradient(180deg,#3d352b,#2a251e);box-shadow:0 22px 60px #000c;color:#f3e8c8;font-family:Georgia,'Times New Roman',serif;text-align:center;
+  animation:ev215in .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes ev215in{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.ev215::after{content:"";position:absolute;inset:6px;border:1px solid rgba(143,123,76,.35);pointer-events:none}
+.ev215>i{position:absolute;width:16px;height:16px;border-color:#cdb06a;border-style:solid;pointer-events:none;z-index:2}
+.ev215>i.c1{left:10px;top:10px;border-width:1px 0 0 1px}.ev215>i.c2{right:10px;top:10px;border-width:1px 1px 0 0}
+.ev215>i.c3{left:10px;bottom:10px;border-width:0 0 1px 1px}.ev215>i.c4{right:10px;bottom:10px;border-width:0 1px 1px 0}
+.ev215 .im215{position:relative;width:calc(100% - 8px);margin:2px auto 10px;aspect-ratio:16/9;border:1px solid #8f7b4c;border-radius:2px;
+  background:#1a1611 center/cover no-repeat;box-shadow:inset 0 0 0 1px #0008,0 6px 18px #0009}
+.ev215 .im215::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,#2a251e66 100%);pointer-events:none}
+.ev215 .kick215{display:block;font:700 10px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.3em;color:#cdb06a;margin-bottom:2px}
+.ev215 h3{margin:0 0 6px;font:700 19px/1.2 Georgia,'Times New Roman',serif;color:#f6ead0;letter-spacing:.01em}
+.ev215 p{margin:0 0 12px;font-size:14px;line-height:1.42;color:#e6dac0}
+.ev215 p b{color:#fff}
+.ev215 .ch215{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left}
+.ev215 .c215{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ev215 .b76{width:100%;padding:11px 8px;border-radius:4px;border:1px solid #ffffff24;font:700 14px Georgia,'Times New Roman',serif;cursor:pointer;color:#f6f0e4;background:#ffffff14}
+.ev215 .b76.y{background:linear-gradient(180deg,#f4c95a,#d49a1f);border-color:#ffe29a;color:#2b1c00}
+.ev215 .b76:active{filter:brightness(1.12)}
+.ev215 ul{list-style:none;margin:0;padding:0 2px;font:600 11.5px/1.35 system-ui,-apple-system,Roboto,sans-serif}
+.ev215 li{margin:2px 0;color:#cfc4a4}
+.ev215 li i{font-style:normal;margin-right:3px}
+.ev215 li.g{color:#9fd78a}.ev215 li.b{color:#f0a090}
+
+/* ---------- (2) profil ekranı ---------- */
+.pf215{position:relative;text-align:center;font-family:Georgia,'Times New Roman',serif;color:#f3e8c8}
+.pf215 .hd{display:flex;align-items:center;gap:12px;margin:2px 0 12px;text-align:left}
+.pf215 .hd .av{width:76px;height:76px;flex:0 0 76px;border-radius:50%;border:2px solid #cdb06a;background:#1a1611 center/cover;box-shadow:0 0 0 3px #2a251e,0 6px 16px #000a}
+.pf215 .hd b{display:block;font-size:20px;color:#fff;line-height:1.15;word-break:break-word}
+.pf215 .hd small{display:block;font:700 10px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.24em;color:#cdb06a;margin-top:3px}
+.pf215 .hd em{display:block;font-style:normal;font-size:12.5px;color:#cfc4a4;margin-top:2px}
+.pf215 h4{margin:12px 0 6px;font:700 10px system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.28em;color:#cdb06a;text-align:left}
+.pf215 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pf215 .grid button{position:relative;aspect-ratio:1;border-radius:50%;border:2px solid #6e5f3c;background:#1a1611 center/cover;padding:0;cursor:pointer;box-shadow:0 4px 10px #0008;transition:transform .15s,border-color .15s}
+.pf215 .grid button.on{border-color:#f5c75a;box-shadow:0 0 0 3px #f5c75a55,0 4px 12px #000a;transform:scale(1.05)}
+.pf215 .grid button.on::after{content:"✔";position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:#f5c75a;color:#2b1c00;font:700 12px/20px system-ui;text-align:center}
+.pf215 input.nm{width:100%;box-sizing:border-box;padding:11px 12px;border-radius:4px;border:1px solid #8f7b4c;background:#1a1611;color:#fff;font:600 16px Georgia,'Times New Roman',serif;outline:none}
+.pf215 input.nm:focus{border-color:#f5c75a}
+.pf215 .err{min-height:16px;font:600 12px system-ui;color:#f0a090;text-align:left;margin-top:4px}
+.pf215 .ti{display:flex;flex-wrap:wrap;gap:6px}
+.pf215 .ti button{flex:1 1 auto;padding:7px 10px;border-radius:999px;border:1px solid #6e5f3c;background:#ffffff0d;color:#e6dac0;font:600 12.5px Georgia,serif;cursor:pointer}
+.pf215 .ti button.on{border-color:#f5c75a;background:#f5c75a22;color:#fff}
+.pf215 .st{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pf215 .st div{background:#ffffff12;border:1px solid #ffffff1a;border-radius:8px;padding:6px 2px}
+.pf215 .st b{display:block;font-size:16px;color:#fff}
+.pf215 .st small{display:block;font:600 8.5px system-ui;letter-spacing:.08em;color:#cfc4a4;margin-top:1px}
+.pf215 .act{display:grid;gap:8px;margin-top:14px}
+.av215{display:inline-block;width:26px;height:26px;border-radius:50%;border:1px solid #cdb06a;background:#1a1611 center/cover;vertical-align:middle;flex:0 0 auto}
+.av215.lg{width:56px;height:56px;border-width:2px}
+.wcr-plate .av215{margin-right:8px}

@@ -682,29 +682,60 @@
   }
 
   /* V72: animasyon ön hazırlığı — dosya + model/doku üretimi oyun açıkken boş zamanda yapılır; saldırıda donma olmaz */
+  /* V215: ön hazırlıklar oyunun yoğun anlarını beklesin: yeni oyunun küre yaklaşması (intro), ana menü, savaş, animasyon.
+     Eskiden küre kurulur kurulmaz başlıyordu ve tam yaklaşma sırasında ~0,6 sn'lik (4x yavaş işlemcide) donmalar yapıyordu. */
+  function busy215() {
+    try {
+      if (!A() || !A().ready()) return true;
+      if (window.v30IntroBusy && v30IntroBusy()) return true;
+      if (document.body.classList.contains('wcm-on')) return true;
+      if (play || (typeof BSH !== 'undefined' && BSH)) return true;
+      if (window.__v30introEnd && performance.now() - window.__v30introEnd < 1200) return true;   /* yaklaşma bittikten sonra kısa bir nefes */
+    } catch (e) { }
+    return false;
+  }
+  function idle215(fn) { if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 3000 }); else setTimeout(fn, 250); }
   function warm() {
     try {
       if (bad || fx) return;
-      var a = A(); if (!a || !a.ready()) { setTimeout(warm, 4000); return; }
-      loadFx().then(function () { try { if (!fx && A() && A().ready()) ensureFx(); if (fx) setTimeout(function () { precompile212(fx); }, 600); } catch (e) { } }, function () { });
+      if (busy215()) { setTimeout(warm, 1500); return; }
+      loadFx().then(function () { idle215(function () { try { if (busy215()) { setTimeout(warm, 1500); return; } if (!fx && A() && A().ready()) ensureFx(); if (fx) setTimeout(function () { precompile212(fx); }, 800); } catch (e) { } }); }, function () { });
     } catch (e) { }
   }
   /* V212: SHADER ÖN DERLEMESİ. Savaş animasyonunun ilk karesinde tank/asker/gemi/patlama malzemelerinin shader'ları derleniyordu
      (ölçüm: ilk sahnede gl.render ~270-400 ms donma). Boşta her modelden ve her efektten birer örnek görünmeden sahneye konup derlenir;
      örnekler sahneden çıkarılır ama malzemeleri SİLİNMEZ (silinirse derlenen program da atılır). Oyun/animasyon akışı değişmez. */
   var pre212 = false;
+  /* V215: modeller/efektler artık TEK SEFERDE değil, her boşta (requestIdleCallback) bir tane kurulur; oyun yoğunsa (busy215) beklenir.
+     Hepsi hazır olunca derleme (compileAsync) yapılır. Savaş başlarsa yarıda kalır, sonra kaldığı yerden sürer. */
   function precompile212(f) {
-    if (pre212 || !f || play) return; var a = A(); if (!a || !a.ready()) return; pre212 = true;
+    if (pre212 || !f) return; var a = A(); if (!a || !a.ready()) return; pre212 = true;
+    var T = a.THREE(), p = new T.Vector3(0, 0, 0), M = window.WCBattleFX && window.WCBattleFX.models, built = [];
+    var jobs = [function () { f.explosion(p, 1); }, function () { f.debris(p, 1); }, function () { f.dust(p, 1, 4); }, function () { f.deploy(p, 1, 0x3b82f6, 2); },
+      function () { f.muzzle(p, new T.Vector3(1, 0, 0), 1, true); }, function () { f.splash(p, 1); }, function () { f.waterBlast(p, 1); }, function () { f.blob(p, 1); }];
+    if (M) Object.keys(M).forEach(function (k) { jobs.push(function () { var o = M[k](0x3b82f6); if (o && o.isObject3D) built.push(o); }); });
+    var fxObjs = [], wasVis0 = f.root.visible;
+    (function step(dl) {
+      if (busy215()) { setTimeout(function () { idle215(step); }, 1200); return; }
+      var t0 = performance.now();
+      while (jobs.length && (performance.now() - t0 < 6) && (!dl || !dl.timeRemaining || dl.timeRemaining() > 3)) {
+        var j = jobs.shift(), before = new Set(f.objs || []);
+        try { j(); } catch (e) { }
+        try { (f.objs || []).forEach(function (o) { if (!before.has(o)) { fxObjs.push(o); f.objs.delete(o); if (o.parent) o.parent.remove(o); } }); } catch (e) { }   /* efekt nesneleri sahnede/listede bekletilmez */
+        f.root.visible = wasVis0;
+      }
+      if (jobs.length) { idle215(step); return; }
+      try { f.clear(); } catch (e) { }
+      compileAll(a, f, built.concat(fxObjs));
+    })();
+  }
+  function compileAll(a, f, objs) {
+    if (busy215()) { setTimeout(function () { idle215(function () { compileAll(a, f, objs); }); }, 1200); return; }
     var keep = window.__v212keep = [], wasVis = f.root.visible;
     try {
-      var T = a.THREE(), r = a.renderer(), cam = a.camera(), scn = a.globe(); while (scn.parent) scn = scn.parent;
-      var p = new T.Vector3(0, 0, 0), M = window.WCBattleFX && window.WCBattleFX.models;
-      f.root.visible = true;
-      [function () { f.explosion(p, 1); }, function () { f.debris(p, 1); }, function () { f.dust(p, 1, 4); }, function () { f.deploy(p, 1, 0x3b82f6, 2); },
-       function () { f.muzzle(p, new T.Vector3(1, 0, 0), 1, true); }, function () { f.splash(p, 1); }, function () { f.waterBlast(p, 1); }, function () { f.blob(p, 1); }]
-        .forEach(function (fn) { try { fn(); } catch (e) { } });
-      if (M) Object.keys(M).forEach(function (k) { try { var o = M[k](0x3b82f6); if (o && o.isObject3D) { f.root.add(o); keep.push(o); } } catch (e) { } });
-      var mine = Array.from(f.objs || []);   /* yalnızca ön derlemenin eklediği nesneler (derleme sürerken savaş başlarsa onunkilere dokunulmaz) */
+      var r = a.renderer(), cam = a.camera(), scn = a.globe(); while (scn.parent) scn = scn.parent;
+      f.root.visible = true; objs.forEach(function (o) { f.root.add(o); keep.push(o); });
+      var mine = [];
       var done = function () {
         try {
           mine.forEach(function (o) { f.root.remove(o); if (f.objs) f.objs.delete(o); keep.push(o); });   /* dispose edilmeden çıkarılır */

@@ -18,7 +18,7 @@
       return ownedN(G.pl) === 0 || !!(G.over && G.over.w === -1 && !G.over.tl);   /* süre sonu (tl) sonucu V139 ekranında kalır */
     } catch (e) { return false; }
   }
-  var shown = false, home = null, snap = null, lostAt = 0;
+  var shown = false, home = null, snap = null, lostAt = 0, resAt = 0;
 
   function chip(v, k) { return '<div><b>' + v + '</b><small>' + k + '</small></div>'; }
   function btn(ic, label, fn, cls) { return '<button type="button" class="c141b ' + (cls || '') + '" onclick="' + fn + '"><span class="ic">' + ic + '</span><span class="lb">' + label + '</span></button>'; }
@@ -69,7 +69,7 @@
     try { document.body.classList.add('go214on'); } catch (e) { }
   }
   function open214() { var bx = document.getElementById('box'), m = document.getElementById('mod'); return !!(bx && m && m.style.display === 'flex' && bx.querySelector('.go214')); }
-  function reset() { shown = false; snap = null; lostAt = 0; try { document.body.classList.remove('go214on'); var m = document.getElementById('mod'); if (m) m.classList.remove('go214m'); } catch (e) { } }
+  function reset() { shown = false; snap = null; lostAt = 0; resAt = 0; try { document.body.classList.remove('go214on'); var m = document.getElementById('mod'); if (m) m.classList.remove('go214m'); } catch (e) { } }
 
   window.v214Again = function (same) {
     var c = home || (snap && snap.c);
@@ -122,20 +122,26 @@
       killOld();
       if (!G) { if (shown) reset(); return; }
       if (document.body.classList.contains('wcm-on')) return;
-      if (!lost()) { if (shown && G.ph !== 'over') reset(); lostAt = 0; return; }
+      if (!lost()) { if (shown && G.ph !== 'over') reset(); lostAt = 0; resAt = 0; return; }
       if (!home && G.pl) home = G.pl;
       if (open214()) return;
       var m = document.getElementById('mod'), bx = document.getElementById('box');
       if (shown && m && m.style.display === 'flex' && bx && bx.querySelector('.h139')) return;   /* oyun geçmişi açık */
       if (!lostAt) lostAt = Date.now();
-      var dt = Date.now() - lostAt, bshOn = typeof BSH !== 'undefined' && BSH;
-      if (window.v60Active && dt < 20000) return;
-      if (bshOn && document.querySelector('#fn button') && dt < 8000) return;
-      if (bshOn && !document.querySelector('#fn button') && dt < 12000) return;   /* savaş paneli sonuca ilerliyor */
-      if (bshOn && typeof closeBattle === 'function') { try { closeBattle(); } catch (e) { } }
+      /* V215: kart artık hızlı gelir. Yenilgide savaş animasyonu (karşı saldırı) atlanır; savaş panelinin sonucu ("YENİLGİ")
+         1,2 sn gösterilip kart açılır. Panel sonuca ulaşamazsa en çok 6 sn beklenir. (Eskiden: animasyon 20 sn'ye, "Haritaya Dön" 8 sn'ye kadar beklenirdi.) */
+      var now = Date.now(), dt = now - lostAt, bshOn = typeof BSH !== 'undefined' && BSH, resUp = !!document.querySelector('#fn button');
+      if (window.v60Active) { try { if (window.v60Skip) v60Skip(); } catch (e) { } }
+      if (bshOn) {
+        if (resUp && !resAt) resAt = now;
+        if (!resUp) { try { var g0 = document.getElementById('go'), bs0 = document.getElementById('bs'); if (g0 && g0.offsetParent) g0.click(); else if (bs0 && bs0.offsetParent) bs0.click(); } catch (e) { } }   /* V215: yenilgide zar/karşılaştırma animasyonu hızlandırılır (panele dokunma = geç) */
+        if (!resUp && dt < 6000) return;              /* zarlar/karşılaştırma sürüyor */
+        if (resUp && now - resAt < 1200) return;      /* "YENİLGİ" kısa süre görünsün */
+        if (typeof closeBattle === 'function') { try { closeBattle(); } catch (e) { } }
+      }
       show();
     } catch (e) { }
-  }, 400);
+  }, 200);
   /* yeni oyunda ülke takibi (aynı ülkeyle tekrar için) */
   setInterval(function () { try { if (G && solo5() && ownedN(G.pl) > 0 && !G.over) { home = G.pl; if (shown) reset(); } } catch (e) { } }, 1500);
 })();
