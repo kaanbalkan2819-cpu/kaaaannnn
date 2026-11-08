@@ -1,0 +1,25 @@
+name: Build APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [pixel-kus]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - name: Sabit imza anahtari (guncellemeler ustune kurulabilsin)
+        run: |
+          mkdir -p ~/.android
+          echo "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" | base64 -d > ~/.android/debug.keystore
+      - run: npm install
+      - run: node scripts/setup_android.js
+      - run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pixel-kus-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk

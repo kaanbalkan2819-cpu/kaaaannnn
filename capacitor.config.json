@@ -1,0 +1,8 @@
+{
+  "appId": "com.pixelkus.dortmevsim",
+  "appName": "4 Mevsim Uçuş",
+  "webDir": "www",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false },
+  "backgroundColor": "#6ec6ff"
+}
