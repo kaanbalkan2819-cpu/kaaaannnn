@@ -160,10 +160,11 @@
     { id: 'spy', ic: '🕵', n: ['Casus Ağı', 'Spy Network'], d: ['Menzilindeki tüm ülkelerin değerleri açılır', 'Reveals the stats of every country in reach'], p: 30 },
     { id: 'peace', ic: '📜', n: ['Huzur Fermanı', 'Edict of Peace'], d: ['5 tur boyunca isyan çıkmaz', 'No rebellions for 5 turns'], p: 35 },
     { id: 'envoy', ic: '🕊', n: ['Elçi Hediyesi', 'Envoy Gifts'], d: ['Komşularla ilişkiler iyileşir, teklifler daha kolay kabul edilir', 'Neighbours warm to you; offers are accepted more easily'], p: 30 },
-    { id: 'nuke', ic: '☢', n: ['Atom Bombası', 'Atom Bomb'], d: ['Menzilindeki bir ülkeyi anında ele geçir (her 3 turda bir)', 'Seize a country in reach at once (once every 3 turns)'], p: 2500 }   /* V222 */
+    { id: 'nuke', ic: '☢', n: ['Atom Bombası', 'Atom Bomb'], d: ['Satın al, cephaneliğinde dursun; oyunda menzilindeki bir ülkeyi anında ele geçir (her 3 turda bir)', 'Buy it for your arsenal; in-game seize a country in reach at once (once every 3 turns)'], p: 2500 }   /* V223: stoklu */
   ];
   function canUse(it) {
     try {
+      if (it.id === 'nuke') return '';   /* V223: bomba her yerde satın alınır (stoğa girer) */
       if (!solo() || G.over) return X('Oyun içinde kullanılabilir', 'Only in-game');
       if (it.id === 'move' && G.ph !== 'act') return X('Kendi turunda kullan', 'Use on your turn');
       if (it.id === 'merc' && G.merc220) return X('Zaten etkin', 'Already active');
@@ -190,7 +191,8 @@
       '<div class="bal220"><span>🪙</span><b>' + g + '</b><small>' + X('altının', 'your gold') + '</small></div>' +
       '<div class="tabs219"><button type="button" class="' + (TAB === 'adv' ? 'on' : '') + '" onclick="v220Shop.tab(\'adv\')">' + X('Avantajlar', 'Boosts') + '</button><button type="button" class="' + (TAB === 'buy' ? 'on' : '') + '" onclick="v220Shop.tab(\'buy\')">' + X('Altın Al', 'Buy Gold') + '</button></div><div class="sg220">';
     if (TAB === 'adv') {
-      ITEMS.forEach(function (it) {
+      ITEMS.slice().sort(function (a, b) { return (b.id === 'nuke') - (a.id === 'nuke'); }).forEach(function (it) {   /* V223: bomba en üstte */
+        if (it.id === 'nuke' && window.WCNuke) { h += WCNuke.shopRow(it, g); return; }   /* V223: stok + kullan düğmesi */
         var why = canUse(it), ok = !why && g >= it.p;
         h += '<div class="si220"><i>' + it.ic + '</i><div><b>' + X(it.n[0], it.n[1]) + '</b><small>' + X(it.d[0], it.d[1]) + '</small>' + (why ? '<em>' + why + '</em>' : '') + '</div>' +
           '<button type="button" ' + (ok ? 'onclick="v220Shop.buy(\'' + it.id + '\')"' : 'disabled') + '>' + it.p + ' 🪙</button></div>';
@@ -213,11 +215,12 @@
     m.style.display = 'flex';
   }
   window.v220Shop = {
-    open: function () { if (!solo()) { try { toast(X('Dükkan oyun içinde açılır', 'The shop opens in-game')); } catch (e) { } return; } show(); },
+    open: function () { show(); },   /* V223: ana menüden de açılır (bomba satın almak için); oyun içi avantajlar yalnızca oyunda */
+    refresh: function () { var m = document.getElementById('mod'); if (m && m.style.display === 'flex' && document.querySelector('.shop220')) show(); },
     tab: function (t) { TAB = t; show(); },
     buy: function (id) {
       var it = ITEMS.filter(function (x) { return x.id === id; })[0]; if (!it || canUse(it)) return;
-      if (id === 'nuke') { var gg = 0; try { gg = Gold.get(); } catch (e) { } if (gg < it.p) { try { toast(X('Yeterli altının yok', 'Not enough gold')); } catch (e) { } return; } if (window.v222NukePick) v222NukePick(); return; }   /* V222: ücret bomba atılınca */
+      if (id === 'nuke') { if (window.WCNuke) WCNuke.buy(it.p); show(); return; }   /* V223: alınan bomba stoğa girer */
       if (!window.Gold || !Gold.spend(it.p, 'shop220-' + id)) { try { toast(X('Yeterli altının yok', 'Not enough gold')); } catch (e) { } return; }
       use(it); if (id === 'nuke') return; try { toast(it.ic + ' ' + X(it.n[0] + ' alındı', it.n[1] + ' bought')); } catch (e) { } show();
     }

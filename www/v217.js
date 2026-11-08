@@ -10,7 +10,7 @@
 
   /* ---------- (4) gerçekçi kılıç (v208 savaş paneli bunu kullanır) ----------
      Görsel ucu yukarı; kılıç birimi: uç y=-104, siper y≈+12 (çizimdeki ölçülerle aynı yerde çarpışır). */
-  var SW_IMG = new Image(); SW_IMG.src = 'assets/art/sword217.png';
+  var SW_IMG = new Image(); SW_IMG.src = 'assets/art/sword223.png';
   window.WCSWORD217 = { src: 'assets/art/sword217.png', w: 31, h: 153, px: 15.5, py: 104 };
 
   /* ---------- (1) çapraz kılıç görseli ---------- */
@@ -23,7 +23,7 @@
       if (!window.WCSwordClash) return '';
       var host = document.createElement('div'); host.style.cssText = 'position:fixed;left:-500px;top:0;width:10px;height:10px;opacity:0;pointer-events:none';
       document.body.appendChild(host);
-      var sc = WCSwordClash.mount(host, { width: 130, height: 130, scale: .66, originY: .40, holdFinal: true, sound: false, sprite: null });   /* V218: savaş paneliyle aynı çizim kılıçlar */
+      var sc = WCSwordClash.mount(host, { width: 130, height: 130, scale: .66, originY: .40, holdFinal: true, sound: false, sprite: { src: 'assets/art/sword223.png', w: 35, h: 161, px: 17.5, py: 104 } });   /* V223: savaş paneliyle aynı gerçekçi kılıç */
       sc.active = true; sc.mode = 'once'; sc.animT = 1e6; sc._now = 0; sc._render();
       swordURL = sc.canvas.toDataURL('image/png');
       sc.destroy(); host.remove();

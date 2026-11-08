@@ -79,7 +79,7 @@
     try {
       if (!solo() || !tg || !M[tg]) return; var e = G.owner[tg];
       if (typeof e !== 'string' || e === G.pl || !targets(G.pl, G.owner)[tg]) return;
-      if (!window.Gold || !Gold.spend(2500, 'nuke222')) { try { toast(X('Yeterli altının yok', 'Not enough gold')); } catch (x) { } return; }   /* ücret bomba atılınca */
+      if (!window.WCNuke || !WCNuke.take()) { try { toast(X('Cephaneliğinde atom bombası yok — Dükkândan al', 'No atom bomb in your arsenal — buy one in the Shop')); } catch (x) { } return; }   /* V223: stoktan düşülür */
       try { closeMod(); } catch (x) { }
       G.nuke222 = turn();
       try { if (window.v30FocusOn) v30FocusOn(tg); } catch (x) { }

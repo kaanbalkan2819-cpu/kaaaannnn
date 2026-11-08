@@ -87,7 +87,7 @@
       h += '<button type="button" class="col219i n' + (ok ? ' ok' : '') + '" style="animation-delay:' + Math.min(.6, i * .006).toFixed(3) + 's" onclick="GS219.info(\'n\',\'' + c + '\',this)">' +
         '<i style="background-image:url(' + surlC(c) + ')"></i><b>' + esc(cname(c)) + '</b></button>';
     });
-    return cnt(nNormal(), list.length, X('ülke mührü açıldı', 'country seals unlocked')) + '<div class="grid219 nn">' + h + '</div>';
+    return cnt(nNormal(), list.length, X('ülke mührü açıldı', 'country seals unlocked')) + (window.WCAch ? WCAch.html() : '') + '<div class="grid219 nn">' + h + '</div>';   /* V223: başarımlar */
   }
   function page() {
     var hint = TAB === 'gold' ? X('Bir mühre dokun: bölgesi, açma koşulu ve avantajı. Bir bölgenin tüm ülkelerini aynı oyunda fethedersen mühür açılır ve canlı rengine döner.',
@@ -102,6 +102,7 @@
   }
   function render() { var bx = document.getElementById('box'); if (bx) { bx.innerHTML = page(); try { if (window.v156Decorate) v156Decorate(); } catch (e) { } } }
   window.GS219 = {
+    total: nAll, got: nNormal,   /* V223 */
     open: function (tab) {
       if (tab) TAB = tab;
       var m = document.getElementById('mod'), bx = document.getElementById('box'); if (!m || !bx) return;

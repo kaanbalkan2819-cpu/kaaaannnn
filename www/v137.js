@@ -121,7 +121,7 @@
   function turnMsg(i) {
     var a = [];
     if (i.extra) a.push('⚡ ' + X('Seferberlik: +1 hamle (−' + r1(i.extra.cost) + ' 💰)', 'Mobilization: +1 move (−' + r1(i.extra.cost) + ' 💰)'));
-    if (typeof i.net === 'number' && Math.abs(i.net) >= .05) {
+    if (false && typeof i.net === 'number' && Math.abs(i.net) >= .05) {   /* V223: bakım/enflasyon bilgisi gösterilmez */
       a.push('💰 ' + (i.net >= 0 ? '+' : '') + r1(i.net) + (i.upk > .05 ? ' · ' + X('bakım −', 'upkeep −') + r1(i.upk) : '') + (i.decay > .05 ? ' · ' + X('enflasyon −', 'inflation −') + r1(i.decay) : ''));
     }
     return a.join('  •  ');

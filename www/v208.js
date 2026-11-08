@@ -20,7 +20,7 @@
         quality: (navigator.hardwareConcurrency || 4) <= 4 ? 'low' : 'high',
         timeScale: sp, holdFinal: true, sound: !!S.sfxOn, volume: vol,
         attacker: '#3b82f6', defender: '#ef4444',
-        sprite: null   /* V218: kullanıcı isteğiyle eski çizim (iki kılıç ortada çapraz birleşir) geri geldi. ESKİ V217: V217: Figma'da üretilen gerçekçi çelik kılıç (assets/art/sword217.png); çizgi film görünümlü çizim yerine */
+        sprite: { src: 'assets/art/sword223.png', w: 35, h: 161, px: 17.5, py: 104 }   /* V223: Figma ile üretilen gerçekçi kılıç (ikinci hesap); aynı çapraz çarpışma hareketi. ESKİ V218: kullanıcı isteğiyle eski çizim (iki kılıç ortada çapraz birleşir) geri geldi. ESKİ V217: V217: Figma'da üretilen gerçekçi çelik kılıç (assets/art/sword217.png); çizgi film görünümlü çizim yerine */
       });
       prev.playOnce();
     } catch (e) { try { var s2 = document.getElementById('sx'); if (s2) { s2.removeAttribute('data-wcsc'); Array.prototype.forEach.call(s2.querySelectorAll('.swd'), function (n) { n.style.display = ''; }); } } catch (x) { } }

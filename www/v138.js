@@ -339,7 +339,7 @@
     modal('<div class="polx"><div class="polhd"><b>✉ ' + X('Elçi Gönder', 'Send Envoy') + '</b><span class="polsub">' + esc(nm(e)) + '</span>' +
       '<button class="polcl" onclick="closeMod()" aria-label="close">✕</button></div>' +
       relBar(r) + why(e) + (chips ? '<div class="d38-chips">' + chips + '</div>' : '') +
-      '<div class="polscroll">' + friendRow + pactRow + more + worldDeals221() + '</div></div>');
+      '<div class="polscroll">' + friendRow + pactRow + more + '</div></div>');   /* V223: dünya anlaşmaları Diplomasi menüsüne taşındı */
   }
   window.v138Sheet = function (e) { sheet(e || selE()); };
   window.v138Via = function (fn) {   // v23.js içindeki eski elçi alt ekranlarını (ENV gerektirir) tek sayfadan aç
@@ -503,7 +503,7 @@
     modal('<div class="d38 d218"><div class="d218h"><h3>🕊 ' + X('Diplomasi', 'Diplomacy') + '</h3><button class="d218x" onclick="closeMod()" aria-label="close">✕</button></div><div class="d218c"><div class="d218l">' +
       /* V222: zar/güven/itibar şeridi kaldırıldı */
       '<div class="d38-inc">' + (inc > 0 ? '🪙 ' + X('Barış geliri: ', 'Peace income: ') + '<b>+' + (Math.round(inc * 100) / 100) + '</b>' + X(' / tur', ' / turn') : (d.agg >= PEACE_AGG_MAX ? '⚠ ' + X('Saldırgan itibarın barış gelirini kesti', 'Your aggressive reputation cut the peace income') : X('Pakt ve ittifaklar tur başına gelir getirir', 'Pacts and alliances bring income each turn'))) + '</div>' +
-      '<div class="d38-sec">' + X('Aktif anlaşmalar', 'Active deals') + '</div>' + activeDeals() +
+      '<div class="d38-sec">' + X('Aktif anlaşmaların', 'Your active deals') + '</div>' + activeDeals() + worldDeals221() +   /* V223 */
       '<details class="d38-rules"><summary>' + X('Kurallar', 'Rules') + '</summary><ul>' +
       '<li>' + X('<b>İlişki</b> −100…+100: ittifak/pakt/yardım artırır; savaş, haraç, kışkırtma düşürür; zamanla sıfıra yaklaşır.', '<b>Relations</b> −100…+100: alliances/pacts/help raise; war, tribute and incitement lower; they drift to zero.') + '</li>' +
       '<li>' + X('<b>İttifak</b>: ilişki en az Nötr ve güven ≥ 30; ' + ALLY_TURNS + ' tur; en çok ' + MAXCO + ' devlet. Süre dolunca cezasız biter, erken çıkış güveni düşürür.', '<b>Alliance</b>: relations at least Neutral, trust ≥ 30; ' + ALLY_TURNS + ' turns; max ' + MAXCO + ' states. Expiry is free; leaving early costs trust.') + '</li>' +

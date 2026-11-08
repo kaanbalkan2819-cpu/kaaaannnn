@@ -26,8 +26,8 @@
     var id = G.pl, v = st(id), S = (T[L] || T.tr).S, owned = 0, k;
     for (k in G.owner) if (G.owner[k] === id) owned++;
     var h = '<div class="h">' + (typeof fimg === 'function' ? fimg(id) : '') + '<div><b>' + M[id].name + '</b><small>' + X('Senin ülken', 'Your country') + ' · ' + owned + ' ' + X('toprak', 'territories') + '</small></div><button class="x" aria-label="close">✕</button></div>';
-    var IC220 = ['pop', 'army', 'eco', 'tech'];   /* V221: yeni madalyon simgeleri; Diplomasi satırı yok */
-    for (var i = 0; i < 4; i++) h += '<div class="r"><span><img class="wci" alt="" src="' + ((window.WC_ICONS && WC_ICONS[IC220[i]]) || '') + '" style="width:22px;height:22px"></span><span><em>' + S[i] + '</em><div class="bar"><i style="width:' + Math.max(3, Math.min(100, v[i])) + '%"></i></div></span><b>' + v1(v[i]) + '</b></div>';
+    var IC220 = ['pop', 'army', 'eco', 'tech', 'dip'];   /* V223: Diplomasi satırı geri geldi (5 değer) */
+    for (var i = 0; i < 5; i++) h += '<div class="r"><span><img class="wci" alt="" src="' + ((window.WC_ICONS && WC_ICONS[IC220[i]]) || '') + '" style="width:22px;height:22px"></span><span><em>' + S[i] + '</em><div class="bar"><i style="width:' + Math.max(3, Math.min(100, v[i])) + '%"></i></div></span><b>' + v1(v[i]) + '</b></div>';
     if (card.__h === h) return;   /* V134: içerik aynıysa DOM yeniden kurulmaz (600 ms yoklamada boşa iş + dokunma kaybı) */
     card.__h = h; card.innerHTML = h;
     card.querySelector('.x').onclick = function (e) { e.stopPropagation(); toggle(false); };

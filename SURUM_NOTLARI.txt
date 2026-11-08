@@ -1156,3 +1156,14 @@ V222 ek (ikinci Figma hesabı, dosya 4KKFs7RTdjWBnlHa2wHz0a):
 - Atom bombası: Figma ile üretilen gerçek mantar bulutu görseli (assets/art/nuke222.png, şeffaf). Hedef ülkenin üstünde patlar; bulut ekranın üstünden taşmaz.
 - Elçi Gönder düğmesi: Figma atlı elçi görseli (assets/art/envoy222.jpg).
 - Ülkeye özel yeni mühürler (assets/stamps/c): Almanya (Reichsadler), Meksika (kaktüs-kartal-yılan), Polonya (taçlı kartal), Arnavutluk (çift başlı kartal), İtalya (Roma dişi kurdu), Portekiz (Barcelos horozu). Toplam 17 ülkeye özel mühür.
+
+=================== V223 ===================
+- Teklif taahhütleri: pakt/ittifak/barış teklifini kabul edince söz verilen değer (ör. Teknoloji) belirgin artar (en az +%12 / +3) ve ekranda "+X" gösterilir.
+- Atom bombası cephaneliği: Dükkân'dan 2500 altına alınır, stokta durur (wc_nuke223). Oyunda Dükkân'daki "Kullan" düğmesi veya sağ kare menüdeki ☢ düğmesi ile atılır (3 turda bir). Dükkân artık ana menüden de açılır.
+- Mühür başarımları: her 20 mühürde bir başarım (Sınır Muhafızı … Efsane Fatih); tüm mühürler toplanınca "Dünya Hâkimi" + 3 atom bombası hediye. Mühürler sayfasında başarım şeridi.
+- Diplomasi (sağ kare menü): aktif anlaşmalarının altında dünyadaki ittifak ve paktlar da listelenir (Elçi Gönder ekranından buraya taşındı).
+- Ülkem kartında Diplomasi satırı geri geldi (5 değer).
+- Savaş paneli kılıçları: Figma ile üretilen gerçekçi şövalye kılıcı (assets/art/sword223.png), aynı çarpışma hareketi.
+- Haritadaki savaş animasyonları büyütüldü (SC 0.06 → 0.085, en küçük ölçek sınırı yükseltildi).
+- Tur başındaki "bakım / enflasyon" bilgisi kaldırıldı; yardım metnindeki ilgili cümle sadeleştirildi.
+- Sağ kare menü: Diplomasi, Kalkınma ve Atom Bombası düğmeleri Figma ile üretilen kareyi dolduran görseller (dip223/dev223/nukebtn223.jpg).

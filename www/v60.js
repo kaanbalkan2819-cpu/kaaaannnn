@@ -7,7 +7,7 @@
    Atlanır: 2B harita, "hareketi azalt" (SET.rm), hızı 0 olan ayar, dosya yüklenemezse. */
 (function () {
   'use strict';
-  var SC = 0.06;         // V221: 0.054 -> 0.06 (saldıranın ülkesine göre biraz daha büyük; hedefe sığma denetimleri aynen). V218: 0.046 -> 0.054 (sığdığı sürece daha büyük; sınır denetimleri gerekirse küçültür). birim ölçeği (küre yarıçapı = 1): büyütürsen modeller büyür
+  var SC = 0.085;        // V223: 0.06 -> 0.085 (animasyonlar büyütüldü). V221: 0.054 -> 0.06 (saldıranın ülkesine göre biraz daha büyük; hedefe sığma denetimleri aynen). V218: 0.046 -> 0.054 (sığdığı sürece daha büyük; sınır denetimleri gerekirse küçültür). birim ölçeği (küre yarıçapı = 1): büyütürsen modeller büyür
   var ZOOM = 3.5;        // V71: başlangıç kamera uzaklığı biraz artırıldı (eski 2.7). Küçük = daha yakın; 1.5 en yakın. Sonra serbest
   var ZMIN = 3.0;        // V71: en yakın başlangıç uzaklığı (eski 2.2)
   var TINY = 4;   // V141: eski 7 -> 4. Küçük ülkelerin çoğu artık tank/piyade/uçak sahnesi alır; füze yalnızca gerçekten minik ülkelerde ve bazen
@@ -252,7 +252,7 @@
     var la = a.ll(from), lt = a.ll(tg); if (!la || !lt) return null;
     var T = a.THREE(), va = a.sph(la[0], la[1], 1), vt = a.sph(lt[0], lt[1], 1);
     var mid = va.clone().add(vt); if (mid.lengthSq() < 1e-6) mid = va.clone(); mid.normalize();
-    var scales = land ? [1, .75, .56, .42, .32, .24, .18, .13, .1, .08] : [1, .75, .56, .42, .32, .24, .18, .13]   /* V92: kara sahnesi sığana kadar küçülür */, best = null, cands = [], zs = [];
+    var scales = land ? [1, .8, .66, .54, .44, .36, .3] : [1, .8, .66, .54, .44, .36, .3]   /* V223: en küçük ölçek büyütüldü */   /* V92: kara sahnesi sığana kadar küçülür */, best = null, cands = [], zs = [];
     if (land && !MIDPT) { try { cands = borderCands(a, from, tg, va, vt); } catch (e) { cands = []; } }
     if (!cands.length) cands = [mid];
     if (land && MIDPT) {   /* V100: orta noktadan başla; birlik ayak izi savunan ülkeye/denize/3. ülkeye değerse saldıranın merkezine doğru çek */
@@ -406,7 +406,7 @@
       var bestP = Mm, bestB = 1e9, ks = [0, .12, .24, .36, .5, .65, .8, 1];
       for (var ki = 0; ki < ks.length; ki++) {
         var Pk = Mm.clone().multiplyScalar(1 - ks[ki]).add(va.clone().multiplyScalar(ks[ki])).normalize();
-        var dk = Math.acos(Math.max(-1, Math.min(1, Pk.dot(vt)))), sk0 = Math.max(SC * .4, Math.min(SC * 1.2 * sizeF(o.ids), dk / 9, ownExt(a, o.ids) / 5));
+        var dk = Math.acos(Math.max(-1, Math.min(1, Pk.dot(vt)))), sk0 = Math.max(SC * .4, Math.min(SC * 1.2 * sizeF(o.ids), dk / 9, ownExt(a, o.ids) / 3.2));
         var frk = frameAt(a, Pk, vt.clone().sub(Pk)), bk = fireFootBad(a, Pk, frk, sk0, o.ids, tg);
         if (bk < bestB) { bestB = bk; bestP = Pk; } if (bk === 0) break;
       }
@@ -504,10 +504,10 @@
     var la = a.ll(o.from), lt = llOf(a, tg); if (!la || !lt) return null;
     var T = a.THREE(), va = a.sph(la[0], la[1], 1), vt = a.sph(lt[0], lt[1], 1), P = launchPoint(a, o, va, vt, tg);
     var dt = Math.acos(Math.max(-1, Math.min(1, P.dot(vt))));
-    var sc = Math.max(SC * .4, Math.min(SC * 1.2 * sizeF(o.ids), dt / 9, ownExt(a, o.ids) / 5));   // V91: saldıran ülkeyle orantılı, kendi ülkesine sığar   // V71: sizeF artık mesafeye çarpılmaz (eskiden ateş hedefi aşıyordu)
+    var sc = Math.max(SC * .4, Math.min(SC * 1.2 * sizeF(o.ids), dt / 9, ownExt(a, o.ids) / 3.2));   // V91: saldıran ülkeyle orantılı, kendi ülkesine sığar   // V71: sizeF artık mesafeye çarpılmaz (eskiden ateş hedefi aşıyordu)
     if (dt / sc > 18) sc = Math.min(SC * 2.6, dt / 18);                       // uzak hedefte ölçek büyür: menzil ~18 birimi geçmez
     var fr = frameAt(a, P, vt.clone().sub(P));
-    try { sc = fitFireScale(a, P, fr, sc, o.ids, tg, SC * .1); } catch (eF) { }   // V92: birlikler kendi ülke sınırını aşmasın
+    try { sc = fitFireScale(a, P, fr, sc, o.ids, tg, SC * .45); } catch (eF) { }   // V92: birlikler kendi ülke sınırını aşmasın
     var lc = dt / sc;
     f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(fr.x, P, fr.z));
     if (!f.root.parent) a.globe().add(f.root);
@@ -575,10 +575,10 @@
     var la = a.ll(o.from), lt = llOf(a, tg); if (!la || !lt) return null;
     var T = a.THREE(), va = a.sph(la[0], la[1], 1), vt = a.sph(lt[0], lt[1], 1), P = launchPoint(a, o, va, vt, tg);
     var dt = Math.acos(Math.max(-1, Math.min(1, P.dot(vt))));
-    var sc = Math.max(SC * .5, Math.min(SC * 1.6 * sizeF(o.ids), dt / 6, ownExt(a, o.ids) / 4));   // V91: saldıran ülkeyle orantılı   // V72: küçük ülkede de büyük/okunur sahne
+    var sc = Math.max(SC * .5, Math.min(SC * 1.6 * sizeF(o.ids), dt / 6, ownExt(a, o.ids) / 2.6));   // V91: saldıran ülkeyle orantılı   // V72: küçük ülkede de büyük/okunur sahne
     if (dt / sc > 20) sc = Math.min(SC * 2.6, dt / 20);
     var fr = frameAt(a, P, vt.clone().sub(P)), pts = spread(tinyPts(a, tg), 6);
-    try { sc = fitFireScale(a, P, fr, sc, o.ids, tg, SC * .1); } catch (eF) { }   // V92: füze kamyonu / izi kendi ülke sınırını aşmasın
+    try { sc = fitFireScale(a, P, fr, sc, o.ids, tg, SC * .45); } catch (eF) { }   // V92: füze kamyonu / izi kendi ülke sınırını aşmasın
     if (!pts.length) return null;
     var tos = pts.map(function (q) { return up(localOf(a, fr, sc, q), .12); }), cen = { x: 0, y: 0, z: 0 };
     tos.forEach(function (q) { cen.x += q.x / tos.length; cen.z += q.z / tos.length; });

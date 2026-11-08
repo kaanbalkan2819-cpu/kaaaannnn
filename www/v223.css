@@ -1,0 +1,36 @@
+/* V223 — sağ kare menü görselleri (hepsi kareyi doldurur), bomba düğmesi, dükkân bomba satırı, başarımlar */
+.it221[data-k="dip"] i{background-image:url(assets/art/dip223.jpg)!important}
+.it221[data-k="dev"] i{background-image:url(assets/art/dev223.jpg)!important}
+.it221[data-k="nk"] i{background-image:url(assets/art/nukebtn223.jpg)!important}
+.it221 i{background-size:cover!important;background-position:center!important;inset:0!important;border-radius:9px!important}
+.it221[data-k="nk"].zero i{filter:grayscale(.75) brightness(.7)}
+.it221 .nkn223{position:absolute;right:-5px;bottom:-5px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:#b3261e;border:1px solid #ffd27a;
+  color:#fff;font:800 11px/16px system-ui,sans-serif;text-align:center;z-index:2;pointer-events:none}
+.it221[data-k="nk"].zero .nkn223{background:#4a4234;border-color:#8f7b4c}
+
+.si220.nk223{border-color:rgba(255,120,60,.55);background:linear-gradient(90deg,rgba(120,30,10,.35),rgba(0,0,0,.22))}
+.si220 .nkc223{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:9px;background:rgba(255,120,60,.18);border:1px solid rgba(255,140,80,.5);font:700 10.5px system-ui,sans-serif;color:#ffcfae;vertical-align:1px}
+.nkb223{display:flex;flex-direction:column;gap:4px;flex:0 0 auto!important}
+.si220 .nkb223 button.use{background:linear-gradient(180deg,#e2553b,#a3221a);border-color:#ffb08a;color:#fff}
+.si220 .nkb223 button[disabled]{opacity:.45;cursor:default}
+
+.ach223s{margin:4px 0 8px;padding:7px 8px;border-radius:8px;border:1px solid rgba(205,176,106,.35);background:rgba(0,0,0,.25)}
+.ach223t{font:700 12.5px Georgia,serif;color:#f3d98b;margin-bottom:5px}
+.ach223t em{font:500 10.5px system-ui,sans-serif;font-style:normal;color:#b9ad8c;margin-left:6px}
+.ach223r{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+.a223{flex:0 0 72px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 3px;border-radius:7px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);opacity:.55;text-align:center}
+.a223 i{font-style:normal;font-size:18px;filter:grayscale(1)}
+.a223 b{font:800 12px system-ui,sans-serif;color:#fff}
+.a223 small{font:500 9.5px/1.15 system-ui,sans-serif;color:#cfc4a4}
+.a223.ok{opacity:1;border-color:#e9c25a;background:linear-gradient(180deg,rgba(233,194,90,.22),rgba(0,0,0,.15))}
+.a223.ok i{filter:none}
+.a223.all{flex-basis:96px}
+
+.ach223{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));z-index:9999;display:flex;align-items:center;gap:10px;padding:9px 16px 9px 12px;border-radius:12px;
+  background:linear-gradient(160deg,rgba(58,43,12,.97),rgba(24,18,6,.97));border:1px solid #e9c25a;box-shadow:0 8px 26px #000c,0 0 18px rgba(233,194,90,.35);
+  transform:translate(-50%,-140%);opacity:0;transition:transform .45s cubic-bezier(.2,1.3,.4,1),opacity .3s;pointer-events:none;max-width:calc(100vw - 32px)}
+.ach223.on{transform:translate(-50%,0);opacity:1}
+.ach223>i{font-style:normal;font-size:28px}
+.ach223 small{display:block;font:800 9.5px system-ui,sans-serif;letter-spacing:.12em;color:#e9c25a}
+.ach223 b{display:block;font:700 15px Georgia,serif;color:#fff}
+.ach223 span{display:block;font:500 11px system-ui,sans-serif;color:#d9cca6}
