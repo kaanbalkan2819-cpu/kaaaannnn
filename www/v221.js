@@ -29,7 +29,7 @@
     try {
       var id = G.sel, o = id && G.owner[id];
       if (typeof o === 'string' && o !== G.pl && M[o]) { if (window.v138Sheet) v138Sheet(o); else if (window.v23Envoy) v23Envoy(); return; }
-      toast('✉ ' + X('Önce haritada elçi göndereceğin ülkeye dokun', 'First tap the country you want to send an envoy to'));
+      if (window.v222EnvoyPick) v222EnvoyPick(); else toast('✉ ' + X('Önce haritada elçi göndereceğin ülkeye dokun', 'First tap the country you want to send an envoy to'));   /* V222: önce ülke listesi */
     } catch (e) { }
   }
   function item(k, img, lb, fn) { return '<button type="button" class="it221" data-k="' + k + '" title="' + lb + '"><i style="background-image:url(assets/art/' + img + '.webp)"></i><span>' + lb + '</span></button>'; }

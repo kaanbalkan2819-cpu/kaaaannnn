@@ -15,13 +15,17 @@
        - taban güç: başlangıç ülkesinin 5 değer toplamı; 180 altı küçük, 120 altı çok küçük sayılır
        - toprak sayısı arttıkça destek azalır, 9+ toprakta biter
      Ayrıca dükkandan alınan Paralı Askerler bir sonraki savaşta Ordu +%12. Ekonomi değerine dokunulmaz. */
-  function baseSum(c) { try { var b = (typeof BASE !== 'undefined' && BASE[c]) || []; return b.reduce(function (s, v) { return s + (+v || 0); }, 0); } catch (e) { return 250; } }
+  /* V222: küçük devlet desteği GİZLİ ve yalnızca GERÇEKTEN küçük ülkelere.
+     Ölçüt yüzölçümü (d3.geo.area): ~20.000 km² altı %12, ~50.000 km² altı %7. Toprak arttıkça azalır, 6 toprakta biter.
+     Değerlere (ekrana) yansımaz; yalnızca savaş hesabında oyuncunun değer dizisine uygulanır. */
+  var AREA = {};
+  function km2(c) { if (AREA[c] != null) return AREA[c]; var v = 1e9; try { for (var i = 0; i < R.length; i++) if (R[i].id === c) { v = d3.geo.area(R[i].f) * 40589641; break; } } catch (e) { } return (AREA[c] = v); }
   function smallK() {
     try {
       if (!solo()) return 1;
-      var b = baseSum(G.pl), n = owned(G.pl); if (n >= 9) return 1;
-      var size = b < 120 ? .16 : b < 180 ? .10 : b < 230 ? .04 : 0; if (!size) return 1;
-      return 1 + size * Math.max(0, (9 - n) / 8);
+      var a = km2(G.pl), n = owned(G.pl); if (n >= 6) return 1;
+      var size = a < 20000 ? .12 : a < 50000 ? .07 : 0; if (!size) return 1;
+      return 1 + size * Math.max(0, (6 - n) / 5);
     } catch (e) { return 1; }
   }
   window.v220SmallK = smallK;
@@ -31,15 +35,30 @@
     var _st = st;
     st = function (e) {
       var r = _st.apply(this, arguments);
-      try {
-        if (solo() && e === G.pl && r && r.length) {
-          var k = smallK(), m = G.merc220 ? 1.12 : 1;
-          if (k > 1 || m > 1) { r = r.slice(); [0, 1, 3, 4].forEach(function (i) { r[i] = Math.round(r[i] * k * (i === 1 ? m : 1) * 10) / 10; }); }
-        }
-      } catch (x) { }
+      try { if (solo() && e === G.pl && r && r.length && G.merc220) { r = r.slice(); r[1] = Math.round(r[1] * 1.12 * 10) / 10; } } catch (x) { }   /* dükkan: Paralı Askerler */
       return r;
     };
     st.v220 = 1;
+  })();
+  /* gizli destek: battle() oyuncunun dizisini (değerleri st(G.pl) ile aynı olan taraf) savaş anında güçlendirir */
+  (function hookBattle() {
+    if (typeof battle !== 'function') return setTimeout(hookBattle, 400);
+    if (battle.v222) return;
+    var _b = battle;
+    battle = function (A, D) {
+      try {
+        var k = smallK();
+        if (k > 1) {
+          var me = st(G.pl), same = function (x) { return x && x.length === me.length && x.every(function (v, i) { return Math.abs(v - me[i]) < .01; }); };
+          var boost = function (x) { var y = x.map(function (v, i) { return i === 2 ? v : v * k; }); for (var p in x) if (p.charAt(0) === '_') y[p] = x[p]; return y; };
+          var args = Array.prototype.slice.call(arguments);
+          if (same(A)) args[0] = boost(A); else if (same(D)) args[1] = boost(D);
+          return _b.apply(this, args);
+        }
+      } catch (x) { }
+      return _b.apply(this, arguments);
+    };
+    battle.v222 = 1;
   })();
   /* paralı askerler: bir savaşta kullanılır */
   (function hookSb() {
@@ -49,10 +68,6 @@
     showBattle = function (r, p, e) { try { if (G && G.merc220 && (p === G.pl || e === G.pl)) G.merc220 = 0; } catch (x) { } var o = _sb.apply(this, arguments); try { setTimeout(allyFlags, 0); setTimeout(allyFlags, 120); } catch (x) { } return o; };
     showBattle.v220 = 1;
   })();
-  /* küçük devlet bilgisi: oyun başında bir kez */
-  setInterval(function () {
-    try { if (!solo() || G.sk220 || ['pick', 'v7pick'].indexOf(G.ph) >= 0) return; G.sk220 = 1; var k = smallK(); if (k > 1.02) toast('🛡 ' + X('Küçük devlet direnci: değerlerin +%' + Math.round((k - 1) * 100) + ' (toprak arttıkça azalır)', 'Small-state resilience: stats +' + Math.round((k - 1) * 100) + '% (fades as you grow)')); } catch (e) { }
-  }, 1500);
 
   /* ================= 2) YAZILAR PANELE SIĞSIN =================
      Pencere/panel/savaş ekranında taşan (kesilen) tek satırlık yazılar bulunur ve sığana kadar küçültülür (en çok %70'e). */
@@ -144,7 +159,8 @@
     { id: 'fort', ic: '🏰', n: ['Sınır Kaleleri', 'Border Forts'], d: ['2 tur boyunca rakipler sana saldırmaz', 'Rivals won\'t attack you for 2 turns'], p: 55 },
     { id: 'spy', ic: '🕵', n: ['Casus Ağı', 'Spy Network'], d: ['Menzilindeki tüm ülkelerin değerleri açılır', 'Reveals the stats of every country in reach'], p: 30 },
     { id: 'peace', ic: '📜', n: ['Huzur Fermanı', 'Edict of Peace'], d: ['5 tur boyunca isyan çıkmaz', 'No rebellions for 5 turns'], p: 35 },
-    { id: 'envoy', ic: '🕊', n: ['Elçi Hediyesi', 'Envoy Gifts'], d: ['Komşularla ilişkiler iyileşir, teklifler daha kolay kabul edilir', 'Neighbours warm to you; offers are accepted more easily'], p: 30 }
+    { id: 'envoy', ic: '🕊', n: ['Elçi Hediyesi', 'Envoy Gifts'], d: ['Komşularla ilişkiler iyileşir, teklifler daha kolay kabul edilir', 'Neighbours warm to you; offers are accepted more easily'], p: 30 },
+    { id: 'nuke', ic: '☢', n: ['Atom Bombası', 'Atom Bomb'], d: ['Menzilindeki bir ülkeyi anında ele geçir (her 3 turda bir)', 'Seize a country in reach at once (once every 3 turns)'], p: 2500 }   /* V222 */
   ];
   function canUse(it) {
     try {
@@ -153,6 +169,8 @@
       if (it.id === 'merc' && G.merc220) return X('Zaten etkin', 'Already active');
       if (it.id === 'fort' && G.fort220 > turn()) return X('Zaten etkin', 'Already active');
       if (it.id === 'peace' && G.peace220 > turn()) return X('Zaten etkin', 'Already active');
+      if (it.id === 'nuke' && G.ph !== 'act') return X('Kendi turunda kullan', 'Use on your turn');
+      if (it.id === 'nuke' && G.nuke222 != null && turn() - G.nuke222 < 3) return X('Yeniden kullanım: ' + (3 - (turn() - G.nuke222)) + ' tur', 'Ready in ' + (3 - (turn() - G.nuke222)) + ' turns');
     } catch (e) { return '—'; }
     return '';
   }
@@ -163,6 +181,7 @@
     else if (it.id === 'spy') { var tg = targets(G.pl, G.owner); G.kn = G.kn || {}; G.kn[G.pl] = G.kn[G.pl] || {}; for (var k in tg) { var o = G.owner[k]; if (typeof o === 'string' && o !== G.pl) G.kn[G.pl][o] = [1, 1, 1, 1, 1]; } }
     else if (it.id === 'peace') { G.peace220 = turn() + 5; G.cool23 = Math.max(G.cool23 || 0, 5); if (G.lib76) for (var t in G.lib76) if (G.lib76[t].at) G.lib76[t].at += 5; }
     else if (it.id === 'envoy') { G.dx220 = (G.dx220 || 0) + 3; }
+    else if (it.id === 'nuke') { setTimeout(function () { if (window.v222NukePick) v222NukePick(); }, 30); return; }
     try { save(); } catch (e) { } try { render(); } catch (e) { }
   }
   function shopHTML() {
@@ -198,8 +217,9 @@
     tab: function (t) { TAB = t; show(); },
     buy: function (id) {
       var it = ITEMS.filter(function (x) { return x.id === id; })[0]; if (!it || canUse(it)) return;
+      if (id === 'nuke') { var gg = 0; try { gg = Gold.get(); } catch (e) { } if (gg < it.p) { try { toast(X('Yeterli altının yok', 'Not enough gold')); } catch (e) { } return; } if (window.v222NukePick) v222NukePick(); return; }   /* V222: ücret bomba atılınca */
       if (!window.Gold || !Gold.spend(it.p, 'shop220-' + id)) { try { toast(X('Yeterli altının yok', 'Not enough gold')); } catch (e) { } return; }
-      use(it); try { toast(it.ic + ' ' + X(it.n[0] + ' alındı', it.n[1] + ' bought')); } catch (e) { } show();
+      use(it); if (id === 'nuke') return; try { toast(it.ic + ' ' + X(it.n[0] + ' alındı', it.n[1] + ' bought')); } catch (e) { } show();
     }
   };
   (function hookShop() { if (!window.Shop) return setTimeout(hookShop, 500); if (Shop.v220) return; Shop.open = v220Shop.open; Shop.v220 = 1; })();

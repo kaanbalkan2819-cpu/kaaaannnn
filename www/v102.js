@@ -10,7 +10,7 @@
   function X(tr, en) { return (typeof L !== 'undefined' && L === 'tr') ? tr : en; }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function is5() { try { return !!G && G.v5 === 1; } catch (e) { return false; } }
-  var K = .25, ARMY_CAP = .10, POP_CAP = .10, ALLY_DIP_MAX = .20, TECH1 = 1.3, TECH2 = 2.0;   /* V134: Ordu/Nüfus +%8 -> +%10; Teknoloji zar avantajı 1,2/1,6 -> 1,3/2,0 (tek özellik zarla +%30 vermesin) */
+  var K = .25, ARMY_CAP = 0, POP_CAP = 0, ALLY_DIP_MAX = 0, TECH1 = 999, TECH2 = 9999;   /* V222: 5 değerin yan etkileri kapatıldı (ordu/nüfus çarpanı, teknoloji zar avantajı, diplomasi müttefik katkısı). Eski: .10 .10 .20 1.3 2.0 */   /* V134: Ordu/Nüfus +%8 -> +%10; Teknoloji zar avantajı 1,2/1,6 -> 1,3/2,0 (tek özellik zarla +%30 vermesin) */
   function edge(hi, lo, cap) { return lo > 0 ? Math.min(cap, K * (hi / lo - 1)) : cap; }
   function dieEdge(hi, lo) { var r = lo > 0 ? hi / lo : 9; return r >= TECH2 ? 2 : r >= TECH1 ? 1 : 0; }
   function keep(src, dst) { for (var k in src) if (k.charAt(0) === '_') dst[k] = src[k]; return dst; }   // v23 isyancı bayrakları (_reb,_pl)

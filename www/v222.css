@@ -1,0 +1,90 @@
+/* V222 — gizlenenler, kapatma düğmeleri, ülke seçim kartı, atom bombası efekti */
+#wcm .mb[data-a="tut"]{display:none!important}                 /* ana menü: Nasıl Oynanır yok */
+.r137,.t137,.g136,.d218 .d38-inc{display:none!important}       /* ekonomi kuralları / kaynak aktarımı / özellik yan etkileri / tur başı gelir */
+
+/* kapatma ✕: başlığın sağ üst köşesinde, kartın içinde, dikeyde ortalı */
+.polhd{position:relative!important;padding-right:46px!important;min-height:38px;display:flex!important;align-items:center}
+#box .polhd .polcl,#mod #box .polx .polhd .polcl{position:absolute!important;right:2px!important;top:50%!important;transform:translateY(-50%)!important;margin:0!important;
+  width:34px!important;height:34px!important;min-height:0!important;padding:0!important;border-radius:50%!important;display:flex!important;align-items:center;justify-content:center;
+  border:1px solid rgba(205,176,106,.55)!important;background:rgba(0,0,0,.3)!important;color:#efe3c6!important;font-size:15px!important;line-height:1!important}
+.d218h{min-height:34px;align-items:center!important}
+.d218x{top:50%!important;transform:translateY(-50%)!important;right:2px!important;width:34px!important;height:34px!important;display:flex!important;align-items:center;justify-content:center;line-height:1!important}
+
+/* ülke seçim kartı (Elçi Gönder / Atom Bombası) */
+#box:has(.pk222){width:auto!important;max-width:97vw!important;max-height:calc(100dvh - 12px)!important;overflow-x:hidden!important;overflow-y:auto!important}
+#box .wb-panel.pk222{width:min(94vw,560px)!important;max-width:none!important}
+.pk222s{margin:0 0 8px;font:500 12.5px/1.4 Georgia,serif;color:#d9cba6;text-align:center}
+.pk222g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;max-height:calc(100dvh - 230px);overflow-y:auto;overflow-x:hidden;padding:2px}
+.pk222i{appearance:none;display:flex;align-items:center;gap:8px;margin:0;min-height:42px;width:auto;padding:6px 9px;border-radius:7px;border:1px solid rgba(205,176,106,.35);
+  background:rgba(0,0,0,.25);color:#f3e8c8;font:600 13px Georgia,serif;text-align:left;cursor:pointer;box-shadow:none}
+.pk222i .fi{width:28px!important;height:19px!important;border-radius:2px;flex:0 0 auto}
+.pk222i span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk222i:active{background:rgba(205,176,106,.18)}
+.pk222i.nk{border-color:rgba(255,120,60,.5)}
+.pk222 .c141g{grid-template-columns:1fr!important}
+
+/* ---------- ATOM BOMBASI efekti ---------- */
+#nk222{position:fixed;inset:0;z-index:2147483400;pointer-events:none;overflow:hidden}
+#nk222 .fl{position:absolute;inset:0;background:#fff;opacity:0}
+#nk222.go .fl{animation:nkF 1.1s ease-out forwards}
+@keyframes nkF{0%{opacity:0}6%{opacity:1}30%{opacity:.85;background:#fff3c4}100%{opacity:0;background:#ffb347}}
+#nk222 .fb{position:absolute;left:var(--x,50%);top:var(--y,56%);width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;
+  background:radial-gradient(circle,#fffbe0 0,#ffe27a 22%,#ff9a2e 48%,#d6400f 70%,rgba(120,20,5,0) 76%);transform:scale(0);filter:blur(1px)}
+#nk222.go .fb{animation:nkB 2.6s cubic-bezier(.2,.8,.3,1) .05s forwards}
+@keyframes nkB{0%{transform:scale(0)}25%{transform:scale(3.4)}60%{transform:scale(3.8);opacity:1}100%{transform:scale(4);opacity:0}}
+#nk222 .sw{position:absolute;left:var(--x,50%);top:var(--y,56%);width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;border:6px solid rgba(255,240,200,.85);
+  box-shadow:0 0 30px rgba(255,200,120,.8),inset 0 0 20px rgba(255,200,120,.6);transform:scale(0);opacity:0}
+#nk222.go .sw{animation:nkW 1.6s ease-out .15s forwards}
+#nk222.go .sw.s2{animation:nkW 2s ease-out .45s forwards}
+@keyframes nkW{0%{transform:scale(0) scaleY(.45);opacity:1}100%{transform:scale(22) scaleY(.45);opacity:0}}
+#nk222 .mc{position:absolute;left:var(--x,50%);top:var(--y,56%);width:0;height:0;opacity:0}
+#nk222.go .mc{animation:nkM 3.6s ease-out .5s forwards}
+@keyframes nkM{0%{opacity:0;transform:translateY(0) scale(.25)}15%{opacity:1}100%{opacity:1;transform:translateY(-18px) scale(.62)}}
+#nk222 .st{position:absolute;left:-26px;bottom:0;width:52px;height:0;border-radius:40% 40% 20% 20%;
+  background:linear-gradient(90deg,rgba(90,40,20,.9),rgba(230,140,60,.95) 45%,rgba(255,210,140,.95) 55%,rgba(110,50,25,.9));filter:blur(2px)}
+#nk222.go .st{animation:nkS 1.8s ease-out .5s forwards}
+@keyframes nkS{to{height:130px}}
+#nk222 .cap{position:absolute;left:-110px;bottom:120px;width:220px;height:120px;transform:scale(0);transform-origin:50% 100%}
+#nk222.go .cap{animation:nkC 2s cubic-bezier(.2,.8,.3,1) .9s forwards}
+@keyframes nkC{to{transform:scale(1)}}
+#nk222 .cap i{position:absolute;border-radius:50%;filter:blur(3px);
+  background:radial-gradient(circle at 40% 35%,#ffe9b0 0,#ffad4d 30%,#c2541b 60%,#5a2410 100%)}
+#nk222 .cap i:nth-child(1){left:50px;top:10px;width:120px;height:100px}
+#nk222 .cap i:nth-child(2){left:0;top:40px;width:110px;height:80px}
+#nk222 .cap i:nth-child(3){right:0;top:40px;width:110px;height:80px}
+#nk222 .cap i:nth-child(4){left:30px;top:0;width:80px;height:70px;opacity:.9}
+#nk222 .cap i:nth-child(5){right:30px;top:0;width:80px;height:70px;opacity:.9}
+#nk222 .ring{position:absolute;left:-90px;bottom:70px;width:180px;height:44px;border-radius:50%;border:10px solid rgba(255,190,120,.55);filter:blur(3px);opacity:0}
+#nk222.go .ring{animation:nkR 2.4s ease-out 1.1s forwards}
+@keyframes nkR{0%{opacity:0;transform:scale(.3)}30%{opacity:1}100%{opacity:.6;transform:scale(1.35)}}
+#nk222 .sm{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(60,30,15,.5),rgba(20,10,5,0) 65%);opacity:0}
+#nk222.go .sm{animation:nkSm 3.6s ease-out .6s forwards}
+@keyframes nkSm{0%{opacity:0}50%{opacity:1}100%{opacity:.8}}
+#nk222.out{transition:opacity .7s;opacity:0}
+body.nk222shake #g3d,body.nk222shake #map{animation:nkShake .12s linear 9}
+@keyframes nkShake{0%{transform:translate(0,0)}25%{transform:translate(6px,-4px)}50%{transform:translate(-5px,5px)}75%{transform:translate(4px,3px)}100%{transform:translate(0,0)}}
+.pk222g::-webkit-scrollbar,.d218l::-webkit-scrollbar,.d218r::-webkit-scrollbar{width:4px}.pk222g::-webkit-scrollbar-thumb{background:rgba(205,176,106,.55);border-radius:2px}.pk222g::-webkit-scrollbar-button,.d218l::-webkit-scrollbar-button,.d218r::-webkit-scrollbar-button{display:none;height:0}.pk222g::-webkit-scrollbar-track{background:transparent}
+/* bulut başlığı: daha doğal (koyu alt gölge, karnabahar dokusu) */
+#nk222 .cap i{background:radial-gradient(circle at 45% 30%,#fff1c8 0,#ffbf6a 22%,#d9692a 48%,#7a3115 74%,#3a170b 100%)!important;filter:blur(4px)!important;box-shadow:inset 0 -18px 26px rgba(40,15,5,.55)}
+#nk222 .cap::after{content:"";position:absolute;left:10px;right:10px;bottom:-6px;height:36px;border-radius:50%;background:radial-gradient(ellipse,rgba(60,25,10,.85),rgba(60,25,10,0) 70%);filter:blur(5px)}
+#nk222 .st{background:linear-gradient(90deg,rgba(70,30,15,.92),rgba(210,120,50,.95) 40%,rgba(255,200,130,.95) 52%,rgba(190,100,40,.92) 64%,rgba(70,30,15,.92))!important;border-radius:45% 45% 30% 30%/20% 20% 10% 10%!important;filter:blur(3px)!important}
+/* V222b: bulut topakları (rastgele, bulanık, sıcak çekirdek → koyu kenar) */
+#nk222 .cap{left:-110px!important;bottom:118px!important;width:220px!important;height:250px!important}
+#nk222 .cap b{position:absolute;border-radius:50%;opacity:0;transform:scale(.3);
+  background:radial-gradient(circle at 40% 35%,rgba(255,240,200,calc(var(--d)*1)) 0,rgba(255,170,80,.95) 25%,rgba(200,85,30,.92) 52%,rgba(95,40,18,.9) 78%,rgba(40,18,8,.85) 100%);
+  filter:blur(3.5px);animation:nkP 1.8s cubic-bezier(.2,.8,.3,1) forwards}
+#nk222 .cap b.sp{background:radial-gradient(circle at 45% 40%,rgba(255,210,150,.9) 0,rgba(190,95,40,.9) 45%,rgba(80,35,15,.85) 85%)}
+@keyframes nkP{0%{opacity:0;transform:scale(.3)}25%{opacity:1}100%{opacity:.95;transform:scale(1)}}
+#nk222 .st{display:none}
+#nk222 .cap{bottom:-8px!important;transform:none!important;animation:none!important}#nk222.go .cap b{animation-name:nkP}#nk222 .cap b{animation-play-state:paused}#nk222.go .cap b{animation-play-state:running}
+/* V222c: daha dumanlı bulut (dış topaklar gri-kahve, yarı saydam, daha bulanık), biraz daha küçük */
+#nk222 .cap b{filter:blur(6px)!important;background:radial-gradient(circle at 45% 40%,rgba(255,226,160,.95) 0,rgba(240,140,60,.85) 22%,rgba(150,70,35,.7) 48%,rgba(80,55,45,.55) 72%,rgba(60,50,45,0) 100%)!important}
+#nk222 .cap b:nth-child(3n){background:radial-gradient(circle at 45% 40%,rgba(200,120,70,.75) 0,rgba(110,80,65,.6) 50%,rgba(70,60,55,0) 100%)!important}
+#nk222 .cap b.sp{filter:blur(5px)!important;background:radial-gradient(circle at 50% 40%,rgba(255,200,130,.85) 0,rgba(170,85,40,.7) 45%,rgba(80,55,45,0) 100%)!important}
+@keyframes nkM{0%{opacity:0;transform:translateY(0) scale(.2)}15%{opacity:1}100%{opacity:1;transform:translateY(-12px) scale(.5)}}
+/* V222d: Figma patlama görseli (siyah zemin "screen" karışımıyla saydam), hedefin üstünde yerden yükselir */
+#nk222 .nkimg{position:absolute;left:var(--x,50%);top:var(--y,56%);width:min(40vh,290px);height:auto;transform:translate(-50%,-80%) scale(.15);transform-origin:50% 80%;
+  opacity:0;filter:saturate(1.1) drop-shadow(0 0 18px rgba(255,140,40,.35))}
+#nk222.go .nkimg{animation:nkI 3.6s cubic-bezier(.15,.8,.3,1) .12s forwards}
+@keyframes nkI{0%{opacity:0;transform:translate(-50%,-80%) scale(.15)}12%{opacity:1}55%{opacity:1;transform:translate(-50%,-80%) scale(1)}100%{opacity:.85;transform:translate(-50%,-83%) scale(1.05)}}
+.it221[data-k="env"] i{background-image:url(assets/art/envoy222.jpg)!important}

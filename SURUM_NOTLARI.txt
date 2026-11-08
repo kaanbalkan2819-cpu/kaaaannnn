@@ -1135,3 +1135,24 @@ V221 — İstek listesi (masaüstü Chrome, telefon görünümü ile kontrol edi
    perçinli altın halka, mücevherli taç, altın yıldız. Figma dosyasına PNG + düzenlenebilir vektör olarak yüklendi (Figma AI kredisi bittiği için elle çizildi).
    Uygulama simgeleri (tüm mipmap, yuvarlak, uyarlanabilir), Play Store 512 simgesi, kapak görseli amblemi ve açılış ekranları yenilendi.
    Dosyalar: play_store/gorseller/logo-1024.png, logo-vektor.svg.
+ - Logo düzeltmesi: taçın tepesindeki haç (ve yerine denenen yıldız) kaldırıldı; tarafsız altın küre + kırmızı mücevher. Tüm simgeler/kapak/açılış yeniden üretildi.
+
+=================== V222 ===================
+V222 — (masaüstü Chrome, telefon görünümü ile kontrol edildi)
+ - Elçi Gönder (sağ kare menü): haritada elçi gönderilebilecek bir ülke seçili değilse önce menzildeki ülkelerin listesi açılır; seçince elçi penceresi (v222.js).
+ - Sağdaki Diplomasi menüsünün üstündeki zar / Güven / İtibar şeridi ve "tur başı barış geliri" satırı kaldırıldı (v138.js, v222.css).
+ - Diplomasi, Kalkınma, Elçi pencerelerinde kapatma ✕ başlığın sağında ortalı (önceden üstte kesik görünüyordu).
+ - Ana menüde "Nasıl Oynanır" yok.
+ - Küçük devlet desteği GİZLİ ve yalnızca gerçekten küçük ülkelere: yüzölçümü ~20.000 km² altı %12, ~50.000 km² altı %7; 6 toprakta biter.
+   Değerlere/ekrana yansımaz, yalnızca savaş hesabında uygulanır; bildirim gösterilmez (v220.js).
+ - 5 ana değerin yan özellikleri kapatıldı: Ordu/Nüfus savaş çarpanı, Teknoloji zar avantajı, Diplomasi müttefik katkısı (v102.js),
+   Ekonomiden ekstra hamle (v137.js). "Kaynak aktarımı" bildirimi, ekonomi kuralları kutusu ve "Özellikler savaşı nasıl etkiler?" gizlendi; Kalkınma'da tur başı gelir gösterilmez.
+ - Kalkınma: yan etkiler kaldırıldı (yalnızca seçilen değer artar), açıklamalar buna göre yazıldı; bedel (hazine) aynen.
+ - DÜKKAN: ATOM BOMBASI — 2500 altın, her 3 turda bir, kendi turunda. Saldırabileceğin ülkelerden hedef seçilir; küre hedefe döner,
+   beyaz flaş + ateş topu + şok dalgaları + mantar bulutu (rastgele duman topakları) + ekran sarsıntısı, sonra toprak senin olur. Altın yalnızca bomba atılınca düşer.
+   Figma AI kredisi bittiği için efekt kodla (CSS) çizildi; kredi gelince Figma görseliyle değiştirilebilir.
+
+V222 ek (ikinci Figma hesabı, dosya 4KKFs7RTdjWBnlHa2wHz0a):
+- Atom bombası: Figma ile üretilen gerçek mantar bulutu görseli (assets/art/nuke222.png, şeffaf). Hedef ülkenin üstünde patlar; bulut ekranın üstünden taşmaz.
+- Elçi Gönder düğmesi: Figma atlı elçi görseli (assets/art/envoy222.jpg).
+- Ülkeye özel yeni mühürler (assets/stamps/c): Almanya (Reichsadler), Meksika (kaktüs-kartal-yılan), Polonya (taçlı kartal), Arnavutluk (çift başlı kartal), İtalya (Roma dişi kurdu), Portekiz (Barcelos horozu). Toplam 17 ülkeye özel mühür.

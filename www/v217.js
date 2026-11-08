@@ -113,7 +113,7 @@
   Object.keys(A).forEach(function (k) { A[k][2].split(' ').forEach(function (c) { OF[c] = k; }); });
   function animal(c) { return OF[c] || 'eagle'; }   /* listede olmayan (yeni eklenen) ülke: kartal */
   /* V220: ülkeye özel mühür varsa o (assets/stamps/c/ISO.png, Figma), yoksa hayvan mührü */
-  var OWN = ' BGR CZE ETH IRN KEN LKA MAR NLD NOR SEN SWZ ';
+  var OWN = ' ALB BGR CZE DEU ETH IRN ITA KEN LKA MAR MEX NLD NOR POL PRT SEN SWZ ';
   function surl(c) { return OWN.indexOf(' ' + c + ' ') >= 0 ? 'assets/stamps/c/' + c + '.png' : 'assets/stamps/' + animal(c) + '.png'; }
   window.WCStamp = { of: function (c) { return OF[c] || null; }, url: surl, A: A, animal: function (c) { return animal(c); } };   /* V219: koleksiyon sayfası (gs219.js) için tablo da açık */
 

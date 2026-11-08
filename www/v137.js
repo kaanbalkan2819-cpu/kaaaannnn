@@ -15,7 +15,7 @@
 (function () {
   'use strict';
   /* ================= AYARLAR ================= */
-  var EX_BASE = .06, EX_MAX = .30, EX_K = 70, EX_COST = .03, EX_COST_MIN = .5, EX_MIN_ECO = 4, EX_REPEAT = .5, EX_PITY = .03, EX_PITY_MAX = .09;
+  var EX_BASE = 0, EX_MAX = 0, EX_K = 70, EX_COST = .03, EX_COST_MIN = .5, EX_MIN_ECO = 4, EX_REPEAT = .5, EX_PITY = 0, EX_PITY_MAX = 0;   /* V222: ekonomiden ekstra hamle kapatıldı */
   var INC_BASE = .30, INC_RATE = .004, CATCH_BELOW = 30, CATCH_RATE = .02, UPK_FREE = 4, UPK_PER = .08, UPK_MAX = 2.5, SOFT = 80, DECAY = .12, ECO_HARD = 130, ECO_FLOOR = 1;
   var TR_FRAC = .35, TR_LAST = .60, WAR_LOSS = .30, GAIN_CAP = .15, GAIN_CAP_MIN = 2;
   var DEV_MIN_ECO = 3, DEV_GAIN0 = 7, DEV_REF = 110, DEV_MAXLV = 6, DEV_ESC = .25, STAT_MAX = 100;
@@ -24,14 +24,14 @@
 
   var ICON = ['👥', '🎖', '💰', '🔬', '🕊'], PCL = ['#4aa3ff', '#ff6b5a', '#ffd24a', '#8a7bff', '#4fe0a0'];
   var DEV = [
-    { k: 'pop', i: 0, cost: 8, side: { 1: -1 }, tr: 'Halk Kalkınması', en: 'Public Development',
-      dtr: 'Konut, sağlık ve eğitim: Nüfus büyür; savunma bütçesi kısıldığı için Ordu hafif düşer.', den: 'Housing, health and schooling: Population grows; Army dips as the defence budget is trimmed.' },
-    { k: 'army', i: 1, cost: 10, side: { 4: -1.5 }, tr: 'Silahlanma Programı', en: 'Armament Programme',
-      dtr: 'Ordu güçlenir; saldırgan duruş Diplomasiyi zedeler.', den: 'Army grows; the aggressive posture hurts Diplomacy.' },
-    { k: 'tech', i: 3, cost: 12, side: { 0: -1 }, tr: 'Ar-Ge Yatırımı', en: 'R&D Investment',
-      dtr: 'Teknoloji sıçrar; kaynaklar laboratuvara aktığı için halk hizmetleri (Nüfus) geriler.', den: 'Technology leaps; public services (Population) lag as funds flow to labs.' },
-    { k: 'dip', i: 4, cost: 8, side: { 1: -1 }, tr: 'Diplomatik Atılım', en: 'Diplomatic Push',
-      dtr: 'Diplomasi artar; elçilik ve yardım harcamaları Ordu payını azaltır.', den: 'Diplomacy rises; embassy and aid spending trims the Army share.' }
+    { k: 'pop', i: 0, cost: 8, side: {}, tr: 'Halk Kalkınması', en: 'Public Development',
+      dtr: 'Konut, sağlık ve eğitim yatırımıyla Nüfus kalıcı olarak büyür.', den: 'Housing, health and schooling permanently grow Population.' },
+    { k: 'army', i: 1, cost: 10, side: {}, tr: 'Silahlanma Programı', en: 'Armament Programme',
+      dtr: 'Silah ve kışla yatırımıyla Ordu kalıcı olarak güçlenir.', den: 'Arms and barracks permanently strengthen the Army.' },
+    { k: 'tech', i: 3, cost: 12, side: {}, tr: 'Ar-Ge Yatırımı', en: 'R&D Investment',
+      dtr: 'Laboratuvar ve akademi yatırımıyla Teknoloji kalıcı olarak sıçrar.', den: 'Labs and academies permanently boost Technology.' },
+    { k: 'dip', i: 4, cost: 8, side: {}, tr: 'Diplomatik Atılım', en: 'Diplomatic Push',
+      dtr: 'Elçilik ve yardım yatırımıyla Diplomasi kalıcı olarak artar.', den: 'Embassies and aid permanently raise Diplomacy.' }
   ];
 
   /* ================= YARDIMCILAR ================= */
@@ -173,7 +173,7 @@
       if (alive) ecoAdd(from, -moved);
       var real = ecoAdd(to, gain);
       G.t137 = { ref: G.last, from: from, to: to, moved: r2(moved), gain: r2(real), destroyed: !alive, share: r2(share), frac: frac };
-      if (to === G.pl) say('📦 ' + X('Kaynak aktarımı: +', 'Resource transfer: +') + r1(real) + ' 💰 (' + nm(from) + ')', 2400);
+      if (false && to === G.pl) say('📦 ' + X('Kaynak aktarımı: +', 'Resource transfer: +') + r1(real) + ' 💰 (' + nm(from) + ')', 2400);
       else if (from === G.pl) say('📦 ' + X('Kaynak kaybı: −', 'Resource loss: −') + r1(alive ? moved : 0) + ' 💰 (' + nm(to) + ')', 2400);
     } catch (x) { }
   }
@@ -231,10 +231,9 @@
   }
   function rulesHtml() {
     return '<details class="r137"><summary>📘 ' + X('Ekonomi ve kaynak kuralları', 'Economy and resource rules') + '</summary>' +
-      '<div>⚡ <b>' + X('Ekstra hamle', 'Extra move') + '</b>: ' + X('Tur başında şansla gelir (%6–%30; zengin ülke daha olası ama azalan oranda). Üst üste gelirse olasılık yarıya düşer, uzun süre gelmezse biraz artar. Kazanınca hazinenin %3\'ü (en az 0,5) seferberlik gideri olarak ödenir.', 'Comes by chance at turn start (6–30%; richer is likelier but with diminishing returns). Halved right after a hit, slightly raised after a long dry spell. Costs 3% of your treasury (min 0.5).') + '</div>' +
       '<div>💰 <b>' + X('Tur geliri (herkes için aynı)', 'Turn income (same for all)') + '</b>: ' + X('0,3 + hazine×%0,4; hazine 30\'un altındaysa destek; 4\'ten fazla toprak için bakım (toprak başı −0,08, en çok −2,5); hazine 80\'i aşarsa fazlası her tur %12 erir; üst sınır 130.', '0.3 + treasury×0.4%; support below 30; upkeep beyond 4 territories (−0.08 each, max −2.5); anything above 80 erodes 12% per turn; hard cap 130.') + '</div>' +
       '<div>📦 <b>' + X('Fetih aktarımı', 'Conquest transfer') + '</b>: ' + X('Savaş tazminatına ek olarak, ele geçirilen toprak kaybedenin hazinesinden toprak payı × %35 taşır; kazanan bunun %70\'ini alır (%30 savaş yıkımı). Ülke tamamen yok olursa kalan hazinenin %60\'ı el değiştirir. Kazanan tek seferde kendi hazinesinin %15\'inden fazlasını alamaz.', 'On top of the war reparation, a captured territory carries its share of the loser\'s treasury × 35%; the winner keeps 70% (30% war damage). If a nation is destroyed, 60% of what is left changes hands. A winner cannot take more than 15% of its own treasury at once.') + '</div>' +
-      '<div>🏗 <b>' + X('Kalkınma', 'Development') + '</b>: ' + X('Hazine harcanarak kalıcı gelişim alınır. Değer yükseldikçe kazanç düşer; her seçeneğin yan etkisi vardır; seviye arttıkça maliyet yükselir; tur başına tek yatırım, hamle harcamaz. Ekonomi 5 değerden biri olduğu için harcamak savaş gücünü de etkiler.', 'Spend treasury for permanent growth. Gains shrink as the stat rises; each option has a side effect; cost rises with level; one investment per turn, no moves spent. Economy is one of the 5 stats, so spending also affects war strength.') + '</div></details>';
+      '<div>🏗 <b>' + X('Kalkınma', 'Development') + '</b>: ' + X('Hazine harcanarak kalıcı gelişim alınır. Değer yükseldikçe kazanç düşer; yan etkisi yoktur; seviye arttıkça maliyet yükselir; tur başına tek yatırım, hamle harcamaz. Ekonomi 5 değerden biri olduğu için harcamak savaş gücünü de etkiler.', 'Spend treasury for permanent growth. Gains shrink as the stat rises; no side effects; cost rises with level; one investment per turn, no moves spent. Economy is one of the 5 stats, so spending also affects war strength.') + '</div></details>';
   }
   window.dev137Menu = function () {
     try {
@@ -243,7 +242,7 @@
       var st0 = ecoStep(pl, c[pl] || 0, G.trade137 || 0), net = st0.net;
       var h = '<div class="polx"><div class="polhd"><b>🏗 ' + X('Kalkınma', 'Development') + '</b><span class="polsub">' + nm(pl) + '</span>' +
         '<button class="polcl" onclick="closeMod()" aria-label="close">✕</button></div>' +
-        '<div class="polbar"><span>💰 ' + X('Hazine', 'Treasury') + ': <b>' + r1(eco) + '</b></span><span>📈 ' + X('Tur başı', 'Per turn') + ': <b>' + (net >= 0 ? '+' : '') + r1(net) + '</b></span></div>' +
+        '<div class="polbar"><span>💰 ' + X('Hazine', 'Treasury') + ': <b>' + r1(eco) + '</b></span></div>' +   /* V222: tur başı gelir gösterilmez */
         '<div class="polinfo">' + X('Hazineni kalıcı gelişime çevir. Tur başına <b>1</b> yatırım; hamle harcamaz. Ekonomi savaşta da sayıldığı için harcamak gücünü düşürür — zayıf alanını güçlendirmek daha verimlidir.', 'Turn your treasury into permanent growth. <b>1</b> investment per turn; no moves spent. Economy also counts in battle, so spending lowers it — strengthening a weak stat is more efficient.') + '</div>' +
         '<div class="polscroll">';
       DEV.forEach(function (d, ix) {
@@ -254,7 +253,7 @@
         else if (eco - cost < DEV_MIN_ECO) btn = '<button class="polgo" disabled>💰 ' + X('Hazine yetersiz', 'Not enough treasury') + ' · ' + cost + '</button>';
         else btn = '<button class="polgo gold" onclick="dev137Ask(\'' + d.k + '\')">' + X('Geliştir', 'Upgrade') + ' · ' + cost + ' 💰</button>';
         h += '<div class="pcard" style="--pc:' + PCL[d.i] + ';animation-delay:' + (ix * .05) + 's"><div class="pic">' + ICON[d.i] + '</div><div class="pbd"><div class="ptt"><b>' + X(d.tr, d.en) + '</b> <small>' + X('Sv.', 'Lv.') + ' ' + lv + '/' + DEV_MAXLV + '</small></div>' +
-          '<div class="pds">' + X(d.dtr, d.den) + '</div><div class="pst"><span class="pchip">' + sn[d.i] + ' ' + r1(cur) + ' → <b>' + r1(Math.min(STAT_MAX, cur + gain)) + '</b></span><span class="pchip">' + X('Yan etki: ', 'Side effect: ') + sideTxt(d.side) + '</span></div>' + btn + '</div></div>';
+          '<div class="pds">' + X(d.dtr, d.den) + '</div><div class="pst"><span class="pchip">' + sn[d.i] + ' ' + r1(cur) + ' → <b>' + r1(Math.min(STAT_MAX, cur + gain)) + '</b></span></div>' + btn + '</div></div>';   /* V222: yan etki etiketi kaldırıldı */
       });
       var tl = G.trade137 || 0, tc = tradeCost(), tb;
       if (!can) tb = '<button class="polgo" disabled>' + X('Kendi turunda', 'On your turn') + '</button>';
@@ -281,8 +280,8 @@
         var d = devOf(k); if (!d) return;
         var cost = devCost(d), cur = +raw[d.i] || 0, gain = devGain(cur);
         title = ICON[d.i] + ' ' + X(d.tr, d.en);
-        body = X('Maliyet: <b>' + cost + ' 💰</b> (hazine ' + r1(eco) + ' → ' + r1(eco - cost) + ').<br>' + sn[d.i] + ': <b>' + r1(cur) + ' → ' + r1(Math.min(STAT_MAX, cur + gain)) + '</b><br>Yan etki: ' + sideTxt(d.side),
-          'Cost: <b>' + cost + ' 💰</b> (treasury ' + r1(eco) + ' → ' + r1(eco - cost) + ').<br>' + sn[d.i] + ': <b>' + r1(cur) + ' → ' + r1(Math.min(STAT_MAX, cur + gain)) + '</b><br>Side effect: ' + sideTxt(d.side));
+        body = X('Maliyet: <b>' + cost + ' 💰</b> (hazine ' + r1(eco) + ' → ' + r1(eco - cost) + ').<br>' + sn[d.i] + ': <b>' + r1(cur) + ' → ' + r1(Math.min(STAT_MAX, cur + gain)) + '</b>',
+          'Cost: <b>' + cost + ' 💰</b> (treasury ' + r1(eco) + ' → ' + r1(eco - cost) + ').<br>' + sn[d.i] + ': <b>' + r1(cur) + ' → ' + r1(Math.min(STAT_MAX, cur + gain)) + '</b>');
       }
       modal('<div class="polx"><div class="polhd"><b>' + title + '</b></div><p class="polinfo">' + body + '<br>' + X('Bu tur başka yatırım yapamazsın. Onaylıyor musun?', 'You cannot invest again this turn. Confirm?') + '</p>' +
         '<button class="big pri" onclick="dev137Do(\'' + k + '\')">' + X('Evet, yatırım yap', 'Yes, invest') + '</button><button class="big" onclick="dev137Menu()">' + X('Vazgeç', 'Cancel') + '</button></div>');

@@ -501,7 +501,7 @@
     var inc = peaceIncome(), d = D2();
     /* V218: düzen — başlık şeridi + iki sütun (sol: durum, gelir, aktif anlaşmalar, kurallar · sağ: menzildeki ülkeler). Dar ekranda alt alta. */
     modal('<div class="d38 d218"><div class="d218h"><h3>🕊 ' + X('Diplomasi', 'Diplomacy') + '</h3><button class="d218x" onclick="closeMod()" aria-label="close">✕</button></div><div class="d218c"><div class="d218l">' +
-      '<div class="d38-stats"><span>🎲 <b>' + ((G.T && G.T.moves) || 0) + '</b></span><span>🤝 ' + X('Güven', 'Trust') + ' <b>' + trustInfo() + '</b></span><span>⚔ ' + X('İtibar', 'Rep.') + ' <b>' + aggInfo() + '</b></span></div>' +
+      /* V222: zar/güven/itibar şeridi kaldırıldı */
       '<div class="d38-inc">' + (inc > 0 ? '🪙 ' + X('Barış geliri: ', 'Peace income: ') + '<b>+' + (Math.round(inc * 100) / 100) + '</b>' + X(' / tur', ' / turn') : (d.agg >= PEACE_AGG_MAX ? '⚠ ' + X('Saldırgan itibarın barış gelirini kesti', 'Your aggressive reputation cut the peace income') : X('Pakt ve ittifaklar tur başına gelir getirir', 'Pacts and alliances bring income each turn'))) + '</div>' +
       '<div class="d38-sec">' + X('Aktif anlaşmalar', 'Active deals') + '</div>' + activeDeals() +
       '<details class="d38-rules"><summary>' + X('Kurallar', 'Rules') + '</summary><ul>' +
