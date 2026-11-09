@@ -126,6 +126,9 @@
       if (a === other || allied(a, other)) return;
       var x = st(a); for (var i = 0; i < 5; i++) s[i] += x[i]; joined.push(a);
     });
+    /* V237: müttefik değerleri tam toplanmaz: toplam desteğin %45'i sayılır ve bir ülkenin değeri müttefikle en çok %35 artar.
+       Böylece küçük ülke büyük müttefikle her yeri fethedemez, büyük ülke de küçük müttefikle ezici olmaz. */
+    if (joined.length) { var b0 = st(e); s = s.map(function (v, i) { var ex = Math.max(0, v - b0[i]); return b0[i] + Math.min(ex * .45, b0[i] * .35); }); }
     return { s: s, j: joined };
   }
   /* ---------- V46: zorluk, yön takibi, tepki ---------- */
@@ -484,7 +487,7 @@
       return '<button class="wd-r ' + (cls || '') + '" ' + (on ? 'onclick="' + on + '"' : 'disabled') + '><span class="wd-i">' + ic + '</span><span class="wd-t"><b>' + tt + '</b><small>' + ds + '</small></span><em>' + st2 + '</em></button>';
     };
     var h = '<div class="wd-h">🕊 ' + T('Diplomasi', 'Diplomacy') + (mine.length ? '<small>' + T('Müttefikler: ', 'Allies: ') + mine.map(nm).join(', ') + '</small>' : '') + (inC ? '<small>' + T('İlişki: ', 'Relations: ') + frLevel(e).n + ' ' + frLevel(e).h + '</small>' : '') + '</div>' +
-      rows('🤝', T('Dostluk Antlaşması', 'Friendship Treaty'), T('Birlikte savaş, değerler toplanır · 2 🎲', 'Fight together, stats add up · 2 🎲'), inC ? T('Müttefik', 'Allied') : label(p), 'wcdFriend()') +
+      rows('🤝', T('Dostluk Antlaşması', 'Friendship Treaty'), T('Birlikte savaş, müttefik desteği en çok +%35 · 2 🎲', 'Fight together, ally support up to +35% · 2 🎲'), inC ? T('Müttefik', 'Allied') : label(p), 'wcdFriend()') +
       rows('🛡', T('Saldırmazlık Antlaşması', 'Non-Aggression Pact'), T('Kolay kabul · 4 tur saldırmazlık', 'Easy to get · 4 turns without attacks'), (window.v20Pacted && v20Pacted(G.pl, e)) ? T('Aktif', 'Active') : WCPay.label(), 'wcdNap()') +
       rows('💰', T('Haraç Talep Et', 'Demand Tribute'), T('Zayıf devletlerden ödeme iste · 1 🎲', 'Ask weaker states to pay · 1 🎲'), tLeft() + '/' + MAX_TOT, 'wcdTribute()') +
       (coIdx(G.pl) >= 0 ? rows('🚪', T('İttifaktan Çık', 'Leave Alliance'), '', '', 'wcdLeave()', 'sm') : '');

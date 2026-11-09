@@ -137,6 +137,15 @@
   function subModes() {
     if (CFG.flat) return setMenu((window.WCRank ? btn('', '★', X('Dereceli Mücadele', 'Ranked Struggle'), '', 'rank', 0, 0) : '') + btn('', 'I', X('Tek Oyunculu', 'Single Player'), '', 'm1', 0, 0) + (window.WCOnline ? btn('', '⇄', X('Arkadaşınla Maç', 'Match with a Friend'), '', 'onl', 0, 0) : '') + btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0));
     setMenu(btn('pri', 'I', t('m1'), t('m1d'), 'm1', 0, 0) + (window.WCOnline ? btn('', '⇄', X('Online (2 kişi)', 'Online (2 players)'), X('Arkadaşına karşı', 'Versus a friend'), 'onl', 0, 0) : '') + btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0)); }
+  /* V237: tek oyunculu zorluk seçimi: Normal bitince Zor, Zor bitince Iron Man açılır */
+  function lsOn(k) { try { return !!localStorage.getItem(k); } catch (e) { return false; } }
+  function subDiff() {
+    var h = lsOn('wc_hard230'), ir = lsOn('wc_iron237');
+    setMenu(btn('pri', 'I', X('Normal', 'Normal'), '', 'dn', 0, 0) +
+      btn(h ? '' : 'lk237', h ? 'II' : '🔒', X('Zor Mod', 'Hard Mode'), h ? '' : X('Normal modda bitir', 'Finish on Normal'), h ? 'dh' : 'dlh', 0, 0) +
+      btn(ir ? '' : 'lk237', ir ? 'III' : '🔒', X('Iron Man', 'Iron Man'), ir ? '' : X('Zor Mod\'da bitir', 'Finish on Hard'), ir ? 'di' : 'dli', 0, 0) +
+      btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0));
+  }
   function subNew() { if (!hasSave()) return subModes(); setMenu('<div class="subm">' + t('del') + '</div>' + btn('pri', '✓', t('yes'), '', 'yes', 0, 0) + btn('', '←', t('no'), '', 'back', 0, 0)); }
   function subBack() { var m = root && root.querySelector('.menu'); if (m && mainHTML) { m.innerHTML = mainHTML; mainHTML = ''; fixDelay(m); setTimeout(lockMenu, 0); } }
   function live() { return idle() && root && root.classList.contains('on'); }
@@ -168,7 +177,10 @@
     try {
       if (a === 'yes') { subModes(); return; }
       if (a === 'back') { subBack(); return; }
-      if (a === 'm1') { if (window.WCTut && WCTut.later) WCTut.later(); launch(1); return; }   /* V125: öğretici sorusu oyun başladıktan sonra */
+      if (a === 'm1') { subDiff(); return; }   /* V237: önce zorluk */
+      if (a === 'dn' || a === 'dh' || a === 'di') { window.__diff237 = a === 'di' ? 2 : a === 'dh' ? 1 : 0; if (window.WCTut && WCTut.later) WCTut.later(); launch(1); return; }   /* V125: öğretici sorusu oyun başladıktan sonra */
+      if (a === 'dlh') { toast(X('Zor Mod için oyunu Normal modda bitir', 'Finish the game on Normal to unlock Hard Mode')); return; }
+      if (a === 'dli') { toast(X('Iron Man için oyunu Zor Mod\'da bitir', 'Finish the game on Hard Mode to unlock Iron Man')); return; }
       if (a === 'onl') { if (window.WCOnline) WCOnline.open(); return; }
       if (a === 'rank') { if (window.WCRank) WCRank.open(); return; }
       if (a === 'tut') { if (window.WCTut) WCTut.open(); return; }

@@ -1254,3 +1254,12 @@ V227 — Ses yenilemesi (scripts/gen_audio.html + gen_audio.js ile üretildi; ü
  - Müttefikte Saldırı yerine İhanet düğmesi (müttefik o savaşta 2 kat, v40.js).
  - Fethedilmiş ülkeler teklif ve olay çıkarmaz.
  - Atom bombası: mantar bulutu duman bulutçuklarından; menü küresinin yanındaki halka uçları arka plandan silindi.
+
+=================== V237 (APK adı: v233) ===================
+ - BKB logosu altın halkalı yuvarlak içinde.
+ - İsyan sesi yeni: alarm çanı ve kalabalık uğultusu (sfx/revolt.ogg). KULAKLA DİNLENMEDİ.
+ - Tek Oyunculu'dan sonra zorluk menüsü: Normal, Zor (Normal'i bitirince), Iron Man (Zor'u bitirince); kilitliler görünür.
+ - Rakip gücü: Zor +%25, Iron Man +%50. Zor ve Iron Man fetihleri platin mühür ve ayrıntı verir.
+ - Iron Man: 8 elmas mühür otomatik seçilebilir, ülkeye +%15 (altın +%2); seçilebilir ülkeler mühüre bağlı.
+ - İttifak dengesi: toplam desteğin %45'i sayılır, bir ülkenin değeri müttefikle en çok %35 artar.
+ - Hint Mührü adı: Ganj Mührü.

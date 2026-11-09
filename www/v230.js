@@ -24,22 +24,18 @@
 
   /* ---- Zor Mod ---- */
   function hardOn() { try { return !!localStorage.getItem('wc_hard230'); } catch (e) { return false; } }
-  setInterval(function () { try { if (window.G && !G.mp && G.over && G.over.w === 0 && !G.hard && !hardOn()) localStorage.setItem('wc_hard230', '1'); } catch (e) { } }, 1000);
-  var want = false;
+  setInterval(function () { try { if (window.G && !G.mp && G.over && G.over.w === 0) { if (!G.hard && !hardOn()) localStorage.setItem('wc_hard230', '1'); if (G.hard === 1) localStorage.setItem('wc_iron237', '1'); } } catch (e) { } }, 1000);
+  var want = 0, AIK = [1, 1.25, 1.5];   /* V237: rakip gücü: Normal, Zor +%25, Iron Man +%50 */
   function wrapNew() {
     if (typeof newGame !== 'function' || newGame.v230) return;
     var _n = newGame;
     newGame = function (m) {
       var self = this, a = arguments;
-      function go(h) { want = h; var r = _n.apply(self, a); try { if (window.G && m == 1) G.hard = h ? 1 : 0; } catch (e) { } return r; }
+      function go(h) { want = h; var r = _n.apply(self, a); try { if (window.G && m == 1) G.hard = h; } catch (e) { } return r; }
       var ons = null; try { ons = window.WCOnline && WCOnline._state && WCOnline._state(); } catch (e) { }
-      if (m != 1 || !hardOn() || (ons && (ons.side || ons.ranked))) return go(false);   /* online ve ranked maçta zorluk yok */
-      if (window.__noAsk230) { window.__noAsk230 = 0; return go(want); }
-      window.WC230 = window.WC230 || {};
-      window.WC230.pick = function (h) { try { closeMod(); } catch (e) { } go(!!h); };
-      modal('<h2>' + X('Zorluk Seç', 'Choose Difficulty') + '</h2>' +
-        '<button class="big" onclick="WC230.pick(0)">' + X('Normal', 'Normal') + '<small class="sub220">' + X('Bildiğin sefer', 'The campaign you know') + '</small></button>' +
-        '<button class="big pri" onclick="WC230.pick(1)">' + X('Zor Mod', 'Hard Mode') + '<small class="sub220">' + X('Rakipler %20 güçlü · platin mühürler', 'Rivals 20% stronger · platinum seals') + '</small></button>');
+      if (m != 1 || (ons && (ons.side || ons.ranked))) return go(0);   /* online ve ranked maçta zorluk yok */
+      if (window.__noAsk230) { window.__noAsk230 = 0; return go(want); }   /* tekrar başla: aynı zorluk */
+      var d = window.__diff237 | 0; window.__diff237 = 0; return go(d);   /* zorluk ana menüde seçilir (v35.js) */
     };
     newGame.v230 = 1;
   }
@@ -50,7 +46,7 @@
     var _w = WCD.war;
     WCD.war = function (att, de) {
       var r = _w.apply(this, arguments);
-      try { if (G && G.hard && !G.mp && r) { if (att !== G.pl) r.A = r.A.map(function (v) { return v * 1.2; }); if (de !== G.pl) r.D = r.D.map(function (v) { return v * 1.2; }); } } catch (e) { }
+      try { if (G && G.hard && !G.mp && r) { var k = AIK[G.hard] || 1; if (att !== G.pl) r.A = r.A.map(function (v) { return v * k; }); if (de !== G.pl) r.D = r.D.map(function (v) { return v * k; }); } } catch (e) { }
       return r;
     };
     WCD.war.v230 = 1;

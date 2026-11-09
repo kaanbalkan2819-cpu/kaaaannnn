@@ -345,6 +345,13 @@
       });
       return q.then(function () { return { files: out, stat: st }; });
     },
+    revolt237: function () {   /* isyan: üç alarm çanı + büyüyen kalabalık uğultusu */
+      seed = 237; var k = new K(4.6), v = k.bus(.8, .6, k.verb(2.4, 3200, .7, 8)), i;
+      [0, 1.05, 2.1].forEach(function (t, j) { k.bell(.02 + t, hz('A3'), .5 - j * .08, 2.2, v); k.war(.02 + t, 58, .35, v); });
+      k.nzE(.05, [[0, .0001], [1.2, .14], [3.1, .2], [4.3, .0001]], { type: 'bandpass', q: .5, fp: [[0, 480], [2, 880], [4.3, 560]], dst: v });
+      for (i = 0; i < 22; i++) { var t0 = R(.6, 3.6); k.tn(t0, R(.18, .42), { f0: R(260, 540), f1: R(200, 420), type: 'triangle', g: R(.02, .05), a: .05, dst: k.pan(v, R(-.7, .7)) }); }
+      return k.render(.72, 0).then(function (p) { return enc(p, 72, false).then(function (x) { return JSON.stringify({ files: { 'sfx/revolt.ogg': x }, stat: { revolt: stat(p) } }); }); });
+    },
     battle232: function () {   /* savaş paneli: melodi yok; kısık savaş davulu + uzak rüzgâr (32 sn döngü) */
       seed = 232; var D = 32, k = new K(D + 5), c = k.c, lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 800; lp.Q.value = .4; lp.connect(k.out); k.out = lp;
       var verb = k.verb(2.6, 1200, .65, 6), b = k.bus(.8, .6, verb), bar, i;

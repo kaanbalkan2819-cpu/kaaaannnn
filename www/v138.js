@@ -265,8 +265,8 @@
       OFF = true;
       var isA = o.kind === 'ally';
       modal('<h3>' + (isA ? '🤝 ' + X('İttifak Teklifi', 'Alliance Offer') : '🛡 ' + X('Saldırmazlık Teklifi', 'Pact Offer')) + '</h3><div style="text-align:center;margin:8px 0">' + fl(o.from) + ' <b>' + esc(nm(o.from)) + '</b></div>' +
-        '<p style="color:var(--tx2)">' + (isA ? X('<b>' + esc(nm(o.from)) + '</b> seninle ittifak kurmak istiyor (' + ALLY_TURNS + ' tur). Savaşlarda değerler toplanır, her müttefik küçük bir ticaret geliri getirir; ama müttefike saldırmak ihanettir.',
-          '<b>' + esc(nm(o.from)) + '</b> wants an alliance (' + ALLY_TURNS + ' turns). Stats add up in war and each ally brings a little trade income; attacking an ally is betrayal.') :
+        '<p style="color:var(--tx2)">' + (isA ? X('<b>' + esc(nm(o.from)) + '</b> seninle ittifak kurmak istiyor (' + ALLY_TURNS + ' tur). Savaşlarda müttefik destek verir (en çok +%35), her müttefik küçük bir ticaret geliri getirir; ama müttefike saldırmak ihanettir.',
+          '<b>' + esc(nm(o.from)) + '</b> wants an alliance (' + ALLY_TURNS + ' turns). Your ally backs you in war (up to +35%) and each ally brings a little trade income; attacking an ally is betrayal.') :
           X('<b>' + esc(nm(o.from)) + '</b> ' + PACT_TURNS + ' tur boyunca birbirinize saldırmamayı öneriyor.', '<b>' + esc(nm(o.from)) + '</b> proposes ' + PACT_TURNS + ' turns without attacks.')) + '</p>' +
         /* V214: teklifte karşı taraf somut bir şey taahhüt eder (kabul edilip antlaşma kurulursa o alan +%5) */
         (function () { try { if (o.k == null) o.k = 1 + Math.floor(Math.random() * 4); return window.WCPledge ? '<div class="pledge214"><img class="wci" src="' + ((window.WC_ICONS || {})[['pop', 'army', 'eco', 'tech', 'dip'][o.k]] || '') + '" alt=""><span><small>' + X('KARŞILIĞINDA', 'IN RETURN') + '</small>' + WCPledge(o) + '</span></div>' : ''; } catch (e) { return ''; } })() +
@@ -331,7 +331,7 @@
     var fc = chFriend(e), pc = chPact(e), tl = 0; try { tl = WCD.tribLeft(); } catch (x) { }
     var friendRow;
     if (al) { var left = myCoLeft(); friendRow = left <= 2 ? prow('🔄', X('İttifakı Yenile', 'Renew Alliance'), X('Süreyi ' + ALLY_TURNS + ' tura uzatır · ilişki en az Nötr olmalı', 'Extends to ' + ALLY_TURNS + ' turns · relations must be at least Neutral'), COSTS.renew + ' 🎲', 'v138Renew()') : prow('🤝', X('İttifak', 'Alliance'), X('Müttefik · ' + left + ' tur kaldı', 'Allied · ' + left + ' turns left'), '✔', null); }
-    else friendRow = prow('🤝', X('İttifak', 'Alliance'), X('Savaşta değerler toplanır · müttefik başına ticaret geliri · ' + ALLY_TURNS + ' tur', 'Stats add in war · trade income per ally · ' + ALLY_TURNS + ' turns'), fc.p ? pct(fc.p) + ' · ' + COSTS.friend + ' 🎲' : '—', fc.p ? 'wcdFriend()' : null, fc.p ? '' : fc.why);
+    else friendRow = prow('🤝', X('İttifak', 'Alliance'), X('Savaşta müttefik destek verir (en çok +%35) · müttefik başına ticaret geliri · ' + ALLY_TURNS + ' tur', 'Stats add in war · trade income per ally · ' + ALLY_TURNS + ' turns'), fc.p ? pct(fc.p) + ' · ' + COSTS.friend + ' 🎲' : '—', fc.p ? 'wcdFriend()' : null, fc.p ? '' : fc.why);
     var pactRow = pl ? prow('🛡', X('Saldırmazlık', 'Non-Aggression'), X(pl + ' tur kaldı', pl + ' turns left'), '✔', null) :
       prow('🛡', X('Saldırmazlık', 'Non-Aggression'), X(PACT_TURNS + ' tur saldıramazsınız · aktif ' + pactCount() + '/' + PACT_MAX, PACT_TURNS + ' turns without attacks · active ' + pactCount() + '/' + PACT_MAX), pc.p ? pct(pc.p) + ' · ' + pactCost() + ' 🎲' : '—', pc.p ? 'wcdNap()' : null, pc.p ? '' : pc.why);
     var more = prow('💰', X('Haraç Talep Et', 'Demand Tribute'), X('Zayıf devletten ödeme iste · reddederse ilişki bozulur', 'Demand payment from weaker states · refusal sours relations'), tl + '/2 · ' + COSTS.tribute + ' 🎲', 'wcdTribute()') +
@@ -358,8 +358,8 @@
     if (!c.p) { modal('<h3>🤝 ' + X('İttifak', 'Alliance') + '</h3><p>' + (c.why || '') + '</p><button class="big" onclick="v138Sheet()">‹ ' + X('Geri', 'Back') + '</button>'); return; }
     setCost(COSTS.friend);
     modal('<div class="d38"><h3>🤝 ' + X('İttifak', 'Alliance') + ' — ' + esc(nm(e)) + '</h3><div class="d38-hd">' + fl(G.pl) + '<span>⇄</span>' + fl(e) + '</div>' + relBar(relOf(e)) +
-      '<p style="color:var(--tx2)">' + X('Kabul şansı: <b>' + pct(c.p) + '</b>. Reddedilirse zarın yarısı iade edilir. ' + ALLY_TURNS + ' tur sürer; savaşlarda değerler toplanır, ittifak üyelerine saldıramazsın. Müttefike saldırmak <b>ihanettir</b>: o savaşta 2 kat güçlü olur, güvenin ve itibarın çöker.',
-        'Chance: <b>' + pct(c.p) + '</b>. Half the dice are refunded if refused. Lasts ' + ALLY_TURNS + ' turns; stats add up in war and you cannot attack members. Attacking an ally is <b>betrayal</b>: it fights at 2x and your trust and reputation collapse.') + '</p>' +
+      '<p style="color:var(--tx2)">' + X('Kabul şansı: <b>' + pct(c.p) + '</b>. Reddedilirse zarın yarısı iade edilir. ' + ALLY_TURNS + ' tur sürer; savaşlarda müttefik destek verir (en çok +%35), ittifak üyelerine saldıramazsın. Müttefike saldırmak <b>ihanettir</b>: o savaşta 2 kat güçlü olur, güvenin ve itibarın çöker.',
+        'Chance: <b>' + pct(c.p) + '</b>. Half the dice are refunded if refused. Lasts ' + ALLY_TURNS + ' turns; your ally backs you in war (up to +35%) and you cannot attack members. Attacking an ally is <b>betrayal</b>: it fights at 2x and your trust and reputation collapse.') + '</p>' +
       '<p>' + WCPay.costLine() + '</p>' + WCPay.rows('v138FriendGo') + gold218('friend', c.p) + '<button class="big" onclick="v138Sheet()">‹ ' + X('Geri', 'Back') + '</button></div>');
   }
   window.v138FriendGo = function (how) {

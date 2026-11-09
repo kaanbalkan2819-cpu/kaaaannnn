@@ -17,14 +17,28 @@
     { id: 'savan', n: ['Savan Mührü', 'Savanna Seal'], a: ['Aslan', 'Lion'], r: ['Doğu Afrika', 'East Africa'], c: 'KEN TZA UGA RWA BDI SOM' },
     { id: 'bozkir', n: ['Bozkır Mührü', 'Steppe Seal'], a: ['At', 'Horse'], r: ['Orta Asya Bozkırı', 'Central Asian Steppe'], c: 'KAZ UZB TKM KGZ TJK MNG' },
     { id: 'mezopotamya', n: ['Mezopotamya Mührü', 'Mesopotamia Seal'], a: ['Kanatlı Boğa', 'Lamassu'], r: ['Mezopotamya ve Levant', 'Mesopotamia & Levant'], c: 'IRQ SYR JOR LBN ISR PSE' },
-    { id: 'hint', n: ['Hint Mührü', 'Indus Seal'], a: ['Kaplan', 'Tiger'], r: ['Hint Alt Kıtası', 'Indian Subcontinent'], c: 'IND PAK BGD NPL BTN LKA' },
+    { id: 'hint', n: ['Ganj Mührü', 'Ganges Seal'], a: ['Kaplan', 'Tiger'], r: ['Hint Alt Kıtası', 'Indian Subcontinent'], c: 'IND PAK BGD NPL BTN LKA' },
     { id: 'uzakdogu', n: ['Ejder Mührü', 'Dragon Seal'], a: ['Ejderha', 'Dragon'], r: ['Uzak Doğu', 'Far East'], c: 'CHN KOR PRK JPN TWN' },
     { id: 'sahra', n: ['Sahra Mührü', 'Sahara Seal'], a: ['Çöl Tilkisi', 'Fennec Fox'], r: ['Kuzey Afrika', 'North Africa'], c: 'MAR DZA TUN LBY MRT ESH' },
     { id: 'and', n: ['And Mührü', 'Andes Seal'], a: ['Kondor', 'Condor'], r: ['Güney Konisi', 'Southern Cone'], c: 'CHL ARG URY PRY BOL' }
   ];
+  /* V237: ELMAS MÜHÜRLER: yalnızca Iron Man'de, otomatik seçilebilir; ülkenin tüm değerleri +%15 */
+  var DIA = [
+    { id: 'iskender', n: ['Büyük İskender Mührü', 'Alexander Seal'], a: ['Makedon Kralı', 'King of Macedon'], r: ['Makedonya ve Yunanistan', 'Macedonia & Greece'], c: 'MKD GRC' },
+    { id: 'sezar', n: ['Sezar Mührü', 'Caesar Seal'], a: ['Roma', 'Rome'], r: ['Roma İmparatorluğu sınırları', 'Roman Empire'], c: 'ITA ESP PRT FRA BEL NLD GBR CHE AUT SVN HRV BIH SRB MNE ALB MKD GRC BGR ROU TUR CYP SYR LBN ISR PSE JOR EGY LBY TUN DZA MAR' },
+    { id: 'cengiz', n: ['Cengiz Han Mührü', 'Genghis Khan Seal'], a: ['Moğol Hanı', 'Great Khan'], r: ['Moğol bozkırları', 'Mongol Steppe'], c: 'MNG KAZ KGZ UZB TJK TKM CHN' },
+    { id: 'fatih', n: ['Fatih Mührü', 'Conqueror Seal'], a: ['Osmanlı Padişahı', 'Ottoman Sultan'], r: ['Osmanlı toprakları', 'Ottoman Lands'], c: 'TUR GRC BGR MKD ALB SRB BIH' },
+    { id: 'napolyon', n: ['Napolyon Mührü', 'Napoleon Seal'], a: ['Fransız İmparatoru', 'Emperor of France'], r: ['Fransa ve Batı Avrupa', 'France & Western Europe'], c: 'FRA BEL LUX NLD ITA CHE' },
+    { id: 'selahaddin', n: ['Selahaddin Mührü', 'Saladin Seal'], a: ['Eyyûbî Sultanı', 'Ayyubid Sultan'], r: ['Mısır ve Levant', 'Egypt & Levant'], c: 'EGY SYR JOR LBN IRQ PSE' },
+    { id: 'asoka', n: ['Aşoka Mührü', 'Ashoka Seal'], a: ['Maurya İmparatoru', 'Maurya Emperor'], r: ['Maurya toprakları', 'Maurya Lands'], c: 'IND PAK BGD NPL AFG' },
+    { id: 'bolivar', n: ['Bolívar Mührü', 'Bolívar Seal'], a: ['Kurtarıcı', 'The Liberator'], r: ['Büyük Kolombiya', 'Gran Colombia'], c: 'VEN COL ECU PER BOL PAN' }
+  ];
   REG.forEach(function (g) { g.list = g.c.split(' '); });
-  function byId(id) { for (var i = 0; i < REG.length; i++) if (REG[i].id === id) return REG[i]; return null; }
-  function img(g) { return 'assets/goldseals/' + g.id + '.png'; }
+  DIA.forEach(function (g) { g.list = g.c.split(' '); g.dia = 1; });
+  function iron() { try { return !!window.G && G.hard === 2 && !G.mp; } catch (e) { return false; } }
+  function pct(g) { return g && g.dia ? 15 : 2; }
+  function byId(id) { var i; for (i = 0; i < REG.length; i++) if (REG[i].id === id) return REG[i]; for (i = 0; i < DIA.length; i++) if (DIA[i].id === id) return DIA[i]; return null; }
+  function img(g) { return g.dia ? 'assets/diamond/' + g.id + '.webp' : 'assets/goldseals/' + g.id + '.png'; }
   function got() { try { var a = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
   function setGot(a) { try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) { } }
   function solo() { try { return !!window.G && !G.mp && G.v5 === 1 && typeof G.pl === 'string' && !!G.owner; } catch (e) { return false; } }
@@ -60,9 +74,12 @@
   /* ---------- başlangıç: mühür seçimi ---------- */
   var SEL = null;
   function chooserHTML() {
-    var have = got(), h = '<div class="wb-wrap still"><div class="wb-panel wb-pause wc141p gs218"><div class="c141h"><span class="p">⚜</span><h3>' + X('ALTIN MÜHÜR', 'GOLDEN SEAL') + '</h3></div>' +
-      '<p class="gs218s">' + X('Bu seferi bir altın mühürle başlatmak ister misin? Mühür seçersen yalnızca o bölgeden ülke seçebilirsin; ülkenin tüm değerleri <b>+%2</b> olur.',
-        'Start this campaign with a golden seal? You can then only pick a country from that region; all its stats get <b>+2%</b>.') + '</p><div class="gs218g">';
+    var have = got(), isI = iron(), h = '<div class="wb-wrap still"><div class="wb-panel wb-pause wc141p gs218"><div class="c141h"><span class="p">⚜</span><h3>' + (isI ? X('MÜHÜR SEÇ', 'CHOOSE A SEAL') : X('ALTIN MÜHÜR', 'GOLDEN SEAL')) + '</h3></div>' +
+      '<p class="gs218s">' + (isI ? X('<b>Elmas mühürler</b> Iron Man\'de hazır: yalnızca o bölgeden ülke seçersin, ülkenin tüm değerleri <b>+%15</b>. Altın mühürler <b>+%2</b>.', '<b>Diamond seals</b> are ready in Iron Man: pick only from that region, all stats <b>+15%</b>. Golden seals <b>+2%</b>.') : X('Bu seferi bir altın mühürle başlatmak ister misin? Mühür seçersen yalnızca o bölgeden ülke seçebilirsin; ülkenin tüm değerleri <b>+%2</b> olur.',
+        'Start this campaign with a golden seal? You can then only pick a country from that region; all its stats get <b>+2%</b>.')) + '</p><div class="gs218g">';
+    if (isI) DIA.forEach(function (g) {
+      h += '<button type="button" class="gs218i d237' + (SEL === g.id ? ' on' : '') + '" onclick="GS218.sel(\'' + g.id + '\')"><i style="background-image:url(' + img(g) + ')"></i><b>' + esc(X(g.n[0], g.n[1])) + '</b><small>' + esc(X(g.r[0], g.r[1])) + '</small></button>';
+    });
     REG.forEach(function (g) {
       var ok = have.indexOf(g.id) >= 0;
       h += '<button type="button" class="gs218i' + (ok ? '' : ' lk') + (SEL === g.id ? ' on' : '') + '" ' + (ok ? 'onclick="GS218.sel(\'' + g.id + '\')"' : 'onclick="GS218.why(\'' + g.id + '\')"') + '>' +
@@ -95,19 +112,20 @@
     },
     none: function () { SEL = null; PEND = null; try { if (window.G) G.gs218 = null; closeMod(); } catch (e) { } },
     list: function () { return REG.map(function (g) { return { id: g.id, open: got().indexOf(g.id) >= 0 }; }); },
+    diaList: function () { return DIA; }, diaImg: img,
     unlockAll: function () { setGot(REG.map(function (g) { return g.id; })); }   /* yalnızca test için */
   };
   /* tutorial sorusu yerine (mühür varsa) */
   (function hookTut() {
     if (!window.WCTut || !WCTut.askInGame) return setTimeout(hookTut, 500);
     if (WCTut.askInGame.gs218) return;
-    var _a = WCTut.askInGame; WCTut.askInGame = function () { if (got().length && window.G && !G.mp && !G.gs218asked) { G.gs218asked = 1; SEL = null; showChooser(); return; } return _a.apply(this, arguments); };
+    var _a = WCTut.askInGame; WCTut.askInGame = function () { if ((got().length || iron()) && window.G && !G.mp && !G.gs218asked) { G.gs218asked = 1; SEL = null; showChooser(); return; } return _a.apply(this, arguments); };
     WCTut.askInGame.gs218 = 1;
   })();
   /* öğretici sorulmayan yeni oyunlarda: seçim ekranı açılınca (küre yaklaşması bitince) bir kez sor */
   setInterval(function () {
     try {
-      if (!pickSolo() || G.ph !== 'v7pick' || G.gs218asked || !got().length) return;
+      if (!pickSolo() || G.ph !== 'v7pick' || G.gs218asked || !(got().length || iron())) return;
       if (window.v30IntroBusy && v30IntroBusy()) return;
       var m = document.getElementById('mod'); if (m && m.style.display === 'flex') return;
       G.gs218asked = 1; SEL = null; showChooser();
@@ -139,9 +157,9 @@
       if (g.list.indexOf(G.pl) < 0) return;   /* bölge dışı (olmamalı) */
       G.es = G.es || {}; var b = (G.es[G.pl] || (typeof BASE !== 'undefined' && BASE[G.pl]) || []).slice();
       if (!b.length) return;
-      G.es[G.pl] = b.map(function (v) { return Math.round(v * (1 + BONUS) * 10) / 10; });
+      G.es[G.pl] = b.map(function (v) { return Math.round(v * (1 + (g.dia ? .15 : BONUS)) * 10) / 10; });
       try { save(); } catch (e) { } try { render(); } catch (e) { }
-      try { toast('⚜ ' + X(g.n[0] + ' etkin: ' + nm(G.pl) + ' tüm değerler +%2', g.n[1] + ' active: ' + nm(G.pl) + ' all stats +2%')); } catch (e) { }
+      try { toast('⚜ ' + X(g.n[0] + ' etkin: ' + nm(G.pl) + ' tüm değerler +%' + pct(g), g.n[1] + ' active: ' + nm(G.pl) + ' all stats +' + pct(g) + '%')); } catch (e) { }
     } catch (e) { }
   }, 700);
 })();

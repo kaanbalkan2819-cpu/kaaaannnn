@@ -34,7 +34,7 @@
   }
   /* V227: efektler assets/audio/sfx/ altındaki Ogg (Opus) dosyalarından yüklenir (scripts/gen_audio.js ile üretildi). Zar sesi wc_sfx_data.js'te kalır.
      Dosya yüklenemezse her ses eski sentezleyiciye geri düşer. Tek tek ve sırayla çözülür; açılışta takılma yapmaz. */
-  var FILES = { click: 1, notify: 1, attack: 1, cannon: 3, boom: 3, hit: 3, shot: 4, mg: 2, missile: 2, jet: 1, tank: 1, wave: 1, splash: 1, wblast: 1, collapse: 1, clash: 3, tick: 1, ping: 1, coin: 1, pact: 1, win: 1, lose: 1, conq: 1, horn: 1, flak: 2, siren: 1, bomber: 1, whistle: 1, nuke: 1, tcannon: 3, thit: 3 };
+  var FILES = { click: 1, notify: 1, attack: 1, cannon: 3, boom: 3, hit: 3, shot: 4, mg: 2, missile: 2, jet: 1, tank: 1, wave: 1, splash: 1, wblast: 1, collapse: 1, clash: 3, tick: 1, ping: 1, coin: 1, pact: 1, win: 1, lose: 1, conq: 1, horn: 1, flak: 2, siren: 1, bomber: 1, whistle: 1, nuke: 1, tcannon: 3, thit: 3, revolt: 1 };
   /* V229: uçak saldırısı V226 öncesi örnek seslere döndü (assets/audio/sfx/oboom_*.mp3, owhoosh_*.mp3) */
   var OLD = { oboom: 2, owhoosh: 1 };
   function oldReady() { return !!(bufs.oboom && bufs.oboom.length); }
@@ -119,7 +119,7 @@
       var m = document.getElementById('mod'), b = document.getElementById('box'); return !!(m && b && m.style.display === 'flex' && b.querySelector('.polx,.d38'));
     } catch (e) { return false; }
   }
-  var PLAYS = { click: ['click', .7, 1], tick: ['tick', .6, 1], notify: ['notify', .55], ping: ['ping', .6], coin: ['coin', .7, 1], pact: ['pact', .85], win: ['win', .9], lose: ['lose', .9], conq: ['conq', .95], attack: ['attack', .85], horn: ['horn', .7], cannon: ['cannon', .85, 1], boom: ['boom', .92, 1], rifle: ['mg', .5, 1], missile: ['missile', .75, 1], clash: ['clash', .8, 1] };
+  var PLAYS = { revolt: ['revolt', .85], click: ['click', .7, 1], tick: ['tick', .6, 1], notify: ['notify', .55], ping: ['ping', .6], coin: ['coin', .7, 1], pact: ['pact', .85], win: ['win', .9], lose: ['lose', .9], conq: ['conq', .95], attack: ['attack', .85], horn: ['horn', .7], cannon: ['cannon', .85, 1], boom: ['boom', .92, 1], rifle: ['mg', .5, 1], missile: ['missile', .75, 1], clash: ['clash', .8, 1] };
   function play(k) {
     if (!c || !S().sfxOn) return; var t = c.currentTime + .005, i;
     try { if (window.G && (G.ph === 'v7pick' || G.ph === 'pick')) return; } catch (e) { }   /* V230: ilk ülke seçiminde ses yok */

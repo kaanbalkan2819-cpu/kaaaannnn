@@ -64,6 +64,16 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .inf219 i.pt.lk{filter:grayscale(1) brightness(.6)!important}
 .inf219 span em{font-style:normal;color:#dce9ff;white-space:nowrap}
 
+/* ---- V237: kilitli zorluk, elmas mühürler ---- */
+.gs218g{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-height:52vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.gs218 .gs218i{min-width:0}
+#wcm .mb.lk237{opacity:.5!important}
+.tabs219 button.dm237{color:#d9f3ff}
+.tabs219 button.dm237.on{background:linear-gradient(180deg,#7ec8ee,#3f7fb8)!important;color:#fff}
+.gs218i.d237{border-color:#8fd4ff!important;box-shadow:0 0 10px #8fd4ff55}
+.gs218i.d237 b{color:#d9f3ff;font-size:11.5px;white-space:normal;line-height:1.15}
+.col219i.dm b{color:#d9f3ff}
+.col219i.dm i{filter:drop-shadow(0 0 6px #9fdcff)!important}
 body.wcm-on #onbar{display:none!important}
 /* ---- V236: inst226 açıkken menü öğeleri görünür; yorgunluk bildirimi dokununca kapanır; ihanet düğmesi ---- */
 #wcm.inst226 .mb,#wcm.inst226 .menu>*{opacity:1!important;transform:none!important}

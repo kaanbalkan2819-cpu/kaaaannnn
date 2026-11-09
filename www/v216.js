@@ -55,7 +55,7 @@
     }
     if (!pts.length) pts.push(new T.Vector3(0, 0, 0));
     var dur = 5200; window.__anim216 = performance.now() + dur + 600;
-    try { if (window.AU) AU.play('attack'); } catch (e) { }
+    try { if (window.AU) AU.play('revolt'); } catch (e) { }   /* V237: alarm çanı ve kalabalık uğultusu */
     var M = window.WCBattleFX.models, mobs = [], RED = 0xb3261e;
     /* 1) bağımsızlık ışık sütunu */
     f.at(.35, function () { try { f.deploy({ x: 0, y: 0, z: 0 }, 1.1, 0xd23b2b, 7); } catch (e) { } });
