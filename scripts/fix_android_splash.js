@@ -13,7 +13,7 @@ const RES = path.join(ROOT, 'android', 'app', 'src', 'main', 'res');
 if (!fs.existsSync(RES)) { console.log('• V217: android klasörü yok; önce setup_android_windows.bat çalıştırın.'); process.exit(0); }
 
 fs.writeFileSync(path.join(RES, 'values', 'wc_colors.xml'),
-  '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="wc_bg">#05060D</color>\n</resources>\n');
+  '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="wc_bg">#000000</color>\n</resources>\n');
 
 let n = 0;
 for (const d of fs.readdirSync(RES)) {

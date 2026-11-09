@@ -164,7 +164,7 @@
   }
   function hookFX() {
     var W = window.WCBattleFX; if (!W || W.__snd) return; W.__snd = 1; var P = W.prototype;
-    function wrap(n, f) { var o = P[n]; if (typeof o !== 'function') return; P[n] = function () { try { if (!(animKind === 'air' && oldReady())) f.apply(this, arguments); } catch (e) { } return o.apply(this, arguments); }; }   /* V229: uçak saldırısında olay sesleri yerine eski ses akışı (animStart) */
+    function wrap(n, f) { var o = P[n]; if (typeof o !== 'function') return; P[n] = function () { try { if (!this.__noSnd && !(animKind === 'air' && oldReady())) f.apply(this, arguments); } catch (e) { } return o.apply(this, arguments); }; }   /* V229: uçak saldırısında olay sesleri yerine eski ses akışı (animStart) */
     wrap('tankAttack', function () { this.__k = 'tank'; this.at(.03, function () { if (!aTank && anim('tank', .22, 1, true)) aTank = true; }); });
     wrap('infantryAttack', function () { this.__k = 'inf'; });
     wrap('missileAttack', function () { this.__k = 'msl'; });

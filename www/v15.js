@@ -39,7 +39,7 @@
       ((o === G.pl && window.hist218HTML && hist218HTML(id)) ? '<blockquote class="v15q h218q"><small>' + X('Tarihçe', 'Chronicle') + (id !== G.pl ? ' · ' + esc(M[id].name) : '') + '</small>' + hist218HTML(id) + '</blockquote>' :
       '<blockquote class="v15q"><small>' + X('Tarih Notu', 'History Note') + '</small>' + esc(quote) + '</blockquote>') +
       '<div class="v15a"><button onclick="v15Explore()"' + (scoutDis ? ' disabled' : '') + '>🔍 ' + X('KEŞİF', 'SCOUT') + '</button>' +
-      '<button class="pri" onclick="v15Attack()"' + (atk ? '' : ' disabled') + '>⚔ ' + X('SALDIRI', 'ATTACK') + '</button></div></div>';
+      '<button class="pri' + (ally218 ? ' bet236' : '') + '" onclick="v15Attack()"' + (atk ? '' : ' disabled') + '>' + (ally218 ? '🗡 ' + X('İHANET', 'BETRAY') : '⚔ ' + X('SALDIRI', 'ATTACK')) + '</button></div></div>';   /* V236: müttefikte İhanet (o savaşta müttefik 2 kat güçlü, v40.js) */
     el.style.display = 'block';
   };
   // KEŞİF: saldırılabilir ülkede mevcut keşif kuralı (1 hamle, özellikleri açar); diğer ülkelerde yalnızca bilgi detayını açar. Asla savaş başlatmaz.

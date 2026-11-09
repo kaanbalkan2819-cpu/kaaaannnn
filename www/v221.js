@@ -82,7 +82,7 @@
     if (!window.WCStats || !WCStats.pickNear || !WCStats.pool) return setTimeout(hook, 500);
     if (WCStats.pickNear.v221) return;
     var _pn = WCStats.pickNear;
-    WCStats.pickNear = function (t, parity, exclude, near) {
+    WCStats.pickNear = function (t, parity, exclude, near, strict) {
       try {
         if (near && window.M && M[near]) {
           /* V226: uzaklık en çok 6 ülke, ortalama 4; güç farkı en az olanlar seçilir (tüm ülkelerden) */
@@ -92,10 +92,12 @@
           var cand = [];
           all.forEach(function (id) {
             if ((exclude && exclude.indexOf(id) >= 0) || !M[id] || id === near) return;
+            if (WCStats.fair && !WCStats.fair(id, near)) return;   /* V236: yalnızca güçte ve yüzölçümünde denk ülkeler */
             var h = hops(near, id); if (h < 2 || h > 6) return;
             cand.push({ id: id, c: Math.abs(sc(id) - s0) / s0 * 100 + Math.abs(h - d0) * 5 });
           });
           if (cand.length) { cand.sort(function (a, b) { return a.c - b.c; }); return cand[Math.floor(Math.random() * Math.min(3, cand.length))].id; }
+          if (strict) return null;
         }
       } catch (e) { }
       return _pn.apply(this, arguments);

@@ -12,6 +12,19 @@
   var SPR = {}, SPT = {}; ['aerial', 'aerialr', 'tank'].forEach(function (n) { var i = new Image(); i.src = 'assets/art/nk_' + n + '.webp'; SPR[n] = i; });
   function sprTex(T, n) { if (SPT[n]) return SPT[n]; var t = new T.Texture(SPR[n]); if ('colorSpace' in t) t.colorSpace = T.SRGBColorSpace; else if ('encoding' in t) t.encoding = T.sRGBEncoding; SPT[n] = t; if (SPR[n].complete) t.needsUpdate = true; else SPR[n].addEventListener('load', function () { t.needsUpdate = true; }); return t; }
   function cl(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  var puffT = null;   /* V236: yumuşak, kıvrımlı duman bulutçuğu dokusu */
+  function puffTex(T) {
+    if (puffT) return puffT;
+    var S = 128, c = document.createElement('canvas'); c.width = c.height = S; var x = c.getContext('2d'), im = x.createImageData(S, S), d = im.data, L = 16, g = new Float32Array(L * L), i, y, X;
+    for (i = 0; i < g.length; i++) g[i] = Math.random();
+    function n(px, py) { var fx = px / S * (L - 1), fy = py / S * (L - 1), ix = fx | 0, iy = fy | 0, tx = fx - ix, ty = fy - iy, a = g[iy * L + ix], b = g[iy * L + Math.min(L - 1, ix + 1)], c0 = g[Math.min(L - 1, iy + 1) * L + ix], c1 = g[Math.min(L - 1, iy + 1) * L + Math.min(L - 1, ix + 1)]; return (a + (b - a) * tx) * (1 - ty) + (c0 + (c1 - c0) * tx) * ty; }
+    for (y = 0; y < S; y++) for (X = 0; X < S; X++) {
+      var r = Math.hypot(X - S / 2 + .5, y - S / 2 + .5) / (S / 2), nv = .55 * n(X, y) + .45 * n(X * 2 % S, y * 2 % S), edge = Math.max(0, 1 - Math.pow(r / (.72 + nv * .34), 2.4)), j = (y * S + X) * 4, sh = 205 + 50 * nv;
+      d[j] = d[j + 1] = d[j + 2] = sh; d[j + 3] = Math.round(255 * Math.min(1, edge * 1.35));
+    }
+    x.putImageData(im, 0, 0);
+    puffT = new T.CanvasTexture(c); return puffT;
+  }
   function rnd(a, b) { return a + Math.random() * (b - a); }
   function eo(t) { return 1 - Math.pow(1 - cl(t), 3); }
   function ss(t) { t = cl(t); return t * t * (3 - 2 * t); }
@@ -167,7 +180,7 @@
     /* düzlem: resmin sağı ekranın sağı, üstü ekranın üstü (yerel -x doğu, +z kuzey), yüzü küreden dışarı */
     var qS = new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3(-1, 0, 0), new T.Vector3(0, 0, 1), new T.Vector3(0, 1, 0))), geoS = new T.PlaneGeometry(1, 1);
     var addSpr = function (name, x, z, S, kind, flip, ord) {
-      var mat = new T.MeshBasicMaterial({ map: sprTex(T, name), transparent: true, alphaTest: .08, depthWrite: false, side: T.DoubleSide }), m = new T.Mesh(geoS, mat), r = Math.hypot(x, z), y0 = dropY(r);
+      var mat = new T.MeshBasicMaterial({ map: sprTex(T, name), transparent: true, opacity: kind === 0 ? .82 : 1, alphaTest: .02, depthWrite: false, side: T.DoubleSide }), m = new T.Mesh(geoS, mat), r = Math.hypot(x, z), y0 = dropY(r);
       m.quaternion.copy(qS); m.position.set(x, y0 + .03, z); m.scale.set(.001, .001, 1); m.renderOrder = 6 + ord * .01; f.spawn(m);
       var u = { o: m, x: x, z: z, r: r, y0: y0, kind: kind, S: S, fl: flip ? -1 : 1, hit: false }; units.push(u);
       return u;
@@ -177,7 +190,7 @@
     for (var szi = 0; szi < 8; szi++) { var okN = 0; for (hi = 0; hi < 12; hi++) { ang0 = hi * .5236; if (inT(Math.cos(ang0) * sz * .42, Math.sin(ang0) * sz * .42)) okN++; } fits = okN >= 10; /* göl ve küçük koylar şehri küçültmesin */ if (fits) break; sz *= .85; }
     addSpr('aerial', 0, 0, sz, 0, false, 0);
     /* tanklar: şehrin dış çevresinde, namlu şehre dönük */
-    var nT = 0, tr = Math.min(3.2, sz * .5 + .5), tS = 1 * ks; for (hi = 0; hi < 12 && nT < (LOW ? 6 : 8); hi++) { var ta = hi * .5236 * (hi % 2 ? 1 : 1) + (hi % 2 ? 3.1416 : 0) + .3, tx = Math.cos(ta) * tr, tz = Math.sin(ta) * tr; if (!inT(tx, tz)) continue; addSpr('tank', tx, tz, tS, 1, tx > 0, 20 + (tz < 0 ? 20 : 0) + nT); nT++; }
+    var nT = 0, tr = Math.min(3.2, sz * .5 + .35), tS = .82 * ks; for (hi = 0; hi < 14 && nT < (LOW ? 4 : 6); hi++) { var ta = hi * 2.399 + rnd(-.25, .25), trr = tr * rnd(.88, 1.2), tx = Math.cos(ta) * trr, tz = Math.sin(ta) * trr;   /* V236: dağınık yerleşim */ if (!inT(tx, tz)) continue; addSpr('tank', tx, tz, tS, 1, tx > 0, 20 + (tz < 0 ? 20 : 0) + nT); nT++; }
     units.forEach(function (u, i) {
       var D = .05 + i * .035, m = u.o;
       f.tween(.4, function (v) { if (!u.hit) { var e = Math.max(.001, u.S * eo(v)); m.scale.set(e * u.fl, e, 1); } }, null, D);
@@ -230,11 +243,16 @@
     });
 
     /* ===== 4) ÖN YÜKLEME: shader derlemesi patlama anında takılma yapmasın (görünmez ölçekte hazır beklerler) ===== */
-    var cap = cloud(T, capGeo(T), { amp: .24, fx: 3, fy: 9, flow: .34, smoke: [.6, .53, .47], under: .55, ro: 10 });
-    var stem = cloud(T, stemGeo(T), { amp: .15, fx: 5, fy: 18, flow: -.8, bump: .05, smoke: [.72, .62, .54], crack: .95, under: .4, ro: 8 });
-    var skirt = cloud(T, ringGeo(T, [[1.06, 0], [1.02, .42], [.9, .88], [.76, 1], [.62, .62], [.52, 0]], LOW ? 64 : 96), { amp: .22, fx: 3.6, fy: 3, flow: -.2, bump: .05, smoke: [.42, .37, .31], crack: 1.4, ro: 7 });
-    C.add(cap, stem); f.root.add(skirt); f.objs.add(skirt);
-    [cap, stem, skirt].forEach(function (m) { m.scale.setScalar(.0001); m.position.y = -3; m.material.uniforms.uAlpha.value = .9; });
+    /* V236: mantar bulutu yumuşak duman bulutçuklarından kurulur; her zaman kameraya bakar, gerçek bulut hacmi gibi görünür */
+    var puffs = [], nCap = LOW ? 38 : 60, nStem = LOW ? 14 : 22, nRing = LOW ? 16 : 26, pi;
+    function addPuff(k, a0, rr, hh, sz, inC) {
+      var m = new T.SpriteMaterial({ map: puffTex(T), transparent: true, depthWrite: false, opacity: 0, rotation: Math.random() * 6.28 }), s = new T.Sprite(m); s.scale.setScalar(.001); s.renderOrder = k === 2 ? 7 : k === 1 ? 8 : 10; s.visible = false;
+      if (inC) C.add(s); else f.spawn(s);
+      puffs.push({ s: s, k: k, a: a0, rr: rr, hh: hh, sz: sz, ph: Math.random() * 6.28 });
+    }
+    for (pi = 0; pi < nCap; pi++) { var uu = Math.sqrt(Math.random()), hh0 = .62 * Math.sqrt(Math.max(0, 1 - uu * uu)) - .2 * uu * uu + rnd(-.08, .08); addPuff(0, Math.random() * 6.283, .12 + .92 * uu, hh0, rnd(.44, .72), true); }
+    for (pi = 0; pi < nStem; pi++) addPuff(1, Math.random() * 6.283, rnd(0, .3), pi / (nStem - 1), rnd(.5, .78), true);
+    for (pi = 0; pi < nRing; pi++) addPuff(2, pi / nRing * 6.283 + rnd(-.1, .1), rnd(.9, 1.1), 0, rnd(.75, 1.2), false);
 
     /* ===== 5) BOMBA BIRAKILIR ===== */
     f.at(TREL, function () {
@@ -301,18 +319,29 @@
         /* --- ateş topu → mantar --- */
         var capY = 1.6 + 1.1 * eo(t / .6) + 4.8 * eo((t - .55) / 6.5), R = 2.4 * eo(t / .55) + 1.2 * eo((t - .4) / 6.5), mo = ss((t - .75) / 2.4);
         var heat = t < .34 ? 1 : .05 + .95 * Math.exp(-(t - .34) * .95), fade = 1 - cl((t - (TEND - 1.5)) / 1.4);
-        var U = cap.material.uniforms; U.uT.value = t; U.uMorph.value = mo; U.uHeat.value = heat; U.uAlpha.value = fade; U.uFlow.value = .34 + .5 * Math.exp(-t * .4);
-        U.uUnder.value = .55 * Math.max(.06, Math.exp(-t * .4));
-        cap.position.set(0, capY, 0); cap.scale.set(R * (.96 + .24 * mo), R * (1 - .3 * mo), R * (.96 + .24 * mo));
         hal.position.y = capY; hal.scale.setScalar(R * 5);
-        /* --- gövde --- */
-        var top = capY - R * .42 * mo, sg = eo((t - .22) / .7), w = (.75 + 1.5 * eo((t - .2) / 5.2));
-        stem.visible = t > .2; stem.position.set(0, -.02, 0); stem.scale.set(w * sg, Math.max(.02, top), w * sg);
-        var Us = stem.material.uniforms; Us.uT.value = t; Us.uHeat.value = .16 + .84 * Math.exp(-t * .95); Us.uAlpha.value = fade; Us.uUnder.value = .35 * Math.exp(-t * .3);
-        /* --- yerde yayılan toz eteği --- */
-        var sr = (.8 + 3.6 * eo(t / 3)) * BL, sh2 = (.22 + .3 * eo((t - .05) / 1.6) * (1 - .3 * cl(t / 7))) * BL;   /* V230: alçak, yarı saydam toz halkası */
-        skirt.position.set(0, -.02, 0); skirt.scale.set(sr, sh2, sr);
-        var Uk = skirt.material.uniforms; Uk.uT.value = t; Uk.uHeat.value = .18 * Math.exp(-t * 1.2); Uk.uAlpha.value = cl(t / .22) * (1 - cl((t - 2.4) / 2.6)) * .55;
+        /* --- V236: bulutçuklar: ateş → kızıl → dumana renk geçişi --- */
+        var top = capY - R * .3 * mo, w = 1 + 1.7 * eo((t - .2) / 5.2), sr = (.8 + 3.8 * eo(t / 3)) * BL;
+        for (k = 0; k < puffs.length; k++) {
+          var q = puffs[k], sp = q.s, mt = sp.material, cA = Math.cos(q.a + t * .06), sA = Math.sin(q.a + t * .06), bob = Math.sin(t * .6 + q.ph) * .05, hk, op, sc2;
+          if (q.k === 0) {
+            sp.position.set(cA * q.rr * R * (1.02 + .16 * mo), capY + (q.hh + bob) * R * (1 - .22 * mo), sA * q.rr * R * (1.02 + .16 * mo)); sc2 = q.sz * R * 1.25;
+            hk = heat * 1.1 + (q.hh < .05 ? .32 : .08) * Math.exp(-t * .4); op = cl(t / .12) * fade * .92;
+          } else if (q.k === 1) {
+            sp.position.set(cA * q.rr * w, q.hh * top + bob, sA * q.rr * w); sc2 = q.sz * w * 1.05 * eo((t - .15) / .6);
+            hk = heat * .9 * (1 - q.hh * .4); op = cl((t - .18) / .3) * fade * .9;
+          } else {
+            sp.position.set(cA * q.rr * sr, .1, sA * q.rr * sr); sc2 = q.sz * (1 + 1.1 * eo(t / 2.6)) * BL * 2.1;
+            hk = heat * .25; op = cl(t / .25) * (1 - cl((t - 2.6) / 3)) * .5;
+          }
+          hk = cl(hk);
+          /* ısı rampası: beyaz-sarı → turuncu → kızıl-kahve → duman */
+          var r0 = q.k === 2 ? .46 : q.k === 1 ? .34 + q.hh * .18 : (q.hh > .25 ? .58 : q.hh > 0 ? .44 : .3), g0 = r0 * .9, b0 = r0 * .8, r1, g1, b1;
+          if (hk > .66) { var a3 = (hk - .66) / .34; r1 = 1; g1 = .55 + .43 * a3; b1 = .12 + .62 * a3; }
+          else if (hk > .33) { var a2 = (hk - .33) / .33; r1 = .72 + .28 * a2; g1 = .2 + .35 * a2; b1 = .06 + .06 * a2; }
+          else { var a1b = hk / .33; r1 = r0 + (.72 - r0) * a1b; g1 = g0 + (.2 - g0) * a1b; b1 = b0 + (.06 - b0) * a1b; }
+          mt.color.setRGB(r1, g1, b1); mt.opacity = op; sp.visible = op > .01; sp.scale.setScalar(Math.max(.01, sc2)); mt.rotation += dt * (.12 + q.sz * .1);
+        }
         /* --- bulut kenarını yumuşatan seyrek duman --- */
         nC += dt * (LOW ? 18 : 34) * fade;
         while (nC >= 1) {

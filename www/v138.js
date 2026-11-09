@@ -242,11 +242,11 @@
     return Object.keys(s);
   }
   function aiOffer(d, tn) {
-    if (d.offer) { if (tn - d.offer.t > 2 || ownedN(d.offer.from) === 0) d.offer = null; else return; }
+    if (d.offer) { if (tn - d.offer.t > 2 || ownedN(d.offer.from) === 0 || G.owner[d.offer.from] !== d.offer.from) d.offer = null; else return; }   /* V236: başkenti fethedilmiş ülke teklif yapamaz */
     if (G.dip && G.dip.offer) return; if (tn - d.lastOffer < 3 || Math.random() > .4 + hid220()) return;
     var c = [], pl = power(G.pl);
     neighboursOfPl().forEach(function (e) {
-      if (allied(e) || pactLeft(e) > 0) return; var r = relOf(e);
+      if (allied(e) || pactLeft(e) > 0 || G.owner[e] !== e) return; var r = relOf(e);
       if (r >= 25 && canJoin(G.pl, e) && d.trust >= ALLY_MIN_TRUST) c.push({ from: e, kind: 'ally', w: 1 + r / 50 });
       else if (r > -15 && r < 40 && pactCount() < PACT_MAX && (power(e) < .9 * pl || d.agg >= 2)) c.push({ from: e, kind: 'pact', w: 1 + (power(e) < .9 * pl ? .5 : 0) + d.agg / 4 });
     });
@@ -261,7 +261,7 @@
       var d = on() && G.dip2; var m = document.getElementById('mod'); if (OFF && (!m || m.style.display !== 'flex')) OFF = false;
       if (!d || !d.offer || OFF || !WCD.canAct()) return;
       if (m && m.style.display === 'flex') return;
-      var o = d.offer; if (ownedN(o.from) === 0) { d.offer = null; return; }
+      var o = d.offer; if (ownedN(o.from) === 0 || G.owner[o.from] !== o.from) { d.offer = null; return; }
       OFF = true;
       var isA = o.kind === 'ally';
       modal('<h3>' + (isA ? '🤝 ' + X('İttifak Teklifi', 'Alliance Offer') : '🛡 ' + X('Saldırmazlık Teklifi', 'Pact Offer')) + '</h3><div style="text-align:center;margin:8px 0">' + fl(o.from) + ' <b>' + esc(nm(o.from)) + '</b></div>' +

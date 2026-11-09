@@ -8,6 +8,9 @@
   document.addEventListener('contextmenu', function (e) { if (!field(e.target)) e.preventDefault(); }, true);
   document.addEventListener('selectstart', function (e) { if (!field(e.target)) e.preventDefault(); }, true);
 
+  /* ---- V236: savaş yorgunluğu bildirimine dokununca kapanır ---- */
+  document.addEventListener('click', function (e) { try { var w = e.target && e.target.closest && e.target.closest('.wfat'); if (w) w.classList.remove('on'); } catch (x) { } }, true);
+
   /* ---- BKB açılış logosu: ana menü (ya da kaldığın oyun) hazır olana kadar ---- */
   (function () {
     var el = document.getElementById('bkb230'), t0 = window.__bkbT0 || Date.now(); if (!el) return;

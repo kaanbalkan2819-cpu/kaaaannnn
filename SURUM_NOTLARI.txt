@@ -1244,3 +1244,13 @@ V227 — Ses yenilemesi (scripts/gen_audio.html + gen_audio.js ile üretildi; ü
  - "Zaman geçti" düşüşü kaldırıldı: keşif bilgisi ve ilişki puanı turla azalmaz (v160.js devre dışı).
  - Menü küresindeki orta demir bant kaldırıldı.
  - Ranked: son toprak savaşta gidince panel kendisi kapanır ve yenilgi ekranı açılır (gerçek savaşla denendi).
+
+=================== V236 (APK adı: v232) ===================
+ - Açılış: Figma ile üretilen BKB ağacı tam ekran, tek seferlik; Android'in yuvarlak açılış simgesi boş.
+ - İlk ülke seçimindeki ses: görünmez efekt ön derlemesinin patlama sesiydi, kaldırıldı.
+ - Yorgunluk bildirimine dokununca kapanır.
+ - Ranked: eşleşme toplam güçte ±%12, yüzölçümünde en çok 3 kat fark; duraklatmada Pes Et.
+ - Menü yazıları: kalıcı kalan inst226 sınıfı kaldırıldı.
+ - Müttefikte Saldırı yerine İhanet düğmesi (müttefik o savaşta 2 kat, v40.js).
+ - Fethedilmiş ülkeler teklif ve olay çıkarmaz.
+ - Atom bombası: mantar bulutu duman bulutçuklarından; menü küresinin yanındaki halka uçları arka plandan silindi.

@@ -421,7 +421,7 @@
       }
       var off = Math.floor(n / 4);   // her 4 saldırıda o yönden barış teklifi
       if (n >= 4 && off > (d.offN[b] || 0) && !d.offer) {
-        var cand = pool.filter(function (e) { return !allied(G.pl, e) && !(window.v20Pacted && v20Pacted(G.pl, e)); });
+        var cand = pool.filter(function (e) { return G.owner[e] === e && !allied(G.pl, e) && !(window.v20Pacted && v20Pacted(G.pl, e)); });   /* V236: fethedilmiş ülke teklif yapmaz */
         if (cand.length) {
           cand.sort(function (a, c) { return pw(c) - pw(a); });
           var k = [1, 2, 3, 4][Math.floor(Math.random() * 4)];   // nüfus (0) teklif edilmez
@@ -453,7 +453,7 @@
     if (OFFERING || !is5() || !G.dip || !G.dip.offer || !canAct()) return;
     var m = document.getElementById('mod'); if (m && m.style.display === 'flex') return;
     var o = G.dip.offer, SN = [T('Nüfus', 'Population'), T('Ordu gücü', 'Army'), T('Ekonomi', 'Economy'), T('Teknoloji', 'Technology'), T('Diplomasi', 'Diplomacy')];
-    if (!M[o.from] || ownedN(o.from) === 0) { delete G.dip.offer; return; }
+    if (!M[o.from] || ownedN(o.from) === 0 || G.owner[o.from] !== o.from) { delete G.dip.offer; return; }
     OFFERING = true;
     modal('<h3>🕊 ' + T(BLOC[o.b][0] + ' Devletlerinden Teklif', 'Offer from the ' + BLOC[o.b][1]) + '</h3><div style="text-align:center;margin:8px 0">' + fl(o.from) + ' <b>' + nm(o.from) + '</b></div>' +
       '<p style="color:var(--tx2)">' + T('<b>' + nm(o.from) + '</b>, ilerleyişini durdurmak için ' + (window.v20PactTurns || 6) + ' tur sürecek bir saldırmazlık antlaşması öneriyor.',

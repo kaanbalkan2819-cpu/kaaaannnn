@@ -18,7 +18,7 @@
     var s = {}; for (var id in G.owner) if (G.owner[id] === e && M[id] && M[id].nb) M[id].nb.forEach(function (n) { var o = G.owner[n]; if (o !== undefined && o !== e) s[o] = 1; });
     return Object.keys(s);
   }
-  function foes() { return neighbours(G.pl).filter(function (e) { return typeof e === 'string' && ownedN(e) > 0 && !allied(G.pl, e); }); }
+  function foes() { return neighbours(G.pl).filter(function (e) { return typeof e === 'string' && ownedN(e) > 0 && G.owner[e] === e && !allied(G.pl, e); }); }   /* V236: başkenti fethedilmiş ülkeyle olay çıkmaz */
   function myAllies() { var r = [], c = D().co; for (var i = 0; i < c.length; i++) { if ((c[i].until == null || c[i].until > turn()) && c[i].m.indexOf(G.pl) >= 0) c[i].m.forEach(function (x) { if (x !== G.pl && ownedN(x) > 0 && r.indexOf(x) < 0) r.push(x); }); } return r; }
   function pickOne(a) { return a[Math.floor(Math.random() * a.length)]; }
   var SN = function () { return [T('Nüfus', 'Population'), T('Ordu', 'Army'), T('Ekonomi', 'Economy'), T('Teknoloji', 'Technology'), T('Diplomasi', 'Diplomacy')]; };

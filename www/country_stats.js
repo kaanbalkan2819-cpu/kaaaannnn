@@ -38,8 +38,15 @@
     var A = cuOf(a), B = cuOf(b); if (!A || !B) return 0;
     return Math.acos(Math.max(-1, Math.min(1, A[0] * B[0] + A[1] * B[1] + A[2] * B[2])));
   }
+  /* V236: rank eşleşmesi: toplam güç (±%12) ve yüzölçümü (en çok 3 kat) denk olmalı; Rusya-İtalya gibi eşleşme olmaz */
+  var arMap = null;
+  function areaOf(id) { try { if (!arMap) { arMap = {}; R.forEach(function (r) { if (r && r.id) arMap[r.id] = r.ar; }); } return arMap[id] || 0; } catch (e) { return 0; } }
+  function fair(a, b) {
+    var sa = score(a), sb = score(b), ra = areaOf(a), rb = areaOf(b); if (!sa || !sb) return false;
+    return Math.max(sa, sb) / Math.min(sa, sb) <= 1.12 && (!ra || !rb || Math.max(ra, rb) / Math.min(ra, rb) <= 3);
+  }
   window.WCStats = {
-    NAMES: NAMES,
+    NAMES: NAMES, fair: fair,
     ready: function () { return !!get(); },
     power: score,
     tierOf: function (id) { var c = get(); return c ? c.of[id] : -1; },
@@ -51,15 +58,18 @@
       return p.length ? rnd(p) : null;
     },
     /* near'a MAXD içinde olanlardan seç; yoksa en yakını (veri yoksa rastgele) */
-    pickNear: function (t, parity, exclude, near) {
+    pickNear: function (t, parity, exclude, near, strict) {
       var p = this.pool(t, parity).filter(function (id) { return !exclude || exclude.indexOf(id) < 0; });
-      if (!p.length) return null; if (!near || !cuOf(near)) return rnd(p);
+      if (!p.length) return null;
+      if (near) { var fr = p.filter(function (id) { return fair(id, near); }); if (fr.length) p = fr; else if (strict) return null; }
+      if (!near || !cuOf(near)) return rnd(p);
       var ok = p.filter(function (id) { return dist(id, near) <= MAXD; });
       if (ok.length) return rnd(ok);
       p.sort(function (a, b) { return dist(a, near) - dist(b, near); }); return p[0];
     },
     pickPair: function (t) {   // {hc, gc}: kurucu ülkesi + ona makul uzaklıkta konuk ülkesi
-      for (var tr = 0; tr < 40; tr++) { var h0 = this.pick(t, tr % 2), g0 = h0 && this.pickNear(t, 1, [h0], h0); if (h0 && g0 && (!window.v221Hops || v221Hops(h0, g0) <= 6)) return { hc: h0, gc: g0 }; }   // V226: adalar gibi ulaşılamayan eşleşmeler elenir
+      for (var tr = 0; tr < 120; tr++) { var h0 = this.pick(t, 0), g0 = h0 && this.pickNear(t, 1, [h0], h0, true); if (h0 && g0 && (!window.v221Hops || v221Hops(h0, g0) <= 6)) return { hc: h0, gc: g0 }; }   // V226: adalar gibi ulaşılamayan eşleşmeler elenir
+      for (tr = 0; tr < 200; tr++) { var h1 = this.pick(t, 0), g1 = h1 && this.pickNear(t, 1, [h1], h1, true); if (h1 && g1) return { hc: h1, gc: g1 }; }   /* V236: mesafe koşulu gevşer, güç denkliği gevşemez */
       var h = this.pick(t, 0); if (!h) return { hc: null, gc: this.pick(t, 1) };
       return { hc: h, gc: this.pickNear(t, 1, [h], h) };
     },

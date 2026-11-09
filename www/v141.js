@@ -26,17 +26,18 @@
   function b(ic, label, fn, cls) { return '<button type="button" class="c141b ' + (cls || '') + '" onclick="' + fn + '"><span class="ic">' + ic + '</span><span class="lb">' + label + '</span></button>'; }
 
   /* V152: oyun içi menüye "Pes Et" (kaybetme) eklendi: onay sonrası sefer yenilgiyle biter ve "İmparatorluk Düştü" ekranı açılır. Online (G.mp) oyunda gösterilmez. */
-  function giveBtn() { try { if (G && G.mp) return ''; } catch (e) { return ''; } return b('🏳', X('Pes Et', 'Surrender'), 'v151Give()', 'warn'); }
+  function giveBtn() { try { if (G && G.mp && !G.mp.rank) return ''; } catch (e) { return ''; } return b('🏳', X('Pes Et', 'Surrender'), 'v151Give()', 'warn'); }
   window.v151Give = function () {
     try {
-      modal('<h3>🏳 ' + X('Pes Et', 'Surrender') + '</h3><p style="color:var(--tx2);text-align:center">' + X('Seferi yenilgiyle bitirmek istiyor musun? Kayıtlı seferin silinir.', 'End the campaign in defeat? Your saved campaign will be deleted.') + '</p>' +
+      modal('<h3>🏳 ' + X('Pes Et', 'Surrender') + '</h3><p style="color:var(--tx2);text-align:center">' + ((G && G.mp) ? X('Maçı kaybedersin ve rank puanın düşer. Emin misin?', 'You will lose the match and your rating will drop. Are you sure?') : X('Seferi yenilgiyle bitirmek istiyor musun? Kayıtlı seferin silinir.', 'End the campaign in defeat? Your saved campaign will be deleted.')) + '</p>' +
         '<button class="big pri" onclick="v151GiveDo()">' + X('Evet, pes et', 'Yes, surrender') + '</button><button class="big" onclick="closeMod()">' + X('Vazgeç', 'Cancel') + '</button>');
     } catch (e) { try { console.error(e); } catch (x) { } }
   };
   window.v151GiveDo = function () {
     try {
       try { closeMod(); } catch (e) { }
-      if (!G || G.over || (G.mp)) return;
+      if (!G || G.over || (G.mp && !G.mp.rank)) return;
+      if (G.mp) { G.over = { w: -1 }; G.ph = 'over'; G.busy = 0; return; }   /* V236: ranked pes: sonuç ekranını ranked.js açar */
       G.fin139 = { w: -1 }; G.over = { w: -1 }; G.ph = 'over'; G.busy = 0;
       try { localStorage.removeItem(SV); } catch (e) { }
       try { if (window.v214Give && v214Give()) return; } catch (e) { try { console.error(e); } catch (x) { } }   /* V230: render() ana menüye düşürüyordu */

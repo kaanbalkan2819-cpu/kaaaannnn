@@ -64,6 +64,12 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .inf219 i.pt.lk{filter:grayscale(1) brightness(.6)!important}
 .inf219 span em{font-style:normal;color:#dce9ff;white-space:nowrap}
 
+body.wcm-on #onbar{display:none!important}
+/* ---- V236: inst226 açıkken menü öğeleri görünür; yorgunluk bildirimi dokununca kapanır; ihanet düğmesi ---- */
+#wcm.inst226 .mb,#wcm.inst226 .menu>*{opacity:1!important;transform:none!important}
+.wfat.on{pointer-events:auto!important;cursor:pointer}
+.v15a button.bet236{background:linear-gradient(180deg,#a11d1d,#6a0f0f)!important;color:#ffe9d6!important;border-color:#e0705f!important}
+
 /* ---- V235: olay penceresi açıkken Ülkem düğmesi ve kartı üstte ---- */
 body.ev235 #v99b{z-index:85!important}
 body.ev235 #v99c{z-index:86!important}

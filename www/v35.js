@@ -331,7 +331,8 @@
     // Menü zaten açıksa yeniden kurma (v20 bekçisi 600 ms'de bir menu() çağırır; yeniden kurmak animasyonları ve küreyi sıfırlıyordu)
     if (!force && root && root.classList.contains('on') && root.firstChild) return;
     var snap226 = document.querySelector('#boot #wcm'); if (snap226) { snap226.remove(); var bb226 = document.getElementById('boot'); if (bb226) bb226.remove(); }   /* V226: anlık menü görüntüsü gerçek menüyle yer değiştirir */
-    build(); root.classList.add('on'); if (snap226) root.classList.add('inst226'); document.body.classList.add('wcm-on'); introT = performance.now();
+    /* V236: inst226 sınıfı açılış animasyonunu kapatır; kalıcı kalınca sonraki menülerde yazılar görünmüyordu */
+    build(); root.classList.add('on'); if (snap226) { root.classList.add('inst226'); setTimeout(function () { try { root.classList.remove('inst226'); } catch (e) { } }, 900); } else root.classList.remove('inst226'); document.body.classList.add('wcm-on'); introT = performance.now();
     if (glFail || CFG.flat) return;   /* V129: flat menüde WebGL hiç kurulmaz (pil/bellek tasarrufu) */
     var go = function () {
       if (!root.classList.contains('on')) return;

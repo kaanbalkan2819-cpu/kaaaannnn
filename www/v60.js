@@ -673,6 +673,7 @@
     } catch (e) { return 2.4; }
   }
   function begin(args) {
+    try { if (fx) fx.__noSnd = 0; } catch (e) { }
     var a = A(), r = args[0], po = args[1], tg = args[3], att = args[5];
     var ids = (Array.isArray(att) ? att : []).filter(function (i) { return a.has(i); });
     if (!ids.length) return;   // V68: hedef küre verisinde olmasa da yedek sahne denenir
@@ -733,7 +734,7 @@
     var a = A(); if (bad || !a || !a.ready() || !window.WCBattleFX || !window.WCNukeScene || play) return false;
     try {
       var T = a.THREE(), lt = WCNukeScene.center(a, tg) || llOf(a, tg); if (!lt) return false;
-      clearScenes(); var f = ensureFx(), P = a.sph(lt[0], lt[1], 1).normalize();
+      clearScenes(); var f = ensureFx(), P = a.sph(lt[0], lt[1], 1).normalize(); f.__noSnd = 0;
       var fr = frameAt(a, P, new T.Vector3(0, 1, 0));
       var rad = extRad(a, tg), sc = SC;   /* V230: ülke büyüdükçe sahne büyüyünce birlikler küre eğrisinden kopuyordu */
       f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(fr.x, P, fr.z));
@@ -815,7 +816,7 @@
     try {
       if (bad || fx) return;
       if (busy215()) { setTimeout(warm, 1500); return; }
-      loadFx().then(function () { idle215(function () { try { if (busy215()) { setTimeout(warm, 1500); return; } if (!fx && A() && A().ready()) ensureFx(); if (fx) setTimeout(function () { precompile212(fx); }, 800); } catch (e) { } }); }, function () { });
+      loadFx().then(function () { idle215(function () { try { if (busy215()) { setTimeout(warm, 1500); return; } if (!fx && A() && A().ready()) ensureFx(); if (fx) { fx.__noSnd = 1; /* V236: ön derlemedeki görünmez efektler ses çıkarmaz (oyun başındaki patlama sesi buydu) */ setTimeout(function () { precompile212(fx); }, 800); } } catch (e) { } }); }, function () { });
     } catch (e) { }
   }
   /* V212: SHADER ÖN DERLEMESİ. Savaş animasyonunun ilk karesinde tank/asker/gemi/patlama malzemelerinin shader'ları derleniyordu
