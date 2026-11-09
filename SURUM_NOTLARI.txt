@@ -1214,3 +1214,13 @@ V227 — Ses yenilemesi (scripts/gen_audio.html + gen_audio.js ile üretildi; ü
  - Dev ülkelerde savaş sahnesi cephede kurulur (v60.js nearLL); Rusya'da patlama boyutu sınırlandı. Türkiye gibi dar ülkede iki tank kendi karasına yerleşir, denizden çıkmaz (izlendi: Türkiye-Filistin, Rusya-Ukrayna, Türkiye-Rusya).
  - "Kaydedildi" yazısı yok; kayıt sessizce sürer.
  - Kalkınma ve Diplomasi menülerinde tıklama/bildirim sesleri V226 öncesi haline döndü. KULAKLA DİNLENMEDİ.
+
+=================== V231 (henüz APK'da yok) ===================
+ - "Savaş yorgunluğu geçti" kartı, yorgunluk sıfırlaması panelde veya YZ savaşında olunca da artık çıkıyor (v73.js endPend).
+
+=================== V232 (APK adı: v228) ===================
+ - Ana menü küresi: Figma ile üretilen koyu demir okyanus ve eskimiş parşömen kara dokuları, gerçek sınırlar (assets/menu/globe230.webp).
+ - Saldırı türleri yüzdeyle seçilir (v60.js KW): kara savaşında tank+piyade, çift tank, piyade, uçak, füze aracı; deniz savaşında gemi, uçak, füze aracı. Tür sığmazsa sıradaki denenir. Dar denizlerde gemi ölçeği küçülür.
+ - Savaş paneli: melodili müzik yerine kısık savaş davulu + uzak rüzgâr (battle.ogg). Sonuç sesleri ve kılıç vuruşu eski sentez, kılıç sesi kısıldı; zar sesi aynı. KULAKLA DİNLENMEDİ.
+ - Atom bombası: bina ve tanklar Figma çizimleri (assets/art/nk_city, nk_ruin, nk_tank); şehir patlama merkezinde, tanklar çevresinde, karaya sığmayan atlanır. Patlamada enkaz çizimine döner.
+ - Yorgunluk geçti kartı V231 düzeltmesiyle birlikte (v73.js).

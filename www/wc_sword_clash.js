@@ -125,7 +125,7 @@
     try {
       var t0 = ac.currentTime;
       var master = ac.createGain();
-      master.gain.value = vol * strength;
+      master.gain.value = vol * strength * .45;   /* V232: kısık, kısa kılıç sesi */
       master.connect(ac.destination);
       // vuruş transienti (gürültü patlaması)
       var len = Math.floor(ac.sampleRate * 0.04);
@@ -139,7 +139,7 @@
       var base = 1150 + Math.random() * 140;
       var ratios = [1, 1.51, 2.07, 2.76, 3.43, 4.12];
       var amps = [0.5, 0.38, 0.3, 0.22, 0.14, 0.08];
-      var decs = [0.55, 0.45, 0.35, 0.28, 0.2, 0.14];
+      var decs = [0.3, 0.24, 0.18, 0.14, 0.1, 0.07];
       ratios.forEach(function (r, i) {
         var o = ac.createOscillator(); o.type = 'sine';
         o.frequency.value = base * r * (1 + (Math.random() - 0.5) * 0.004);

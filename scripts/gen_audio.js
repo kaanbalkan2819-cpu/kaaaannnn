@@ -345,6 +345,17 @@
       });
       return q.then(function () { return { files: out, stat: st }; });
     },
+    battle232: function () {   /* savaş paneli: melodi yok; kısık savaş davulu + uzak rüzgâr (32 sn döngü) */
+      seed = 232; var D = 32, k = new K(D + 5), c = k.c, lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 800; lp.Q.value = .4; lp.connect(k.out); k.out = lp;
+      var verb = k.verb(2.6, 1200, .65, 6), b = k.bus(.8, .6, verb), bar, i;
+      for (bar = 0; bar < 8; bar++) {
+        var t = bar * 4, soft = bar % 4 === 3 ? .7 : 1;
+        k.war(t + .02, 56, .62 * soft, b); k.war(t + 2.02, 56, .4 * soft, b);
+        if (bar % 2 === 1) { k.war(t + 3, 66, .22, b); k.war(t + 3.5, 66, .28, b); }
+      }
+      for (i = 0; i < 5; i++) { var ws = i * 7 - 1, st = Math.max(0, ws); k.nzE(st, [[0, .0001], [3.4, .1], [7, .05], [10, .0001]], { type: 'bandpass', q: .6, fp: [[0, 240], [4, 520], [10, 200]], dst: k.pan(b, i % 2 ? .5 : -.5) }); }
+      return k.render(.7, 0).then(function (p) { return enc(p, 56, false).then(function (x) { return JSON.stringify({ files: { 'battle.ogg': x }, stat: { battle: stat(p) } }); }); });
+    },
     v229: function () {   /* yalnızca V229 dosyaları: map.ogg, battle.ogg, sfx/tcannon_*.ogg, sfx/thit_*.ogg */
       var out = {}, st = {}, q = Promise.resolve();
       Object.keys(FX2).forEach(function (name) {

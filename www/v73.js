@@ -8,9 +8,11 @@
   function T(tr, en) { return (typeof L !== 'undefined' && L === 'en') ? en : tr; }
   function nm(e) { return (M[e] && M[e].name) || e; }
   function tn() { return (G && G.T && G.T.turn) || 0; }
+  var endPend = false;
   /* V226: tüm modlarda yeni tur başlayınca (zar yeniden atılınca) herkesin savaş yorgunluğu tamamen sıfırlanır. */
   function decay() {
     var f = G.fat; if (!f) return false;
+    try { if (typeof G.pl === 'string' && (f.s[G.pl] || 0) > 0) endPend = true; } catch (e) { }   /* V231: sıfırlama panel veya YZ savaşında olsa da "geçti" kartı kaçmaz */
     var ns = {};
     G.fat = { t: tn(), s: ns }; return true;
   }
@@ -76,10 +78,8 @@
   function checkEnd() {
     try {
       if (!G || G.v5 !== 1 || typeof G.pl !== 'string' || !G.fat || BSH || G.busy) return;
-      if (G.fat.t !== tn()) {
-        var had = Math.min(FAT_MAX, G.fat.s[G.pl] || 0); decay(); var now = G.fat.s[G.pl] || 0;
-        if (had > 0 && now <= 0) setTimeout(showEnd, 500); else if (had > 0) setTimeout(function () { showDrop(now); }, 500);
-      }
+      if (G.fat.t !== tn()) decay();
+      if (endPend) { endPend = false; setTimeout(showEnd, 500); }
     } catch (e) { }
   }
   var _rn73 = render;

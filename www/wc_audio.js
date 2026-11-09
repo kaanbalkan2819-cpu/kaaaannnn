@@ -111,6 +111,8 @@
   }
   /* V230: Kalkınma ve Diplomasi menülerinde tıklama/bildirim sesleri V226 öncesi haliyle (sentez) */
   function oldUi(k) {
+    /* V232: savaş panelinde sonuç sesleri ve kılıç vuruşu da eski sentez; zar sesleri değişmez */
+    try { if ((k === 'click' || k === 'win' || k === 'lose' || k === 'conq') && document.body.classList.contains('bsh')) return true; } catch (e) { }
     if (k !== 'click' && k !== 'notify' && k !== 'tick') return false;
     try {
       var ev = window.event, tg = ev && ev.target; if (tg && tg.closest && tg.closest('#col221')) return true;
