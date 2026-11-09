@@ -450,9 +450,11 @@
     tinyLand: [['missile', 45], ['air', 30], ['tankInf', 25]],
     tinySea: [['missile', 55], ['air', 45]]
   };
-  function kindOrder(land, tiny) {
+  /* V233: uçak yüzdesi saldıranın Teknoloji puanıyla çarpılır: 60 ve üstü tam, 15 ve altı %12 */
+  function airF(e) { try { var v = +st(e)[3]; return isNaN(v) ? 1 : Math.max(.12, Math.min(1, (v - 15) / 45)); } catch (x) { return 1; } }
+  function kindOrder(land, tiny, airK) {
     if (window.__forceK232) return [window.__forceK232, 'air'];   // yalnızca test/ayar için
-    var pool = KW[tiny ? (land ? 'tinyLand' : 'tinySea') : (land ? 'land' : 'sea')].slice(), out = [];
+    var pool = KW[tiny ? (land ? 'tinyLand' : 'tinySea') : (land ? 'land' : 'sea')].map(function (q) { return [q[0], q[0] === 'air' ? q[1] * (airK == null ? 1 : airK) : q[1]]; }), out = [];
     while (pool.length) { var tot = 0, i; pool.forEach(function (q) { tot += q[1]; }); var x = Math.random() * tot; for (i = 0; i < pool.length; i++) { x -= pool[i][1]; if (x <= 0) break; } i = Math.min(i, pool.length - 1); out.push(pool[i][0]); pool.splice(i, 1); }
     if (out.length > 1 && out[0] === window.__kind232 && Math.random() < .7) { var t = out[0]; out[0] = out[1]; out[1] = t; }   /* aynı sahne üst üste gelmesin */
     if (out.indexOf('air') < 0) out.push('air');
@@ -621,8 +623,10 @@
   /* V165: karşı taraf (KIRMIZI) sahnesi — hem sıralı (V77) hem eş zamanlı (V165) mod bunu kullanır */
   function buildCounter(a, f, c) {
     var o = c.o, s = null, eo = { ids: [c.tg], from: c.tg, land: c.land, color: RED, extra: [o.from] };
-    if (c.land) { try { s = buildScene(a, f, eo, o.from, { win: true }); } catch (e1) { s = null; } }
+    var wc = Math.random() < airF((G.owner && G.owner[c.tg]) || c.tg) ? undefined : 'tankInf';   /* V233: düşük teknolojili savunan da uçakla karşılık vermez */
+    if (c.land) { try { s = buildScene(a, f, eo, o.from, { win: true }, wc); } catch (e1) { s = null; } }
     else if (!c.tiny) { try { s = buildSeaScene(a, f, [c.tg], c.tg, o.from, RED, BLUE, true); } catch (e2) { s = null; } }   // V80: çok küçük savunan gemi göndermez
+    if (!s && wc) { try { s = buildFireScene(a, f, eo, o.from, { win: true }, wc); } catch (e3) { s = null; } }
     if (!s) { try { s = buildFireScene(a, f, eo, o.from, { win: true }); } catch (e3) { s = null; } }
     return s;
   }
@@ -682,7 +686,7 @@
       var f = i === 0 ? ensureFx() : ensureFx2(), s = null;
       /* V232: tür yüzdeyle seçilir (kindOrder); ikinci taraf (müttefik) yalnızca kara sahnesi */
       if (i === 0) {
-        var order = kindOrder(o.land, tiny);
+        var order = kindOrder(o.land, tiny, airF(po != null ? po : o.from));
         for (var qi = 0; qi < order.length && !s; qi++) {
           var kk = order[qi];
           try {
@@ -693,7 +697,7 @@
           if (!s) { var kf = window.__kf232 = window.__kf232 || {}; kf[kk] = (kf[kk] || 0) + 1; }
           if (s) { window.__kind232 = kk; if (kk === 'missile') missile = true; (window.__kinds232 = window.__kinds232 || []).push(kk); if (window.__kinds232.length > 60) window.__kinds232.shift(); }
         }
-      } else if (!tiny) { try { s = buildScene(a, f, o, tg, r); } catch (e) { s = null; } }
+      } else if (!tiny) { try { s = buildScene(a, f, o, tg, r, Math.random() < airF(po != null ? po : o.from) ? undefined : 'tankInf'); } catch (e) { s = null; } }
       if (!s && i === 0 && !tiny) { try { FORCE_SEA = true; s = buildSeaScene(a, f, o.ids, o.from, tg, o.color, RED, !!r.win, i === 0 && !r.win && PAR_COUNTER); } catch (e6) { s = null; } FORCE_SEA = false; }   /* V101: hiçbir sahne kurulamadıysa animasyon atlanmaz */
       if (s) scenes.push(s); else { try { f.clear(); f.root.visible = false; if (f.root.parent) f.root.parent.remove(f.root); } catch (e) { } }
     });
