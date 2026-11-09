@@ -28,6 +28,7 @@ for (const d of fs.readdirSync(RES)) {
     if (!/android:colorBackground/.test(body)) add.push('        <item name="android:colorBackground">@color/wc_bg</item>');
     if (/parent="Theme.SplashScreen/.test(attrs)) {
       if (!/windowSplashScreenBackground/.test(body)) add.push('        <item name="windowSplashScreenBackground">@color/wc_bg</item>');
+      if (!/windowSplashScreenAnimatedIcon/.test(body)) add.push('        <item name="windowSplashScreenAnimatedIcon">@drawable/bkb_icon</item>');   /* V230: açılışta BKB logosu */
     }
     return '<style name="' + name + '"' + attrs + '>' + body.replace(/\s*$/, '\n') + add.join('\n') + '\n    </style>';
   });

@@ -81,6 +81,7 @@
     reset();
     try { localStorage.removeItem(SV); } catch (e) { }
     try { G = null; } catch (e) { }
+    window.__noAsk230 = 1;   /* tekrar başlarken zorluk yeniden sorulmaz */
     try { newGame(1); } catch (e) { console.error(e); try { menu(); } catch (x) { } return; }
     if (!same || !c) return;
     /* aynı ülke: seçim ekranı gelince ülke kendiliğinden seçilip onaylanır */

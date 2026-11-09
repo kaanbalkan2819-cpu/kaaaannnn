@@ -9,7 +9,7 @@
   var LOW = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
   var LEAN = 62 * Math.PI / 180, cL = Math.cos(LEAN), sL = Math.sin(LEAN);
   /* V232: şehir, enkaz ve tank Figma ile üretilmiş üstten-yandan çizimlerdir; küreye yatık düzlem olarak konur */
-  var SPR = {}, SPT = {}; ['city', 'ruin', 'tank'].forEach(function (n) { var i = new Image(); i.src = 'assets/art/nk_' + n + '.webp'; SPR[n] = i; });
+  var SPR = {}, SPT = {}; ['aerial', 'aerialr', 'tank'].forEach(function (n) { var i = new Image(); i.src = 'assets/art/nk_' + n + '.webp'; SPR[n] = i; });
   function sprTex(T, n) { if (SPT[n]) return SPT[n]; var t = new T.Texture(SPR[n]); if ('colorSpace' in t) t.colorSpace = T.SRGBColorSpace; else if ('encoding' in t) t.encoding = T.sRGBEncoding; SPT[n] = t; if (SPR[n].complete) t.needsUpdate = true; else SPR[n].addEventListener('load', function () { t.needsUpdate = true; }); return t; }
   function cl(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
   function rnd(a, b) { return a + Math.random() * (b - a); }
@@ -162,7 +162,8 @@
     /* ===== 1) ŞEHİR VE SAVUNMA BİRLİKLERİ ===== */
     var rad = Math.max(1.2, Math.min(8, (o.rad || .1) / o.sc)), ks = Math.max(.38, Math.min(1, rad / 3));   /* V232: minik ülkede şehir ve tanklar küçülür, kıyıya taşmaz */
     var dropY = function (r) { return -(1 - Math.cos(r * o.sc)) / o.sc; };   /* V230: yerel düzlem düz, küre eğri: birlik yüzeye oturur */
-    var inT = function (x, z) { var v = o.P.clone().add(o.fr.x.clone().multiplyScalar(x * o.sc)).add(o.fr.z.clone().multiplyScalar(z * o.sc)).normalize(); return a.at(Math.atan2(-v.z, v.x) * 57.29578, Math.asin(v.y) * 57.29578) === o.tg; };
+    var bb0 = a.bbox(o.tg) || [0, 0, 0, 0], wideC = bb0[2] - bb0[0] > 180;   /* V230: Rusya'nın çokgeni 180. meridyeni aştığı için ülke içi denetimi güvenilmez; bu kadar geniş ülkede zaten sığar */
+    var inT = function (x, z) { if (wideC) return true; var v = o.P.clone().add(o.fr.x.clone().multiplyScalar(x * o.sc)).add(o.fr.z.clone().multiplyScalar(z * o.sc)).normalize(); return a.at(Math.atan2(-v.z, v.x) * 57.29578, Math.asin(v.y) * 57.29578) === o.tg; };
     /* düzlem: resmin sağı ekranın sağı, üstü ekranın üstü (yerel -x doğu, +z kuzey), yüzü küreden dışarı */
     var qS = new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3(-1, 0, 0), new T.Vector3(0, 0, 1), new T.Vector3(0, 1, 0))), geoS = new T.PlaneGeometry(1, 1);
     var addSpr = function (name, x, z, S, kind, flip, ord) {
@@ -171,14 +172,12 @@
       var u = { o: m, x: x, z: z, r: r, y0: y0, kind: kind, S: S, fl: flip ? -1 : 1, hit: false }; units.push(u);
       return u;
     };
-    /* şehir: patlama merkezinde ve çevresinde bitişik mahalleler; karaya sığmayan atlanır (kuzeydekiler önce çizilir) */
-    var sz = 1.85 * ks, ringC = 1.28 * ks, cq = [[0, 0]], hi; for (hi = 0; hi < 6; hi++) cq.push([Math.cos(hi * 1.0472 + .4) * ringC, Math.sin(hi * 1.0472 + .4) * ringC]);
-    cq = cq.filter(function (q) { var h = sz * .34; return inT(q[0], q[1]) && inT(q[0] + h, q[1] + h) && inT(q[0] - h, q[1] + h) && inT(q[0] + h, q[1] - h) && inT(q[0] - h, q[1] - h); });
-    if (!cq.length) cq = [[0, 0]];
-    cq.sort(function (p, q) { return q[1] - p[1]; });
-    cq.forEach(function (q, i) { addSpr('city', q[0], q[1], sz, 0, i % 2 === 1, i); });
+    /* V230: şehir uydu görünümünde tek parça; ülkeye sığana kadar küçülür */
+    var sz = 5 * ks, hi, ang0, fits;
+    for (var szi = 0; szi < 8; szi++) { var okN = 0; for (hi = 0; hi < 12; hi++) { ang0 = hi * .5236; if (inT(Math.cos(ang0) * sz * .42, Math.sin(ang0) * sz * .42)) okN++; } fits = okN >= 10; /* göl ve küçük koylar şehri küçültmesin */ if (fits) break; sz *= .85; }
+    addSpr('aerial', 0, 0, sz, 0, false, 0);
     /* tanklar: şehrin dış çevresinde, namlu şehre dönük */
-    var nT = 0, tr = 2.75 * ks, tS = 1 * ks; for (hi = 0; hi < 12 && nT < (LOW ? 5 : 7); hi++) { var ta = hi * 2.399 + .7, tx = Math.cos(ta) * tr, tz = Math.sin(ta) * tr; if (!inT(tx, tz)) continue; addSpr('tank', tx, tz, tS, 1, tx > 0, 20 + (tz < 0 ? 20 : 0) + nT); nT++; }
+    var nT = 0, tr = Math.min(3.2, sz * .5 + .5), tS = 1 * ks; for (hi = 0; hi < 12 && nT < (LOW ? 6 : 8); hi++) { var ta = hi * .5236 * (hi % 2 ? 1 : 1) + (hi % 2 ? 3.1416 : 0) + .3, tx = Math.cos(ta) * tr, tz = Math.sin(ta) * tr; if (!inT(tx, tz)) continue; addSpr('tank', tx, tz, tS, 1, tx > 0, 20 + (tz < 0 ? 20 : 0) + nT); nT++; }
     units.forEach(function (u, i) {
       var D = .05 + i * .035, m = u.o;
       f.tween(.4, function (v) { if (!u.hit) { var e = Math.max(.001, u.S * eo(v)); m.scale.set(e * u.fl, e, 1); } }, null, D);
@@ -277,7 +276,10 @@
         u.hit = true; var m = u.o, dx = u.x / (u.r || 1), dz = u.z / (u.r || 1);
         for (var k = 0; k < 3; k++) f.pnorm.emit({ x: u.x, y: u.y0 + .2, z: u.z, vx: dx * rnd(2, 5), vy: rnd(.3, 1), vz: dz * rnd(2, 5), life: rnd(.8, 1.3), s0: .3, s1: 1.1, c0: [.6, .52, .42], c1: [.36, .33, .3], a0: .5, a1: 0, drag: 1.8 });
         m.scale.set(u.S * u.fl, u.S, 1);
-        if (u.kind === 0) { m.material.map = sprTex(T, 'ruin'); m.material.needsUpdate = true; m.material.color.setScalar(1); }   /* mahalle yıkılır: enkaz çizimi */
+        if (u.kind === 0) {   /* şehir yıkılır: yanmış şehir görüntüsü, içinde dağınık yangınlar */
+          m.material.map = sprTex(T, 'aerialr'); m.material.needsUpdate = true;
+          for (var fi = 0; fi < (LOW ? 3 : 5); fi++) (function () { var fa = Math.random() * 6.283, fr2 = u.S * rnd(.12, .38), h2 = new T.Object3D(); h2.position.set(Math.cos(fa) * fr2, dropY(fr2), Math.sin(fa) * fr2); f.spawn(h2); f.at(rnd(.25, .8), function () { try { f.fireOn(h2, new T.Vector3(0, .2, 0), 5, function () { f.kill(h2); }); } catch (e) { } }); })();
+        }
         else {   /* tank savrulur, kömürleşir */
           m.material.color.setRGB(.42, .38, .34); var push = Math.max(.5, 2.1 - u.r * .3), spin = rnd(1.2, 2.6) * (Math.random() < .5 ? -1 : 1), x0 = m.position.x, z0 = m.position.z, lastE = 0;
           f.tween(.75, function (v) { var e = eo(v), de = e - lastE; lastE = e; m.position.x = x0 + dx * push * e; m.position.z = z0 + dz * push * e; m.rotateZ(spin * de); });

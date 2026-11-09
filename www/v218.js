@@ -65,8 +65,9 @@
     var n = rn * rn, row = new Int32Array(n), lon = new Float32Array(n), shade = new Float32Array(n), msk = new Float32Array(n), S = photo.S, K = .78 / photo.mean, ct = Math.cos(TILT), st = Math.sin(TILT);
     for (var y = 0; y < rn; y++) for (var xx = 0; xx < rn; xx++) {
       var i = y * rn + xx, u = (xx + .5 - rn / 2) / (rn / 2), v = (y + .5 - rn / 2) / (rn / 2), r2 = u * u + v * v, rho = Math.sqrt(r2);
-      var ix = GX - GR + (xx + .5) / rn * N, iy = GY - GR + (y + .5) / rn * N, ringY = 260 + (ix - 241) * (25 / 320);
-      var m = (1 - sm(rho, .93, .985)) * sm(Math.abs(iy - ringY), 10, 16); msk[i] = m; if (m <= .004) continue;
+      /* V230: halka fotoğrafta düz değil, kavisli; bant halkayı tam izler, altından eski fotoğraf görünmez */
+      var ix = GX - GR + (xx + .5) / rn * N, iy = GY - GR + (y + .5) / rn * N, uR = (ix - 400) / 160, ringY = 278 + 9 * uR - 5 * uR * uR;
+      var m = (1 - sm(rho, .93, .985)) * sm(Math.abs(iy - ringY), 4, 6.5); msk[i] = m; if (m <= .004) continue;
       var z = Math.sqrt(Math.max(0, 1 - r2)), Y = -v, lat = Math.asin(Math.max(-1, Math.min(1, Y * ct + z * st))), lo = Math.atan2(u, z * ct - Y * st);
       row[i] = Math.max(0, Math.min(TH - 1, Math.round((.5 - lat / Math.PI) * TH))) * TW; lon[i] = lo;
       /* V230: arka plan fotoğrafındaki küreden ışık ve doku alınmaz (kıtaları leke gibi görünüyordu); temiz, odanın loşluğuna uygun ışık */

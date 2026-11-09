@@ -23,7 +23,11 @@
     sahra: ['Sahra Mührü', 'Sahara Seal', 'Çöl Tilkisi', 'Fennec Fox', 'Kuzey Afrika', 'North Africa', 'MAR DZA TUN LBY MRT ESH'],
     and: ['And Mührü', 'Andes Seal', 'Kondor', 'Condor', 'Güney Konisi', 'Southern Cone', 'CHL ARG URY PRY BOL']
   };
-  var GIDS = Object.keys(D), KEYC = 'wc_seals219', TAB = 'gold', PG = 0, PER = 20, PGH = '';
+  var GIDS = Object.keys(D), KEYC = 'wc_seals219', KEYP = 'wc_seals230p', TAB = 'gold', PG = 0, PER = 20, PGH = '';
+  /* V230: PLATİN MÜHÜRLER — oyun normal modda bitirilince Zor Mod açılır; Zor Mod'da fethedilen ülke platin mühür verir (ayrıntılı bilgiyle) */
+  function hardOn() { try { return !!localStorage.getItem('wc_hard230'); } catch (e) { return false; } }
+  function gotP() { try { var o = JSON.parse(localStorage.getItem(KEYP) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } }
+  function nPlat() { var g = gotP(), all = allC(); return all.filter(function (c) { return !!g[c]; }).length; }
   function jget(k) { try { var a = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
   function gotG() { return jget('wc_gseal218'); }
   function gotC() { return jget(KEYC); }                    /* kalıcı: fethedilmiş ülkeler */
@@ -50,8 +54,30 @@
       var have = gotC(), ch = false;
       G.cq217.forEach(function (c) { if (have.indexOf(c) < 0) { have.push(c); ch = true; } });
       if (ch) localStorage.setItem(KEYC, JSON.stringify(have));
+      if (G.hard) {   /* V230 */
+        var p = gotP(), chp = false, tn = (G.T && G.T.turn) || 0, day = new Date().toISOString().slice(0, 10);
+        G.cq217.forEach(function (c) { if (!p[c]) { p[c] = { t: tn, d: day, by: G.pl }; chp = true; } });
+        if (chp) localStorage.setItem(KEYP, JSON.stringify(p));
+      }
     } catch (e) { }
   }, 1500);
+  function infoPlat(c) {
+    var s = S(), a = animalOf(c), nmA = s && s.A[a] ? X(s.A[a][0], s.A[a][1]) : a, q = gotP()[c], line = s && s.countryInfo ? s.countryInfo(c) : '';
+    if (!q) return '<i class="lk pt" style="background-image:url(' + surlC(c) + ')"></i><div><b>' + esc(cname(c)) + '</b><small>🔒 ' + X('KİLİTLİ · bu ülkeyi Zor Mod\'da fethet', 'LOCKED · conquer this country in Hard Mode') + '</small></div>';
+    var b = []; try { b = (window.BASE && BASE[c]) || []; } catch (e) { }
+    var SN = [X('Nüfus', 'Population'), X('Ordu', 'Army'), X('Ekonomi', 'Economy'), X('Teknoloji', 'Technology'), X('Diplomasi', 'Diplomacy')], ro = b.length ? b.map(function (v, i) { return '<em>' + SN[i] + ' ' + (+v).toFixed(0) + '</em>'; }).join(' · ') : '';
+    return '<i class="pt" style="background-image:url(' + surlC(c) + ')"></i><div><b>' + esc(cname(c)) + ' <em>· ' + esc(nmA) + '</em></b>' +
+      '<small>✦ ' + X('PLATİN', 'PLATINUM') + ' · ' + X('Zor Mod · ', 'Hard Mode · ') + q.t + X('. turda fethedildi', ' turn conquest') + ' · ' + esc(q.d) + (q.by ? ' · ' + esc(cname(q.by)) : '') + '</small>' +
+      '<span>' + esc(line) + (ro ? '<br>' + ro : '') + '</span></div>';
+  }
+  function gridPlat() {
+    var g = gotP(), list = allC(), h = '';
+    list.sort(function (x, y) { var a = g[x] ? 0 : 1, b = g[y] ? 0 : 1; return a - b || cname(x).localeCompare(cname(y), en() ? 'en' : 'tr'); });
+    var pages = Math.max(1, Math.ceil(list.length / PER)); if (PG >= pages) PG = pages - 1; if (PG < 0) PG = 0;
+    list.slice(PG * PER, (PG + 1) * PER).forEach(function (c) { h += '<button type="button" class="col219i n pl' + (g[c] ? ' ok' : '') + '" onclick="GS219.info(\'p\',\'' + c + '\',this)"><i style="background-image:url(' + surlC(c) + ')"></i><b>' + esc(cname(c)) + '</b></button>'; });
+    PGH = '<div class="pg226"><button type="button" ' + (PG <= 0 ? 'disabled' : '') + ' onclick="GS219.pg(-1)">‹</button><span>' + X('Sayfa ', 'Page ') + (PG + 1) + ' / ' + pages + '</span><button type="button" ' + (PG >= pages - 1 ? 'disabled' : '') + ' onclick="GS219.pg(1)">›</button></div>';
+    return cnt(nPlat(), list.length, X('platin mühür açıldı', 'platinum seals unlocked')) + '<div class="grid219 nn">' + h + '</div>';
+  }
 
   /* ---- bilgi satırları ---- */
   function infoGold(id) {
@@ -100,9 +126,10 @@
       : X('Her ülkenin kendi mührü var; ülkeyi fethettiğinde mührü koleksiyona kalıcı olarak girer. Mühre dokun: açıklaması.',         'Conquering a country adds its animal seal to the collection for good. Tap a seal to see which countries grant it.');
     return '<div class="wb-wrap still"><div class="wb-panel wb-pause wc141p col219"><button type="button" class="x226" onclick="GS219.close()" aria-label="' + X('Kapat', 'Close') + '">✕</button><div class="c141h"><span class="p">⚜</span><h3>' + X('MÜHÜR KOLEKSİYONU', 'SEAL COLLECTION') + '</h3></div>' +
       '<div class="tabs219"><button type="button" class="' + (TAB === 'gold' ? 'on' : '') + '" onclick="GS219.tab(\'gold\')">' + X('Altın Mühürler', 'Golden Seals') + ' <i>' + nGold() + '/' + GIDS.length + '</i></button>' +
-      '<button type="button" class="' + (TAB === 'norm' ? 'on' : '') + '" onclick="GS219.tab(\'norm\')">' + X('Mühürler', 'Seals') + ' <i>' + nNormal() + '/' + nAll() + '</i></button></div>' +
-      '<div class="body219">' + (TAB === 'gold' ? gridGold() : gridNormal()) + '</div>' +
-      (TAB === 'norm' ? '<div id="pgw226">' + PGH + '</div>' : '') + '<div class="inf219" id="inf219">' + hint + '</div>' +
+      '<button type="button" class="' + (TAB === 'norm' ? 'on' : '') + '" onclick="GS219.tab(\'norm\')">' + X('Mühürler', 'Seals') + ' <i>' + nNormal() + '/' + nAll() + '</i></button>' +
+      (hardOn() ? '<button type="button" class="pt230 ' + (TAB === 'plat' ? 'on' : '') + '" onclick="GS219.tab(\'plat\')">' + X('Platin', 'Platinum') + ' <i>' + nPlat() + '/' + nAll() + '</i></button>' : '') + '</div>' +
+      '<div class="body219">' + (TAB === 'gold' ? gridGold() : TAB === 'plat' ? gridPlat() : gridNormal()) + '</div>' +
+      (TAB !== 'gold' ? '<div id="pgw226">' + PGH + '</div>' : '') + '<div class="inf219" id="inf219">' + (TAB === 'plat' ? X('Zor Mod\'da fethettiğin her ülke platin mührünü, fetih bilgisi ve değerleriyle açar.', 'Every country you conquer in Hard Mode unlocks its platinum seal with conquest details and stats.') : hint) + '</div>' +
       '<div class="c141g"><button type="button" class="c141b pri" onclick="GS219.close()"><span class="ic">‹</span><span class="lb">' + X('Geri', 'Back') + '</span></button></div></div></div>';
   }
   function render() { var bx = document.getElementById('box'); if (bx) { bx.innerHTML = page(); try { if (window.v156Decorate) v156Decorate(); } catch (e) { } } }
@@ -116,9 +143,9 @@
       m.style.display = 'flex'; m.onclick = null;
     },
     tab: function (t) { TAB = t; render(); },
-    pg: function (d) { PG += d; var b = document.querySelector('.body219'); if (!b) return render(); b.innerHTML = gridNormal(); b.scrollTop = 0; var pw = document.getElementById('pgw226'); if (pw) pw.innerHTML = PGH; var w = document.getElementById('inf219'); if (w) w.innerHTML = X('Bir mühre dokun.', 'Tap a seal.'); try { if (window.AU) AU.play('tick'); } catch (e) { } },
+    pg: function (d) { PG += d; var b = document.querySelector('.body219'); if (!b) return render(); b.innerHTML = TAB === 'plat' ? gridPlat() : gridNormal(); b.scrollTop = 0; var pw = document.getElementById('pgw226'); if (pw) pw.innerHTML = PGH; var w = document.getElementById('inf219'); if (w) w.innerHTML = X('Bir mühre dokun.', 'Tap a seal.'); try { if (window.AU) AU.play('tick'); } catch (e) { } },
     info: function (k, id, el) {
-      var w = document.getElementById('inf219'); if (w) w.innerHTML = k === 'g' ? infoGold(id) : infoNormal(id);
+      var w = document.getElementById('inf219'); if (w) w.innerHTML = k === 'g' ? infoGold(id) : k === 'p' ? infoPlat(id) : infoNormal(id);
       Array.prototype.forEach.call(document.querySelectorAll('.col219i'), function (b) { b.classList.toggle('sel', b === el); });
       try { if (window.AU) AU.play('tick'); } catch (e) { }
     },

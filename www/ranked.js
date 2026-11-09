@@ -573,6 +573,20 @@
     G.ph = 'over';
   }
 
+  /* V230: rank maçında bir taraf son toprağını kaybedince maç biter ve sonuç ekranı açılır (eskiden oyun olduğu yerde duruyordu) */
+  setInterval(function () {
+    try {
+      if (!live() || !G.T || G.ph === 'v7pick') return;
+      if (typeof BSH !== 'undefined' && BSH) return;   /* savaş paneli kapanınca */
+      if (G.over) { if (!CUR || !CUR.done) showOver(); return; }
+      var m = G.mp, on = ONs(), me = m[on.side || 'host'], foe = m[(on.side || 'host') === 'host' ? 'guest' : 'host'], a = 0, b = 0;
+      if (!me || !foe) return;
+      for (var k in G.owner) { if (G.owner[k] === me) a++; else if (G.owner[k] === foe) b++; }
+      if (a && b) return;
+      G.over = { w: a ? 0 : -1 }; G.ph = 'over'; G.busy = 0; showOver();
+    } catch (e) { }
+  }, 400);
+
   /* ---- hamle süresi ---- */
   var TM = { turn: -1, left: CFG.moveSec, last: 0, key: '' };
   function timerEl() {

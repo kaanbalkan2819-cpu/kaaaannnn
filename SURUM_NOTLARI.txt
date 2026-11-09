@@ -1227,3 +1227,13 @@ V227 — Ses yenilemesi (scripts/gen_audio.html + gen_audio.js ile üretildi; ü
 
 =================== V233 (APK adı: v229) ===================
  - Uçakla saldırı olasılığı saldıranın Teknoloji puanına bağlı: 60 ve üstü tam, 15 ve altı %12 (v60.js airF). Karşı saldırılarda da geçerli. Kara birliği hiçbir şekilde sığmazsa yine uçak gelebilir.
+
+=================== V234 (APK adı: v230) ===================
+ - Olaylar: 41 olay (eklenen 26: iki şıkkı kötü, iki şıkkı iyi, artı/eksi karışık, ülkeye özel); olasılık %85. Saldırmazlık teklifini reddetmek ilişkiyi -25 bozar (olay ve diplomasi teklifi).
+ - Basılı tutunca kopyala/yapıştır çıkmaz (metin kutuları hariç). İlk ülke seçiminde ses yok.
+ - Açılışta BKB logosu (web ve Android açılış ekranı), ana menüye kadar.
+ - Zor Mod: oyun kazanılınca açılır, rakipler +%20; Zor Mod fetihleri platin mühür verir (fetih turu, tarih, değerler).
+ - Atom bombası: şehir uydu görünümünde tek görüntü, patlayınca yanmış şehir.
+ - Menü küresi: bant fotoğraftaki kavisli halkayı izler, eski fotoğraf görünmez.
+ - Öğretici: "Bir daha gösterme"; soru beklenirken geri tuşu menüyü kilitlemez, hamle yapılamaz.
+ - Ranked: son toprak gidince sonuç ekranı açılır. Hub Kapat düğmesi ekrana sığar. Online oda paneli dikey.

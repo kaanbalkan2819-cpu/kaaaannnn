@@ -67,6 +67,7 @@
 
   /* ================= İLİŞKİ / GÜVEN / İTİBAR ================= */
   function addRel(e, v) { var d = D2(); d.d[e] = clamp((d.d[e] || 0) + v, -100, 100); }
+  window.WC138Rel = addRel;   /* V230: olaylar da aynı ilişki puanını değiştirir */
   function relParts(e) {   // [[trAd, enAd, değer], ...]
     var p = [], d = D2(), dd = D(), v;
     try { if (allied(e)) p.push(['İttifak', 'Alliance', 30]); } catch (x) { }
@@ -279,7 +280,11 @@
       if (o.kind === 'ally') { if (canJoin(G.pl, o.from) && addAlly(G.pl, o.from, null)) { addRel(o.from, 10); gift214(); say('🤝 ' + nm(o.from) + ' — ' + X('ittifak kuruldu', 'alliance formed')); } else say(X('İttifak kurulamadı (üye sınırı)', 'Alliance not possible (member limit)')); }
       else if (pactCount() < PACT_MAX) { G.pacts = G.pacts || {}; G.pacts[key(G.pl, o.from)] = turn() + PACT_TURNS + 1; addRel(o.from, 8); gift214(); say('🛡 ' + nm(o.from) + ' — ' + X('saldırmazlık paktı imzalandı', 'pact signed')); }
       else say(X('Aktif pakt sınırına ulaştın', 'Active pact limit reached'));
-    } else addRel(o.from, -3);
+    } else if (o.kind === 'ally') addRel(o.from, -3);
+    else {   /* V230: saldırmazlık teklifini reddetmek ilişkiyi bozar */
+      addRel(o.from, -25); try { G.inc23 = G.inc23 || {}; G.inc23[o.from + '>' + G.pl] = { until: turn() + 4, m: 1.5, add: .1 }; } catch (x) { }
+      say('🛡 ' + nm(o.from) + ' — ' + X('reddedilen teklif ilişkileri bozdu', 'your refusal soured relations'));
+    }
     save2(); try { render(); } catch (x) { }
   };
 

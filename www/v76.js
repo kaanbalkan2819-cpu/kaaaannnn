@@ -5,7 +5,7 @@
    Veri: G.ev76 = {last, prev}, G.lib76 = {ülke: {since, rolled, at}} (kayıtla saklanır). */
 (function () {
   'use strict';
-  var EVT_P = .6, EVT_GAP = 2, EVT_FIRST = 2,   /* V215: eskiden .16 / 4 / 3 (çok seyrek); artık en erken 2 turda bir, %60 olasılık */ LIB_REVOLT_CHANCE = .3 /* V220: .5 -> .3 */, LIB_POWER_CUT = 10;
+  var EVT_P = .85, EVT_GAP = 2, EVT_FIRST = 2,   /* V230: .6 -> .85 */   /* V215: eskiden .16 / 4 / 3 (çok seyrek); artık en erken 2 turda bir, %60 olasılık */ LIB_REVOLT_CHANCE = .3 /* V220: .5 -> .3 */, LIB_POWER_CUT = 10;
   function T(tr, en) { return (typeof L !== 'undefined' && L === 'en') ? en : tr; }
   function nm(e) { return (M[e] && M[e].name) || e; }
   /* V215: Türkçe bulunma eki (ses uyumu + sertleşme): İran'da, Almanya'da, Mısır'da, Türkiye'de, Fas'ta */
@@ -47,8 +47,11 @@
       if (f.rl && ctx.target) relShift(ctx.target, f.rl === 'worse');
       if (f.lib && ctx.target) { G.lib76 = G.lib76 || {}; G.lib76[ctx.target] = { since: turn() }; }
       if (f.min && ctx.target) { G.min215 = G.min215 || {}; G.min215[ctx.target] = turn(); }   /* V215 */
+      if (f.pact && ctx.target) { G.pacts = G.pacts || {}; G.pacts[pkey(G.pl, ctx.target)] = turn() + 5; relShift(ctx.target, false); try { if (window.WC138Rel) WC138Rel(ctx.target, 8); } catch (x) { } }   /* V230 */
+      if (f.snub && ctx.target) { relShift(ctx.target, true); try { if (window.WC138Rel) WC138Rel(ctx.target, -25); } catch (x) { } G.inc23 = G.inc23 || {}; G.inc23[ctx.target + '>' + G.pl] = { until: turn() + 4, m: 1.5, add: .1 }; }
     });
   }
+  function pkey(a, b) { return a < b ? a + '|' + b : b + '|' + a; }
   function fxLines(fx, ctx) {   // [{sym, txt, good}]
     var out = [], S = SN(), tg = ctx.target ? nm(ctx.target) : '';
     fx.forEach(function (f) {
@@ -59,6 +62,10 @@
       if (f.ally) out.push({ sym: '▲', good: true, txt: T(tg + ' gücü +%' + f.ally + ' (müttefik)', tg + ' power +' + f.ally + '% (ally)') });
       if (f.rl) out.push({ sym: f.rl === 'worse' ? '▼' : '▲', good: f.rl !== 'worse', txt: T(tg + ' ile ilişki ' + (f.rl === 'worse' ? 'kötüleşir' : 'iyileşir'), 'Relations with ' + tg + (f.rl === 'worse' ? ' worsen' : ' improve')) });
       if (f.lib) out.push({ sym: '▲', good: false, txt: T('Fethedersen o topraklarda isyan olasılığı %' + Math.round(LIB_REVOLT_CHANCE * 100) + ' (saldırgan olmasan bile)', 'If you conquer it, %' + Math.round(LIB_REVOLT_CHANCE * 100) + ' chance of revolt there (even if not aggressive)') });
+    });
+    fx.forEach(function (f) {   /* V230 */
+      if (f.pact) out.push({ sym: '▲', good: true, txt: T(tg + ' ile 4 tur saldırmazlık paktı', '4-turn non-aggression pact with ' + tg) });
+      if (f.snub) out.push({ sym: '▼', good: false, txt: T(tg + ' ile aran ciddi biçimde bozulur', 'Relations with ' + tg + ' break down') });
     });
     fx.forEach(function (f) { if (f.min) out.push({ sym: '▼', good: true, txt: T('Savaşırsanız ' + tg + ' −%15 (azınlıklar katılmaz)', 'If you go to war, ' + tg + ' −15% (minorities stay out)') }); });   /* V215 */
     if (!out.length) out.push({ sym: '•', good: null, txt: T('Değişiklik yok', 'No change') });
@@ -133,6 +140,45 @@
       text: function (c) { return T('Casusların <b>' + nm(c.target) + '</b> sarayına sızabileceğini söylüyor. Sabotaj o ülkeyi zayıflatır; ortaya çıkarsa ilişkiler bozulur.', 'Your spies say they can infiltrate the court of <b>' + nm(c.target) + '</b>. Sabotage weakens it; if exposed, relations sour.'); },
       yes: [{ t: -8 }, { p: [2, -3] }, { tr: 'worse' }], no: [] }
   ];
+  /* ---------- V230: yeni olaylar. Bazısında iki şık da kötü, bazısında ikisi de iyi, bazısında artı ve eksi karışık. ---------- */
+  var IMG230 = {};
+  function ev230(id, icon, img, tt, tx, yL, nL, yes, no, tg) {
+    var named = function (s, c) { return c && c.target ? s.replace(/\{c\}/g, nm(c.target)) : s; };
+    IMG230[id] = img;
+    EVENTS.push({ id: id, icon: icon, ok: tg ? function () { return tg().length > 0; } : function () { return true; }, ctx: tg ? function () { return { target: pickOne(tg()) }; } : function () { return {}; },
+      title: function (c) { return named(T(tt[0], tt[1]), c); }, text: function (c) { return named(T(tx[0], tx[1]), c); }, yL: yL, nL: nL, yes: yes, no: no });
+  }
+  function foes230() { return foes(); }
+  function noPact() { return foes().filter(function (e) { return !(G.pacts && G.pacts[pkey(G.pl, e)] > turn()); }); }
+  /* iki şık da kötü */
+  ev230('quake', '🌋', 'famine', ['Deprem', 'Earthquake'], ['Şiddetli bir deprem şehirlerini yıktı. Yeniden inşa hazineyi boşaltır; yardım etmezsen halk göç eder.', 'A violent earthquake has flattened your cities. Rebuilding drains the treasury; without aid, people flee.'], ['Yeniden İnşa Et', 'Rebuild'], ['Kendi Hallerine Bırak', 'Leave Them'], [{ p: [2, -9] }], [{ p: [0, -8] }, { p: [4, -2] }]);
+  ev230('mutiny', '🔥', 'deserters', ['Ordu İsyanı', 'Army Mutiny'], ['Maaşları geciken birlikler kışlalarda ayaklandı. Ödersen hazine erir; bastırırsan ordu ve itibarın yara alır.', 'Unpaid troops have risen in the barracks. Paying melts the treasury; crushing them hurts your army and standing.'], ['Maaşları Öde', 'Pay Them'], ['Bastır', 'Crush It'], [{ p: [2, -8] }], [{ p: [1, -8] }, { p: [4, -3] }]);
+  ev230('drought', '🌵', 'famine', ['Kuraklık', 'Drought'], ['Yağmurlar kesildi. Dışarıdan tahıl almak pahalı; karneye geçmek halkı eritir.', 'The rains have failed. Importing grain is costly; rationing wastes your people.'], ['Tahıl Al', 'Import Grain'], ['Karneye Geç', 'Ration'], [{ p: [2, -7] }, { p: [4, -2] }], [{ p: [0, -7] }]);
+  ev230('traitor', '🗝', 'spy', ['Hain Vezir', 'Traitorous Vizier'], ['Vezirin düşmana sır sattığı ortaya çıktı. Açık yargılama itibarını sarsar; gizlersen rüşvet ve kaçan sırlar pahalıya patlar.', 'Your vizier has been selling secrets. A public trial shakes your standing; a cover-up costs bribes and lost secrets.'], ['Açıkça Yargıla', 'Public Trial'], ['Örtbas Et', 'Cover Up'], [{ p: [4, -6] }], [{ p: [2, -5] }, { p: [3, -3] }]);
+  ev230('flood', '🌊', 'famine', ['Sel Felaketi', 'Great Flood'], ['Nehirler taştı. Bent yapmak hazineye, tahliye etmek askere ve halka yük olur.', 'The rivers have burst. Dams burden the treasury; evacuation burdens your troops and people.'], ['Bent Yaptır', 'Build Dams'], ['Tahliye Et', 'Evacuate'], [{ p: [2, -8] }], [{ p: [0, -5] }, { p: [1, -3] }]);
+  ev230('blaze', '🔥', 'famine', ['Büyük Yangın', 'Great Fire'], ['Başkentte yangın çıktı. Askerleri göndermek orduyu ve hazineyi yorar; kendi haline bırakırsan şehir kül olur.', 'Fire has broken out in the capital. Sending soldiers tires the army and treasury; left alone, the city burns.'], ['Askerleri Gönder', 'Send Soldiers'], ['Kendi Haline Bırak', 'Let It Burn'], [{ p: [1, -4] }, { p: [2, -4] }], [{ p: [0, -6] }, { p: [3, -2] }]);
+  /* iki şık da iyi */
+  ev230('goldvein', '⛏', 'merchant', ['Altın Damarı', 'Gold Vein'], ['Dağlarda zengin bir altın damarı bulundu. Hazineye mi aktarırsın, yoksa halka ve komşulara dağıtıp şan mı kazanırsın?', 'A rich gold vein has been found. Into the treasury, or shared out for glory?'], ['Hazineye Aktar', 'To the Treasury'], ['Halka Dağıt', 'Share It'], [{ p: [2, 10] }], [{ p: [4, 7] }, { p: [0, 3] }]);
+  ev230('harvest', '🌾', 'merchant', ['Bereketli Hasat', 'Bountiful Harvest'], ['Bu yıl ambarlar taşıyor. Fazlasını satabilir ya da halkı doyurup nüfusu büyütebilirsin.', 'The granaries overflow this year. Sell the surplus or feed a growing people.'], ['Fazlayı Sat', 'Sell Surplus'], ['Halkı Doyur', 'Feed the People'], [{ p: [2, 8] }], [{ p: [0, 8] }]);
+  ev230('explorer', '🧭', 'academy', ['Kâşifin Dönüşü', 'The Explorer Returns'], ['Uzak diyarlardan dönen kâşif hem haritalar hem baharat getirdi. Hangisine öncelik vereceksin?', 'Your explorer returns with maps and spices. Which comes first?'], ['Haritaları Al', 'Take the Maps'], ['Baharatı Sat', 'Sell the Spices'], [{ p: [3, 8] }], [{ p: [2, 8] }]);
+  ev230('festival', '🎉', 'wedding', ['Zafer Şenlikleri', 'Victory Festival'], ['Halk zaferleri kutluyor. Görkemli bir geçit töreni orduyu, büyük bir şölen sarayını parlatır.', 'The people celebrate your victories. A grand parade lifts the army; a great feast lifts the court.'], ['Geçit Töreni', 'Grand Parade'], ['Büyük Şölen', 'Great Feast'], [{ p: [1, 7] }], [{ p: [4, 7] }, { p: [0, 2] }]);
+  ev230('genius', '⚙', 'academy', ['Dahi Mühendis', 'Genius Engineer'], ['Sarayına genç bir dahi geldi. Silah tasarlatabilir ya da yeni makineler yaptırabilirsin.', 'A young genius has come to court. Design weapons, or build new machines.'], ['Silah Tasarlat', 'Design Weapons'], ['Makine Yaptır', 'Build Machines'], [{ p: [1, 8] }], [{ p: [3, 8] }]);
+  ev230('migrants', '🧳', 'refuge', ['Yetenekli Göçmenler', 'Skilled Migrants'], ['Komşu diyarlardan usta göçmenler geliyor. Atölyelere mi yerleştirirsin, boş topraklara mı?', 'Skilled migrants are arriving. To the workshops, or the empty lands?'], ['Atölyelere', 'Workshops'], ['Boş Topraklara', 'Empty Lands'], [{ p: [2, 6] }, { p: [3, 3] }], [{ p: [0, 9] }]);
+  ev230('congress', '🕊', 'wedding', ['Barış Kongresi', 'Peace Congress'], ['Elçiler başkentinde toplandı. Şanını artırabilir ya da komşularla bağları güçlendirebilirsin.', 'Envoys have gathered in your capital. Raise your prestige, or strengthen ties with your neighbours.'], ['Şanını Artır', 'Raise Prestige'], ['Komşularla Bağ Kur', 'Build Ties'], [{ p: [4, 8] }], [{ nb: 'better' }, { p: [4, 3] }]);
+  /* artı ve eksi karışık */
+  ev230('draft', '🪖', 'fort', ['Zorunlu Askerlik', 'Conscription'], ['Komutanlar genel seferberlik istiyor. Ordu büyür, ama tarla ve dükkânlar boşalır.', 'Your commanders demand mobilisation. The army grows, but fields and shops empty.'], ['Seferberlik İlan Et', 'Mobilise'], ['Gönüllülerle Yetin', 'Volunteers Only'], [{ p: [1, 10] }, { p: [2, -4] }, { p: [0, -3] }], [{ p: [1, -3] }, { p: [4, 3] }]);
+  ev230('newtax', '💰', 'merchant', ['Yeni Vergi', 'New Tax'], ['Hazine yeni bir vergi öneriyor. Kasa dolar, halk ve saray söylenir.', 'The treasury proposes a new tax. The coffers fill while people grumble.'], ['Vergiyi Koy', 'Levy It'], ['Vergiyi Düşür', 'Cut Taxes'], [{ p: [2, 10] }, { p: [0, -4] }, { p: [4, -3] }], [{ p: [2, -3] }, { p: [0, 3] }]);
+  ev230('roads', '🛤', 'academy', ['Büyük Yol Projesi', 'Great Road Project'], ['Mühendisler ülkeyi baştan başa yollarla bağlamak istiyor. Pahalı ama ileriye dönük.', 'Engineers want to link the realm with roads. Costly but far-sighted.'], ['Başlat', 'Begin'], ['Ertele', 'Postpone'], [{ p: [2, -6] }, { p: [3, 7] }, { p: [0, 2] }], [{ p: [3, -2] }, { p: [2, 2] }]);
+  ev230('censor', '📜', 'spy', ['Sansür Yasası', 'Censorship Law'], ['Saray muhalif yayınları yasaklamak istiyor. Düzen sağlanır, itibar zedelenir.', 'The court wants dissent banned. Order improves; your reputation suffers.'], ['Yasakla', 'Ban Them'], ['Serbest Bırak', 'Allow Them'], [{ p: [1, 5] }, { p: [4, -6] }], [{ p: [4, 4] }, { p: [1, -3] }]);
+  ev230('strike', '⚒', 'merchant', ['İşçi Grevi', 'Workers Strike'], ['Maden ve liman işçileri greve gitti. Haklarını verirsen hazine azalır; dağıtırsan iş sürer ama halk öfkelenir.', 'Miners and dockers are on strike. Conceding costs money; breaking it keeps work going but angers the people.'], ['Hak Ver', 'Concede'], ['Dağıt', 'Break It Up'], [{ p: [2, -5] }, { p: [0, 6] }], [{ p: [2, 3] }, { p: [0, -5] }, { p: [4, -3] }]);
+  ev230('advisor', '🎓', 'refuge', ['Yabancı Danışman', 'Foreign Advisor'], ['Yabancı bir danışman bilgisini sunuyor. Yerli saray ise bundan rahatsız.', 'A foreign advisor offers expertise. Your own court is unhappy about it.'], ['Kabul Et', 'Accept'], ['Geri Çevir', 'Decline'], [{ p: [3, 6] }, { p: [4, -3] }], [{ p: [3, -2] }, { p: [4, 2] }]);
+  ev230('mercs', '⚔', 'fort', ['Paralı Askerler', 'Mercenaries'], ['Bir paralı asker birliği hizmet teklif ediyor. Güçlüler, ama ucuz değiller.', 'A mercenary company offers its service. Strong, but not cheap.'], ['Kirala', 'Hire Them'], ['Gönder', 'Send Away'], [{ p: [1, 9] }, { p: [2, -7] }], [{ p: [1, -2] }, { p: [2, 3] }]);
+  ev230('colony', '⛵', 'pirates', ['Deniz Aşırı Üs', 'Overseas Base'], ['Amirallerin uzak bir limanda ticaret üssü kurmak istiyor. Kazançlı, ama gemiler ve askerler oraya gider.', 'Your admirals want a distant trading post. Profitable, but it takes ships and men.'], ['Üssü Kur', 'Found It'], ['Filoyu Evde Tut', 'Keep the Fleet Home'], [{ p: [2, 8] }, { p: [1, -5] }], [{ p: [2, -2] }, { p: [1, 3] }]);
+  /* ülkeye özel */
+  ev230('napoffer', '🛡', 'wedding', ['{c}: Saldırmazlık Teklifi', '{c}: Non-Aggression Offer'], ['<b>{c}</b> elçileri birbirinize saldırmamayı öneriyor. Reddedersen bunu hakaret sayacaklar.', 'Envoys from <b>{c}</b> propose mutual non-aggression. Refuse and they will take it as an insult.'], ['İmzala', 'Sign'], ['Reddet', 'Refuse'], [{ pact: 1 }], [{ snub: 1 }], noPact);
+  ev230('tension', '🚧', 'fort', ['{c} Sınırında Gerginlik', 'Tension on the {c} Border'], ['<b>{c}</b> sınırında askerler karşı karşıya geldi. Takviye göndermek orduyu güçlendirir ama ilişkiyi bozar; geri çekilmek itibarını zedeler.', 'Troops face off on the <b>{c}</b> border. Reinforcing strengthens the army but sours relations; backing down hurts your standing.'], ['Takviye Gönder', 'Reinforce'], ['Geri Çekil', 'Pull Back'], [{ p: [1, 5] }, { tr: 'worse' }], [{ p: [4, -3] }, { rl: 'better' }], foes230);
+  ev230('gift', '🎁', 'wedding', ['{c} Armağan Gönderdi', 'A Gift from {c}'], ['<b>{c}</b> sarayı değerli armağanlar yolladı. Kabul etmek kasayı doldurur ve ilişkiyi ısıtır; iade etmek bağımsızlığını gösterir.', 'The court of <b>{c}</b> has sent costly gifts. Accepting fills the coffers and warms relations; returning them shows independence.'], ['Kabul Et', 'Accept'], ['İade Et', 'Return Them'], [{ p: [2, 6] }, { rl: 'better' }], [{ p: [4, 5] }], foes230);
+  ev230('exiles', '🏕', 'refuge', ['{c} Sürgünleri', 'Exiles from {c}'], ['<b>{c}</b> topraklarından kaçan binlerce kişi sınırda bekliyor. Almak nüfusu artırır ama hazineyi yorar ve o ülkeyi kızdırır.', 'Thousands fleeing <b>{c}</b> wait at your border. Taking them in grows your people but strains the treasury and angers that country.'], ['İçeri Al', 'Let Them In'], ['Sınırı Kapat', 'Close the Border'], [{ p: [0, 6] }, { p: [2, -4] }, { tr: 'worse' }], [{ p: [4, -4] }, { rl: 'better' }], foes230);
   /* V215: olay görselleri (assets/events/ev_*.jpg, Figma ile üretildi). Benzer olaylar aynı görseli paylaşır. */
   var IMG215 = { refuge: 'refuge', liberate: 'minority', minority: 'minority', arms: 'fort', fort: 'fort', brain: 'academy', academy: 'academy', famine: 'famine', plague: 'famine',
     coup: 'spy', spy: 'spy', ally: 'wedding', wedding: 'wedding', pirates: 'pirates', merchant: 'merchant', deserters: 'deserters' };
@@ -161,13 +207,14 @@
     var old = document.getElementById('ev76'); if (old) old.remove();
     var o = document.createElement('div'); o.id = 'ev76';
     /* V215: duraklatma menüsü şablonu (taş kart, altın çerçeve, köşe süsleri) + üst ortada dikdörtgen olay görseli. Eski parşömen görünümü kaldırıldı. */
-    var img = IMG215[ev.id] ? 'assets/events/ev_' + IMG215[ev.id] + '.jpg' : '';
+    var imk = IMG215[ev.id] || IMG230[ev.id], img = imk ? 'assets/events/ev_' + imk + '.jpg' : '';
+    var yLab = ev.yL ? T(ev.yL[0], ev.yL[1]) : T('Kabul', 'Accept'), nLab = ev.nL ? T(ev.nL[0], ev.nL[1]) : T('Reddet', 'Refuse');
     o.className = 'ev215o';
     o.innerHTML = '<div class="ev215"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>' +
       (img ? '<div class="im215" style="background-image:url(' + img + ')"></div>' : '') +
       '<small class="kick215">' + T('OLAY', 'EVENT') + ' · ' + T('TUR ', 'TURN ') + turn() + '</small><h3>' + ev.title(ctx) + '</h3><p>' + ev.text(ctx) + '</p>' +
-      '<div class="ch215"><div class="c215"><button class="b76 y" data-a="1">✔ ' + T('Kabul', 'Accept') + '</button>' + lines(fxLines(ev.yes, ctx)) + '</div>' +
-      '<div class="c215"><button class="b76 n" data-a="0">✖ ' + T('Reddet', 'Refuse') + '</button>' + lines(fxLines(ev.no, ctx)) + '</div></div></div>';
+      '<div class="ch215"><div class="c215"><button class="b76 y" data-a="1">' + (ev.yL ? '' : '✔ ') + yLab + '</button>' + lines(fxLines(ev.yes, ctx)) + '</div>' +
+      '<div class="c215"><button class="b76 n" data-a="0">' + (ev.nL ? '' : '✖ ') + nLab + '</button>' + lines(fxLines(ev.no, ctx)) + '</div></div></div>';
     var busy = false;
     o.querySelectorAll('.b76').forEach(function (b) {
       b.onclick = function () {

@@ -122,6 +122,7 @@
   var PLAYS = { click: ['click', .7, 1], tick: ['tick', .6, 1], notify: ['notify', .55], ping: ['ping', .6], coin: ['coin', .7, 1], pact: ['pact', .85], win: ['win', .9], lose: ['lose', .9], conq: ['conq', .95], attack: ['attack', .85], horn: ['horn', .7], cannon: ['cannon', .85, 1], boom: ['boom', .92, 1], rifle: ['mg', .5, 1], missile: ['missile', .75, 1], clash: ['clash', .8, 1] };
   function play(k) {
     if (!c || !S().sfxOn) return; var t = c.currentTime + .005, i;
+    try { if (window.G && (G.ph === 'v7pick' || G.ph === 'pick')) return; } catch (e) { }   /* V230: ilk ülke seçiminde ses yok */
     if (k === 'dice') duck(1.7); else if (k === 'dtick') duck(.3);
     try {
       /* V227: üretilmiş örnek varsa o çalar; yoksa aşağıdaki eski sentez */

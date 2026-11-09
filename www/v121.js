@@ -62,6 +62,12 @@
       }
       s.style.display = 'block';
       clearTimeout(shieldOn.t); shieldOn.t = setTimeout(shieldOff, 20000);   // emniyet: en geç 20 sn sonra mutlaka kalkar
+      /* V230: duraklatma menüsü açılırsa kalkan menüyü kilitlemesin; menü kapanınca kalkan döner, öğretici sorusu gelene kadar hamle yapılamaz */
+      clearInterval(shieldOn.iv); shieldOn.iv = setInterval(function () {
+        var sh = document.getElementById('wcshield'), md = document.getElementById('mod'); if (!sh) { clearInterval(shieldOn.iv); return; }
+        var o = !!(md && md.style.display === 'flex'); sh.style.display = o ? 'none' : 'block';
+        if (o) { clearTimeout(shieldOn.t); shieldOn.t = setTimeout(shieldOff, 90000); }
+      }, 120);
     } catch (e) { }
   }
   function shieldOff() { try { clearTimeout(shieldOn.t); var s = document.getElementById('wcshield'); if (s && s.parentNode) s.parentNode.removeChild(s); } catch (e) { } }
@@ -96,13 +102,16 @@
     later: function () { pendingAsk = true; },
     askInGame: function () {
       try { if (!(window.G && !G.mp && G.mode == 1 && !G.over)) return; } catch (e) { return; }
+      try { if (localStorage.getItem('wc_tut_never')) return; } catch (e) { }   /* V230: "bir daha gösterme" işaretliyse soru sorulmaz, oyun aynı anda başlar */
       modal('<h2>📖 ' + X('Öğretici ister misin?', 'Want a quick tutorial?') + '</h2>' +
         '<p style="text-align:center;font-size:14px;line-height:1.45">' + X('Kuralları gerçek haritanın üzerinde, oynarken adım adım gösterelim mi? İstersen tek dokunuşla atlayabilirsin.', 'Want us to show the rules step by step on the real map while you play? You can skip with one tap.') + '</p>' +
         '<button class="big pri" onclick="WCTut._yesIn()">' + X('Evet, haritada göster', 'Yes, show me on the map') + '</button>' +
-        '<button class="big" onclick="WCTut._noIn()">' + X('Hayır, oynayayım', 'No, let me play') + '</button>');
+        '<button class="big" onclick="WCTut._noIn()">' + X('Hayır, oynayayım', 'No, let me play') + '</button>' +
+        '<label class="nv230"><input type="checkbox" id="tutnv230"><span>' + X('Bir daha gösterme', 'Do not show again') + '</span></label>');
     },
-    _yesIn: function () { seen(); try { closeMod(); } catch (e) { } if (window.WCTour) WCTour.arm(); },
-    _noIn: function () { seen(); try { closeMod(); } catch (e) { } },
+    _never: function () { try { var c = document.getElementById('tutnv230'); if (c && c.checked) localStorage.setItem('wc_tut_never', '1'); } catch (e) { } },
+    _yesIn: function () { window.WCTut._never(); seen(); try { closeMod(); } catch (e) { } if (window.WCTour) WCTour.arm(); },
+    _noIn: function () { window.WCTut._never(); seen(); try { closeMod(); } catch (e) { } },
     _yes: function () {
       var f = window.WCTut._cb; window.WCTut._cb = null; seen();
       if (window.WCTour) WCTour.arm();
@@ -148,7 +157,7 @@
       var r = _ng.apply(this, arguments);
       if (pendingAsk) {
         pendingAsk = false;
-        if (m == 1) { shieldOn(); var n = 0, iv = setInterval(function () { n++; try { if (window.v30IntroBusy && v30IntroBusy() && n < 12) return; } catch (e) { } /* V150: küre yaklaşırken (3 sn) soru açılıp küreyi örtmesin */ var md = document.getElementById('mod'); if (!(md && md.style.display === 'flex') || n > 8) { clearInterval(iv); try { if (!(md && md.style.display === 'flex')) WCTut.askInGame(); } finally { shieldOff(); } } }, 700); }   /* V161: soru açılana kadar dokunuşlar geçersiz */
+        if (m == 1) { shieldOn(); var n = 0, iv = setInterval(function () { n++; try { if (window.v30IntroBusy && v30IntroBusy() && n < 12) return; } catch (e) { } /* V150: küre yaklaşırken (3 sn) soru açılıp küreyi örtmesin */ var md = document.getElementById('mod'), mo = md && md.style.display === 'flex'; if (mo && n < 120) return; /* V230: duraklatma menüsü açıkken beklenir, soru kapanınca gelir */ clearInterval(iv); try { if (!mo) WCTut.askInGame(); } finally { shieldOff(); } }, 700); }   /* V161: soru açılana kadar dokunuşlar geçersiz */
       }
       return r;
     };

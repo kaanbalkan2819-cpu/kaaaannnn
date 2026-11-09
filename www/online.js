@@ -37,8 +37,8 @@
     modal('<h3>' + X('Online — arkadaşına karşı', 'Online — versus a friend') + '</h3>' +
       '<div style="color:var(--tx2);margin-bottom:8px">' + X('Her biri ayrı bir ülkeyi yönetir; sırayla oynarsınız. İkiniz de aynı anda açık olmalısınız.', 'Each of you rules a separate country; you take turns. Both must be online at the same time.') + '</div>' +
       '<button class="big pri" onclick="WCOnline.host(0)">' + X('Oda Kur', 'Create Room') + '<small class="sub220">' + X('Karşılıklı · ayrı ülkeler', 'Head-to-head · separate countries') + '</small>' + '</button>' +
-      '<div style="display:flex;gap:8px;margin:8px 0"><input id="onc" maxlength="5" placeholder="' + X('Oda kodu', 'Room code') + '" style="flex:1;padding:12px;border-radius:10px;border:1px solid #6b5420;background:#1a1408;color:#f2c14e;font-size:18px;text-transform:uppercase;letter-spacing:4px;text-align:center">' +
-      '<button class="big" style="flex:1;margin:0" onclick="WCOnline.join()">' + X('Katıl', 'Join') + '</button></div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;margin:8px 0"><input id="onc" maxlength="5" placeholder="' + X('Oda kodu', 'Room code') + '" style="width:100%;min-width:0;box-sizing:border-box;padding:12px;border-radius:10px;border:1px solid #6b5420;background:#1a1408;color:#f2c14e;font-size:18px;text-transform:uppercase;letter-spacing:4px;text-align:center">' +
+      '<button class="big" style="margin:0;width:100%" onclick="WCOnline.join()">' + X('Katıl', 'Join') + '</button></div>' +
       '<button class="big ghost" onclick="WCOnline.cancel()">' + X('Vazgeç', 'Cancel') + '</button>');
   }
   function status(h, cancel) { modal('<h3>Online</h3><div style="text-align:center;padding:10px;color:var(--tx2)">' + h + '</div>' + (cancel === false ? '' : '<button class="big ghost" onclick="WCOnline.cancel()">' + X('Vazgeç', 'Cancel') + '</button>')); }

@@ -29,7 +29,9 @@
   var snapT = 0;
   function snapshot() {
     try {
-      var w = document.getElementById('wcm'); if (!w || !document.body.classList.contains('wcm-on') || w.querySelector('.launch') || w.querySelector('[data-a="back"]')) return;
+      var w = document.getElementById('wcm'); if (!w || !document.body.classList.contains('wcm-on') || w.querySelector('.launch') || w.querySelector('[data-a="back"]') || w.classList.contains('go')) return;   /* V230: geçiş anındaki soluk menü kaydedilmez */
+      var md230 = document.getElementById('mod'); if (md230 && md230.style.display === 'flex') return;
+      if (!w.querySelector('.menu .mb')) return;
       var c = w.cloneNode(true); c.classList.add('on', 'inst226');
       Array.prototype.forEach.call(c.querySelectorAll('canvas'), function (n) { n.remove(); });
       Array.prototype.forEach.call(c.querySelectorAll('button'), function (n) { n.setAttribute('tabindex', '-1'); });
