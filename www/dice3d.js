@@ -169,7 +169,7 @@ return s+'</svg>'}
     for (i = 0; i < s.fs.length; i++) { n = app(R, s.nrs[i]); d = n[0] * LIGHT[0] + n[1] * LIGHT[1] + n[2] * LIGHT[2]; dk = Math.max(0, Math.min(.55, (.62 - d) * .5)); s.shv[i] = dk; s.fs[i].style.setProperty('--sh', dk.toFixed(2)); }
   }
   function flatShade(s, dk) { var i; for (i = 0; i < s.fs.length; i++) { s.shv[i] = dk; s.fs[i].style.setProperty('--sh', dk); } }
-  function tickSnd() { try { AU.play('tick'); } catch (x) { } }
+  function tickSnd() { try { AU.play('dtick'); } catch (x) { } }
 
   /* ---------- sabit göster (animasyonu iptal eder) ---------- */
   function setDie3(id, v) {

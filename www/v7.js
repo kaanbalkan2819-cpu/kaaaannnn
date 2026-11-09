@@ -318,7 +318,7 @@
       var cl = 'sr7 on ' + (x.w == 'a' ? 'a' : x.w == 'd' ? 'd' : 'e'); if (el.className !== cl) el.className = cl;
       if (x.w == 'a') aw++; if (x.w == 'd') dw++;
       var pa = $('pa'), pd = $('pd'), sa = String(aw), sd = String(dw); if (pa.textContent !== sa) pa.textContent = sa; if (pd.textContent !== sd) pd.textContent = sd;
-      if (snd) AU.play('tick');
+      if (snd) AU.play('dtick');
     }
     /* V66: 6 gelen zar sabit kalır, yanına yeni zar eklenir (en çok 3); oyuncu dokununca yeni zar atılır */
     var sA = (r.da && r.da.length) ? r.da : [r.ra], sD = (r.dd && r.dd.length) ? r.dd : [r.rd], waiting = false, rk = 0;
@@ -356,8 +356,8 @@
         sumLbl(i);
         if (sA.length > i + 1 || sD.length > i + 1) {   // 6 geldi: yeni zar yerini alır, oyuncu dokununca atılır
           [['a', sA], ['d', sD]].forEach(function (y) { if (y[1].length > i + 1) mkDie(y[0], i + 1, true); });
-          waiting = true; rk = i + 1; $('mu').innerHTML = '<b>6!</b> ' + X('Dokun → yeni zar', 'Tap → roll new die'); AU.play('tick');
-        } else { showDice(); AU.play('tick'); ph = 1; rowsRun(); }
+          waiting = true; rk = i + 1; $('mu').innerHTML = '<b>6!</b> ' + X('Dokun → yeni zar', 'Tap → roll new die'); AU.play('dtick');
+        } else { showDice(); AU.play('dtick'); ph = 1; rowsRun(); }
       }, x3 ? RMS + 90 : 950 / Math.min(sp, 1.5)));
     }
     function showDice() {
@@ -383,7 +383,7 @@
     bs.onclick = function (ev) { if (ev.target.closest && ev.target.closest('button')) return; if (done) return; if (waiting) { waiting = false; $('mu').innerHTML = ''; roundRoll(rk); return; } if (lock86) return; finish(); };
     if (!sp) { finish(); return; }
     // 1) kılıçlar hızlanıp çarpışır  2) zarlar atılır  3) çarpanlar  4) beş karşılaştırma  5) sonuç
-    var sx = $('sx'); AU.play('tick'); sx.className = 'sx go';
+    var sx = $('sx'); AU.play('dtick'); sx.className = 'sx go';
     tm.push(setTimeout(function () { sx.className = 'sx go hit'; bs.classList.add('shake'); AU.play('click'); }, 480 / Math.min(sp, 1.5)));
     tm.push(setTimeout(function () { bs.classList.remove('shake'); roundRoll(0); }, 820 / Math.min(sp, 1.5)));
   };

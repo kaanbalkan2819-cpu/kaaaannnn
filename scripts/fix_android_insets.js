@@ -41,6 +41,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try { getBridge().getWebView().getSettings().setTextZoom(100); } catch (Exception e) { }   // V226: Samsung vb. telefonlarda yazi olcegi duzeni bozmasin
         final View content = findViewById(android.R.id.content);
         content.setBackgroundColor(0xFF05060D);
         ViewCompat.setOnApplyWindowInsetsListener(content, (v, insets) -> {

@@ -640,7 +640,7 @@
   }
 
   /* ---------- Kamera ve etkileşim ---------- */
-  function resize() { if (!renderer) return; var w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; _stW = w; _stH = h; renderer.setSize(w, h); bg199(); camera.aspect = w / h; camera.fov = w < h ? 52 : 40; camera.updateProjectionMatrix(); }
+  function resize() { if (!renderer) return; var w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; var ae226 = document.activeElement; if (ae226 && /INPUT|TEXTAREA/.test(ae226.tagName) && _stW && Math.abs(w - _stW) < 4 && h < _stH) return;   /* V226: sohbette klavye açılınca küre yeniden boyutlanıp uzaklaşmasın */ _stW = w; _stH = h; renderer.setSize(w, h); bg199(); camera.aspect = w / h; camera.fov = w < h ? 52 : 40; camera.updateProjectionMatrix(); }
   function rotateBy(dx, dy) { var k = 0.0042 * camZ / 3.4; globe.quaternion.premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(dy * k, dx * k, 0, 'XYZ'))); if (ringM) { ringRot += dx * k * 0.06; ringM.rotation.z = ringRot; } }   /* V210: zemin halkaları sürüklerken küreyle hafifçe döner (derinlik hissi) */
   /* V210: odaklanma artık süreye bağlı, yumuşak hızlanıp yavaşlayan (easeInOut) bir geçiş: eskiden ilk karede ani sıçrayıp sonda sürünüyordu.
      Savurma, yakınlaştırma ve odaklanma kare hızından bağımsız (120 Hz ekranda iki kat hızlı/uzun dönmez). */
@@ -655,18 +655,18 @@
     }
     else if (!down && (Math.abs(vel.x) > 0.05 || Math.abs(vel.y) > 0.05)) { var _f = dt * 60; rotateBy(vel.x * _f, vel.y * _f); var _d = Math.pow(0.93, _f); vel.x *= _d; vel.y *= _d; }
     if (introStart) { if (introP0 !== introStart) { introP0 = introStart; introP = 0; } if (!(baseJob || needPaint) || performance.now() - introStart > 1500) introP += Math.min(dt, 1 / 30) * 1000 / introDur; var _k = Math.max(0, Math.min(1, introP));   /* V215: yaklaşma kare süresine göre ilerler (yavaş karede sıçramaz) ve harita boyanması bitene kadar başlangıçta bekler */ if (introP0 !== introZ0) { introZ0 = introP0; introZ = zoomT; } introZ += (zoomT - introZ) * (1 - Math.exp(-Math.min(dt, 1 / 30) * 3)); camZ = introFrom + (introZ - introFrom) * (1 - Math.pow(1 - _k, 4));   /* V217: yaklaşma ortasında hedef yakınlık değişince (1,5 sn'deki Türkiye odağı) kamera sıçramaz, yumuşakça yeni hedefe kayar */ if (_k >= 1) { introStart = 0; window.__v30introEnd = performance.now(); } }   /* V215: yaklaşma bitiş anı (ön hazırlıklar buna göre bekler) */ else { var _zd = zoomT - camZ; camZ = Math.abs(_zd) < 1e-4 ? zoomT : camZ + _zd * (1 - Math.exp(-dt * 7)); }   /* V56: yeni oyunda küre uzaktan yaklaşır; V210: yaklaşma eğrisi daha yumuşak iniş (quart) */
-     camera.position.z = camZ * (window.innerWidth > window.innerHeight ? 0.7 : 1);   /* V57: yatayda küre daha da yakın (0.86 -> 0.70) */
+     camera.position.z = camZ * ((_stW ? _stW > _stH : window.innerWidth > window.innerHeight) ? 0.7 : 1);   /* V57: yatayda küre daha da yakın (0.86 -> 0.70) */
     // savaş paneli açıkken görüntüyü panelin dışındaki alana kaydır (telefonda yukarı, geniş ekranda sola)
     /* V212: panelin görünürlüğü (offsetWidth = zorunlu yerleşim hesabı) her karede değil, en çok 250 ms'de bir okunur; savaş paneli animasyonlarında kare başına yerleşim hesabı yapılmaz */
-    var _nw = performance.now(); if (_nw - _pnT > 250) { _pnT = _nw; var _pn = window.innerWidth > window.innerHeight && document.getElementById('panel'); _pnV = !!(_pn && _pn.offsetWidth > 0); }
+    var _nw = performance.now(); if (_nw - _pnT > 250) { _pnT = _nw; var _pn = (_stW ? _stW > _stH : window.innerWidth > window.innerHeight) && document.getElementById('panel'); _pnV = !!(_pn && _pn.offsetWidth > 0); }
     var _vt = (((typeof BSH !== 'undefined' && BSH && !window.v60Active) || _pnV) ? 1 : 0); vo += (_vt - vo) * (1 - Math.exp(-dt * 6)); if (Math.abs(_vt - vo) < 0.002) vo = _vt;   /* V210: kare hızından bağımsız */
     var w = _stW || (_stW = stage.clientWidth), h = _stH || (_stH = stage.clientHeight);   /* V205 */
     if (vo < 0.01) { if (camera.view && camera.view.enabled) camera.clearViewOffset(); }
-    else if (w && h) { var wide = window.innerWidth >= 900 || window.innerWidth > window.innerHeight; camera.setViewOffset(w, h, wide ? vo * (window.innerWidth > window.innerHeight && window.innerWidth < 900 ? -Math.min(205, w * 0.2) : 205) : 0, wide ? 0 : vo * h * .19, w, h); }
+    else if (w && h) { var wide = window.innerWidth >= 900 || (_stW ? _stW > _stH : window.innerWidth > window.innerHeight); camera.setViewOffset(w, h, wide ? vo * ((_stW ? _stW > _stH : window.innerWidth > window.innerHeight) && window.innerWidth < 900 ? -Math.min(205, w * 0.2) : 205) : 0, wide ? 0 : vo * h * .19, w, h); }
   }
   /* V212: hedefin ekrandaki dikey konumu. Eskiden her zaman 0.3 rad (~17°) güneye bakılıyordu: dikey telefonda alttaki panel için doğru,
      ama yatay ekranda ve savaş animasyonunda savaşan ülkeler ekranın üstüne, üst çubuğun altına kaçıyordu. */
-  function latOff(battle) { var portrait = window.innerWidth <= window.innerHeight; if (battle) return portrait ? 0.1 : 0.02; return portrait ? 0.3 : 0.1; }
+  function latOff(battle) { var portrait = (_stW ? _stW <= _stH : window.innerWidth <= window.innerHeight); if (battle) return portrait ? 0.1 : 0.02; return portrait ? 0.3 : 0.1; }
   function focusOn(c, instant, lo) {
     if (!c || !READY) return; var b = c.bb, lon = (b[0] + b[2]) / 2 * DEG, lat = (b[1] + b[3]) / 2 * DEG;
     var qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 2 - lon), qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), lat - (lo == null ? latOff((typeof BSH !== 'undefined') && BSH) : lo)), q = qx.multiply(qy);
@@ -813,7 +813,7 @@
       introDur = rm ? 1 : 3000; introFrom = rm ? zoomT : zoomT * 5.5; camZ = introFrom; introStart = performance.now();   /* V101: boş bekleme yok */
       if (G && G.ph === 'v7pick') { zoomT = 3.4; globe.quaternion.identity(); if (cMap.TUR) { focusOn(cMap.TUR, true); zoomT = 3.4; camZ = introFrom; } focusQ = null;   /* V213: yeni oyunda küre baştan Türkiye'ye bakar (eskiden sıfır konumdan yaklaşıp 1,5 sn sonra dönüyordu) */ setTimeout(warmHome, 200);   /* V158 */ setTimeout(function () { try { if (ON && G && G.ph === 'v7pick' && !G.sel && cMap.TUR) focusOn(cMap.TUR, false); } catch (e) { } }, rm ? 300 : 1500); }   /* önce dünya yerine oturur, sonra Türkiye */
       var cvs = renderer && renderer.domElement; if (!cvs) { try { stage.classList.remove('v91cover'); } catch (e) { } return; }
-      cvs.style.transition = 'none'; cvs.style.opacity = '0'; try { camera.position.z = camZ * (window.innerWidth > window.innerHeight ? 0.7 : 1); renderer.render(scene, camera); } catch (e) { } /* V150: tampon uzak kamerayla doldurulur; eski yakın kare solarak görünmez */ void cvs.offsetWidth;
+      cvs.style.transition = 'none'; cvs.style.opacity = '0'; try { camera.position.z = camZ * ((_stW ? _stW > _stH : window.innerWidth > window.innerHeight) ? 0.7 : 1); renderer.render(scene, camera); } catch (e) { } /* V150: tampon uzak kamerayla doldurulur; eski yakın kare solarak görünmez */ void cvs.offsetWidth;
       var _fi = function () { cvs.style.transition = 'opacity .45s ease-out'; cvs.style.opacity = '1'; }; var _fn = 0; (function _fw() { if (++_fn < 3 || ((baseJob || needPaint) && introStart && performance.now() - introStart < 1500)) return requestAnimationFrame(_fw); _fi(); })();   /* V217: yeni oyunda harita boyanırken (Yeni Ülke Seç / Tekrar Başla) küre gizli bekler, boyama bitince solarak gelir */   /* V217: ilk ağır kareler (doku yükleme) bitince solarak belirir; eskiden takılan karelerde .25 sn'lik geçiş 2-3 karede bitip küre birden beliriyordu */ try { stage.classList.add('v95out'); } catch (e) { }   /* V101: küre anında görünür */
       setTimeout(function () { try { stage.classList.remove('v91cover'); stage.classList.remove('v95out'); } catch (e) { } }, 900);
     } catch (e) { try { stage.classList.remove('v91cover'); } catch (x) { } }

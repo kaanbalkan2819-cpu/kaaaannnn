@@ -59,10 +59,11 @@
       p.sort(function (a, b) { return dist(a, near) - dist(b, near); }); return p[0];
     },
     pickPair: function (t) {   // {hc, gc}: kurucu ülkesi + ona makul uzaklıkta konuk ülkesi
+      for (var tr = 0; tr < 40; tr++) { var h0 = this.pick(t, tr % 2), g0 = h0 && this.pickNear(t, 1, [h0], h0); if (h0 && g0 && (!window.v221Hops || v221Hops(h0, g0) <= 6)) return { hc: h0, gc: g0 }; }   // V226: adalar gibi ulaşılamayan eşleşmeler elenir
       var h = this.pick(t, 0); if (!h) return { hc: null, gc: this.pick(t, 1) };
       return { hc: h, gc: this.pickNear(t, 1, [h], h) };
     },
-    dist: dist,
+    dist: dist, power: score,   // V226
     randomTier: function () { return Math.floor(Math.random() * 4); }
   };
 })();

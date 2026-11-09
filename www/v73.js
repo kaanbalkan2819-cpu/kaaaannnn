@@ -8,11 +8,10 @@
   function T(tr, en) { return (typeof L !== 'undefined' && L === 'en') ? en : tr; }
   function nm(e) { return (M[e] && M[e].name) || e; }
   function tn() { return (G && G.T && G.T.turn) || 0; }
-  /* V160: tur değişince yorgunluk SIFIRLANMAZ; her yeni turda (sen veya YZ turu bitince) herkesin yorgunluğu 1 seviye düşer (en çok 4 seviyeden). */
+  /* V226: tüm modlarda yeni tur başlayınca (zar yeniden atılınca) herkesin savaş yorgunluğu tamamen sıfırlanır. */
   function decay() {
     var f = G.fat; if (!f) return false;
-    var d = Math.max(1, tn() - (f.t | 0)), k, v, ns = {};
-    for (k in f.s) { v = Math.min(FAT_MAX, +f.s[k] || 0) - d; if (v > 0) ns[k] = v; }
+    var ns = {};
     G.fat = { t: tn(), s: ns }; return true;
   }
   function fd() { if (!G.fat) G.fat = { t: tn(), s: {} }; else if (G.fat.t !== tn()) decay(); return G.fat; }
@@ -46,8 +45,8 @@
       injectCss();
       if (!fatEl) { fatEl = document.createElement('div'); fatEl.className = 'wfat'; fatEl.setAttribute('role', 'status'); document.body.appendChild(fatEl); }
       var pips = ''; for (var i = 0; i < FAT_MAX; i++) pips += '<i' + (i < m.lvl ? ' class="f"' : '') + '></i>';
-      fatEl.innerHTML = '<div class="wf-i">😮‍💨</div><div class="wf-b"><div class="wf-t">' + T('Savaş yorgunluğu', 'War fatigue') + (m.lvl >= FAT_MAX ? ' · ' + T('en yüksek', 'max') : '') + '</div>'
-        + '<div class="wf-d">' + T('Sonraki savaşlarında değerlerin <b>−%' + m.pct + '</b> (her tur 1 seviye düşer)', 'Your stats are <b>−' + m.pct + '%</b> in further battles (drops 1 level per turn)') + '</div><div class="wf-p">' + pips + '</div></div>';
+      fatEl.innerHTML = '<div class="wf-i"><img src="assets/icons/fatigue226.webp" alt="" class="wf-k"></div><div class="wf-b"><div class="wf-t">' + T('Savaş yorgunluğu', 'War fatigue') + (m.lvl >= FAT_MAX ? ' · ' + T('en yüksek', 'max') : '') + '</div>'
+        + '<div class="wf-d">' + T('Sonraki savaşlarında değerlerin <b>−%' + m.pct + '</b> (yeni turda sıfırlanır)', 'Your stats are <b>−' + m.pct + '%</b> in further battles (resets next turn)') + '</div><div class="wf-p">' + pips + '</div></div>';
       void fatEl.offsetWidth; fatEl.classList.add('on');
       clearTimeout(fatT); fatT = setTimeout(function () { if (fatEl) fatEl.classList.remove('on'); }, 3600);
     } catch (e) { }
@@ -66,7 +65,7 @@
       injectCss();
       if (!fatEl) { fatEl = document.createElement('div'); fatEl.className = 'wfat'; fatEl.setAttribute('role', 'status'); document.body.appendChild(fatEl); }
       var pips = ''; for (var i = 0; i < FAT_MAX; i++) pips += '<i' + (i < lv ? ' class="f"' : '') + '></i>';
-      fatEl.innerHTML = '<div class="wf-i">😮‍💨</div><div class="wf-b"><div class="wf-t">' + T('Savaş yorgunluğu 1 seviye düştü', 'War fatigue dropped one level') + '</div>'
+      fatEl.innerHTML = '<div class="wf-i"><img src="assets/icons/fatigue226.webp" alt="" class="wf-k"></div><div class="wf-b"><div class="wf-t">' + T('Savaş yorgunluğu 1 seviye düştü', 'War fatigue dropped one level') + '</div>'
         + '<div class="wf-d">' + T('Değerlerin hâlâ <b>−%' + Math.round(FAT_STEP * lv * 100) + '</b>', 'Your stats are still <b>−' + Math.round(FAT_STEP * lv * 100) + '%</b>') + '</div><div class="wf-p">' + pips + '</div></div>';
       void fatEl.offsetWidth; fatEl.classList.add('on');
       clearTimeout(fatT); fatT = setTimeout(function () { if (fatEl) fatEl.classList.remove('on'); }, 3600);
@@ -94,7 +93,7 @@
       var e = G.owner[G.sel], lv = Math.min(FAT_MAX, (G.fat.s[e] || 0)), el = document.getElementById('panel');
       if (typeof e !== 'string' || e === G.pl || !lv || !el || el.style.display === 'none') return r;
       var d = document.createElement('div'); d.id = 'wfatE'; d.style.cssText = 'margin:6px 0;padding:6px 10px;border:1px solid rgba(255,150,90,.45);border-radius:10px;background:rgba(80,40,20,.35);color:#ffd2b0;font-size:12px';
-      d.innerHTML = '😮‍💨 ' + T(nm(e) + ' savaş yorgunu: değerleri <b>−%' + Math.round(FAT_STEP * lv * 100) + '</b> (her tur 1 seviye düşer)', nm(e) + ' is war-weary: stats <b>−' + Math.round(FAT_STEP * lv * 100) + '%</b> (drops 1 level per turn)');
+      d.innerHTML = '<img src="assets/icons/fatigue226.webp" alt="" style="width:22px;height:22px;vertical-align:-6px;margin-right:4px">' + T(nm(e) + ' savaş yorgunu: değerleri <b>−%' + Math.round(FAT_STEP * lv * 100) + '</b> (yeni turda sıfırlanır)', nm(e) + ' is war-weary: stats <b>−' + Math.round(FAT_STEP * lv * 100) + '%</b> (resets next turn)');
       var f = el.firstElementChild; if (f && f.nextSibling) el.insertBefore(d, f.nextSibling); else el.appendChild(d);
     } catch (x) { }
     return r;

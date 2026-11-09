@@ -130,7 +130,7 @@
     try {
       if (!is5() || !G.T || G.ph !== 'act' || busy() || G.busy) return;
       var i = G.T.e137; if (!i || i.shown) return;
-      i.shown = 1; var m = turnMsg(i); if (m) toast(m);
+      i.shown = 1; var m = turnMsg(i); if (m && !(G.mp && G.mp.rank)) toast(m);   /* V226: derecelide ekonomi yazısı yok */
     } catch (e) { }
   }
   function installTurn() {

@@ -23,7 +23,7 @@
     sahra: ['Sahra Mührü', 'Sahara Seal', 'Çöl Tilkisi', 'Fennec Fox', 'Kuzey Afrika', 'North Africa', 'MAR DZA TUN LBY MRT ESH'],
     and: ['And Mührü', 'Andes Seal', 'Kondor', 'Condor', 'Güney Konisi', 'Southern Cone', 'CHL ARG URY PRY BOL']
   };
-  var GIDS = Object.keys(D), KEYC = 'wc_seals219', TAB = 'gold';
+  var GIDS = Object.keys(D), KEYC = 'wc_seals219', TAB = 'gold', PG = 0, PER = 20, PGH = '';
   function jget(k) { try { var a = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
   function gotG() { return jget('wc_gseal218'); }
   function gotC() { return jget(KEYC); }                    /* kalıcı: fethedilmiş ülkeler */
@@ -63,6 +63,8 @@
   }
   function infoNormal(c) {
     var s = S(), a = animalOf(c), nmA = s && s.A[a] ? X(s.A[a][0], s.A[a][1]) : a, ok = gotC().indexOf(c) >= 0, line = s && s.countryInfo ? s.countryInfo(c) : '';
+    /* V226: açılmamış mühürde açıklama verilmez */
+    if (!ok) return '<i class="lk" style="background-image:url(' + surlC(c) + ')"></i><div><b>' + esc(cname(c)) + '</b><small>🔒 ' + X('KİLİTLİ · bu ülkeyi fethet', 'LOCKED · conquer this country') + '</small></div>';
     return '<i class="' + (ok ? '' : 'lk') + '" style="background-image:url(' + surlC(c) + ')"></i><div><b>' + esc(cname(c)) + ' <em>· ' + esc(nmA) + '</em></b>' +
       '<small>' + (ok ? '✔ ' + X('AÇILDI', 'UNLOCKED') : '🔒 ' + X('KİLİTLİ · bu ülkeyi fethet', 'LOCKED · conquer this country')) + '</small>' +
       '<span>' + esc(line) + '</span></div>';
@@ -82,22 +84,25 @@
     var g = gotC(), list = allC(), h = '';
     /* açılanlar önde, sonra ülke adına göre */
     list.sort(function (x, y) { var a = g.indexOf(x) >= 0 ? 0 : 1, b = g.indexOf(y) >= 0 ? 0 : 1; return a - b || cname(x).localeCompare(cname(y), en() ? 'en' : 'tr'); });
-    list.forEach(function (c, i) {
+    /* V226: 175 mühür aynı anda çizilince sayfa kasıyordu: sayfa sayfa gösterilir */
+    var pages = Math.max(1, Math.ceil(list.length / PER)); if (PG >= pages) PG = pages - 1; if (PG < 0) PG = 0;
+    list.slice(PG * PER, (PG + 1) * PER).forEach(function (c) {
       var ok = g.indexOf(c) >= 0;
-      h += '<button type="button" class="col219i n' + (ok ? ' ok' : '') + '" style="animation-delay:' + Math.min(.6, i * .006).toFixed(3) + 's" onclick="GS219.info(\'n\',\'' + c + '\',this)">' +
-        '<i style="background-image:url(' + surlC(c) + ')"></i><b>' + esc(cname(c)) + '</b></button>';
+      h += '<button type="button" class="col219i n' + (ok ? ' ok' : '') + '" onclick="GS219.info(\'n\',\'' + c + '\',this)">' +
+        '<i style="background-image:url(' + surlC(c) + ')"></i><b>' + esc(ok ? cname(c) : cname(c)) + '</b></button>';
     });
-    return cnt(nNormal(), list.length, X('ülke mührü açıldı', 'country seals unlocked')) + (window.WCAch ? WCAch.html() : '') + '<div class="grid219 nn">' + h + '</div>';   /* V223: başarımlar */
+    PGH = '<div class="pg226"><button type="button" ' + (PG <= 0 ? 'disabled' : '') + ' onclick="GS219.pg(-1)" aria-label="' + X('Önceki', 'Previous') + '">‹</button><span>' + X('Sayfa ', 'Page ') + (PG + 1) + ' / ' + pages + '</span><button type="button" ' + (PG >= pages - 1 ? 'disabled' : '') + ' onclick="GS219.pg(1)" aria-label="' + X('Sonraki', 'Next') + '">›</button></div>';
+    return cnt(nNormal(), list.length, X('ülke mührü açıldı', 'country seals unlocked')) + (window.WCAch && PG === 0 ? WCAch.html() : '') + '<div class="grid219 nn">' + h + '</div>';   /* V223: başarımlar */
   }
   function page() {
     var hint = TAB === 'gold' ? X('Bir mühre dokun: bölgesi, açma koşulu ve avantajı. Bir bölgenin tüm ülkelerini aynı oyunda fethedersen mühür açılır ve canlı rengine döner.',
       'Tap a seal for its region, unlock rule and bonus. Conquer a whole region in one game to unlock it; it turns to full color.')
       : X('Her ülkenin kendi mührü var; ülkeyi fethettiğinde mührü koleksiyona kalıcı olarak girer. Mühre dokun: açıklaması.',         'Conquering a country adds its animal seal to the collection for good. Tap a seal to see which countries grant it.');
-    return '<div class="wb-wrap still"><div class="wb-panel wb-pause wc141p col219"><div class="c141h"><span class="p">⚜</span><h3>' + X('MÜHÜR KOLEKSİYONU', 'SEAL COLLECTION') + '</h3></div>' +
+    return '<div class="wb-wrap still"><div class="wb-panel wb-pause wc141p col219"><button type="button" class="x226" onclick="GS219.close()" aria-label="' + X('Kapat', 'Close') + '">✕</button><div class="c141h"><span class="p">⚜</span><h3>' + X('MÜHÜR KOLEKSİYONU', 'SEAL COLLECTION') + '</h3></div>' +
       '<div class="tabs219"><button type="button" class="' + (TAB === 'gold' ? 'on' : '') + '" onclick="GS219.tab(\'gold\')">' + X('Altın Mühürler', 'Golden Seals') + ' <i>' + nGold() + '/' + GIDS.length + '</i></button>' +
       '<button type="button" class="' + (TAB === 'norm' ? 'on' : '') + '" onclick="GS219.tab(\'norm\')">' + X('Mühürler', 'Seals') + ' <i>' + nNormal() + '/' + nAll() + '</i></button></div>' +
       '<div class="body219">' + (TAB === 'gold' ? gridGold() : gridNormal()) + '</div>' +
-      '<div class="inf219" id="inf219">' + hint + '</div>' +
+      (TAB === 'norm' ? '<div id="pgw226">' + PGH + '</div>' : '') + '<div class="inf219" id="inf219">' + hint + '</div>' +
       '<div class="c141g"><button type="button" class="c141b pri" onclick="GS219.close()"><span class="ic">‹</span><span class="lb">' + X('Geri', 'Back') + '</span></button></div></div></div>';
   }
   function render() { var bx = document.getElementById('box'); if (bx) { bx.innerHTML = page(); try { if (window.v156Decorate) v156Decorate(); } catch (e) { } } }
@@ -111,6 +116,7 @@
       m.style.display = 'flex'; m.onclick = null;
     },
     tab: function (t) { TAB = t; render(); },
+    pg: function (d) { PG += d; var b = document.querySelector('.body219'); if (!b) return render(); b.innerHTML = gridNormal(); b.scrollTop = 0; var pw = document.getElementById('pgw226'); if (pw) pw.innerHTML = PGH; var w = document.getElementById('inf219'); if (w) w.innerHTML = X('Bir mühre dokun.', 'Tap a seal.'); try { if (window.AU) AU.play('tick'); } catch (e) { } },
     info: function (k, id, el) {
       var w = document.getElementById('inf219'); if (w) w.innerHTML = k === 'g' ? infoGold(id) : infoNormal(id);
       Array.prototype.forEach.call(document.querySelectorAll('.col219i'), function (b) { b.classList.toggle('sel', b === el); });
@@ -119,7 +125,7 @@
     close: function () { try { closeMod(); } catch (e) { } try { if (!window.G) menu(); } catch (e) { } }
   };
   /* ana menüye "MÜHÜRLER" düğmesi (Ayarlar'ın üstünde), altında açılan sayıları */
-  setInterval(function () {
+  function addMenuBtn() {
     try {
       var w = document.getElementById('wcm'); if (!w || !document.body.classList.contains('wcm-on')) return;
       var mn = w.querySelector('.menu'); if (!mn) return;
@@ -130,7 +136,10 @@
       b.innerHTML = X('MÜHÜRLER', 'SEALS') + '<small class="sub218">' + txt + '</small>';
       mn.insertBefore(b, set);
     } catch (e) { }
-  }, 400);
+  }
+  setInterval(addMenuBtn, 400);
+  /* V226: düğme menü kurulur kurulmaz eklensin; menü geç dolmuş gibi görünmesin */
+  try { new MutationObserver(addMenuBtn).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['class'], childList: false }); } catch (e) { }
 })();
 /* V220: menü HTML'i yeniden kurulunca (alt menüden geri dönüş) düğmenin tıklaması kaybolmasın: belge düzeyinde dinlenir */
 document.addEventListener('click', function (e) { try { var b = e.target && e.target.closest && e.target.closest('#wcm .mb219'); if (b) { e.stopPropagation(); e.preventDefault(); GS219.open(); } } catch (x) { } }, true);

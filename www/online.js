@@ -161,6 +161,7 @@
     if (!m || !m.t) return;
     if (m.t === 'hello') return;
     if (m.t === 'chat') { try { if (window.WCChat) WCChat.onMsg(m); } catch (e) { } return; }
+    if (m.t === 'skip226') { try { if (window.WC226) WC226.peerSkip(); } catch (e) { } return; }   // V226: iki taraf da geç derse
     if (m.t === 'ev') { try { if (window.WCSpec) WCSpec.onEv(m); } catch (e) { } return; }   // V104: sıradaki oyuncunun ekranını izleme
     if (m.t === 'hostpick') {
       ON.hostPick = m.c; if (m.coop) ON.coop = true;

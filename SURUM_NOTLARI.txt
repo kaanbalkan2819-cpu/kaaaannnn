@@ -1167,3 +1167,31 @@ V222 ek (ikinci Figma hesabı, dosya 4KKFs7RTdjWBnlHa2wHz0a):
 - Haritadaki savaş animasyonları büyütüldü (SC 0.06 → 0.085, en küçük ölçek sınırı yükseltildi).
 - Tur başındaki "bakım / enflasyon" bilgisi kaldırıldı; yardım metnindeki ilgili cümle sadeleştirildi.
 - Sağ kare menü: Diplomasi, Kalkınma ve Atom Bombası düğmeleri Figma ile üretilen kareyi dolduran görseller (dip223/dev223/nukebtn223.jpg).
+
+=================== V225 ===================
+V225 — (masaüstü Chrome, telefon ve yatay görünüm ile kontrol edildi)
+ - Atom bombası: görsel + patlama efekti yerine savaş animasyonlarıyla aynı 3B sistemde tam sahne (v225.js, v60.js v60Nuke): hedef ülkede şehir ve savunan birlikler, kırmızı hedef halkası, uçaksavar ateşi ve flak, dört motorlu bombardıman uçağı + 2 eskort, düşen bomba, havada patlama, şok dalgasıyla yıkılan evler ve savrulan tank/askerler, gerçek 3B mantar bulutu (ısı rampalı shader), toz eteği, kavrulmuş toprak. Sahne dokunarak geçilebilir.
+ - Eski 2B görselli efekt yalnızca 3B küre hiç açılamazsa kullanılır; süren savaş animasyonu varsa bomba onun bitmesini bekler (v222.js).
+ - İspanya bayrağı: armasız, soluk sürüm yerine doğru renkler ve armalı resmî bayrak (flags/ES.svg, flags.js).
+
+=================== V226 ===================
+V226 - Uygulama simgesi: telefon ana ekranindaki simge artik ana menudeki arma (assets/menu/emblem.webp), koyu zemin uzerinde; tum mipmap, yuvarlak ve uyarlanabilir boyutlar yenilendi (resources/android).
+ - Acilis ekranlari (tum yatay/dikey boyutlar), Play Store 512 simgesi ve ozellik grafigi de ayni armaya cevrildi.
+
+=================== V227 ===================
+V227 — Ses yenilemesi (scripts/gen_audio.html + gen_audio.js ile üretildi; üçüncü taraf kaydı yok; KULAKLA DİNLENMEDİ):
+ - Ana menü müziği: özgün beste, re minör, 72 BPM, 80 sn kesintisiz döngü (lavta, yaylılar, koro, boru, flüt, timpani, savaş davulu) — www/assets/audio/menu.ogg.
+ - Efektler (www/assets/audio/sfx/, Ogg/Opus): tıklama, bildirim, keşif, altın, anlaşma, zafer, yenilgi, fetih, saldırı borusu.
+ - Savaş sesleri artık rastgele zamanlayıcıyla değil, animasyondaki gerçek olaylara bağlı (wc_audio.js hookFX): tank topu, motor ve palet, tüfek, füze, jet geçişi, gemi düdüğü, dalga, top, patlama, isabet, su patlaması, yıkılan bina, kılıç çarpışması. Animasyon geçilince sesler söner.
+ - Atom bombası: siren, bombardıman uçağı, uçaksavar, flak, düşen bomba ıslığı, 12 sn patlama (v225.js).
+ - Zar sesi ve zar akışındaki tık değişmedi (wc_sfx_data.js artık yalnızca zar; dice3d/v7/app 'dtick'). Dosya yüklenemezse eski sentez sesler devreye girer.
+
+=================== V228 (APK adı: v226) ===================
+ - Samsung S25 FE ve benzeri: telefonun yazı ölçeği artık oyun düzenini büyütmüyor (WebView setTextZoom 100, fix_android_insets.js); menü öğeleri üst üste binmez (v226.css).
+ - Ana menü küresi: Figma ile üretilen altın varak kara + koyu okyanus dokuları, oyunun gerçek sınırlarıyla pişirildi (assets/menu/globe226.webp).
+ - Mühürler: sayfa sayfa (20'şer), animasyon ve ağır süzgeçler kaldırıldı; açıklama alanı kaydırılabilir; açılmamış mühürde açıklama yok; sağ üstte kapatma düğmesi, Geri her zaman görünür.
+ - Dereceli: hamle süresi 30 sn; rakip uzaklığı en çok 6, ortalama 4 ülke; güç farkı en az olan ülkeler eşleşir; YZ rakip adları gerçekçi; ekonomi/enflasyon yazısı yok.
+ - Dereceli YZ rakibin turu geçilemez, insan temposunda oynar; dünya YZ turları iki taraf da Geç'e basınca geçilir (v226.js). Sohbet düğmesi yeni simge; klavye açılınca harita uzaklaşmaz.
+ - Savaş yorgunluğu tüm modlarda yeni turda sıfırlanır; simgesi Figma ile üretilen yorgun şövalye.
+ - Açılış: menü kayıtlı anlık görüntüden betikler yüklenmeden görünür, stiller önce yüklenir. "Sefer Başlıyor" altında yeni dönen altın küre animasyonu.
+ - Uçaklar ve roket atar aracı küçültüldü.

@@ -96,7 +96,7 @@
       if (!is5() || !G.T || G.ph !== 'act' || BSH) return;
       if (G.T.eco && !G.T.ecoShown) {
         G.T.ecoShown = 1;
-        toast(G.T.eco.m ? '💰 ' + X('Ekonomi: +1 ekstra hamle', 'Economy: +1 bonus move') : '💰 ' + X('Ekonomi geliri: +', 'Economy income: +') + G.T.eco.inc);
+        if (!(G.mp && G.mp.rank)) toast(G.T.eco.m ? '💰 ' + X('Ekonomi: +1 ekstra hamle', 'Economy: +1 bonus move') : '💰 ' + X('Ekonomi geliri: +', 'Economy income: +') + G.T.eco.inc);
       } else if (false) {
         G.T.atkShown = 1; toast('⚔ ' + X('Bu tur saldırı hakkın bitti; kalan hamlelerle keşif/diplomasi yapabilirsin', 'Attack used for this turn; spend remaining moves on scouting/diplomacy'));
       }

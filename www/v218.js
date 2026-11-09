@@ -34,6 +34,7 @@
   }
   /* antika atlas dokusu: koyu deniz, parşömen kara, ince sınırlar, enlem-boylam ağı, mürekkep lekesi dokusu */
   function buildTex() {
+    if (window.__tex226) return window.__tex226;   /* V226: Figma dokulariyla onceden pisirilmis antika atlas */
     var topo = window.Datamap && Datamap.prototype && Datamap.prototype.worldTopo; if (!topo || !window.topojson || !window.d3 || !d3.geo) return null;
     var c = document.createElement('canvas'); c.width = TW; c.height = TH; var x = c.getContext('2d', { willReadFrequently: true });
     var pr = d3.geo.equirectangular().scale(TW / (2 * Math.PI)).translate([TW / 2, TH / 2]).precision(.5), path = d3.geo.path().projection(pr).context(x);
@@ -121,7 +122,7 @@
     im.onload = function () {
       try { if ((im.naturalWidth || IW) === IW && (im.naturalHeight || IH) === IH) photo = prepPhoto(im); else window.__glb218err = 'size ' + im.naturalWidth + 'x' + im.naturalHeight; } catch (e) { photo = null; window.__glb218err = 'photo ' + e; }
       /* doku kurulumu ağır (~0,1-0,3 sn): ayrı karede */
-      setTimeout(function () { try { if (photo) tex = buildTex(); } catch (e) { tex = null; window.__glb218err = String(e); } busy = false; kick(); }, 30);
+      (function w226(n) { if (!window.__tex226 && !window.__tex226f && n < 80) return setTimeout(function () { w226(n + 1); }, 50); try { if (photo) tex = buildTex(); } catch (e) { tex = null; window.__glb218err = String(e); } busy = false; kick(); })(0);
     };
     im.onerror = function () { busy = false; window.__glb218err = 'img ' + url; }; im.src = url; window.__glb218url = url;
   }

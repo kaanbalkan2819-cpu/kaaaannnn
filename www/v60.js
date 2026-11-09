@@ -27,7 +27,7 @@
     if (loadP) return loadP;
     loadP = new Promise(function (ok, no) {
       var s = document.createElement('script'); s.src = 'wc_battle_fx.js';
-      s.onload = ok; s.onerror = function () { loadP = null; no(new Error('wc_battle_fx.js')); }; document.head.appendChild(s);
+      s.onload = function () { try { if (window.AU && AU.hookFX) AU.hookFX(); } catch (e) { } ok(); }; s.onerror = function () { loadP = null; no(new Error('wc_battle_fx.js')); }; document.head.appendChild(s);
     });
     return loadP;
   }
@@ -122,6 +122,7 @@
   document.addEventListener('pointerup', function (e) {
     var d = tapD; tapD = null; if (!d || !play || Date.now() - d.t > 450) return;
     try { if (e.target && e.target.closest && e.target.closest('button,a,input,select,textarea,#mod,#hud,.wb')) return; } catch (x) { }
+    try { if (window.WC226 && WC226.noTap()) return; } catch (x) { }   /* V226: derecelide YZ/rakip turu dokunarak geçilmez */
     finish();   // V111: dokunarak geç
   }, true);
 
@@ -445,7 +446,7 @@
       var kind = pickKind(), air = false;
       if (kind === 'air') {   // V124: HAVA SALDIRISI — 2 savaş uçağı hedefin üstünden alçalıp bomba bırakır
         var IA = pickImpacts(a, pl.fr, pl.sc, tg, 4, 0, 5.6, 3.6, 10), tosA = IA.pts.map(function (q) { return up(q, .15); });
-        var dA = f.planeAttack(fxo({ from: V(0, 0, -5), to: tosA[0], tos: tosA, color: o.color, scale: 1.2, planes: 2, bombs: 2, dud: !win, blast: win ? 1.7 : 1.2 }));
+        var dA = f.planeAttack(fxo({ from: V(0, 0, -5), to: tosA[0], tos: tosA, color: o.color, scale: .92, planes: 2, bombs: 2, dud: !win, blast: win ? 1.7 : 1.2 }));
         dur = dA && dA.duration || 9; air = true;
       } else if (kind === 'twoTank') {   // V124: iki tank
         var T1 = pickImpacts(a, pl.fr, pl.sc, tg, 2, -1.4, 5.6, 3.6, 10), T2 = pickImpacts(a, pl.fr, pl.sc, tg, 2, 1.4, 5.4, 3.6, 10);
@@ -516,7 +517,7 @@
     var I = pickImpacts(a, fr, sc, tg, 3, 0, lc, Math.max(2, lc - 6), lc + 6), tos = I.pts.map(function (q) { return up(q, .15); });
     var air = false, dur;
     if (o.land && (Math.random() < .45 || (window.__air214 | 0) >= 2)) { window.__air214 = 0;   // V214: şans sayacı; V124: yedek sahnede de bazen uçaklar
-      var dA = f.planeAttack(fxo({ from: V(0, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2], tos[0]], color: o.color, scale: 1.2, planes: 2, bombs: 2, dud: !win, blast: win ? 1.9 : 1.3 }));
+      var dA = f.planeAttack(fxo({ from: V(0, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2], tos[0]], color: o.color, scale: .92, planes: 2, bombs: 2, dud: !win, blast: win ? 1.9 : 1.3 }));
       dur = dA && dA.duration || 9; air = true;
     } else {
       var d1 = f.tankAttack(fxo({ from: V(-1.3, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2]], color: o.color, scale: 1.15 * tk, shots: 3, dud: !win, blast: win ? 1.9 : 1.3 }));
@@ -586,7 +587,7 @@
     if (!f.root.parent) a.globe().add(f.root);
     f.root.scale.setScalar(sc); f.root.position.copy(P); f.root.visible = true; f.clear(); f.timeScale = TS; fitProj(a, f, tg, sc);   // V91
     var win = !!r.win;
-    var d1 = f.missileAttack(fxo({ from: { x: 0, y: 0, z: -.9 }, to: cen, tos: tos, color: o.color, scale: 1.15, missiles: 6, dud: !win, blast: win ? 1.4 : 1, gap: .6 }));
+    var d1 = f.missileAttack(fxo({ from: { x: 0, y: 0, z: -.9 }, to: cen, tos: tos, color: o.color, scale: .8, missiles: 6, dud: !win, blast: win ? 1.4 : 1, gap: .6 }));
     return { fx: f, dir: P.clone(), sea: false, ids: o.ids, base: sc, cur: sc, fixed: true, t0: f.time, dur: (d1 && d1.duration || 12) + .6, fire: true, zr: Math.min(5.8, Math.max(1.95, 1.2 + dt * 3)), focus: MIDPT ? P.clone() : P.clone().add(vt).normalize() };
   }
   /* V97: kamera uzaklığı sahne boyutuna göre — sahnenin uzunluğu dar ekran kenarının ~%55'ini kaplasın. Eskiden en az 3.0 uzaktı; modeller (~0.15 birim) birkaç piksel kalıp animasyon "çalışmıyor" gibi görünüyordu. */
@@ -642,6 +643,33 @@
     var pl0 = play, tw = performance.now();   // V100: ilk saldırıda shader derlemesi ana iş parçacığını dondurabilir; kare hiç çizilmediyse 15 sn'ye kadar bekle
     (function chk() { if (play !== pl0) return; if (pl0.frames > 0) return; if (performance.now() - tw > 15000) { finish(); return; } setTimeout(chk, 1000); })();   // karelerin hiç ilerlemediği durumda takılmaz
   }
+
+  /* dışa açık: hedef ülkenin üstünde atom bombası sahnesi. done() sahne bitince (veya geçilince) çağrılır. false → 3B yok (eski 2B efekt kullanılır) */
+  window.v60Nuke = function (tg, done) {
+    var a = A(); if (bad || !a || !a.ready() || !window.WCBattleFX || !window.WCNukeScene || play) return false;
+    try {
+      var T = a.THREE(), lt = WCNukeScene.center(a, tg) || llOf(a, tg); if (!lt) return false;
+      clearScenes(); var f = ensureFx(), P = a.sph(lt[0], lt[1], 1).normalize();
+      var fr = frameAt(a, P, new T.Vector3(0, 1, 0));
+      var rad = extRad(a, tg), sc = Math.max(SC, Math.min(SC * 1.6, rad / 5.5));
+      f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(fr.x, P, fr.z));
+      if (!f.root.parent) a.globe().add(f.root);
+      f.root.scale.setScalar(sc); f.root.position.copy(P); f.root.visible = true; f.clear(); f.timeScale = 1; f.projK = 1;
+      var dur = WCNukeScene.play(a, f, T, { tg: tg, fr: fr, P: P, sc: sc, rad: rad });   /* V225: v225.js */
+      var s = { fx: f, dir: P.clone(), sea: false, ids: [tg], base: sc, cur: sc, fixed: true, t0: f.time, dur: dur, fire: true };
+      play = { ids: [tg], tg: tg, scenes: [s], t0: s.t0, cnt: null };
+      /* V225: kamera bulutun tamamını (genişlik ~10, yükseklik ~14 birim) görecek kadar uzakta (yerel genişlik ~7, yükseklik ~10) */
+      var cam = a.camera(), tn = 2 * Math.tan(cam.fov * Math.PI / 360), asp = cam.aspect || 1, zr = Math.max(1.75, 1 + 1.2 * Math.max(7.4 * sc / (tn * Math.min(1, asp)), 10.5 * sc / tn));
+      var lon = Math.atan2(-P.z, P.x) / DEG, lat = Math.asin(Math.max(-1, Math.min(1, P.y))) / DEG;
+      a.lift(play.ids); a.focusLL(lon, Math.min(80, lat + 12), window.innerWidth > window.innerHeight ? zr / 0.7 : zr);
+      document.body.appendChild(mkShield());
+      try { if (window.WCSfx) WCSfx.animStart('nuke'); } catch (xs) { }
+      var pl0 = play;
+      (function wt() { if (play === pl0) { setTimeout(wt, 200); return; } try { f.timeScale = TS; } catch (e) { } if (done) done(); })();
+      return true;
+    } catch (x) { try { console.error('v60Nuke', x); } catch (y) { } try { finish(); } catch (y) { } return false; }
+  };
+  window.v60Load = function () { try { return loadFx(); } catch (e) { return null; } };
 
   /* ---------- savaş ekranına bağlantı ---------- */
   // V63: savaş paneli (zar, karşılaştırma) açıkken ve animasyon yokken küre dört karede bir çizilir; zar/yazılar akıcı kalsın

@@ -21,6 +21,7 @@
     return false;
   }
   function doSkip(all) {
+    try { if (window.WC226 && WC226.mode() === 'both') { WC226.press(); return; } } catch (e) { }   /* V226 */
     try {
       V20.skip(all);
       if (aiBattleOpen()) skipBattle();
@@ -55,6 +56,7 @@
       var rollOpen = !!(mdd && mdd.style.display === 'flex' && bxx && bxx.querySelector('#v20d'));
       var bshOn = typeof BSH !== 'undefined' && BSH;
       var show = aiPhase() && !decisionOpen() && (!!document.getElementById('ai20') || rollOpen || (bshOn && !!window.__v213aa) || (V20.skipping && V20.skipping() && !bshOn));
+      try { if (window.WC226) { var md = WC226.mode(); if (md === 'hide') show = false; else if (WC226.spectating()) show = true; } } catch (e) { }   /* V226 */
       btn.classList.toggle('on', show);
       /* tur atlanırken YZ↔YZ savaş sonucu kendiliğinden kapanır */
       if (show && V20.skipping && V20.skipping() && aiBattleOpen()) skipBattle();

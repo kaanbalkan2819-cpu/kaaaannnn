@@ -234,10 +234,10 @@ function showBattle(r,p,e,tg,mv,att){var done=0,ph=0,tm=[],sp=SET.rm?0:SET.spd,S
  bs.innerHTML=h+'</div><div class="fin" id="fn"></div>';bs.style.display='block';bs.scrollTop=0;paint();fitBattle(tg,att);
  function rolled(){if(ph>0)return;ph=1;setDie3('da',r.ra);setDie3('db',r.rd);$('da').classList.toggle('hi',r.ra>r.rd);$('db').classList.toggle('hi',r.rd>r.ra);
   $('mu').innerHTML=r.diff?t('hi')+'<br><b>'+(r.ra>r.rd?t('A'):t('D'))+' ×'+r.mult.toFixed(2)+'</b>':t('eqd');$('ba').innerHTML=bonus(r,1);$('bb').innerHTML=bonus(r,0);
-  $('pre').innerHTML='<button class="big pri" id="go">⚔ '+t('startB')+'</button>';$('go').onclick=function(){go()};AU.play('tick')}
+  $('pre').innerHTML='<button class="big pri" id="go">⚔ '+t('startB')+'</button>';$('go').onclick=function(){go()};AU.play('dtick')}
  function row(i,snd){var x=r.rows[i],el=$('r'+i),tot=x.a+x.d||1;el.children[0].textContent=v1(x.a);el.children[0].className='v'+(x.w=='a'?' up':'');el.children[2].textContent=v1(x.d);el.children[2].className='v'+(x.w=='d'?' up':'');
   el.children[1].children[0].textContent=SI[i]+' '+t('S')[i];var b=el.children[1].children[1].children;b[0].style.width=(x.a/tot*100)+'%';b[1].style.width=(x.d/tot*100)+'%';
-  el.className='sr on '+(x.w=='a'?'a':x.w=='d'?'d':'');if(x.w=='a')aw++;if(x.w=='d')dw++;$('pa').textContent=aw;$('pd').textContent=dw;if(snd)AU.play('tick')}
+  el.className='sr on '+(x.w=='a'?'a':x.w=='d'?'d':'');if(x.w=='a')aw++;if(x.w=='d')dw++;$('pa').textContent=aw;$('pd').textContent=dw;if(snd)AU.play('dtick')}
  function go(){if(ph!=1)return;ph=2;$('pre').innerHTML='';$('mu').innerHTML='';if(!sp){finish();return}var i=0;(function nx(){if(done)return;if(i<5){row(i++,1);tm.push(setTimeout(nx,380/sp))}else tm.push(setTimeout(finish,350/sp))})()}
  function finish(){if(done)return;done=1;ph=3;tm.forEach(clearTimeout);rolled();$('pre').innerHTML='';aw=0;dw=0;for(var i=0;i<5;i++)row(i,0);
   $('sa').className='sd '+(r.win?'win':'lose');$('sdf').className='sd '+(r.win?'lose':'win');$('sa').firstChild.textContent=r.win?t('winner'):t('loser');$('sdf').firstChild.textContent=r.win?t('loser'):t('winner');bs.className=r.win?'vw':'vl';
@@ -418,7 +418,7 @@ function showWheel(){if(WAITW||!G||G.ph!='wheel'||BSH)return;if(WH&&WH.stop)retu
  modal('<h3>'+t('wheelT')+' — '+t('cycle')+' '+G.cyc+'</h3><div class="wsub">'+t('left2')+': '+el.length+'</div><div id="wh" class="wheel"><div id="wr" class="reel">'+cards.map(card).join('')+'</div><div class="wmark"></div></div><button class="big pri" id="wstop">'+t('wheelStop')+'</button>');
  var box=$('wh'),rl=$('wr');function draw(){rl.style.transform='translateX('+(box.clientWidth/2-(WH.pos+.5)*CW)+'px)'}
  function tick(ts){if(!WH||WH.stop)return;var dt=Math.min(.05,(ts-(WH.last||ts))/1000);WH.last=ts;WH.pos+=WH.v*dt;if(WH.pos>=24)WH.pos-=24;draw();WH.raf=requestAnimationFrame(tick)}
- function stop(){if(!WH||WH.stop||!G||G.ph!='wheel')return;WH.stop=1;cancelAnimationFrame(WH.raf);AU.play('tick');
+ function stop(){if(!WH||WH.stop||!G||G.ph!='wheel')return;WH.stop=1;cancelAnimationFrame(WH.raf);AU.play('dtick');
   var w=WH.el[Math.floor(Math.random()*WH.el.length)],tgt=Math.floor(WH.pos)+14,from=WH.pos,t0=0,dur=(SET.rm||!SET.spd)?0:1700;
   WH.cards[tgt]=w;rl.children[tgt].outerHTML=card(w);var tk=WH;
   function fin(){if(WH!==tk)return;WH=null;wheelDone(w)}

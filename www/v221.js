@@ -85,13 +85,17 @@
     WCStats.pickNear = function (t, parity, exclude, near) {
       try {
         if (near && window.M && M[near]) {
-          var p = WCStats.pool(t, parity).filter(function (id) { return (!exclude || exclude.indexOf(id) < 0) && M[id]; });
-          var ok = p.filter(function (id) { var h = hops(near, id); return h >= 4 && h <= 6; });
-          if (ok.length) return ok[Math.floor(Math.random() * ok.length)];
-          /* aynı güç grubunda yoksa: tüm gruplardan 4-6 adım uzaktakiler */
-          var all = []; for (var g = 0; g < 4; g++) all = all.concat(WCStats.pool(g, parity) || []);
-          ok = all.filter(function (id) { if ((exclude && exclude.indexOf(id) >= 0) || !M[id]) return false; var h = hops(near, id); return h >= 4 && h <= 6; });
-          if (ok.length) return ok[Math.floor(Math.random() * ok.length)];
+          /* V226: uzaklık en çok 6 ülke, ortalama 4; güç farkı en az olanlar seçilir (tüm ülkelerden) */
+          var sc = function (id) { return WCStats.power ? WCStats.power(id) : 0; }, s0 = sc(near) || 1, roll = Math.random();
+          var d0 = roll < .1 ? 2 : roll < .3 ? 3 : roll < .7 ? 4 : roll < .9 ? 5 : 6, all = [];
+          for (var g = 0; g < 4; g++) { all = all.concat(WCStats.pool(g, 0) || [], WCStats.pool(g, 1) || []); }
+          var cand = [];
+          all.forEach(function (id) {
+            if ((exclude && exclude.indexOf(id) >= 0) || !M[id] || id === near) return;
+            var h = hops(near, id); if (h < 2 || h > 6) return;
+            cand.push({ id: id, c: Math.abs(sc(id) - s0) / s0 * 100 + Math.abs(h - d0) * 5 });
+          });
+          if (cand.length) { cand.sort(function (a, b) { return a.c - b.c; }); return cand[Math.floor(Math.random() * Math.min(3, cand.length))].id; }
         }
       } catch (e) { }
       return _pn.apply(this, arguments);

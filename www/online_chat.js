@@ -14,7 +14,7 @@
   // ---------- stil ----------
   var css = document.createElement('style');
   css.textContent = '#bs[data-spec="1"] .d3w,#bs[data-spec="1"] .d3{display:none!important}' +
-    '#wcchb{position:fixed;left:calc(env(safe-area-inset-left,0px) + 8px);bottom:calc(env(safe-area-inset-bottom,0px) + 40px);z-index:58;width:42px;height:42px;border-radius:50%;border:1px solid #6b5420;background:rgba(20,14,6,.9);color:#f2c14e;font-size:20px;line-height:40px;text-align:center;cursor:pointer;display:none;-webkit-tap-highlight-color:transparent}' +
+    '#wcchb{position:fixed;left:calc(env(safe-area-inset-left,0px) + 8px);bottom:calc(env(safe-area-inset-bottom,0px) + 40px);z-index:58;width:42px;height:42px;border-radius:50%;border:1px solid #6b5420;background:rgba(20,14,6,.9);color:#f2c14e;font-size:0;line-height:0;text-align:center;cursor:pointer;display:none;box-sizing:border-box;padding:7px;-webkit-tap-highlight-color:transparent}' +
     '#wcchb i{position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;border-radius:9px;background:#d33;color:#fff;font:700 11px/17px system-ui,sans-serif;font-style:normal;padding:0 4px;display:none}' +
     '#wcchp{position:fixed;left:calc(env(safe-area-inset-left,0px) + 56px);bottom:calc(env(safe-area-inset-bottom,0px) + 44px);z-index:58;max-width:40vw;background:rgba(242,193,78,.95);color:#1a1408;font:600 12px system-ui,sans-serif;padding:6px 10px;border-radius:14px 14px 14px 3px;display:none;pointer-events:none}' +
     '#wccht{position:fixed;left:0;bottom:0;z-index:59;width:min(60vw,420px);max-height:60%;height:60%;display:none;flex-direction:column;background:rgba(26,23,18,.94);border:1px solid #6b5420;border-radius:0 12px 0 0;padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}' +
@@ -71,7 +71,7 @@
     var on = live(), hb = $i('wcchb');
     if (!on) { if (hb) hb.style.display = 'none'; var p0 = $i('wccht'); if (p0) p0.style.display = 'none'; C.open = false; return; }
     if (!hb) {
-      hb = document.createElement('div'); hb.id = 'wcchb'; hb.innerHTML = '💬<i></i>';
+      hb = document.createElement('div'); hb.id = 'wcchb'; hb.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M12 3C6.5 3 2 6.6 2 11.1c0 2.5 1.4 4.8 3.6 6.3-.2 1.3-.9 2.6-1.8 3.4 1.9-.1 3.7-.8 5.1-1.9 1 .2 2 .4 3.1.4 5.5 0 10-3.6 10-8.2S17.5 3 12 3z"/></svg><i></i>';
       hb.addEventListener('click', function (ev) { ev.stopPropagation(); toggle(); });
       document.body.appendChild(hb);
       var pv = document.createElement('div'); pv.id = 'wcchp'; document.body.appendChild(pv);

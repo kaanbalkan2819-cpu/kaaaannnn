@@ -382,6 +382,7 @@
     try { if (ac.state === 'suspended' && ac.resume) ac.resume(); } catch (e) {}
   };
   SwordClash.prototype._sound = function (strength) {
+    try { var A0 = root.AU; if (A0 && A0.has && A0.has('clash')) { A0.play('clash'); return; } } catch (e) { }   // V227: üretilmiş çelik çarpışma sesi
     var ac = sharedAC(); if (!ac) return;
     this.ac = ac;
     if (ac.state === 'suspended' && ac.resume) ac.resume();

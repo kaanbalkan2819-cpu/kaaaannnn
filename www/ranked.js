@@ -20,10 +20,10 @@
     swapCost: 250,                                // ülke değişim ücreti (altın)
     queueSec: 15,                                 // gerçek rakip arama süresi
     lobbySec: 12,                                 // "rakip bulundu" ekranı (ülke değiştirme penceresi)
-    moveSec: 45,                                  // hamle (tur) başına süre
+    moveSec: 30,                                  // hamle (tur) başına süre
     graceSec: 10,                                 // bağlantı kopunca geri dönme süresi
     turnLimit: 30,                                // her oyuncu için tur limiti
-    botThinkMin: 5, botThinkMax: 14,              // yapay zekâ rakibin "düşünme" gecikmesi (sn)
+    botThinkMin: 2, botThinkMax: 6,              // yapay zekâ rakibin "düşünme" gecikmesi (sn)
     verifySec: 20                                 // rakibin sonuç bildirimini bekleme
   };
 
@@ -445,25 +445,27 @@
   function fail() { hub(); toast(X('Eşleşme kurulamadı', 'Could not set up the match')); }
   /* V122: bot adları — tek "Mira" ve "Gaming" yerine geniş, gerçek oyuncu gibi görünen biçimler. Tek bir kelime sık tekrarlanmasın diye
      son kullanılan adlar hatırlanır (aynı sözcük art arda gelmez). */
-  var FN1 = ['Efe', 'Deniz', 'Mert', 'Aras', 'Emre', 'Burak', 'Cem', 'Arda', 'Kerem', 'Onur', 'Tolga', 'Yigit', 'Baran', 'Selin', 'Ece', 'Zeynep', 'Defne', 'Nova', 'Vex', 'Atlas', 'Orion', 'Kral', 'Aslan', 'Kurt', 'Bora', 'Alp', 'Ege', 'Leo', 'Ryan', 'Alex', 'Max', 'Jake', 'Luka', 'Marco', 'Berk', 'Kaan', 'Umut', 'Ozan', 'Can', 'Ilker', 'Tuna', 'Mete', 'Doruk', 'Poyraz', 'Taha', 'Sarp', 'Ilgaz', 'Rüzgar', 'Yildiz', 'Elif', 'Ada', 'Asya', 'Derya', 'Naz', 'Lara', 'Ayaz', 'Sina', 'Nikos', 'Ivan', 'Omar', 'Hugo', 'Felix', 'Theo', 'Mika', 'Dante', 'Kai', 'Rex', 'Zed', 'Rio'];
-  var FN2 = ['', '', '', '', '_', 'x', 'TR', 'Pro', 'Wolf', '_tr', 'GG', 'King', 'Boss', 'Zero', 'Fire', 'Storm', 'Shadow', 'Hunter', 'Ace', 'Lord', 'Tank', 'Blade', 'Sniper', 'FX', '34', '06', '35', '61'];
+  /* V226: adlar gerçek bir oyuncunun yazacağı gibi: ad, ad+soyad, ad+yıl/plaka, kısaltma. Yapay kalıplar kaldırıldı. */
+  var FN1 = ['Mehmet', 'Ahmet', 'Mustafa', 'Ali', 'Hasan', 'Huseyin', 'Ibrahim', 'Yusuf', 'Omer', 'Murat', 'Emre', 'Burak', 'Serkan', 'Hakan', 'Onur', 'Oguz', 'Furkan', 'Enes', 'Batuhan', 'Tunahan', 'Emirhan', 'Kerem', 'Berkay', 'Cagri', 'Gokhan', 'Volkan', 'Sinan', 'Tolga', 'Ugur', 'Umut', 'Eren', 'Yigit', 'Kaan', 'Arda', 'Mert', 'Baris', 'Salih', 'Halil', 'Recep', 'Zeynep', 'Elif', 'Merve', 'Busra', 'Ayse', 'Selin', 'Ece', 'Dilara', 'Irem', 'Lukas', 'Diego', 'Andrei', 'Ivan', 'Marco', 'Daniel', 'Adam', 'Tomas', 'Nikola', 'Omar', 'Karim', 'Rafael'];
+  var FN2 = ['Yilmaz', 'Kaya', 'Demir', 'Celik', 'Sahin', 'Ozturk', 'Aydin', 'Arslan', 'Dogan', 'Kilic', 'Cetin', 'Koc', 'Kurt', 'Ozdemir', 'Polat', 'Erdem', 'Yildiz', 'Aksoy', 'Tekin', 'Gunes'];
+  var PLATE = ['01', '06', '07', '16', '21', '25', '27', '34', '35', '38', '41', '42', '44', '55', '61', '63'];
   var NAMED = [];   // son kullanılan adlar
   var STYLES = [
-    function (a, b, n) { return a + n; },                       // Efe42
-    function (a, b, n) { return a + '_' + (b || pickOf(FN2.slice(5))); },   // Mert_Wolf
-    function (a, b, n) { return (b || pickOf(FN2.slice(5))) + a; },         // KingBora
-    function (a, b, n) { return a.toLowerCase() + (n || Math.floor(rnd(10, 999))); },   // arda317
-    function (a, b, n) { return a + pickOf(FN1); },             // EfeKaan
-    function (a, b, n) { return 'xX' + a + 'Xx'; },             // xXBoraXx
-    function (a, b, n) { return a + '.' + pickOf(['tr', 'gz', 'ist', 'ank', 'izm', 'jr']); },   // Cem.ist
-    function (a, b, n) { return a + (Math.random() < .5 ? '07' : '99') ; }
+    function (a) { return a.toLowerCase() + pickOf(PLATE); },
+    function (a) { return a; },
+    function (a, b) { return a + ' ' + b.charAt(0) + '.'; },
+    function (a, b) { return a.toLowerCase() + '.' + b.toLowerCase(); },
+    function (a, b) { return a + b; },
+    function (a) { return a.toLowerCase() + '_' + pickOf(PLATE); },
+    function (a, b, n) { return a.toLowerCase() + n; },
+    function (a, b) { return a.charAt(0).toLowerCase() + b.toLowerCase(); }
   ];
   function botIdentity() {
     var nk = '', tries = 0;
     do {
-      var a = pickOf(FN1), b = pickOf(FN2), n = Math.random() < .55 ? String(Math.floor(rnd(1, 99))) : (Math.random() < .5 ? String(Math.floor(rnd(1990, 2010))) : '');
+      var a = pickOf(FN1), b = pickOf(FN2), n = String(Math.floor(rnd(1988, 2009)));
       nk = pickOf(STYLES)(a, b, n).replace(/[^A-Za-z0-9ÇĞİÖŞÜçğıöşü _.\-]/g, '').replace(/^[_.\-]+/, '').slice(0, 14);
-      if (nk.length < 3) nk = a + String(Math.floor(rnd(10, 99)));
+      if (nk.length < 3) nk = a;
       tries++;
     } while (tries < 8 && NAMED.some(function (x) { return x.toLowerCase() === nk.toLowerCase() || x.toLowerCase().indexOf(nk.toLowerCase().slice(0, 4)) === 0; }));
     NAMED.push(nk); if (NAMED.length > 12) NAMED.shift();
@@ -586,7 +588,7 @@
       if (key !== TM.key) { TM.key = key; TM.left = CFG.moveSec + (mine ? 0 : 12); }
       var busy = !!(G.busy || (typeof BSH !== 'undefined' && BSH));
       if (mine && G.ph === 'act') { if (!busy) TM.left -= dt; }
-      else if (!mine) { TM.left = Math.max(0, TM.left - dt); }
+      else if (!mine) { TM.left = Math.max(m.bot ? 3 : 0, TM.left - dt); }   /* V226: YZ rakipte sayaç sıfıra inip takılı kalmasın */
       var e = timerEl(), sec = Math.max(0, Math.ceil(TM.left)); e.style.display = 'block';
       e.className = (mine ? 'me' : 'op') + (sec <= 10 && mine ? ' low' : '');
       var lab = mine ? '⏱ ' + sec : '⏳ ' + esc(on.ranked && on.ranked.oppNick || X('Rakip', 'Rival')) + ' ' + sec;

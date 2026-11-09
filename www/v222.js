@@ -82,18 +82,24 @@
       if (!window.WCNuke || !WCNuke.take()) { try { toast(X('Cephaneliğinde atom bombası yok — Dükkândan al', 'No atom bomb in your arsenal — buy one in the Shop')); } catch (x) { } return; }   /* V223: stoktan düşülür */
       try { closeMod(); } catch (x) { }
       G.nuke222 = turn();
-      try { if (window.v30FocusOn) v30FocusOn(tg); } catch (x) { }
-      /* küre hedefe dönüp DURUNCA patlat (konum sabitlenene kadar bekle, en çok 3 sn) */
-      var last = null, still = 0, t0 = Date.now();
-      (function wait() {
-        var p = scr(tg);
-        if (p && last && Math.abs(p[0] - last[0]) < 2 && Math.abs(p[1] - last[1]) < 2) still++; else still = 0;
-        last = p;
-        if (still < 3 && Date.now() - t0 < 3000) return setTimeout(wait, 90);
-        go();
-      })();
-      function go() {
-        boom(function () {
+      /* V224: önce 3B savaş animasyonu sistemiyle gerçek bombardıman sahnesi (v60Nuke); 3B küre yoksa eski 2B efekt */
+      var ended = false;
+      var try3d = function () { var n = 0; (function w() { if (window.v60Active && n++ < 40) return setTimeout(w, 100); try { if (window.v60Nuke && v60Nuke(tg, fin)) return; } catch (x) { } old2d(); })(); };   /* V225: süren savaş animasyonu bitsin, bomba sahnesi 2B'ye düşmesin */
+      try { var lp = window.v60Load && v60Load(); if (lp && lp.then) lp.then(try3d, old2d); else try3d(); } catch (x) { old2d(); }
+      function old2d() {
+        try { if (window.v30FocusOn) v30FocusOn(tg); } catch (x) { }
+        var last = null, still = 0, t0 = Date.now();
+        (function wait() {
+          var p = scr(tg);
+          if (p && last && Math.abs(p[0] - last[0]) < 2 && Math.abs(p[1] - last[1]) < 2) still++; else still = 0;
+          last = p;
+          if (still < 3 && Date.now() - t0 < 3000) return setTimeout(wait, 90);
+          boom(fin, tg);
+        })();
+      }
+      function fin() {
+        if (ended) return; ended = true;
+        (function () {
           try {
             G.owner[tg] = G.pl; G.st = G.st || [{}]; G.st[0] = G.st[0] || {}; G.st[0].c = (G.st[0].c | 0) + 1;
             if (G.es && G.es[tg]) delete G.es[tg];
@@ -101,7 +107,7 @@
             try { save(); } catch (x) { } try { render(); } catch (x) { }
             try { toast('☢ ' + X(nm(tg) + ' atom bombasıyla ele geçirildi', nm(tg) + ' seized with an atom bomb')); } catch (x) { }
           } catch (x) { }
-        }, tg);
+        })();
       }
     } catch (x) { }
   };

@@ -1,0 +1,46 @@
+/* V226 — mühür sayfası, menü, yükleme simgesi */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+
+/* ---- mühürler: animasyon ve pahalı süzgeçler yok; panel üç bölüm: ızgara (kayar) + açıklama (kayar) + düğme (hep görünür) ---- */
+#box .wb-panel.col219{position:relative;display:flex!important;flex-direction:column;max-height:calc(100dvh - 12px)!important;overflow:hidden}
+.col219 .wb-wrap,.col219>*{flex:0 0 auto}
+.col219 .body219{flex:1 1 auto!important;min-height:90px!important;max-height:none!important}
+.col219 .inf219{display:block!important;flex:0 0 auto;max-height:24vh;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
+.col219 .inf219:after{content:"";display:block;clear:both}
+.col219 .inf219>i{float:left;margin:0 10px 4px 0}
+.col219 .c141g{flex:0 0 auto;position:relative;z-index:2}
+.col219i{animation:none!important;contain:layout paint}
+.col219i i{transition:none!important;transform:none!important}
+.col219i.n.ok i,.col219i.g.ok i{filter:none!important}
+.col219i:not(.ok) i{filter:grayscale(1)!important;opacity:.4}
+.x226{position:absolute!important;top:12px!important;right:12px!important;left:auto!important;z-index:5;width:36px;height:36px;min-height:0;padding:0;border-radius:50%;border:1px solid rgba(205,176,106,.55);background:rgba(0,0,0,.45);color:#f0dfb3;font:700 16px/1 system-ui,sans-serif;cursor:pointer}
+.pg226{display:flex;align-items:center;justify-content:center;gap:14px;margin:8px 0 2px}
+.pg226 button{width:44px;height:36px;min-height:0;padding:0;border-radius:8px;border:1px solid rgba(205,176,106,.55);background:rgba(0,0,0,.3);color:#f0dfb3;font:700 22px/1 Georgia,serif;cursor:pointer}
+.pg226 button:disabled{opacity:.3;cursor:default}
+.pg226 span{font:700 12px Georgia,serif;letter-spacing:.06em;color:#d9cba6;min-width:92px;text-align:center}
+
+/* ---- ana menü: büyük yazı tipli / dar ekranlarda başlık amblemin altında kalır, öğeler üst üste binmez ---- */
+#wcm.flat .col{display:flex;flex-direction:column}
+#wcm.flat .col>*{flex:0 0 auto;position:relative}
+#wcm.flat .seal{overflow:visible}
+#wcm.flat h1{margin-top:6px!important}
+#wcm.flat .mb{height:auto!important}
+#wcm.flat .mb small{position:static!important;transform:none!important}
+#wcm.inst226>*:not(.launch),#wcm.inst226 .col *{animation:none!important;transition:none!important}
+#boot #wcm{opacity:1!important}
+
+/* ---- yorgunluk simgesi ---- */
+.wfat .wf-i{overflow:visible;background:radial-gradient(circle at 35% 30%,rgba(255,200,130,.32),rgba(255,120,60,.1))!important;flex-basis:46px!important;height:46px!important}
+.wfat .wf-k{width:54px;height:54px;object-fit:contain;display:block;margin-top:-6px}
+
+/* ---- "Sefer Başlıyor" yükleme simgesi: dönen altın küre iskeleti ---- */
+#wcm .launch .lb .gl226{display:block;position:relative;width:84px;height:84px;margin:22px auto 0;perspective:360px}
+.gl226a{position:absolute;inset:6px;transform:rotate(-20deg);transform-style:preserve-3d}
+.gl226a em{position:absolute;inset:0;border-radius:50%;border:1.6px solid #e9c25a;box-shadow:0 0 6px rgba(233,194,90,.35);animation:gl226 2.4s linear infinite;will-change:transform;backface-visibility:visible;display:block!important;width:auto!important;height:auto!important;margin:0!important;background:none!important}
+.gl226a em:nth-child(2){animation-delay:-.6s}
+.gl226a em:nth-child(3){animation-delay:-1.2s}
+.gl226a em:nth-child(4){animation-delay:-1.8s}
+.gl226a u{position:absolute;left:-7%;right:-7%;top:50%;height:0;border-top:1.6px solid #f3d98a;text-decoration:none;box-shadow:0 0 8px rgba(243,217,138,.5)}
+.gl226 s{position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(233,194,90,.35);text-decoration:none}
+@keyframes gl226{from{transform:rotateY(0)}to{transform:rotateY(360deg)}}
+/* yükleme simgesi hareketi azalt ayarında da döner: durursa oyun donmuş sanılır */
