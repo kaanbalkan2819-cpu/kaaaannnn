@@ -1237,3 +1237,10 @@ V227 — Ses yenilemesi (scripts/gen_audio.html + gen_audio.js ile üretildi; ü
  - Menü küresi: bant fotoğraftaki kavisli halkayı izler, eski fotoğraf görünmez.
  - Öğretici: "Bir daha gösterme"; soru beklenirken geri tuşu menüyü kilitlemez, hamle yapılamaz.
  - Ranked: son toprak gidince sonuç ekranı açılır. Hub Kapat düğmesi ekrana sığar. Online oda paneli dikey.
+
+=================== V235 (APK adı: v231) ===================
+ - Kıbrıs: kuzey Türkiye toprağı, güney ayrı devlet "Güney Kıbrıs" (app.js wcCyprus).
+ - Olay seçerken Ülkem düğmesi ve kartı açılabilir.
+ - "Zaman geçti" düşüşü kaldırıldı: keşif bilgisi ve ilişki puanı turla azalmaz (v160.js devre dışı).
+ - Menü küresindeki orta demir bant kaldırıldı.
+ - Ranked: son toprak savaşta gidince panel kendisi kapanır ve yenilgi ekranı açılır (gerçek savaşla denendi).

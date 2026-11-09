@@ -577,15 +577,26 @@
   setInterval(function () {
     try {
       if (!live() || !G.T || G.ph === 'v7pick') return;
-      if (typeof BSH !== 'undefined' && BSH) return;   /* savaş paneli kapanınca */
-      if (G.over) { if (!CUR || !CUR.done) showOver(); return; }
+      if (CUR && CUR.done) return;
       var m = G.mp, on = ONs(), me = m[on.side || 'host'], foe = m[(on.side || 'host') === 'host' ? 'guest' : 'host'], a = 0, b = 0;
-      if (!me || !foe) return;
-      for (var k in G.owner) { if (G.owner[k] === me) a++; else if (G.owner[k] === foe) b++; }
-      if (a && b) return;
-      G.over = { w: a ? 0 : -1 }; G.ph = 'over'; G.busy = 0; showOver();
+      if (!G.over) {
+        if (!me || !foe) return;
+        for (var k in G.owner) { if (G.owner[k] === me) a++; else if (G.owner[k] === foe) b++; }
+        if (a && b) return;
+        G.over = { w: a ? 0 : -1 }; G.ph = 'over'; G.busy = 0;
+      }
+      /* savaş paneli açıksa sonucu kısa süre gösterir, sonra kendisi kapatır (rakip turunda panele dokunulamıyordu, oyun orada kalıyordu) */
+      if (typeof BSH !== 'undefined' && BSH) {
+        var now = Date.now(), resUp = !!document.querySelector('#fn button'); OVW.t = OVW.t || now;
+        if (resUp && !OVW.r) OVW.r = now;
+        if (!resUp && now - OVW.t < 7000) { try { var g0 = $i('go'), bs0 = $i('bs'); if (g0 && g0.offsetParent) g0.click(); else if (bs0 && bs0.offsetParent) bs0.click(); } catch (x) { } return; }
+        if (resUp && now - OVW.r < 1500) return;
+        try { closeBattle(); } catch (x) { }
+      }
+      OVW.t = OVW.r = 0; showOver();
     } catch (e) { }
   }, 400);
+  var OVW = { t: 0, r: 0 };
 
   /* ---- hamle süresi ---- */
   var TM = { turn: -1, left: CFG.moveSec, last: 0, key: '' };

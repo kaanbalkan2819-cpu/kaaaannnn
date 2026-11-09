@@ -64,6 +64,10 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .inf219 i.pt.lk{filter:grayscale(1) brightness(.6)!important}
 .inf219 span em{font-style:normal;color:#dce9ff;white-space:nowrap}
 
+/* ---- V235: olay penceresi açıkken Ülkem düğmesi ve kartı üstte ---- */
+body.ev235 #v99b{z-index:85!important}
+body.ev235 #v99c{z-index:86!important}
+
 /* ---- V230: kayıt sessizce yapılır, bildirim yok ---- */
 #sv139{display:none!important}
 body.wcm-on #rollbtn23{display:none!important}

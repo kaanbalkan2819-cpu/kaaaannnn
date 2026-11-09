@@ -205,7 +205,7 @@
   function lines(l) { return '<ul>' + l.map(function (x) { return '<li class="' + (x.good === true ? 'g' : x.good === false ? 'b' : 'n') + '"><i>' + x.sym + '</i> ' + x.txt + '</li>'; }).join('') + '</ul>'; }
   function showEvent(ev, ctx, done) {
     var old = document.getElementById('ev76'); if (old) old.remove();
-    var o = document.createElement('div'); o.id = 'ev76';
+    var o = document.createElement('div'); o.id = 'ev76'; document.body.classList.add('ev235');   /* V235: seçim yaparken Ülkem açılabilir */
     /* V215: duraklatma menüsü şablonu (taş kart, altın çerçeve, köşe süsleri) + üst ortada dikdörtgen olay görseli. Eski parşömen görünümü kaldırıldı. */
     var imk = IMG215[ev.id] || IMG230[ev.id], img = imk ? 'assets/events/ev_' + imk + '.jpg' : '';
     var yLab = ev.yL ? T(ev.yL[0], ev.yL[1]) : T('Kabul', 'Accept'), nLab = ev.nL ? T(ev.nL[0], ev.nL[1]) : T('Reddet', 'Refuse');
@@ -223,6 +223,7 @@
         try { applyFx(yes ? ev.yes : ev.no, ctx); } catch (e) { console.error(e); }
         G.ev76 = G.ev76 || {}; G.ev76.last = turn(); G.ev76.prev = ev.id;
         o.classList.add('out');
+        document.body.classList.remove('ev235');
         setTimeout(function () { o.remove(); try { save(); render(); } catch (e) { } done(); }, 420);
       };
     });
