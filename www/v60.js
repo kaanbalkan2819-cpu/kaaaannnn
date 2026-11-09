@@ -171,7 +171,7 @@
   function ownExt(a, ids) { var m = 0; (ids || []).forEach(function (i) { m = Math.max(m, extRad(a, i)); }); return m || .1; }
   /* V91: mermi / füze / patlama boyutu HEDEF ülkeye sığsın: patlama halkası (~5 yerel birim x blast x ölçek) hedefin ~%30'unu geçmesin */
   function fitProj(a, f, tg, sc) {
-    var k = 1; try { k = Math.max(.05, Math.min(1, extRad(a, tg) * .3 / (5 * 1.9 * sc))); } catch (e) { k = 1; }
+    var k = 1; try { k = Math.max(.05, Math.min(1, Math.min(.6, extRad(a, tg)) * .3 / (5 * 1.9 * sc))); } catch (e) { k = 1; }   /* V230: Rusya'nın sınır kutusu tüm dünyayı sardığı için patlama devleşip kara leke bırakıyordu */
     f.projK = k; return k;
   }
   /* V131: TANK ÖLÇEĞİ ÜLKEYE GÖRE — tank/piyade, saldıran ile hedef ülkenin KÜÇÜĞÜne ve mutlak bir üst sınıra göre kısılır.
@@ -249,8 +249,20 @@
   }
   var UT = (function () { var o = [], xs = [-2.6, -1.3, 0, 1.6, 2.8]; for (var z = -5.8; z <= .8; z += .8) xs.forEach(function (x) { o.push([x, z]); }); return o; })();
   function unitTouch(a, fr, sc, tg) { var n = 0; UT.forEach(function (q) { var ll = worldLL(fr, sc, q[0], q[1]); if (a.at(ll[0], ll[1]) === tg) n++; }); return n; }
+  /* V230: dev ülkede (Rusya, ABD, Çin…) sahne ülke ortasında değil, karşı tarafa bakan kenarın biraz içinde kurulur */
+  function nearLL(a, id, other) {
+    var c = a.ll(id); if (!c) return c;
+    try {
+      var b = a.bbox(id), oc = a.ll(other) || llOf(a, other); if (!b || !oc || Math.max(b[2] - b[0], b[3] - b[1]) < 40) return c;
+      var T = a.THREE(), vo = xyz(oc, T), vc = xyz(c, T), best = null, bd = 1e9, ks = [.14, .1, .06, .03, 0], i;
+      a.border(id, 500).forEach(function (q) { var v = xyz(q, T), d = v.distanceToSquared(vo); if (d < bd) { bd = d; best = v; } });
+      if (!best) return c;
+      for (i = 0; i < ks.length; i++) { var t = Math.min(1, ks[i] / (best.distanceTo(vc) || 1)), ll = toLL(best.clone().multiplyScalar(1 - t).add(vc.clone().multiplyScalar(t)).normalize()); if (a.at(ll[0], ll[1]) === id) return ll; }
+    } catch (e) { }
+    return c;
+  }
   function place(a, ids, tg, from, land) {
-    var la = a.ll(from), lt = a.ll(tg); if (!la || !lt) return null;
+    var la = nearLL(a, from, tg), lt = nearLL(a, tg, from); if (!la || !lt) return null;
     var T = a.THREE(), va = a.sph(la[0], la[1], 1), vt = a.sph(lt[0], lt[1], 1);
     var mid = va.clone().add(vt); if (mid.lengthSq() < 1e-6) mid = va.clone(); mid.normalize();
     var scales = land ? [1, .8, .66, .54, .44, .36, .3] : [1, .8, .66, .54, .44, .36, .3]   /* V223: en küçük ölçek büyütüldü */   /* V92: kara sahnesi sığana kadar küçülür */, best = null, cands = [], zs = [];
@@ -501,14 +513,37 @@
     for (k = 0; k < 12; k++) { if (fireFootOK(a, P, fr, s2, ids, tg)) return s2; s2 *= .8; if (s2 < minSc) break; }
     return Math.max(minSc, s2);
   }
+  /* V229: birlik ayak izi saldıranın karasına sığan nokta aranır (seçilen nokta, sonra ülke merkezlerine doğru). Sığmıyorsa null: kara birliği konmaz, denizden tank çıkmaz. */
+  function fireSpot(a, o, P, vt, sc, tg) {
+    var cs = [P], i;
+    o.ids.slice(0, 16).forEach(function (id) { var ll = a.ll(id); if (!ll) return; var v = a.sph(ll[0], ll[1], 1); [.25, .5, .75, 1].forEach(function (k) { cs.push(P.clone().multiplyScalar(1 - k).add(v.clone().multiplyScalar(k)).normalize()); }); });
+    for (i = 0; i < cs.length; i++) {
+      var c = cs[i], fr = frameAt(a, c, vt.clone().sub(c)), s = fitFireScale(a, c, fr, sc, o.ids, tg, SC * .45);
+      if (fireFootOK(a, c, fr, s, o.ids, tg)) return { P: c, fr: fr, sc: s };
+    }
+    /* Türkiye gibi dar ülkede tam düzen sığmaz: yalnızca iki tank ve ilerleme yolları kendi karasına sığıyorsa tank sahnesi kurulur */
+    for (i = 0; i < cs.length; i++) {
+      for (var s2 = sc; s2 >= SC * .45; s2 *= .8) { var c2 = cs[i], f2 = frameAt(a, c2, vt.clone().sub(c2)); if (tanksFit(a, c2, f2, s2, o.ids)) return { P: c2, fr: f2, sc: s2, tanksOnly: true }; }
+    }
+    return null;
+  }
+  var TANK_PTS = [[-1.3, -1], [1.3, -1.4], [-1.3, .2], [1.3, -.2], [0, -1.2], [-2, -1.2], [2, -1.4]];
+  function tanksFit(a, P, fr, sc, ids) { for (var i = 0; i < TANK_PTS.length; i++) { var q = TANK_PTS[i], ll = worldLL({ P: P, x: fr.x, z: fr.z }, sc, q[0], q[1]); if (ids.indexOf(a.at(ll[0], ll[1])) < 0) return false; } return true; }
+  window.v60FireProbe = function (ids, tg) {   // yalnızca test/ayar için
+    var a = A(), la = a.ll(ids[0]), lt = llOf(a, tg); if (!la || !lt) return null;
+    var va = a.sph(la[0], la[1], 1), vt = a.sph(lt[0], lt[1], 1), o = { ids: ids, from: ids[0], land: false }, P = launchPoint(a, o, va, vt, tg), fr = frameAt(a, P, vt.clone().sub(P)), sc = fitFireScale(a, P, fr, SC * .6, ids, tg, SC * .45), sp = fireSpot(a, o, P, vt, sc, tg);
+    return { oldOk: fireFootOK(a, P, fr, sc, ids, tg), found: !!sp, sc: sp ? sp.sc / SC : 0, ll: sp ? toLL(sp.P) : null };
+  };
   function buildFireScene(a, f, o, tg, r) {
-    var la = a.ll(o.from), lt = llOf(a, tg); if (!la || !lt) return null;
+    var la = nearLL(a, o.from, tg), lt = (a.has(tg) && nearLL(a, tg, o.from)) || llOf(a, tg); if (!la || !lt) return null;
     var T = a.THREE(), va = a.sph(la[0], la[1], 1), vt = a.sph(lt[0], lt[1], 1), P = launchPoint(a, o, va, vt, tg);
     var dt = Math.acos(Math.max(-1, Math.min(1, P.dot(vt))));
     var sc = Math.max(SC * .4, Math.min(SC * 1.2 * sizeF(o.ids), dt / 9, ownExt(a, o.ids) / 3.2));   // V91: saldıran ülkeyle orantılı, kendi ülkesine sığar   // V71: sizeF artık mesafeye çarpılmaz (eskiden ateş hedefi aşıyordu)
     if (dt / sc > 18) sc = Math.min(SC * 2.6, dt / 18);                       // uzak hedefte ölçek büyür: menzil ~18 birimi geçmez
     var fr = frameAt(a, P, vt.clone().sub(P));
     try { sc = fitFireScale(a, P, fr, sc, o.ids, tg, SC * .45); } catch (eF) { }   // V92: birlikler kendi ülke sınırını aşmasın
+    var spot = null; try { spot = fireSpot(a, o, P, vt, sc, tg); } catch (eS) { }   /* V229 */
+    if (spot) { P = spot.P; fr = spot.fr; sc = spot.sc; dt = Math.acos(Math.max(-1, Math.min(1, P.dot(vt)))); }
     var lc = dt / sc;
     f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(fr.x, P, fr.z));
     if (!f.root.parent) a.globe().add(f.root);
@@ -516,14 +551,14 @@
     var tk = tankK(a, o.ids, tg, sc), win = !!r.win, V = function (x, y, zz) { return { x: x, y: y, z: zz }; };
     var I = pickImpacts(a, fr, sc, tg, 3, 0, lc, Math.max(2, lc - 6), lc + 6), tos = I.pts.map(function (q) { return up(q, .15); });
     var air = false, dur;
-    if (o.land && (Math.random() < .45 || (window.__air214 | 0) >= 2)) { window.__air214 = 0;   // V214: şans sayacı; V124: yedek sahnede de bazen uçaklar
+    if (!spot || (o.land && (Math.random() < .45 || (window.__air214 | 0) >= 2))) { window.__air214 = 0;   /* V229: kara birliği sığmıyorsa yalnız uçak */   // V214: şans sayacı; V124: yedek sahnede de bazen uçaklar
       var dA = f.planeAttack(fxo({ from: V(0, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2], tos[0]], color: o.color, scale: .92, planes: 2, bombs: 2, dud: !win, blast: win ? 1.9 : 1.3 }));
       dur = dA && dA.duration || 9; air = true;
     } else {
       var d1 = f.tankAttack(fxo({ from: V(-1.3, 0, -1), to: tos[0], tos: [tos[0], tos[1], tos[2]], color: o.color, scale: 1.15 * tk, shots: 3, dud: !win, blast: win ? 1.9 : 1.3 }));
       var d2 = f.tankAttack(fxo({ from: V(1.3, 0, -1.4), to: tos[1], tos: [tos[1], tos[2], tos[0]], color: o.color, scale: 1.15 * tk, shots: 3, dud: !win, blast: win ? 1.9 : 1.3 }));
       dur = Math.max(d1 && d1.duration || 8, d2 && d2.duration || 8);
-      if (o.land) {   // V78: kara saldırısında yedek sahnede de piyade olsun (tank + piyade)
+      if (o.land && !spot.tanksOnly) {   // V78: kara saldırısında yedek sahnede de piyade olsun (tank + piyade)
         var d3 = f.infantryAttack(fxo({ from: V(.1, 0, -2.2), to: up(I.pts[2], .2), pool: I.pool(1.4), color: o.color, count: 4, scale: 1.2 * tk, dud: !win, blast: win ? 1.4 : 1 }));
         dur = Math.max(dur, d3 && d3.duration || 8);
       }
@@ -535,7 +570,7 @@
      Kara komşusu → savunanın tank + piyadesi bizim toprağa ateş eder; deniz aşırı → savunanın gemisi torpidoyla bizim gemiyi batırır
      (gemi sahnesi kurulamazsa savunanın tankları kendi kıyısından bize ateş eder). Saldırı animasyonu bittikten sonra sırayla oynar. */
   function buildSeaScene(a, f, ids, from, target, cA, cB, sink, both) {   // V79: gemi + torpido sahnesi (saldıran = A gemisi, hedef = B gemisi)
-    var la = a.ll(from), lt = a.ll(target); if (!la || !lt) return null;
+    var la = nearLL(a, from, target), lt = nearLL(a, target, from); if (!la || !lt) return null;
     var T = a.THREE(), pl = place(a, ids, target, from, false); if (!pl) return null;
     f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(pl.fr.x, pl.P, pl.fr.z));
     if (!f.root.parent) a.globe().add(f.root);
@@ -573,13 +608,16 @@
   }
   /* V71: FÜZE ATAR SAHNESİ — hedef çok küçükse: saldıranın kendi toprağından füze atar çıkar, hedef ülkenin İÇİNE minik füzeler yağdırır. */
   function buildMissileScene(a, f, o, tg, r) {
-    var la = a.ll(o.from), lt = llOf(a, tg); if (!la || !lt) return null;
+    var la = nearLL(a, o.from, tg), lt = llOf(a, tg); if (!la || !lt) return null;
     var T = a.THREE(), va = a.sph(la[0], la[1], 1), vt = a.sph(lt[0], lt[1], 1), P = launchPoint(a, o, va, vt, tg);
     var dt = Math.acos(Math.max(-1, Math.min(1, P.dot(vt))));
     var sc = Math.max(SC * .5, Math.min(SC * 1.6 * sizeF(o.ids), dt / 6, ownExt(a, o.ids) / 2.6));   // V91: saldıran ülkeyle orantılı   // V72: küçük ülkede de büyük/okunur sahne
     if (dt / sc > 20) sc = Math.min(SC * 2.6, dt / 20);
     var fr = frameAt(a, P, vt.clone().sub(P)), pts = spread(tinyPts(a, tg), 6);
     try { sc = fitFireScale(a, P, fr, sc, o.ids, tg, SC * .45); } catch (eF) { }   // V92: füze kamyonu / izi kendi ülke sınırını aşmasın
+    var spotM = null; try { spotM = fireSpot(a, o, P, vt, sc, tg); } catch (eS) { }   /* V229: kamyon denize konmaz */
+    if (!spotM) return null;
+    P = spotM.P; fr = spotM.fr; sc = spotM.sc; dt = Math.acos(Math.max(-1, Math.min(1, P.dot(vt))));
     if (!pts.length) return null;
     var tos = pts.map(function (q) { return up(localOf(a, fr, sc, q), .12); }), cen = { x: 0, y: 0, z: 0 };
     tos.forEach(function (q) { cen.x += q.x / tos.length; cen.z += q.z / tos.length; });
@@ -651,7 +689,7 @@
       var T = a.THREE(), lt = WCNukeScene.center(a, tg) || llOf(a, tg); if (!lt) return false;
       clearScenes(); var f = ensureFx(), P = a.sph(lt[0], lt[1], 1).normalize();
       var fr = frameAt(a, P, new T.Vector3(0, 1, 0));
-      var rad = extRad(a, tg), sc = Math.max(SC, Math.min(SC * 1.6, rad / 5.5));
+      var rad = extRad(a, tg), sc = SC;   /* V230: ülke büyüdükçe sahne büyüyünce birlikler küre eğrisinden kopuyordu */
       f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(fr.x, P, fr.z));
       if (!f.root.parent) a.globe().add(f.root);
       f.root.scale.setScalar(sc); f.root.position.copy(P); f.root.visible = true; f.clear(); f.timeScale = 1; f.projK = 1;
@@ -670,6 +708,7 @@
     } catch (x) { try { console.error('v60Nuke', x); } catch (y) { } try { finish(); } catch (y) { } return false; }
   };
   window.v60Load = function () { try { return loadFx(); } catch (e) { return null; } };
+  window.v60Begin = function (r, po, tg, att) { loadFx().then(function () { ensureFx(); begin([r, po, null, tg, null, att]); }); };   // yalnızca test/ayar için
 
   /* ---------- savaş ekranına bağlantı ---------- */
   // V63: savaş paneli (zar, karşılaştırma) açıkken ve animasyon yokken küre dört karede bir çizilir; zar/yazılar akıcı kalsın

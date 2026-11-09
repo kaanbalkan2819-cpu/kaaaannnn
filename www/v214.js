@@ -25,14 +25,14 @@
   function mmss(s) { s = Math.max(0, Math.round(s)); var m = Math.floor(s / 60); return m + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
   function summary() {
     var st = (G.st && G.st[0]) || {}, turn = (G.T && G.T.turn) || G.turn || 1, sec = G.ts ? (Date.now() - G.ts) / 1000 : 0;
-    return { c: home || G.pl, turn: turn, w: st.w | 0, l: st.l | 0, conq: st.c | 0, sec: sec };
+    return { c: home || G.pl, turn: turn, w: st.w | 0, l: st.l | 0, conq: st.c | 0, sec: sec, give: !!G.give214 };
   }
   function cardHTML(m) {
     var flag = ''; try { flag = fimg(m.c, 'sm'); } catch (e) { }
     var name = ''; try { name = nm(m.c); } catch (e) { name = m.c; }
     return '<div class="wb-wrap still"><div class="wb-panel wb-pause wc141p go214">' +
       '<div class="c141h"><span class="p">⚑</span><h3>' + X('OYUN BİTTİ', 'GAME OVER') + '</h3></div>' +
-      '<p class="sub214">' + flag + '<span><b>' + name + '</b> ' + X(m.turn + '. turda son toprağını kaybetti', 'lost its last land on turn ' + m.turn) + '</span></p>' +
+      '<p class="sub214">' + flag + '<span><b>' + name + '</b> ' + (m.give ? X(m.turn + '. turda pes etti', 'surrendered on turn ' + m.turn) : X(m.turn + '. turda son toprağını kaybetti', 'lost its last land on turn ' + m.turn)) + '</span></p>' +
       '<div class="c141s">' + chip(m.turn, X('TUR', 'TURNS')) + chip(m.conq, X('FETİH', 'CONQUESTS')) + chip(m.w + '<i>/' + m.l + '</i>', X('ZAFER/YENİLGİ', 'WON/LOST')) + chip(mmss(m.sec), X('SÜRE', 'TIME')) + '</div>' +
       '<div class="c141g">' +
       btn('🔁', X('Tekrar Başla', 'Play Again'), 'v214Again(1)', 'pri') +
@@ -68,6 +68,8 @@
     shown = true;
     try { document.body.classList.add('go214on'); } catch (e) { }
   }
+  /* V230: pes edince yenilgi kartı doğrudan açılır */
+  window.v214Give = function () { if (!G) return false; if (G.pl) home = G.pl; G.give214 = 1; snap = null; show(); return true; };
   function hist214() { var bx = document.getElementById('box'), m = document.getElementById('mod'); return !!(bx && m && m.style.display === 'flex' && bx.querySelector('.h139')); }   /* V218: oyun geçmişi açık mı */
   function open214() { var bx = document.getElementById('box'), m = document.getElementById('mod'); return !!(bx && m && m.style.display === 'flex' && bx.querySelector('.go214')); }
   function reset() { shown = false; snap = null; lostAt = 0; resAt = 0; try { document.body.classList.remove('go214on'); var m = document.getElementById('mod'); if (m) m.classList.remove('go214m'); } catch (e) { } }

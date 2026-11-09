@@ -43,6 +43,6 @@
 (function () {
   try {
     var im = new Image(); im.onload = function () { try { var c = document.createElement('canvas'); c.width = 2048; c.height = 1024; var x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0, 2048, 1024); window.__tex226 = x.getImageData(0, 0, 2048, 1024).data; } catch (e) { window.__tex226f = 1; } };
-    im.onerror = function () { window.__tex226f = 1; }; im.decoding = 'async'; im.src = 'assets/menu/globe226.webp';
+    im.onerror = function () { window.__tex226f = 1; }; im.decoding = 'async'; im.src = 'assets/menu/globe229.webp';
   } catch (e) { window.__tex226f = 1; }
 })();

@@ -17,6 +17,8 @@
   function fd() { if (!G.fat) G.fat = { t: tn(), s: {} }; else if (G.fat.t !== tn()) decay(); return G.fat; }
   function fac(e) { return 1 - FAT_STEP * Math.min(FAT_MAX, fd().s[e] || 0); }
   function mul(a, f) { return a.map(function (v) { return v * f; }); }
+  /* V229: keşif raporu yorgunluğu buradan okur */
+  window.WCFat = { f: function (e) { try { return fac(e); } catch (x) { return 1; } }, pct: function (e) { try { return Math.round((1 - fac(e)) * 100); } catch (x) { return 0; } } };
   /* V84: İMPARATORLUK YÜKÜ — çok toprağı olan devletin savaş değerleri düşer (kazanan ardı ardına her yeri fethetmesin).
      Her toprak (3'ten sonra) %OVR_STEP, en çok %OVR_MAX. Hem saldıran hem savunan için; kalıcı değere dokunmaz. Ayar: OVR_STEP, OVR_MAX. */
   var OVR_STEP = .02, OVR_MAX = .3;
@@ -55,7 +57,7 @@
     try {
       injectCss();
       if (!fatEl) { fatEl = document.createElement('div'); fatEl.className = 'wfat'; fatEl.setAttribute('role', 'status'); document.body.appendChild(fatEl); }
-      fatEl.innerHTML = '<div class="wf-i">😌</div><div class="wf-b"><div class="wf-t">' + T('Savaş yorgunluğu geçti', 'War fatigue has passed') + '</div><div class="wf-d">' + T('Değerlerin <b>normale döndü</b>', 'Your stats are <b>back to normal</b>') + '</div></div>';
+      fatEl.innerHTML = '<div class="wf-i"><img src="assets/icons/rested229.webp" alt="" class="wf-k"></div><div class="wf-b"><div class="wf-t">' + T('Savaş yorgunluğu geçti', 'War fatigue has passed') + '</div><div class="wf-d">' + T('Değerlerin <b>normale döndü</b>', 'Your stats are <b>back to normal</b>') + '</div></div>';
       void fatEl.offsetWidth; fatEl.classList.add('on');
       clearTimeout(fatT); fatT = setTimeout(function () { if (fatEl) fatEl.classList.remove('on'); }, 3600);
     } catch (e) { }

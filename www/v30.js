@@ -668,7 +668,7 @@
      ama yatay ekranda ve savaş animasyonunda savaşan ülkeler ekranın üstüne, üst çubuğun altına kaçıyordu. */
   function latOff(battle) { var portrait = (_stW ? _stW <= _stH : window.innerWidth <= window.innerHeight); if (battle) return portrait ? 0.1 : 0.02; return portrait ? 0.3 : 0.1; }
   function focusOn(c, instant, lo) {
-    if (!c || !READY) return; var b = c.bb, lon = (b[0] + b[2]) / 2 * DEG, lat = (b[1] + b[3]) / 2 * DEG;
+    if (!c || !READY) return; var b = c.bb, cc0 = centerOf(c), lon = cc0[0] * DEG, lat = cc0[1] * DEG;   /* V230 */
     var qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 2 - lon), qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), lat - (lo == null ? latOff((typeof BSH !== 'undefined') && BSH) : lo)), q = qx.multiply(qy);
     if (instant) globe.quaternion.copy(q); else focusQ = q;
     var span = Math.max(b[2] - b[0], (b[3] - b[1]) * 1.6); zoomT = Math.max(2.2, Math.min(3.6, 2.2 + span / 25)); if (instant) camZ = zoomT;
@@ -737,6 +737,15 @@
   function anyMoving() { for (var i = 0; i < C.length; i++) if (C[i].h !== C[i].t) return true; return false; }
   /* ---------- V60: savaş animasyonları (v60.js) için küçük dış arayüz; oyun kurallarına dokunmaz ---------- */
   var FH = [];
+  /* V230: 180. meridyeni aşan ülkede (Rusya) sınır kutusu -180..180 çıkar ve kutu ortası Atlantik'e düşer; merkez, ülkenin içindeki noktaların ortalamasıdır */
+  function centerOf(c) {
+    var b = c.bb; if (b[2] - b[0] <= 180) return [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
+    if (c.cen230) return c.cen230.slice();
+    var sx = 0, sy = 0, n = 0, lo, la;
+    for (lo = 0; lo < 360; lo += 2) for (la = b[1]; la <= b[3]; la += 2) { var L = lo > 180 ? lo - 360 : lo, h = countryAt(L, la); if (h === c) { sx += lo; sy += la; n++; } }
+    var r = n ? [sx / n, sy / n] : [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]; if (r[0] > 180) r[0] -= 360;
+    c.cen230 = r; return r.slice();
+  }
   window.v30IntroBusy = function () { return !!introStart; };   /* V150: öğretici sorusu, küre yaklaşırken açılıp küreyi örtmesin */
   window.v30API = {
     ready: function () { return !!(ON && READY && scene && globe && renderer && THREE); },
@@ -744,7 +753,7 @@
     hook: function (f) { if (FH.indexOf(f) < 0) FH.push(f); },
     has: function (id) { return !!cMap[id]; },
     bbox: function (id) { var c = cMap[id]; return c ? c.bb.slice() : null; },   /* V71: ana kara parçasının sınır kutusu [x0,y0,x1,y1] (derece) */
-    ll: function (id) { var c = cMap[id]; if (!c) return null; var b = c.bb; return [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]; },
+    ll: function (id) { var c = cMap[id]; return c ? centerOf(c) : null; },
     sph: function (lon, lat, r) { var q = sph([lon, lat], r || 1); return new THREE.Vector3(q[0], q[1], q[2]); },
     height: function (ids) { var h = 1; ids.forEach(function (id) { var c = cMap[id]; if (c && c.h < h) h = c.h; }); return 1 + H0 * h; },
     lift: function (ids) { ids.forEach(function (id) { var c = cMap[id]; if (c) c.t = 1; }); },

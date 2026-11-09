@@ -1195,3 +1195,22 @@ V227 — Ses yenilemesi (scripts/gen_audio.html + gen_audio.js ile üretildi; ü
  - Savaş yorgunluğu tüm modlarda yeni turda sıfırlanır; simgesi Figma ile üretilen yorgun şövalye.
  - Açılış: menü kayıtlı anlık görüntüden betikler yüklenmeden görünür, stiller önce yüklenir. "Sefer Başlıyor" altında yeni dönen altın küre animasyonu.
  - Uçaklar ve roket atar aracı küçültüldü.
+
+=================== V229 (APK adı: v227) ===================
+ - Savaş paneli: açılıştaki davul/boru kaldırıldı; yerine alçak perdeli, kısık özgün müzik (assets/audio/battle.ogg). Zar atılınca müzik kısılır, 850 Hz üstü süzülü olduğu için zar sesini örtmez. KULAKLA DİNLENMEDİ.
+ - Harita müziği: savaş paneli dışında hafif, davulsuz özgün müzik (assets/audio/map.ogg). Haritadaki savaş animasyonunda kısılır. KULAKLA DİNLENMEDİ.
+ - Tank topu ve isabet sesi yenilendi (sfx/tcannon_*, thit_*). Tank + piyade sahnesinde top artık tüfek sesiyle çalmıyor.
+ - Uçak saldırısı eski ses akışına ve V226 öncesi örneklere döndü (sfx/oboom_*, owhoosh_*).
+ - "Savaş yorgunluğu geçti" bildirimi: Figma ile üretilen mutlu şövalye (assets/icons/rested229.webp).
+ - Keşif raporu: değerler ve değerlendirme savaş yorgunluğu düşülmüş gösterilir; "Sen / Rakip −%" şeridi eklendi (v24.js, v73.js WCFat).
+ - Sağ kare menü: düğme yazısına dokunmak da menüyü açar.
+ - Ateş ve füze sahnesi: birlikler saldıranın karasına sığmıyorsa içeride yeni nokta aranır; yine sığmazsa kara birliği konmaz, yalnız uçak gelir (v60.js fireSpot). Oyun içinde denenmedi.
+ - Uygulama simgesi: V226'daki yeni simge dosyaları derleme deposuna kopyalanmamıştı; bir sonraki APK'da resources/ da kopyalanmalı.
+
+=================== V230 (APK adı: v227) ===================
+ - Ana menü küresi: doku odanın tonlarına çekildi (assets/menu/globe229.webp); arka plan fotoğrafından gelen leke dokusu kaldırıldı, temiz loş ışık (v218.js).
+ - Pes Et: "Oyun Bitti" kartı doğrudan açılır, "pes etti" yazar (v141.js, v214.js). Ana menüde Zar At düğmesi kalmıyor.
+ - Atom bombası (masaüstü Chrome, telefon görünümünde kare kare izlendi): Rusya'da doğru yerde patlar (v30.js centerOf). Sahne küre eğrisine oturtuldu, birlikler ülke içinde kalır; mantar bulutu ve toz halkası yenilendi (v225.js).
+ - Dev ülkelerde savaş sahnesi cephede kurulur (v60.js nearLL); Rusya'da patlama boyutu sınırlandı. Türkiye gibi dar ülkede iki tank kendi karasına yerleşir, denizden çıkmaz (izlendi: Türkiye-Filistin, Rusya-Ukrayna, Türkiye-Rusya).
+ - "Kaydedildi" yazısı yok; kayıt sessizce sürer.
+ - Kalkınma ve Diplomasi menülerinde tıklama/bildirim sesleri V226 öncesi haline döndü. KULAKLA DİNLENMEDİ.

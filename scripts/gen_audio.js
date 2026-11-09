@@ -244,6 +244,60 @@
     });
   }
 
+  /* ---------- V229: tank sesleri + harita ve savaş paneli müziği (özgün beste) ---------- */
+  var FX2 = {
+    tcannon: [1.7, 2, function (k, i) {
+      var v = k.bus(.92, .3, k.verb(.9, 3000, .5, 6));
+      k.nz(.002, .012, { type: 'highpass', f0: 3200, g: .9, dst: v }); k.nz(.002, .05, { type: 'bandpass', f0: 2100 - i * 200, f1: 900, q: 1, g: .75, dst: v });
+      k.tn(.002, .16, { f0: 240 - i * 20, f1: 78, g: .85, a: .001, dst: v }); k.tn(.004, .42, { f0: 108 - i * 8, f1: 42, fk: .6, g: 1.1, a: .002, dst: v });
+      k.nz(.004, .32, { type: 'lowpass', f0: 1100, f1: 160, q: .6, g: .7, dst: v });
+      k.nz(.19, .16, { type: 'bandpass', f0: 620, f1: 240, q: .8, g: .16, dst: v }); k.nz(.38, .2, { type: 'bandpass', f0: 420, f1: 180, q: .8, g: .08, dst: v });
+      [[.58, 1460], [.585, 2230], [.59, 3120]].forEach(function (q) { k.tn(q[0], .09, { f0: q[1], type: 'triangle', g: .07, a: .001, dst: v }); });
+    }, .9, 3],
+    thit: [1.8, 2, function (k, i) {
+      var v = k.bus(.9, .35, k.verb(1, 2600, .55, 6));
+      k.nz(.002, .02, { type: 'highpass', f0: 2400, g: .55, dst: v }); k.nz(.003, .5, { type: 'lowpass', f0: 1700 - i * 150, f1: 130, q: .6, g: .9, dst: v });
+      k.tn(.003, .42, { f0: 130 - i * 12, f1: 40, fk: .6, g: 1.05, a: .002, dst: v });
+      for (var q = 0; q < 10; q++) k.nz(R(.12, .7), R(.01, .035), { type: 'bandpass', f0: R(1400, 3800), q: 2, g: R(.03, .1), dst: v });
+    }, .86, 3]
+  };
+  function pad(k, dst, t, d, f, g) {
+    var c = k.c, e = c.createGain(); ramp(e.gain, t, [[0, .0001], [Math.min(1.4, d * .4), g], [Math.max(1.5, d - .4), g * .85], [d + 1.6, .0001]]);
+    [[1, 'sine', 1], [1.004, 'triangle', .35], [.998, 'sine', .5]].forEach(function (q) { var s = c.createOscillator(), a = c.createGain(); s.type = q[1]; s.frequency.value = f * q[0]; a.gain.value = q[2]; s.connect(a); a.connect(e); s.start(t); s.stop(t + d + 1.7); });
+    e.connect(dst);
+  }
+  function fluteS(k, dst, t, d, f, g) {
+    var c = k.c, e = c.createGain(), s = c.createOscillator(), v = c.createOscillator(), a = c.createGain(); s.frequency.value = f; v.frequency.value = 4.8; a.gain.value = 5; v.connect(a); a.connect(s.detune);
+    ramp(e.gain, t, [[0, .0001], [.14, g], [Math.max(.2, d - .1), g * .8], [d + .3, .0001]]); s.connect(e); e.connect(dst); s.start(t); v.start(t); s.stop(t + d + .35); v.stop(t + d + .35);
+  }
+  var MAP_B = 60 / 66, MAP_BAR = MAP_B * 4;
+  var MAP_CH = { D: ['D2', 'A2', 'D3', 'F#3', 'A3', 'D4'], Bm: ['B1', 'F#2', 'B2', 'D3', 'F#3', 'B3'], G: ['G1', 'D2', 'G2', 'B2', 'D3', 'G3'], A: ['A1', 'E2', 'A2', 'C#3', 'E3', 'A3'], Fm: ['F#1', 'C#2', 'F#2', 'A2', 'C#3', 'F#3'], Em: ['E2', 'B2', 'E3', 'G3', 'B3', 'E4'] };
+  var MAP_FORM = ['D', 'Bm', 'G', 'A', 'D', 'Fm', 'G', 'A', 'Bm', 'G', 'D', 'A', 'G', 'D', 'Em', 'A'];
+  var MAP_MEL = { 4: [['F#5', 0, 2], ['A5', 2, 1], ['F#5', 3, 1]], 5: [['E5', 0, 2], ['C#5', 2, 2]], 6: [['D5', 0, 1.5], ['B4', 1.5, .5], ['G4', 2, 2]], 7: [['A4', 0, 3]], 12: [['B4', 0, 1.5], ['D5', 1.5, .5], ['G5', 2, 2]], 13: [['F#5', 0, 2], ['D5', 2, 2]], 14: [['E5', 0, 1.5], ['G5', 1.5, .5], ['B4', 2, 2]], 15: [['A4', 0, 2], ['C#5', 2, 1], ['E5', 3, 1]] };
+  function buildMap(k) {
+    var c = k.c, verb = k.verb(2.8, 3800, .7, 8), low = c.createBiquadFilter(), pB = k.bus(.7, .6, verb), lute = k.bus(.72, .55, verb), fl = k.bus(.5, .72, verb);
+    low.type = 'lowpass'; low.frequency.value = 1300; low.Q.value = .4; low.connect(pB);
+    MAP_FORM.forEach(function (n, b) {
+      var t = b * MAP_BAR, ch = MAP_CH[n], i;
+      ch.forEach(function (x, j) { if (j !== 1) pad(k, low, t, MAP_BAR + .04, hz(x), [.11, 0, .075, .06, .05, .035][j]); });
+      [[0, 0, .3], [1, 2, .2], [1.5, 3, .16], [2, 4, .22], [3, 3, .18], [3.5, 5, .14]].forEach(function (p) { k.pluck(Math.max(0, t + p[0] * MAP_B + R(-.012, .012)), hz(ch[p[1]]) * (p[1] ? 2 : 1), p[2] * R(.9, 1.06), lute, 3, .5); });
+      (MAP_MEL[b] || []).forEach(function (m) { fluteS(k, fl, t + m[1] * MAP_B, m[2] * MAP_B - .04, hz(m[0]), .085); });
+    });
+  }
+  var BAT_CH = { Dm: ['D2', 'A2', 'D3', 'F3'], Bb: ['Bb1', 'F2', 'Bb2', 'D3'], Gm: ['G1', 'D2', 'G2', 'Bb2'], A: ['A1', 'E2', 'A2', 'C#3'] };
+  var BAT_FORM = ['Dm', 'Dm', 'Bb', 'A', 'Gm', 'Dm', 'Bb', 'A'];
+  var BAT_MEL = { 2: [['A3', 0, 2], ['F3', 2, 1], ['D3', 3, 1]], 3: [['E3', 0, 2], ['C#3', 2, 2]], 6: [['Bb3', 0, 2], ['A3', 2, 1], ['G3', 3, 1]], 7: [['A3', 0, 3]] };
+  function buildBattle(k) {
+    var c = k.c, lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 850; lp.Q.value = .5; lp.connect(k.out); k.out = lp;   /* zarın tıkırtısı (1,5-2,7 kHz) maskelenmesin */
+    var verb = k.verb(2.2, 1400, .6, 6), b = k.bus(.85, .5, verb);
+    BAT_FORM.forEach(function (n, i) {
+      var t = i * 4, ch = BAT_CH[n];
+      ch.forEach(function (x, j) { pad(k, b, t, 4.05, hz(x), [.16, .11, .08, .06][j]); });
+      k.timp(t, hz(ch[0]) * (hz(ch[0]) < 60 ? 2 : 1), .2, b); k.timp(t + 2, hz(ch[0]) * (hz(ch[0]) < 60 ? 2 : 1), .12, b);
+      (BAT_MEL[i] || []).forEach(function (m) { k.brass(t + m[1], m[2] - .05, hz(m[0]), .05, b, .35); });
+    });
+  }
+
   /* ---------- Opus + Ogg (tarayıcının kendi kodlayıcısı; dış kitaplık yok) ---------- */
   var CRC = (function () { var t = new Uint32Array(256); for (var i = 0; i < 256; i++) { var r = i << 24; for (var j = 0; j < 8; j++) r = r & 0x80000000 ? (r << 1) ^ 0x04c11db7 : r << 1; t[i] = r >>> 0; } return t; })();
   function oggPage(serial, seq, flags, granule, packets) {
@@ -290,6 +344,18 @@
         q = q.then(function () { seed = 4242 + name.length; var k = new K(F[0] * 2 + 1.2); F[1](k); return k.render(F[2], 0); }).then(function (p) { var r = loopify(p, F[0], .15); st[name] = stat(r); return enc(r, 72, false).then(function (b) { out['sfx/' + name + '.ogg'] = b; }); });
       });
       return q.then(function () { return { files: out, stat: st }; });
+    },
+    v229: function () {   /* yalnızca V229 dosyaları: map.ogg, battle.ogg, sfx/tcannon_*.ogg, sfx/thit_*.ogg */
+      var out = {}, st = {}, q = Promise.resolve();
+      Object.keys(FX2).forEach(function (name) {
+        var F = FX2[name];
+        for (var i = 0; i < F[4]; i++) (function (i) {
+          q = q.then(function () { seed = 2290 + name.length * 77 + i * 991; var k = new K(F[0]); F[2](k, i); return k.render(F[3], 0); }).then(function (p) { st[name + '_' + i] = stat(p); return enc(p, 80, false).then(function (b) { out['sfx/' + name + '_' + i + '.ogg'] = b; }); });
+        })(i);
+      });
+      return q.then(function () { seed = 229; var k = new K(16 * MAP_BAR + 6); buildMap(k); ksC = {}; return k.render(.55, 0); }).then(function (p) { st.map = stat(p); return enc(p, 64, false).then(function (b) { out['map.ogg'] = b; }); })
+        .then(function () { seed = 230; var k = new K(32 + 5); buildBattle(k); return k.render(.7, 0); }).then(function (p) { st.battle = stat(p); return enc(p, 56, false).then(function (b) { out['battle.ogg'] = b; }); })
+        .then(function () { return JSON.stringify({ files: out, stat: st }); });
     },
     all: function () {
       var R0 = {};

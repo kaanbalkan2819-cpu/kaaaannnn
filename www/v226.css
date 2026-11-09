@@ -44,3 +44,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .gl226 s{position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(233,194,90,.35);text-decoration:none}
 @keyframes gl226{from{transform:rotateY(0)}to{transform:rotateY(360deg)}}
 /* yükleme simgesi hareketi azalt ayarında da döner: durursa oyun donmuş sanılır */
+
+/* ---- V230: kayıt sessizce yapılır, bildirim yok ---- */
+#sv139{display:none!important}
+body.wcm-on #rollbtn23{display:none!important}
+
+/* ---- V229: sağ kare menüde yazıya dokunmak da düğmeyi açar; keşif raporunda savaş yorgunluğu ---- */
+#col221.on .it221 span{pointer-events:auto;cursor:pointer}
+.sc28fat{display:flex;align-items:center;gap:8px;margin:7px 0 2px;padding:5px 9px;border-radius:10px;border:1px solid rgba(255,150,90,.45);background:rgba(80,40,20,.32);color:#ffd2b0;font-size:12px;line-height:1.3}
+.sc28fat img{width:26px;height:26px;object-fit:contain;flex:0 0 26px}
+.sc28fat b{color:#fff;white-space:nowrap}
+.sc28fat small{display:block;opacity:.75;font-size:10.5px}

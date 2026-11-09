@@ -1130,7 +1130,7 @@
         if (dead) return;
         g.updateMatrixWorld(true); tk.tip.getWorldPosition(tipW); const mz = this.root.worldToLocal(tipW.clone());
         const dir = new T.Vector3(to.x - fin.x, 0, to.z - fin.z).normalize().multiplyScalar(Math.cos(elev)); dir.y = Math.sin(elev); dir.normalize();
-        this.muzzle(mz, dir, 1.4 * sc); this.shake(.22); antV += 6; this.ringFx(new T.Vector3(fin.x + fw.x * 1.4 * sc, fin.y, fin.z + fw.z * 1.4 * sc), 0xffe0b0, 1.8 * sc, .4);
+        this.muzzle(mz, dir, 1.4 * sc, undefined, 'tank'); this.shake(.22); antV += 6; this.ringFx(new T.Vector3(fin.x + fw.x * 1.4 * sc, fin.y, fin.z + fw.z * 1.4 * sc), 0xffe0b0, 1.8 * sc, .4);
         this.dust(new T.Vector3(fin.x + fw.x * 1.3 * sc, fin.y, fin.z + fw.z * 1.3 * sc), .9 * sc, 8);
         this.tween(.5, u => {
           const r = u < .12 ? u / .12 : Math.pow(1 - (u - .12) / .88, 2);
@@ -1141,7 +1141,7 @@
         if (vic) vic.arm();
         const ap = o.aim ? o.aim(i, 1.1) : null, tt = ap ? V(ap) : (o.tos && o.tos.length ? V(o.tos[i % o.tos.length]) : to);   // v6: hedefler dışarıdan verilebilir (hep hedef ülkenin içinde); V166: aim → karşı birlik
         this.shell(mz, tt, sc, () => {
-          this.explosion(tt, o.blast);
+          this.explosion(tt, o.blast, { snd: 'tank' });
           if (o.target) { if (i === o.shots - 1 && o.destroy) this.collapse(o.target); else this.flinch(o.target); }
           if (o.onHit) o.onHit(i);
         }, o.dud);

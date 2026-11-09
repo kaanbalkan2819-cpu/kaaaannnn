@@ -69,12 +69,9 @@
       var m = (1 - sm(rho, .93, .985)) * sm(Math.abs(iy - ringY), 10, 16); msk[i] = m; if (m <= .004) continue;
       var z = Math.sqrt(Math.max(0, 1 - r2)), Y = -v, lat = Math.asin(Math.max(-1, Math.min(1, Y * ct + z * st))), lo = Math.atan2(u, z * ct - Y * st);
       row[i] = Math.max(0, Math.min(TH - 1, Math.round((.5 - lat / Math.PI) * TH))) * TW; lon[i] = lo;
-      var sx = (xx + .5) / rn * N - .5, sy = (y + .5) / rn * N - .5, x0 = Math.max(0, Math.min(N - 2, sx | 0)), y0 = Math.max(0, Math.min(N - 2, sy | 0)), fx = sx - x0, fy = sy - y0;
-      var s = (S[y0 * N + x0] * (1 - fx) + S[y0 * N + x0 + 1] * fx) * (1 - fy) + (S[(y0 + 1) * N + x0] * (1 - fx) + S[(y0 + 1) * N + x0 + 1] * fx) * fy;
-      var l0 = (photo.L0[y0 * N + x0] * (1 - fx) + photo.L0[y0 * N + x0 + 1] * fx) * (1 - fy) + (photo.L0[(y0 + 1) * N + x0] * (1 - fx) + photo.L0[(y0 + 1) * N + x0 + 1] * fx) * fy;
-      var det = Math.max(.72, Math.min(1.3, .55 + .45 * l0 / Math.max(6, s)));   /* V221: gerçek kürenin dokusu haritanın üstüne biner */
-      var spec = Math.max(0, s / photo.mean - 1.15) * .35;   /* parlak bölgelerde hafif cila parlaması */
-      shade[i] = Math.min(1.8, s * K * det + spec) * (.55 + .45 * Math.pow(z, .6));   /* fotoğrafın ışığı + kenara doğru yumuşak kararma */
+      /* V230: arka plan fotoğrafındaki küreden ışık ve doku alınmaz (kıtaları leke gibi görünüyordu); temiz, odanın loşluğuna uygun ışık */
+      var dl = Math.max(0, u * -.26 + Y * .45 + z * .854);
+      shade[i] = (.26 + .86 * Math.pow(dl, 1.3)) * (.55 + .45 * Math.pow(z, .6));
     }
     return { row: row, lon: lon, shade: shade, m: msk };
   }

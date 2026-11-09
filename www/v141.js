@@ -39,6 +39,7 @@
       if (!G || G.over || (G.mp)) return;
       G.fin139 = { w: -1 }; G.over = { w: -1 }; G.ph = 'over'; G.busy = 0;
       try { localStorage.removeItem(SV); } catch (e) { }
+      try { if (window.v214Give && v214Give()) return; } catch (e) { try { console.error(e); } catch (x) { } }   /* V230: render() ana menüye düşürüyordu */
       try { render(); } catch (e) { }
     } catch (e) { try { console.error(e); } catch (x) { } }
   };

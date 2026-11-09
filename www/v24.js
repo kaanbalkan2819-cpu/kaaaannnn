@@ -102,7 +102,8 @@
   var SNAME = function () { return lang() === 'en' ? ['Population', 'Army', 'Economy', 'Technology', 'Diplomacy'] : ['Nüfus', 'Ordu', 'Ekonomi', 'Teknoloji', 'Diplomasi']; };
   function winP(a, d) {      // saldıran a, savunan d: 36 zar sonucu üzerinden zafer ihtimali
     try {
-      var A = st(a), D = st(d), bA = !!(G.rv && G.rv[a + '>' + d]), bD = !!(G.rv && G.rv[d + '>' + a]), w = 0;
+      var fA = window.WCFat ? WCFat.f(a) : 1, fD = window.WCFat ? WCFat.f(d) : 1;   /* V229: değerlendirme savaş yorgunluğunu da hesaba katar */
+      var A = st(a).map(function (v) { return v * fA; }), D = st(d).map(function (v) { return v * fD; }), bA = !!(G.rv && G.rv[a + '>' + d]), bD = !!(G.rv && G.rv[d + '>' + a]), w = 0;
       for (var x = 1; x <= 6; x++) for (var y = 1; y <= 6; y++) if (battle(A, D, x, y, bA, bD).win) w++;
       return w / 36;
     } catch (e) { return .5; }
@@ -118,7 +119,8 @@
       var o = G.owner[G.sel], pl = G.pl; if (typeof o !== 'string' || o === pl) return;
       var kn = G.kn && G.kn[pl] && G.kn[pl][o]; if (!kn || !kn[0]) return;      // yalnızca keşfedilmişse
       var el = document.getElementById('panel'), box = el && el.querySelector('.v15p'); if (!box || box.querySelector('.scr28')) return;
-      var me = st(pl), he = st(o), sn = SNAME(), IC5 = ['👥', '🎖', '💰', '🔬', '🕊'], mt = 0, ht = 0, i, rows = '';
+      var fP = window.WCFat ? WCFat.f(pl) : 1, fR = window.WCFat ? WCFat.f(o) : 1, pP = Math.round((1 - fP) * 100), pR = Math.round((1 - fR) * 100);   /* V229: satırlar yorgunluk düşülmüş değerleri gösterir */
+      var me = st(pl).map(function (v) { return v * fP; }), he = st(o).map(function (v) { return v * fR; }), sn = SNAME(), IC5 = ['👥', '🎖', '💰', '🔬', '🕊'], mt = 0, ht = 0, i, rows = '';
       for (i = 0; i < 5; i++) { mt += +me[i] || 0; ht += +he[i] || 0; }
       var hi = 0, lo = 0; for (i = 1; i < 5; i++) { if (he[i] > he[hi]) hi = i; if (he[i] < he[lo]) lo = i; }
       for (i = 0; i < 5; i++) {
@@ -131,6 +133,7 @@
       var VD = lang() === 'en' ? ['Negligible', 'Low', 'Notable', 'Serious'] : ['Önemsiz', 'Düşük', 'Belirgin', 'Ciddi'];
       var pact = pactedWith(pl, o);
       var h = '<div class="scr28"><div class="sc28t"><span>' + T('KEŞİF RAPORU', 'SCOUT REPORT') + '</span><span class="leg"><u class="a"></u>' + T('Sen', 'You') + '<u class="d"></u>' + T('Rakip', 'Rival') + '</span></div>' + rows +
+        (pP || pR ? '<div class="sc28fat"><img src="assets/icons/fatigue226.webp" alt=""><span>' + T('Savaş yorgunluğu: ', 'War fatigue: ') + (pP ? T('Sen <b>−%' + pP + '</b>', 'You <b>−' + pP + '%</b>') : '') + (pP && pR ? ' · ' : '') + (pR ? T('Rakip <b>−%' + pR + '</b>', 'Rival <b>−' + pR + '%</b>') : '') + '<small>' + T('Değerlere işlendi', 'Applied to the values above') + '</small></span></div>' : '') +
         '<div class="sc28v"><div class="vc"><small>' + T('Saldırı değerlendirmesi', 'If you attack') + '</small>' + meter(ba, 'g') + '<b>' + VA[ba] + '</b></div>' +
         '<div class="vc"><small>' + T('Sana tehdidi', 'Threat to you') + '</small>' + meter(bd, 'r') + '<b>' + VD[bd] + '</b></div></div>' +
         '<div class="sc28f"><span class="ch">' + T('Güçlü yanı', 'Strength') + ' <b>' + sn[hi] + '</b></span><span class="ch">' + T('Zayıf yanı', 'Weakness') + ' <b>' + sn[lo] + '</b></span>' +

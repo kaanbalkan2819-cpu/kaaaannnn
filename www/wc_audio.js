@@ -34,11 +34,15 @@
   }
   /* V227: efektler assets/audio/sfx/ altındaki Ogg (Opus) dosyalarından yüklenir (scripts/gen_audio.js ile üretildi). Zar sesi wc_sfx_data.js'te kalır.
      Dosya yüklenemezse her ses eski sentezleyiciye geri düşer. Tek tek ve sırayla çözülür; açılışta takılma yapmaz. */
-  var FILES = { click: 1, notify: 1, attack: 1, cannon: 3, boom: 3, hit: 3, shot: 4, mg: 2, missile: 2, jet: 1, tank: 1, wave: 1, splash: 1, wblast: 1, collapse: 1, clash: 3, tick: 1, ping: 1, coin: 1, pact: 1, win: 1, lose: 1, conq: 1, horn: 1, flak: 2, siren: 1, bomber: 1, whistle: 1, nuke: 1 };
+  var FILES = { click: 1, notify: 1, attack: 1, cannon: 3, boom: 3, hit: 3, shot: 4, mg: 2, missile: 2, jet: 1, tank: 1, wave: 1, splash: 1, wblast: 1, collapse: 1, clash: 3, tick: 1, ping: 1, coin: 1, pact: 1, win: 1, lose: 1, conq: 1, horn: 1, flak: 2, siren: 1, bomber: 1, whistle: 1, nuke: 1, tcannon: 3, thit: 3 };
+  /* V229: uçak saldırısı V226 öncesi örnek seslere döndü (assets/audio/sfx/oboom_*.mp3, owhoosh_*.mp3) */
+  var OLD = { oboom: 2, owhoosh: 1 };
+  function oldReady() { return !!(bufs.oboom && bufs.oboom.length); }
   function xhr(url, ok, no) { try { var x = new XMLHttpRequest(); x.open('GET', url); x.responseType = 'arraybuffer'; x.onload = function () { if (x.response && x.response.byteLength) ok(x.response); else no(); }; x.onerror = no; x.send(); } catch (e) { no(); } }
   function decode(ab, ok, no) { try { var pr = c.decodeAudioData(ab, ok, no); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { no(); } }
   function loadFiles() {
     var q = []; Object.keys(FILES).forEach(function (k) { bufs[k] = []; for (var i = 0; i < FILES[k]; i++) q.push([k, 'assets/audio/sfx/' + k + (FILES[k] > 1 ? '_' + i : '') + '.ogg']); });
+    Object.keys(OLD).forEach(function (k) { bufs[k] = []; for (var i = 0; i < OLD[k]; i++) q.push([k, 'assets/audio/sfx/' + k + '_' + i + '.mp3']); });
     (function nx() { var it = q.shift(); if (!it) return; var go = function () { setTimeout(nx, 15); }; xhr(it[1], function (ab) { decode(ab, function (b) { bufs[it[0]].push(b); go(); }, go); }, go); })();
   }
   function smp(k, t, g, rate) {
@@ -87,12 +91,39 @@
     [.33, .45, .56, .66, .75, .83, .9, .96].forEach(function (o) { clack(t + o + R(-.008, .008), g, R(1800, 2700)); g *= .72; });   // sekmeler
     nz(t + .33, .7, .1, 'lowpass', 1000, 280, sf, .7);                                  // masada yuvarlanma
   }
+  /* V229: harita ve savaş paneli müziği; zar atılınca müzik kısılır */
+  var AMB = { map: { u: 'assets/audio/map.ogg', L: 16 * 240 / 66, g: .9 }, bat: { u: 'assets/audio/battle.ogg', L: 32, g: .5 } }, ambD = null, ambA = null, ambAL = 1;
+  function ambBus() { if (!ambD) { ambD = c.createGain(); ambA = c.createGain(); ambD.connect(ambA); ambA.connect(mu); } return ambD; }
+  function duck(sec) { if (!c || !ambD) return; var t = c.currentTime, g = ambD.gain; try { g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(.22, t + .06); g.setValueAtTime(.22, t + sec); g.linearRampToValueAtTime(1, t + sec + .7); } catch (e) { } }
+  function ambLoad(k) { var A = AMB[k]; if (A.b || A.l || A.f || !c) return; A.l = 1; var no = function () { A.f = 1; A.l = 0; }; xhr(A.u, function (ab) { decode(ab, function (b) { A.b = b; A.l = 0; }, no); }, no); }
+  function ambOn(k) { var A = AMB[k]; if (A.t || !A.b) return; var bus = c.createGain(), n = c.currentTime; bus.gain.setValueAtTime(.0001, n); bus.gain.linearRampToValueAtTime(A.g, n + 1.4); bus.connect(ambBus()); A.t = { bus: bus, next: n + .1, src: [] }; }
+  function ambOff(k, free) {
+    var A = AMB[k], t = A.t; if (free) A.free = 1; if (!t) { if (free) A.b = null; return; } A.t = null;
+    try { var n = c.currentTime; t.bus.gain.cancelScheduledValues(n); t.bus.gain.setValueAtTime(t.bus.gain.value, n); t.bus.gain.linearRampToValueAtTime(.0001, n + .9); } catch (e) { }
+    setTimeout(function () { t.src.forEach(function (s) { try { s.stop(); } catch (e) { } }); try { t.bus.disconnect(); } catch (e) { } if (A.free) { A.free = 0; if (!A.t) A.b = null; } }, 1200);
+  }
+  function ambSched(A) { var t = A.t; while (t.next < c.currentTime + 1.5) { var s = c.createBufferSource(); s.buffer = A.b; s.connect(t.bus); s.start(t.next); t.src.push(s); if (t.src.length > 3) t.src.shift(); t.next += A.L; } }
+  function ambTick(menu) {
+    var g = null; try { g = window.G; } catch (e) { }
+    var on = !menu && !!g && !g.over && !!S().musOn && !!document.body, want = on ? (document.body.classList.contains('bsh') ? 'bat' : 'map') : '';
+    Object.keys(AMB).forEach(function (k) { var A = AMB[k]; if (k === want) { ambLoad(k); ambOn(k); if (A.t) ambSched(A); } else if (A.t || menu) { A.free = 0; ambOff(k, menu); } });
+    var lv = animKind && want === 'map' ? .35 : 1; if (ambA && lv !== ambAL) { ambAL = lv; try { ambA.gain.setTargetAtTime(lv, c.currentTime, .35); } catch (e) { } }
+  }
+  /* V230: Kalkınma ve Diplomasi menülerinde tıklama/bildirim sesleri V226 öncesi haliyle (sentez) */
+  function oldUi(k) {
+    if (k !== 'click' && k !== 'notify' && k !== 'tick') return false;
+    try {
+      var ev = window.event, tg = ev && ev.target; if (tg && tg.closest && tg.closest('#col221')) return true;
+      var m = document.getElementById('mod'), b = document.getElementById('box'); return !!(m && b && m.style.display === 'flex' && b.querySelector('.polx,.d38'));
+    } catch (e) { return false; }
+  }
   var PLAYS = { click: ['click', .7, 1], tick: ['tick', .6, 1], notify: ['notify', .55], ping: ['ping', .6], coin: ['coin', .7, 1], pact: ['pact', .85], win: ['win', .9], lose: ['lose', .9], conq: ['conq', .95], attack: ['attack', .85], horn: ['horn', .7], cannon: ['cannon', .85, 1], boom: ['boom', .92, 1], rifle: ['mg', .5, 1], missile: ['missile', .75, 1], clash: ['clash', .8, 1] };
   function play(k) {
     if (!c || !S().sfxOn) return; var t = c.currentTime + .005, i;
+    if (k === 'dice') duck(1.7); else if (k === 'dtick') duck(.3);
     try {
       /* V227: üretilmiş örnek varsa o çalar; yoksa aşağıdaki eski sentez */
-      var sk = PLAYS[k]; if (sk && smp(sk[0], t, sk[1], sk[2] ? R(.97, 1.03) : 1)) return;
+      var sk = PLAYS[k]; if (sk && !oldUi(k) && smp(sk[0], t, sk[1], sk[2] ? R(.97, 1.03) : 1)) return;
       switch (k) {
         case 'click': tone(660, t, .07, 'triangle', .22); break;
         case 'tick': case 'dtick': tone(880, t, .05, 'sine', .2); break;   /* dtick: zar akışının tıkı (değişmedi) */
@@ -130,20 +161,22 @@
   }
   function hookFX() {
     var W = window.WCBattleFX; if (!W || W.__snd) return; W.__snd = 1; var P = W.prototype;
-    function wrap(n, f) { var o = P[n]; if (typeof o !== 'function') return; P[n] = function () { try { f.apply(this, arguments); } catch (e) { } return o.apply(this, arguments); }; }
+    function wrap(n, f) { var o = P[n]; if (typeof o !== 'function') return; P[n] = function () { try { if (!(animKind === 'air' && oldReady())) f.apply(this, arguments); } catch (e) { } return o.apply(this, arguments); }; }   /* V229: uçak saldırısında olay sesleri yerine eski ses akışı (animStart) */
     wrap('tankAttack', function () { this.__k = 'tank'; this.at(.03, function () { if (!aTank && anim('tank', .22, 1, true)) aTank = true; }); });
     wrap('infantryAttack', function () { this.__k = 'inf'; });
     wrap('missileAttack', function () { this.__k = 'msl'; });
     wrap('navalAttack', function () { this.__k = 'nav'; });
     wrap('planeAttack', function (o) { this.__k = 'air'; var n = Math.min(2, (o && o.planes) || 2); for (var i = 0; i < n; i++) this.at(.2 + i * .55, function () { anim('jet', .75); }); });
-    wrap('muzzle', function (p, d, s) {
+    wrap('muzzle', function (p, d, s, nl, src) {
       var k = this.__k;
+      if (src === 'tank') { if (rl('tcn', 90)) anim('tcannon', .9); return; }   /* V229: yeni tank topu sesi; tank+piyade sahnesinde top artık tüfek gibi çalmaz */
       if (k === 'msl') { if (rl('msl', 280)) anim('missile', .78); return; }
       if (k === 'inf' || s < .6) { if (rl('shot', 65)) anim('shot', R(.24, .4)); return; }
       if (rl('cannon', 90)) anim('cannon', .8);
     });
     wrap('explosion', function (p, s0, o) {
       var s = (s0 || 1) * (this.projK || 1);
+      if (o && o.snd === 'tank') { if (rl('thit', 80)) anim('thit', .85); return; }   /* V229: tank mermisi isabeti */
       if (o && o.water) { if (rl('wb', 220)) anim('wblast', .55); return; }
       if (s >= .75) { if (rl('boom', 130)) anim('boom', Math.min(1, .6 + s * .25)); } else if (rl('hit', 80)) anim('hit', .5 + s * .45);
     });
@@ -156,6 +189,7 @@
   /* ---------- savaş animasyonu başlangıcı (v60.js çağırır) ---------- */
   function animStart(kind) {
     animEnd(); if (!c) return; animKind = kind || 'land'; hookFX();
+    if (animKind === 'air' && oldReady()) { oldAir(); return; }
     if (fxReady()) {
       if (animKind === 'sea') { anim('wave', .42, 1, true); anim('horn', .5, 1); }
       return;
@@ -167,6 +201,15 @@
       if (animKind === 'land') { if (r < .5) cannon(t, .4); else if (r < .75) cannon(t, .55); else if (r < .9) boom(t, .45); }   /* v120: balon patlaması gibi duyulan tiz rifle sesi kaldırıldı */
       else if (animKind === 'sea') { if (r < .35) cannon(t, .5); else if (r < .55) boom(t, .55); if (Math.random() < .3) wave(); }
       else { if (el > 1.8 && r < .6) boom(t, .6); else if (r < .25) whoosh(t, 1.1, .25, true); }
+    }, 650);
+  }
+  /* V229: uçak saldırısının V226 öncesi ses akışı (kalkış uğultusu + rastgele aralıklı patlamalar) */
+  function oldWhoosh(t, d, g) { if (!smp('owhoosh', t, Math.min(1, g * 2.2))) nz(t, d, g, 'bandpass', 250, 2600, sf, 1.4); }
+  function oldAir() {
+    var t0 = Date.now(), n = c.currentTime + .005; oldWhoosh(n, 1.4, .35); tone(80, n, 1.4, 'sawtooth', .12, sf, { to: 200, lp: 500, a: .2 });
+    animT = setInterval(function () {
+      if (!c || !S().sfxOn || document.hidden) return; var t = c.currentTime + .01, r = Math.random(), el = (Date.now() - t0) / 1000;
+      if (el > 1.8 && r < .6) smp('oboom', t, Math.min(1, .6 * 1.15)); else if (r < .25) oldWhoosh(t, 1.1, .25);
     }, 650);
   }
   function wave() { if (!c) return; var t = c.currentTime + .01; nz(t, 3.2, .28, 'lowpass', 300, 700, sf, .5); }
@@ -225,6 +268,7 @@
       if (want && !trk && (mBuf || mFailed)) startTrack(); else if (!want && trk) stopTrack();
       if (trk && trk.s) { if (mBuf) schedMusic(trk); }
       else if (trk) { var lim = c.currentTime + .5; while (trk.next < lim) { sched(trk, trk.step, trk.next); trk.step++; trk.next += SD; } }
+      ambTick(!!document.body && document.body.classList.contains('wcm-on'));
     } catch (e) { }
   }
 
@@ -235,11 +279,8 @@
         var _sb = showBattle;
         showBattle = function (r, p, e) {
           var res = _sb.apply(this, arguments);
-          try {
-            play('attack');
-            /* V122: zafer/yenilgi müziği artık burada 2,6 sn sonra çalmaz — savaş ekranı (v7.js finish) sonuç gerçekten açıldığında çalar;
-               aksi halde rakip 6 atınca sonuç görünmeden "yenilgi" müziği giriyordu. */
-          } catch (x) { }
+          /* V229: savaş paneli açılışındaki davul/boru kaldırıldı; panelde kısık battle.ogg çalar (ambTick).
+             V122: zafer/yenilgi müziği burada değil, savaş ekranı (v7.js finish) sonuç açıldığında çalar. */
           return res;
         };
         showBattle.wc111 = 1;
