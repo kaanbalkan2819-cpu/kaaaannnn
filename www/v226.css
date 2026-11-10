@@ -94,3 +94,26 @@ body.wcm-on #rollbtn23{display:none!important}
 .sc28fat img{width:26px;height:26px;object-fit:contain;flex:0 0 26px}
 .sc28fat b{color:#fff;white-space:nowrap}
 .sc28fat small{display:block;opacity:.75;font-size:10.5px}
+
+/* ---- V238: Zafer Ekranı ---- */
+#v139over .in.v238{width:min(800px,100%);margin:auto;display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:20px;align-items:center}
+#v139over.win{align-items:flex-start;padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 12px max(16px,env(safe-area-inset-left))}
+.v238 .tg238{display:block;font:700 11px Georgia,serif;letter-spacing:.16em;color:#e8c76c}
+.v238 .fg{margin:8px 0 4px}
+#v139over .v238 .fg img,#v139over .v238 .fg .fi{width:104px!important;height:70px!important;max-width:none!important;object-fit:cover;border-radius:6px;box-shadow:0 0 0 2px #e8c76c,0 6px 16px #0008}
+#v139over .v238 h2{font:700 25px/1.15 Georgia,serif;margin:6px 0 4px}
+#v139over .v238 p{font-size:13px;margin:0 0 6px}
+#v139over .v238 .sc{margin:4px 0 0}
+#v139over .v238 .gr{margin:0 0 7px}
+.rw238{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:12px;border:1px solid #e3b94f;background:linear-gradient(90deg,rgba(227,185,79,.26),rgba(227,185,79,.07));text-align:left}
+.rw238 i{font-style:normal;font-size:28px;line-height:1}
+.rw238 small{display:block;font:700 9.5px Georgia,serif;letter-spacing:.14em;color:#e8c76c}
+.rw238 b{display:block;font:700 17px/1.2 Georgia,serif;color:#fff3cf}
+.rw238 span{display:block;font-size:11px;opacity:.75}
+.nx238{margin-top:6px;padding:6px 12px;border-radius:12px;background:#ffffff10;border:1px solid #ffffff1f;text-align:left}
+.nx238 b{display:block;font-size:12.5px;color:#ffe9a8}
+.nx238 span{display:block;font-size:11px;opacity:.75}
+.bt238{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
+#v139over .bt238 button{margin:0;padding:10px 6px;font-size:13.5px;border-radius:12px}
+#v139over .bt238 button.shr{grid-column:1/-1;background:linear-gradient(180deg,#f1cf73,#c9963a);color:#2a1a00}
+@media (orientation:portrait),(max-width:620px){#v139over .in.v238{grid-template-columns:minmax(0,1fr);width:min(400px,100%);gap:8px}}

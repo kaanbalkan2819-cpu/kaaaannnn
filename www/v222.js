@@ -40,7 +40,7 @@
     Object.keys(r).sort(function (a, b) { return nm(a).localeCompare(nm(b), 'tr'); }).forEach(function (e) {
       h += '<button type="button" class="pk222i nk" onclick="v222Nuke(\'' + r[e] + '\')">' + fl(e) + '<span>' + esc(nm(r[e])) + '</span></button>';
     });
-    card('☢ ' + X('ATOM BOMBASI', 'ATOM BOMB'), X('Hedef seç: bomba düştüğü toprağı anında ele geçirirsin. Yalnızca saldırabileceğin ülkeler.', 'Pick a target: you seize the struck land at once. Only countries you can attack.'), h, X('Menzilinde hedef yok.', 'No target in reach.'));
+    card('🚀 ' + X('YIKIM FÜZESİ', 'HAVOC MISSILE'), X('Hedef seç: füzenin düştüğü toprağı anında ele geçirirsin. Yalnızca saldırabileceğin ülkeler.', 'Pick a target: you seize the struck land at once. Only countries you can attack.'), h, X('Menzilinde hedef yok.', 'No target in reach.'));
   };
   /* hedef ülkenin küre üzerindeki ekran konumu (3B küre: v30API) */
   function scr(tg) {
@@ -79,7 +79,7 @@
     try {
       if (!solo() || !tg || !M[tg]) return; var e = G.owner[tg];
       if (typeof e !== 'string' || e === G.pl || !targets(G.pl, G.owner)[tg]) return;
-      if (!window.WCNuke || !WCNuke.take()) { try { toast(X('Cephaneliğinde atom bombası yok — Dükkândan al', 'No atom bomb in your arsenal — buy one in the Shop')); } catch (x) { } return; }   /* V223: stoktan düşülür */
+      if (!window.WCNuke || !WCNuke.take()) { try { toast(X('Cephaneliğinde Yıkım Füzesi yok — Dükkândan al', 'No Havoc Missile in your arsenal — buy one in the Shop')); } catch (x) { } return; }   /* V223: stoktan düşülür */
       try { closeMod(); } catch (x) { }
       G.nuke222 = turn();
       /* V224: önce 3B savaş animasyonu sistemiyle gerçek bombardıman sahnesi (v60Nuke); 3B küre yoksa eski 2B efekt */
@@ -105,7 +105,7 @@
             if (G.es && G.es[tg]) delete G.es[tg];
             G.cq217 = G.cq217 || []; if (G.cq217.indexOf(tg) < 0) G.cq217.push(tg);
             try { save(); } catch (x) { } try { render(); } catch (x) { }
-            try { toast('☢ ' + X(nm(tg) + ' atom bombasıyla ele geçirildi', nm(tg) + ' seized with an atom bomb')); } catch (x) { }
+            try { toast('🚀 ' + X(nm(tg) + ' Yıkım Füzesi ile ele geçirildi', nm(tg) + ' seized with a Havoc Missile')); } catch (x) { }
           } catch (x) { }
         })();
       }

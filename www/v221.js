@@ -21,7 +21,7 @@
   (function fix() { try { if (typeof R === 'undefined' || !R.length || typeof M === 'undefined' || !M.TUR || !M.AZE) return setTimeout(fix, 400); } catch (e) { return setTimeout(fix, 400); } link('TUR', 'AZE'); })();
 
   /* ---- 3) altın 9999 (tek kişilik oyunda bakiye 9999'un altındaysa bir kez tamamlanır) ---- */
-  setInterval(function () { try { if (solo() && !G.g221 && ['pick', 'v7pick'].indexOf(G.ph) < 0) { G.g221 = 1; if ((+G.gold || 0) < 9999) { G.gold = 9999; try { if (window.Gold) Gold.add(0); } catch (e) { } try { save(); } catch (e) { } } } } catch (e) { } }, 1000);
+  setInterval(function () { try { if (solo() && !G.g221 && ['pick', 'v7pick'].indexOf(G.ph) < 0) { G.g221 = 1; if ((+G.gold || 0) < 9999) { G.gold = 9999; try { render(); } catch (e) { } try { save(); } catch (e) { } } } } catch (e) { } }, 1000);
 
   /* ---- 4) sağ taraf: tek kare düğme -> altta açılan kare düğmeler: Elçi Gönder · Diplomasi · Kalkınma (+/− dışarıda kalır) ---- */
   var open = false;

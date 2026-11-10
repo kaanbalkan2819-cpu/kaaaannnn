@@ -157,7 +157,7 @@
       var r = _ng.apply(this, arguments);
       if (pendingAsk) {
         pendingAsk = false;
-        if (m == 1) { shieldOn(); var n = 0, iv = setInterval(function () { n++; try { if (window.v30IntroBusy && v30IntroBusy() && n < 12) return; } catch (e) { } /* V150: küre yaklaşırken (3 sn) soru açılıp küreyi örtmesin */ var md = document.getElementById('mod'), mo = md && md.style.display === 'flex'; if (mo && n < 120) return; /* V230: duraklatma menüsü açıkken beklenir, soru kapanınca gelir */ clearInterval(iv); try { if (!mo) WCTut.askInGame(); } finally { shieldOff(); } }, 700); }   /* V161: soru açılana kadar dokunuşlar geçersiz */
+        if (m == 1) { shieldOn(); var n = 0, seen238 = false, iv = setInterval(function () { n++; try { var bz = !!(window.v30IntroBusy && v30IntroBusy()); if (bz) seen238 = true; if (bz && n < 12) return; if (!bz && !seen238 && n < 6) return; /* V238: yaklaşma henüz başlamadıysa beklenir; "bir daha gösterme" seçiliyken de kilit sorunun açılacağı ana kadar sürer */ } catch (e) { } /* V150: küre yaklaşırken (3 sn) soru açılıp küreyi örtmesin */ var md = document.getElementById('mod'), mo = md && md.style.display === 'flex'; if (mo && n < 120) return; /* V230: duraklatma menüsü açıkken beklenir, soru kapanınca gelir */ clearInterval(iv); try { if (!mo) WCTut.askInGame(); } finally { shieldOff(); } }, 700); }   /* V161: soru açılana kadar dokunuşlar geçersiz */
       }
       return r;
     };

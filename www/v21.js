@@ -41,13 +41,18 @@
   function priceOf(id) {
     try { var C = window.CdvPurchase, pr = C.store.get(id, C.Platform.GOOGLE_PLAY), o = pr && pr.getOffer(); return o && o.pricing ? o.pricing.price : null; } catch (e) { return null; }
   }
+  /* V238: Play ödeme ekranı açılamıyorsa (ürünler henüz Play Console'da değilse) oyunun Google Play sayfası açılır */
+  function openStore() {
+    try { if (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) { location.href = 'market://details?id=com.wconquest.worldgame'; return; } } catch (e) { }
+    toast(T('Satın alma Google Play üzerinden yapılır', 'Purchases are made through Google Play'));
+  }
   function buy(id) {
     if (!pack(id)) return;
     init();
-    if (!B.ready) { toast(T('Satın alma yalnızca Google Play sürümünde kullanılabilir', 'Purchases are only available in the Google Play version')); return; }
+    if (!B.ready) { openStore(); return; }
     try {
       var C = window.CdvPurchase, pr = C.store.get(id, C.Platform.GOOGLE_PLAY), o = pr && pr.getOffer();
-      if (!o) { toast(T('Ürün şu an yüklenemedi, tekrar dene', 'Product not available, try again')); return; }
+      if (!o) { openStore(); return; }
       C.store.order(o).then(function (err) { if (err && err.isError && err.code !== C.ErrorCode.PAYMENT_CANCELLED) toast(T('Satın alma başarısız', 'Purchase failed')); });
     } catch (e) { toast(T('Satın alma başlatılamadı', 'Could not start purchase')); }
   }
@@ -68,13 +73,13 @@
     if (!on()) { toast(T('Dükkan oyun içinde açılır', 'The shop opens in-game')); return; }
     init(); open = true; modal(html());
   }
-  function refreshShop() { try { var m = $('mod'); if (open && m && m.style.display != 'none' && $('box').querySelector('.shgrid')) $('box').innerHTML = html(); } catch (e) { } }
+  function refreshShop() { try { if (window.v220Shop) v220Shop.refresh(); var m = $('mod'); if (open && m && m.style.display != 'none' && $('box').querySelector('.shgrid')) $('box').innerHTML = html(); } catch (e) { } }
   var _cm = closeMod; closeMod = function () { var r = _cm.apply(this, arguments); open = false; try { if (window.V20 && V20.reTribute) setTimeout(V20.reTribute, 0); } catch (e) { } return r; };
-  window.Shop = { open: openShop, buy: buy, packs: PACKS };
+  window.Shop = { open: openShop, buy: buy, packs: PACKS, price: priceOf };
   try { if (window.Gold) Gold.shop.packs = PACKS; } catch (e) { }
 
   // altın göstergesine dokununca dükkan
-  document.addEventListener('click', function (e) { var t = e.target; if (t && t.closest && t.closest('#goldchip')) openShop(); });
+  document.addEventListener('click', function (e) { var t = e.target; if (t && t.closest && t.closest('#goldchip')) window.Shop.open(); });   /* V238: altın göstergesi de aynı dükkanı açar */
   // ana menüde Dükkan düğmesi (oyun açıkken)
   var _menu = menu;
   menu = function () {

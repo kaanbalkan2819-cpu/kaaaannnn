@@ -59,11 +59,11 @@
     take: function () { var n = nN(); if (n <= 0) return false; lset(NK, n - 1); upd(); return true; },
     buy: function (p) {
       if (!window.Gold || !Gold.spend(p, 'nuke223')) { say(X('Yeterli altının yok', 'Not enough gold')); return false; }
-      nAdd(1); say('☢ ' + X('Atom bombası cephaneliğe eklendi (' + nN() + ')', 'Atom bomb added to your arsenal (' + nN() + ')')); return true;
+      nAdd(1); say('🚀 ' + X('Yıkım Füzesi cephaneliğe eklendi (' + nN() + ')', 'Havoc Missile added to your arsenal (' + nN() + ')')); return true;
     },
     use: function () {
-      var w = why(); if (w) { say('☢ ' + w); return; }
-      if (nN() <= 0) { say(X('Cephaneliğinde atom bombası yok — Dükkândan al', 'No atom bomb in your arsenal — buy one in the Shop')); try { Shop.open(); } catch (e) { } return; }
+      var w = why(); if (w) { say('🚀 ' + w); return; }
+      if (nN() <= 0) { say(X('Cephaneliğinde Yıkım Füzesi yok — Dükkândan al', 'No Havoc Missile in your arsenal — buy one in the Shop')); try { Shop.open(); } catch (e) { } return; }
       try { closeMod(); } catch (e) { } setTimeout(function () { if (window.v222NukePick) v222NukePick(); }, 30);
     },
     shopRow: function (it, g) {
@@ -71,7 +71,7 @@
       return '<div class="si220 nk223"><i>' + it.ic + '</i><div><b>' + X(it.n[0], it.n[1]) + ' <span class="nkc223">' + X('Cephanelik: ', 'Arsenal: ') + n + '</span></b><small>' + X(it.d[0], it.d[1]) + '</small>' +
         (n > 0 && w ? '<em>' + w + '</em>' : '') + '</div><div class="nkb223">' +
         '<button type="button" ' + (canBuy ? 'onclick="v220Shop.buy(\'nuke\')"' : 'disabled') + '>' + it.p + ' 🪙</button>' +
-        (n > 0 ? '<button type="button" class="use" ' + (w ? 'disabled' : 'onclick="WCNuke.use()"') + '>☢ ' + X('Kullan', 'Use') + '</button>' : '') + '</div></div>';
+        (n > 0 ? '<button type="button" class="use" ' + (w ? 'disabled' : 'onclick="WCNuke.use()"') + '>🚀 ' + X('Kullan', 'Use') + '</button>' : '') + '</div></div>';
     }
   };
 
@@ -83,8 +83,8 @@
   setInterval(function () {
     try {
       var c = document.getElementById('col221'); if (!c || c.querySelector('[data-k="nk"]')) { upd(); return; }
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'it221'; b.setAttribute('data-k', 'nk'); b.title = X('Atom Bombası', 'Atom Bomb');
-      b.innerHTML = '<i></i><b class="nkn223">0</b><span>☢ ' + X('Atom Bombası', 'Atom Bomb') + '</span>';
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'it221'; b.setAttribute('data-k', 'nk'); b.title = X('Yıkım Füzesi', 'Havoc Missile');
+      b.innerHTML = '<i></i><b class="nkn223">0</b><span>🚀 ' + X('Yıkım Füzesi', 'Havoc Missile') + '</span>';
       b.addEventListener('click', function (e) { e.stopPropagation(); try { var t = document.getElementById('tg221'); if (t) t.click(); } catch (x) { } WCNuke.use(); });
       c.appendChild(b); upd();
     } catch (e) { }
@@ -117,7 +117,7 @@
       });
       if (n >= T && d.indexOf('all') < 0) {
         d.push('all'); ch = true; nAdd(3);
-        queue.push([X('Dünya Hâkimi', 'Ruler of the World'), X('Tüm mühürler toplandı — hediye: 3 ☢ Atom Bombası', 'Every seal collected — gift: 3 ☢ Atom Bombs')]);
+        queue.push([X('Dünya Hâkimi', 'Ruler of the World'), X('Tüm mühürler toplandı — hediye: 3 🚀 Yıkım Füzesi', 'Every seal collected — gift: 3 🚀 Havoc Missiles')]);
       }
       if (ch) { lset(AK, d); next(); }
     } catch (e) { }
@@ -128,7 +128,7 @@
       var n = have(), T = total(), d = done(), h = '';
       ACH.forEach(function (a) { var ok = d.indexOf(a[0]) >= 0 || n >= a[0]; h += '<span class="a223' + (ok ? ' ok' : '') + '" title="' + X(a[1], a[2]) + '"><i>' + (ok ? '🏆' : '🔒') + '</i><b>' + a[0] + '</b><small>' + X(a[1], a[2]) + '</small></span>'; });
       var all = d.indexOf('all') >= 0 || n >= T;
-      h += '<span class="a223 all' + (all ? ' ok' : '') + '"><i>' + (all ? '☢' : '🔒') + '</i><b>' + T + '</b><small>' + X('Dünya Hâkimi · 3 ☢ hediye', 'World Ruler · 3 ☢ gift') + '</small></span>';
+      h += '<span class="a223 all' + (all ? ' ok' : '') + '"><i>' + (all ? '🚀' : '🔒') + '</i><b>' + T + '</b><small>' + X('Dünya Hâkimi · 3 ☢ hediye', 'World Ruler · 3 ☢ gift') + '</small></span>';
       return '<div class="ach223s"><div class="ach223t">🏆 ' + X('Başarımlar', 'Achievements') + ' <em>' + X('her 20 mühürde bir', 'one every 20 seals') + '</em></div><div class="ach223r">' + h + '</div></div>';
     },
     check: check

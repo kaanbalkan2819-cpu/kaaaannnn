@@ -60,11 +60,11 @@
   }
 
   /* ---------- Oyun durumu -> küre ---------- */
-  function sig() { try { return JSON.stringify([G && G.sel, Object.keys(TG || {}).join(','), G && G.cur, typeof BT !== 'undefined' && BT ? [BT.a, BT.d] : 0, typeof FLASH !== 'undefined' ? FLASH : 0, G && G.owner, G && G.pl, G && G.plCol]); } catch (e) { return Math.random() + ''; } }
+  function sig() { try { return JSON.stringify([G && G.sel, Object.keys(TG || {}).join(','), G && G.cur, typeof BT !== 'undefined' && BT ? [BT.a, BT.d] : 0, typeof FLASH !== 'undefined' ? FLASH : 0, G && G.owner, G && G.pl, G && G.plCol, G && G.ph === 'v7pick' && G.gs218]); } catch (e) { return Math.random() + ''; } }
   function recompute() {
     C.forEach(function (c) {
       var t = 0;
-      if (G) { if (G.sel === c.id) t = 1; else if (TG && TG[c.id]) t = .45;  }
+      if (G) { if (G.sel === c.id) t = 1; else if (TG && TG[c.id]) t = .45; else if (G.ph === 'v7pick' && G.gs218 && window.GS218 && GS218.has(c.id)) t = .45; }   /* V238: altın mühürle seçilebilir ülkeler de yükselir */
       c.t = t;
     });
   }

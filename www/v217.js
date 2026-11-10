@@ -304,7 +304,7 @@
     try {
       var bx = document.getElementById('box'), go = bx && bx.querySelector('.go214');
       if (go && !go.querySelector('.sg217')) { var s = go.querySelector('.c141s'); if (s) s.insertAdjacentHTML('afterend', gridHTML(conquered())); }
-      var w = document.querySelector('#v139over.win .in');
+      var w = document.querySelector('#v139over.win .in:not(.v238)');   /* V238: Zafer Ekranı mühür sayısını kendi gösterir */
       if (w && !w.querySelector('.sg217')) { var sc = w.querySelector('.sc'); (sc || w.lastChild).insertAdjacentHTML(sc ? 'afterend' : 'beforebegin', gridHTML(conquered())); }
     } catch (e) { }
   }

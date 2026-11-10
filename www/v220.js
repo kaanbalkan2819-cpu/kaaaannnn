@@ -154,19 +154,22 @@
   /* ================= 5) YENİ DÜKKAN =================
      İki sekme: AVANTAJLAR (altınla oyun içi yardım) ve ALTIN AL (Google Play paketleri; v21 satın alma köprüsü). */
   var TAB = 'adv', ITEMS = [
-    { id: 'move', ic: '🎲', n: ['+1 Hamle', '+1 Move'], d: ['Bu tur bir hamle daha', 'One more move this turn'], p: 25 },
-    { id: 'merc', ic: '⚔', n: ['Paralı Askerler', 'Mercenaries'], d: ['Bir sonraki savaşta Ordu +%12', 'Army +12% in your next battle'], p: 40 },
-    { id: 'fort', ic: '🏰', n: ['Sınır Kaleleri', 'Border Forts'], d: ['2 tur boyunca rakipler sana saldırmaz', 'Rivals won\'t attack you for 2 turns'], p: 55 },
-    { id: 'spy', ic: '🕵', n: ['Casus Ağı', 'Spy Network'], d: ['Menzilindeki tüm ülkelerin değerleri açılır', 'Reveals the stats of every country in reach'], p: 30 },
-    { id: 'peace', ic: '📜', n: ['Huzur Fermanı', 'Edict of Peace'], d: ['5 tur boyunca isyan çıkmaz', 'No rebellions for 5 turns'], p: 35 },
-    { id: 'envoy', ic: '🕊', n: ['Elçi Hediyesi', 'Envoy Gifts'], d: ['Komşularla ilişkiler iyileşir, teklifler daha kolay kabul edilir', 'Neighbours warm to you; offers are accepted more easily'], p: 30 },
-    { id: 'nuke', ic: '☢', n: ['Atom Bombası', 'Atom Bomb'], d: ['Satın al, cephaneliğinde dursun; oyunda menzilindeki bir ülkeyi anında ele geçir (her 3 turda bir)', 'Buy it for your arsenal; in-game seize a country in reach at once (once every 3 turns)'], p: 2500 }   /* V223: stoklu */
+    { id: 'merc', ic: '⚔', n: ['Paralı Askerler', 'Mercenaries'], d: ['Bir sonraki savaşta Ordu +%12', 'Army +12% in your next battle'], p: 300 },
+    { id: 'fort', ic: '🏰', n: ['Sınır Kaleleri', 'Border Forts'], d: ['Bu tur rakipler sana saldırmaz', 'Rivals won\'t attack you this turn'], p: 400 },
+    { id: 'spy', ic: '🕵', n: ['Casus Ağı', 'Spy Network'], d: ['Menzilindeki tüm ülkelerin değerleri açılır', 'Reveals the stats of every country in reach'], p: 200 },
+    { id: 'peace', ic: '📜', n: ['Huzur Fermanı', 'Edict of Peace'], d: ['5 tur boyunca isyan çıkmaz', 'No rebellions for 5 turns'], p: 350 },
+    { id: 'envoy', ic: '🕊', n: ['Elçi Hediyesi', 'Envoy Gifts'], d: ['Komşularla ilişkiler iyileşir, teklifler daha kolay kabul edilir', 'Neighbours warm to you; offers are accepted more easily'], p: 250 },
+    { id: 'nuke', ic: '🚀', n: ['Yıkım Füzesi', 'Havoc Missile'], d: ['Satın al, cephaneliğinde dursun; oyunda menzilindeki bir ülkeyi anında ele geçir (her 3 turda bir)', 'Buy it for your arsenal; in-game seize a country in reach at once (once every 3 turns)'], p: 2500 }   /* V223: stoklu */
   ];
+  /* V238: ödüllü reklam: cüzi altın, günde en çok AD_MAX kez */
+  var AD_GOLD = 15, AD_MAX = 5, AD_KEY = 'wc_ad238';
+  function adDay() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function adUsed() { try { var o = JSON.parse(localStorage.getItem(AD_KEY) || 'null'); return o && o.d === adDay() ? (o.n | 0) : 0; } catch (e) { return 0; } }
+  function adLeft() { return Math.max(0, AD_MAX - adUsed()); }
   function canUse(it) {
     try {
       if (it.id === 'nuke') return '';   /* V223: bomba her yerde satın alınır (stoğa girer) */
       if (!solo() || G.over) return X('Oyun içinde kullanılabilir', 'Only in-game');
-      if (it.id === 'move' && G.ph !== 'act') return X('Kendi turunda kullan', 'Use on your turn');
       if (it.id === 'merc' && G.merc220) return X('Zaten etkin', 'Already active');
       if (it.id === 'fort' && G.fort220 > turn()) return X('Zaten etkin', 'Already active');
       if (it.id === 'peace' && G.peace220 > turn()) return X('Zaten etkin', 'Already active');
@@ -176,9 +179,8 @@
     return '';
   }
   function use(it) {
-    if (it.id === 'move') { G.T.moves = (+G.T.moves || 0) + 1; }
-    else if (it.id === 'merc') { G.merc220 = 1; }
-    else if (it.id === 'fort') { G.fort220 = turn() + 2; }
+    if (it.id === 'merc') { G.merc220 = 1; }
+    else if (it.id === 'fort') { G.fort220 = turn() + 1; }
     else if (it.id === 'spy') { var tg = targets(G.pl, G.owner); G.kn = G.kn || {}; G.kn[G.pl] = G.kn[G.pl] || {}; for (var k in tg) { var o = G.owner[k]; if (typeof o === 'string' && o !== G.pl) G.kn[G.pl][o] = [1, 1, 1, 1, 1]; } }
     else if (it.id === 'peace') { G.peace220 = turn() + 5; G.cool23 = Math.max(G.cool23 || 0, 5); if (G.lib76) for (var t in G.lib76) if (G.lib76[t].at) G.lib76[t].at += 5; }
     else if (it.id === 'envoy') { G.dx220 = (G.dx220 || 0) + 3; }
@@ -198,12 +200,14 @@
           '<button type="button" ' + (ok ? 'onclick="v220Shop.buy(\'' + it.id + '\')"' : 'disabled') + '>' + it.p + ' 🪙</button></div>';
       });
     } else {
-      var P = (window.Shop && Shop.packs) || [];
+      var P = (window.Shop && Shop.packs) || [], adN = adLeft(), adOk = solo() && !G.over && adN > 0;
+      h += '<div class="si220 pk"><i>📺</i><div><b>' + X('Reklam İzle', 'Watch an Ad') + '</b><small>' + X('Kısa bir video izle, +' + AD_GOLD + ' altın kazan · bugün kalan: ' + adN, 'Watch a short video for +' + AD_GOLD + ' gold · left today: ' + adN) + '</small>' + (solo() ? '' : '<em>' + X('Oyun içinde kullanılabilir', 'Only in-game') + '</em>') + '</div>' +
+        '<button type="button" ' + (adOk ? 'onclick="v220Shop.ad()"' : 'disabled') + '>+' + AD_GOLD + ' 🪙</button></div>';
       P.forEach(function (p, i) {
         h += '<div class="si220 pk"><i>' + ['💰', '💰', '🏦', '👑'][i] + '</i><div><b>' + p.gold + ' ' + X('Altın', 'Gold') + '</b><small>' + (i === 3 ? X('En avantajlı paket', 'Best value') : i === 2 ? X('Popüler', 'Popular') : X('Altın paketi', 'Gold pack')) + '</small></div>' +
-          '<button type="button" onclick="Shop.buy(\'' + p.id + '\')">Google Play</button></div>';
+          '<button type="button" onclick="Shop.buy(\'' + p.id + '\')">' + ((window.Shop && Shop.price && Shop.price(p.id)) || X('Satın Al', 'Buy')) + '</button></div>';
       });
-      h += '<p class="note220">' + X('Satın alma yalnızca Google Play sürümünde çalışır. Altın oyunda zafer ve ekonomiyle de kazanılır.', 'Purchases only work in the Google Play version. Gold is also earned in-game.') + '</p>';
+      h += '<p class="note220">' + X('Ödeme Google Play üzerinden yapılır. Altın oyunda zaferle de kazanılır.', 'Payment is handled by Google Play. Gold is also earned by winning.') + '</p>';
     }
     return h + '</div><div class="c141g"><button type="button" class="c141b pri" onclick="closeMod()"><span class="ic">✕</span><span class="lb">' + X('Kapat', 'Close') + '</span></button></div></div></div>';
   }
@@ -218,6 +222,15 @@
     open: function () { show(); },   /* V223: ana menüden de açılır (bomba satın almak için); oyun içi avantajlar yalnızca oyunda */
     refresh: function () { var m = document.getElementById('mod'); if (m && m.style.display === 'flex' && document.querySelector('.shop220')) show(); },
     tab: function (t) { TAB = t; show(); },
+    ad: function () {
+      if (!solo() || adLeft() <= 0 || !window.WCPay) return;
+      WCPay.showAd(function (ok) {
+        if (!ok) { try { toast('📺 ' + X('Reklam tamamlanmadı, ödül verilmedi', 'Ad not completed, no reward')); } catch (e) { } return; }
+        try { localStorage.setItem(AD_KEY, JSON.stringify({ d: adDay(), n: adUsed() + 1 })); } catch (e) { }
+        if (window.Gold && Gold.add(AD_GOLD, 'ad238')) { try { save(); } catch (e) { } try { toast('🪙 +' + AD_GOLD + ' ' + X('Altın', 'Gold')); } catch (e) { } }
+        v220Shop.refresh();
+      });
+    },
     buy: function (id) {
       var it = ITEMS.filter(function (x) { return x.id === id; })[0]; if (!it || canUse(it)) return;
       if (id === 'nuke') { if (window.WCNuke) WCNuke.buy(it.p); show(); return; }   /* V223: alınan bomba stoğa girer */

@@ -314,6 +314,17 @@
       '<div class="cr">' + chip('⏱', mmss(m.sec), X('SÜRE', 'TIME')) + chip('🏴', m.conq, X('FETİH', 'CONQUESTS')) + chip('🤝', m.pacts, X('PAKT', 'PACTS')) + chip('🛡', m.allies, X('İTTİFAK', 'ALLIES')) + '</div>' +
       '<button class="pri" onclick="v139New()">🔁 ' + X('Yeni Ülkeyle Başla', 'Start With a New Country') + '</button><button onclick="v139Hist()">📜 ' + X('Oyun Geçmişi', 'Game History') + '</button><button class="gh" onclick="v139Menu()">' + X('Ana Menü', 'Main Menu') + '</button></div>';
   }
+  /* V238: Zafer Ekranı: sol sütunda ülke ve sonuç, sağda istatistik, ödül, sıradaki hedef ve düğmeler */
+  function winHTML(m, gift, rw, cell) {
+    var n = 0; try { n = WCNuke.n(); } catch (e) { }
+    var sl = '', nx = m.res === 'win' ? V238.next(m.hard) : ''; try { sl = V238.seals(); } catch (e) { }
+    return '<div class="in v238"><div class="l238"><small class="tg238">' + X('ZAFER', 'VICTORY') + ' · ' + V238.diff(m.hard) + '</small><div class="fg">' + fl(m.c) + '</div><h2>' + resTitle(m.res) + '</h2><p>' + resLine(m.res, m) + '</p><div class="sc">⭐ ' + X('Skor', 'Score') + ' <b>' + m.score + '</b></div></div>' +
+      '<div class="r238"><div class="gr">' + cell(m.turns, X('TUR', 'TURNS')) + cell(mmss(m.sec), X('SÜRE', 'TIME')) + cell(m.lands + '<i>/' + m.total + '</i>', X('TOPRAK', 'LANDS')) + cell(m.conq, X('FETİH', 'CONQUESTS')) + '</div>' +
+      (rw ? '<div class="rw238"><i>🚀</i><div><small>' + X('ZAFER ÖDÜLÜ', 'VICTORY REWARD') + '</small><b>+' + rw + ' ' + X('Yıkım Füzesi', 'Havoc Missile') + '</b><span>' + X('Cephanelik: ', 'Arsenal: ') + n + '</span></div></div>' : '') +
+      (nx || sl ? '<div class="nx238">' + (nx ? '<b>' + nx + '</b>' : '') + (sl ? '<span>' + sl + '</span>' : '') + '</div>' : '') +
+      (gift ? '<div class="nx238"><b>🎁 ' + X('Hızlı YZ turu açıldı', 'Fast AI turn unlocked') + '</b><span>' + X('Haritadaki ⚡ düğmesiyle açıp kapatabilirsin.', 'Toggle it with the ⚡ button on the map.') + '</span></div>' : '') +
+      '<div class="bt238"><button class="shr" onclick="V238.share()">📤 ' + X('Zafer Kartını Paylaş', 'Share Victory Card') + '</button><button class="pri" onclick="v139New()">🔁 ' + X('Yeni Sefer', 'New Campaign') + '</button><button onclick="v139Hist()">📜 ' + X('Geçmiş', 'History') + '</button><button class="gh" onclick="v139Menu()">' + X('Ana Menü', 'Main Menu') + '</button></div></div></div>';
+  }
   function countUp() {
     try {
       var el = document.getElementById('v188sc'); if (!el) return; var to = +el.getAttribute('data-v') || 0, t0 = Date.now(), D = 1200;
@@ -331,11 +342,13 @@
       var gift = false;   /* V186: ilk dünya fethi = Hızlı YZ turu ödülü (geçmişe yazmadan ÖNCE kontrol edilir) */
       try { if (m.res === 'win' && !G.mp && !fastUnlocked()) { localStorage.setItem(UKEY, '1'); gift = true; } } catch (e) { }
       if (!s.rec) { s.rec = 1; var h = hist(); h.unshift(m); try { localStorage.setItem(HKEY, JSON.stringify(h.slice(0, CFG.HIST_MAX))); } catch (e) { } }
+      var rw238 = 0; try { if (m.res === 'win' && !G.mp) { if (!s.vic238) { s.vic238 = [1, 2, 3][G.hard | 0] || 1; if (window.WCNuke) WCNuke.add(s.vic238); try { save(); } catch (e) { } } rw238 = s.vic238; } } catch (e) { }   /* V238: zafer ödülü, oyun başına bir kez */
       var win = m.res === 'win' || m.res === 'pts', conf = '';
       if (win) for (var i = 0; i < 18; i++) conf += '<i style="left:' + (i * 5.6 + 2) + '%;animation-delay:' + ((i % 6) * .35).toFixed(2) + 's;background:hsl(' + (i * 37 % 360) + ',80%,60%)"></i>';
       var cell = function (v, k) { return '<div><b>' + v + '</b><small>' + k + '</small></div>'; };
       OVL = document.createElement('div'); OVL.id = 'v139over'; OVL.className = win ? 'win' : 'lose';
-      OVL.innerHTML = m.res === 'lose' ? loseHTML(m) : (win ? '<div class="cf">' + conf + '</div>' : '') + '<div class="in">' + '<div class="ic">' + resIcon(m.res) + '</div>' + '<div class="fg">' + fl(m.c) + '</div><h2>' + resTitle(m.res) + '</h2><p>' + resLine(m.res, m) + '</p>' +
+      m.hard = G.hard | 0; try { if (window.V238) V238.set(m); } catch (e) { }
+      OVL.innerHTML = m.res === 'lose' ? loseHTML(m) : (win && window.V238) ? '<div class="cf">' + conf + '</div>' + winHTML(m, gift, rw238, cell) : (win ? '<div class="cf">' + conf + '</div>' : '') + '<div class="in">' + '<div class="ic">' + resIcon(m.res) + '</div>' + '<div class="fg">' + fl(m.c) + '</div><h2>' + resTitle(m.res) + '</h2><p>' + resLine(m.res, m) + '</p>' +
         '<div class="gr">' + cell(m.turns, X('TUR', 'TURNS')) + cell(mmss(m.sec), X('SÜRE', 'TIME')) + cell(m.lands + '<i>/' + m.total + '</i>', X('TOPRAK', 'LANDS')) + cell(m.max, X('EN ÇOK TOPRAK', 'PEAK LANDS')) +
         cell(m.w + ' / ' + m.l, X('SAVAŞ K / Y', 'WINS / LOSSES')) + cell(m.conq, X('FETİH', 'CONQUESTS')) + cell(m.pacts, X('PAKT', 'PACTS')) + cell(m.allies, X('İTTİFAK', 'ALLIANCES')) + '</div>' +
         '<div class="sc">⭐ ' + X('Skor', 'Score') + ' <b>' + m.score + '</b></div>' +

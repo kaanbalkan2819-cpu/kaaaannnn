@@ -186,6 +186,11 @@
     } catch (e) { k = 1; }
     return Math.max(TANK_MIN, Math.min(1, k));
   }
+  /* V238: birlikler ülkeden bağımsız ekranda hep aynı boyda görünsün: UNIT_FR ekran kısa kenarına oran. Eskiden aynı tank 14-71 px arasında değişiyordu. */
+  var UNIT_FR = { t: .1, s: .16 }, INF_K = 1.3;
+  function unitK(a, sc, z, nom, len, fr, lo, hi) {
+    try { var c = a.camera(), want = fr * Math.max(.6, z - 1) * 2 * Math.tan(c.fov * Math.PI / 360) * Math.min(1, c.aspect || 1); return Math.max(lo, Math.min(hi, want / (sc * nom * len))); } catch (e) { return 1; }
+  }
   function toLL(v) { return [Math.atan2(-v.z, v.x) / DEG, Math.asin(Math.max(-1, Math.min(1, v.y / (v.length() || 1)))) / DEG]; }
   function frameAt(a, P, zdir) {
     var T = a.THREE(), z = zdir.clone().sub(P.clone().multiplyScalar(zdir.dot(P)));
@@ -468,7 +473,7 @@
     f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(xx, P, z));   // yerel Y = yüzey normali, yerel Z = hedefe doğru
     if (!f.root.parent) a.globe().add(f.root);
     f.root.scale.setScalar(pl.sc); f.root.position.copy(P); f.root.visible = true; f.clear(); f.timeScale = TS; fitProj(a, f, tg, pl.sc);   // V91
-    var tk = tankK(a, o.ids, tg, pl.sc), M3 = window.WCBattleFX.models, win = !!r.win, dur = 0, V = function (x, y, zz) { return { x: x, y: y, z: zz }; };
+    var tk = unitK(a, pl.sc, camFor(a, pl.sc), 1.15, 2.4, UNIT_FR.t, .3, 1.5), ik = Math.min(1.7, tk * INF_K), M3 = window.WCBattleFX.models, win = !!r.win, dur = 0, V = function (x, y, zz) { return { x: x, y: y, z: zz }; };
     if (o.land) {
       /* V70: savunan tarafta kule/ev/gemi yok; yalnızca saldıranın tank + piyadesi hedef yönüne ateş eder */
       /* V71: isabet noktaları hedef ülkenin içinden seçilir (dünya koordinatında denetlenir); rastgele yere patlama yok */
@@ -484,13 +489,13 @@
         dur = Math.max(e1 && e1.duration || 8, e2 && e2.duration || 8);
       } else if (kind === 'inf') {   // V232: yalnız piyade
         var N1 = pickImpacts(a, pl.fr, pl.sc, tg, 2, -1.2, 5.6, 3.6, 10), N2 = pickImpacts(a, pl.fr, pl.sc, tg, 2, 1.4, 5.4, 3.6, 10);
-        var n1 = f.infantryAttack(fxo({ from: V(-1.5, 0, -5), to: up(N1.pts[0], .2), pool: N1.pool(1.1), color: o.color, count: 5, scale: 1.25 * tk, dud: !win, blast: win ? 1.4 : 1 }));
-        var n2 = f.infantryAttack(fxo({ from: V(1.6, 0, -4.8), to: up(N2.pts[0], .2), pool: N2.pool(1.1), color: o.color, count: 5, scale: 1.25 * tk, dud: !win, blast: win ? 1.4 : 1 }));
+        var n1 = f.infantryAttack(fxo({ from: V(-1.5, 0, -5), to: up(N1.pts[0], .2), pool: N1.pool(1.1), color: o.color, count: 5, scale: 1.25 * ik, dud: !win, blast: win ? 1.4 : 1 }));
+        var n2 = f.infantryAttack(fxo({ from: V(1.6, 0, -4.8), to: up(N2.pts[0], .2), pool: N2.pool(1.1), color: o.color, count: 5, scale: 1.25 * ik, dud: !win, blast: win ? 1.4 : 1 }));
         dur = Math.max(n1 && n1.duration || 8, n2 && n2.duration || 8);
       } else {   // tank + piyade (eski sahne)
         var I1 = pickImpacts(a, pl.fr, pl.sc, tg, 2, -1.2, 5.6, 3.6, 10), I2 = pickImpacts(a, pl.fr, pl.sc, tg, 1, 1.6, 5.4, 3.6, 10);
         var d1 = f.tankAttack(fxo({ from: V(-1.5, 0, -5.4), to: up(I1.pts[0], .3), tos: I1.pts.map(function (q) { return up(q, .15); }), color: o.color, scale: 1.15 * tk, shots: 2, dud: !win, blast: win ? 1.7 : 1.2 }));
-        var d2 = f.infantryAttack(fxo({ from: V(1.7, 0, -4.8), to: up(I2.pts[0], .2), pool: I2.pool(1.1), color: o.color, count: 4, scale: 1.2 * tk, dud: !win, blast: win ? 1.4 : 1 }));
+        var d2 = f.infantryAttack(fxo({ from: V(1.7, 0, -4.8), to: up(I2.pts[0], .2), pool: I2.pool(1.1), color: o.color, count: 4, scale: 1.2 * ik, dud: !win, blast: win ? 1.4 : 1 }));
         dur = Math.max(d1 && d1.duration || 8, d2 && d2.duration || 8);
       }
     } else { return null; }   // V70: deniz aşırı → yedek sahne (savunan gemi animasyonu yok)
@@ -578,7 +583,7 @@
     f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(fr.x, P, fr.z));
     if (!f.root.parent) a.globe().add(f.root);
     f.root.scale.setScalar(sc); f.root.position.copy(P); f.root.visible = true; f.clear(); f.timeScale = TS; fitProj(a, f, tg, sc);   // V91
-    var tk = tankK(a, o.ids, tg, sc), win = !!r.win, V = function (x, y, zz) { return { x: x, y: y, z: zz }; };
+    var tk = unitK(a, sc, Math.max(camFor(a, sc), Math.min(5.8, Math.max(sc < SC * .45 ? 1.45 : 1.95, 1.2 + dt * 3))), 1.15, 2.4, UNIT_FR.t, .3, 1.5), ik = Math.min(1.7, tk * INF_K), win = !!r.win, V = function (x, y, zz) { return { x: x, y: y, z: zz }; };
     var I = pickImpacts(a, fr, sc, tg, 3, 0, lc, Math.max(2, lc - 6), lc + 6), tos = I.pts.map(function (q) { return up(q, .15); });
     var air = false, dur;
     if (want ? want === 'air' : (!spot || (o.land && (Math.random() < .45 || (window.__air214 | 0) >= 2)))) { window.__air214 = 0;   /* V229: kara birliği sığmıyorsa yalnız uçak */   // V214: şans sayacı; V124: yedek sahnede de bazen uçaklar
@@ -593,7 +598,7 @@
         dur = Math.max(d1 && d1.duration || 8, d2 && d2.duration || 8);
       }
       if (gk === 'inf' || (o.land && gk === 'tankInf' && !spot.tanksOnly)) {   // V78: kara saldırısında yedek sahnede de piyade olsun (tank + piyade)
-        var d3 = f.infantryAttack(fxo({ from: V(.1, 0, -2.2), to: up(I.pts[2], .2), pool: I.pool(1.4), color: o.color, count: 4, scale: 1.2 * tk, dud: !win, blast: win ? 1.4 : 1 }));
+        var d3 = f.infantryAttack(fxo({ from: V(.1, 0, -2.2), to: up(I.pts[2], .2), pool: I.pool(1.4), color: o.color, count: 4, scale: 1.2 * ik, dud: !win, blast: win ? 1.4 : 1 }));
         dur = Math.max(dur, d3 && d3.duration || 8);
       }
     }
@@ -609,10 +614,11 @@
     f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(pl.fr.x, pl.P, pl.fr.z));
     if (!f.root.parent) a.globe().add(f.root);
     f.root.scale.setScalar(pl.sc); f.root.position.copy(pl.P); f.root.visible = true; f.clear(); f.timeScale = TS; fitProj(a, f, target, pl.sc);   // V91
-    var d = f.navalAttack({ from: { x: -.8, y: 0, z: -4.4 }, to: { x: .8, y: 0, z: 4.2 }, color: cA, targetColor: cB, scale: SHIP_S, torpedoes: 3, sink: !!sink, dud: !sink, keep: !!both });   // V164: yenilgide boşa atış
+    var shS = SHIP_S * unitK(a, pl.sc, camFor(a, pl.sc), SHIP_S, 4.2, UNIT_FR.s, .75, 1.5);
+    var d = f.navalAttack({ from: { x: -.8, y: 0, z: -4.4 }, to: { x: .8, y: 0, z: 4.2 }, color: cA, targetColor: cB, scale: shS, torpedoes: 3, sink: !!sink, dud: !sink, keep: !!both });   // V164: yenilgide boşa atış
     var dur = d && d.duration || 12;
     if (both && d && d.targetShip && d.ownShip) {   // V166: yenilgide AYNI sahnede karşı gemi de bizim gemimize torpido atıp batırır
-      var d2 = f.navalAttack({ from: { x: .8, y: 0, z: 4.2 }, to: { x: -.8, y: 0, z: -4.4 }, attacker: d.targetShip, target: d.ownShip, color: cB, scale: SHIP_S, torpedoes: 3, sink: true, keep: true });
+      var d2 = f.navalAttack({ from: { x: .8, y: 0, z: 4.2 }, to: { x: -.8, y: 0, z: -4.4 }, attacker: d.targetShip, target: d.ownShip, color: cB, scale: shS, torpedoes: 3, sink: true, keep: true });
       dur = Math.max(dur, d2 && d2.duration || 12);
     }
     return { fx: f, dir: pl.P.clone(), sea: true, ids: ids.concat([target]), base: pl.sc, cur: pl.sc, t0: f.time, dur: dur + .6, bothSides: !!(both && d && d.targetShip && d.ownShip) };
@@ -736,7 +742,7 @@
       var T = a.THREE(), lt = WCNukeScene.center(a, tg) || llOf(a, tg); if (!lt) return false;
       clearScenes(); var f = ensureFx(), P = a.sph(lt[0], lt[1], 1).normalize(); f.__noSnd = 0;
       var fr = frameAt(a, P, new T.Vector3(0, 1, 0));
-      var rad = extRad(a, tg), sc = SC;   /* V230: ülke büyüdükçe sahne büyüyünce birlikler küre eğrisinden kopuyordu */
+      var rad = extRad(a, tg), sc = Math.max(SC, Math.min(SC * 1.6, rad / 5.5));
       f.root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(fr.x, P, fr.z));
       if (!f.root.parent) a.globe().add(f.root);
       f.root.scale.setScalar(sc); f.root.position.copy(P); f.root.visible = true; f.clear(); f.timeScale = 1; f.projK = 1;

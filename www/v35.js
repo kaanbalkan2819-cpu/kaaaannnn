@@ -135,7 +135,7 @@
   function fixDelay(m) { [].forEach.call(m.querySelectorAll('.mb'), function (b) { b.style.animationDelay = '0s'; }); }
   function setMenu(html) { var m = root && root.querySelector('.menu'); if (!m) return false; if (!mainHTML) mainHTML = m.innerHTML; m.innerHTML = html; fixDelay(m); return true; }
   function subModes() {
-    if (CFG.flat) return setMenu((window.WCRank ? btn('', '★', X('Dereceli Mücadele', 'Ranked Struggle'), '', 'rank', 0, 0) : '') + btn('', 'I', X('Tek Oyunculu', 'Single Player'), '', 'm1', 0, 0) + (window.WCOnline ? btn('', '⇄', X('Arkadaşınla Maç', 'Match with a Friend'), '', 'onl', 0, 0) : '') + btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0));
+    if (CFG.flat) return setMenu(btn('', 'I', X('Tek Oyunculu', 'Single Player'), '', 'm1', 0, 0) + (window.WCOnline ? btn('', '⇄', X('Arkadaşınla Maç', 'Match with a Friend'), '', 'onl', 0, 0) : '') + btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0));
     setMenu(btn('pri', 'I', t('m1'), t('m1d'), 'm1', 0, 0) + (window.WCOnline ? btn('', '⇄', X('Online (2 kişi)', 'Online (2 players)'), X('Arkadaşına karşı', 'Versus a friend'), 'onl', 0, 0) : '') + btn('', '←', X('Geri', 'Back'), '', 'back', 0, 0)); }
   /* V237: tek oyunculu zorluk seçimi: Normal bitince Zor, Zor bitince Iron Man açılır */
   function lsOn(k) { try { return !!localStorage.getItem(k); } catch (e) { return false; } }

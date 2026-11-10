@@ -1,13 +1,13 @@
 /* V218 — ALTIN MÜHÜRLER (12 bölge, Figma ile üretildi: assets/goldseals/*.png)
    - Bir bölgenin TÜM ülkeleri aynı oyunda senin olunca o bölgenin altın mührü KALICI olarak açılır (localStorage 'wc_gseal218').
    - Tek kişilik yeni oyunda ülke seçme ekranı açılınca, açık altın mührün varsa öğretici sorusu yerine "Altın mühür kullanmak ister misin?" penceresi gelir.
-   - Mühür seçilirse yalnızca o bölgeden ülke seçilebilir; oyun başlayınca seçtiğin ülkenin 5 değeri %2 artar (küçük, dengeli avantaj).
+   - Mühür seçilirse yalnızca o bölgeden ülke seçilebilir; oyun başlayınca seçtiğin ülkenin 5 değeri %8 artar (V238: %2 kazanma şansını yalnızca 1,3 puan artırıyordu; %8 ile yaklaşık 5 puan).
    - Online / dereceli oyunlarda devre dışı.
    Geri almak için index.html'den gold218.js bağlantısını silin. */
 (function () {
   'use strict';
   function X(tr, en) { return (typeof L !== 'undefined' && L == 'en') ? en : tr; }
-  var BONUS = 0.02, KEY = 'wc_gseal218';
+  var BONUS = 0.08, KEY = 'wc_gseal218';
   var REG = [
     { id: 'hicaz', n: ['Hicaz Mührü', 'Hejaz Seal'], a: ['Deve', 'Camel'], r: ['Arap Yarımadası', 'Arabian Peninsula'], c: 'SAU YEM OMN ARE QAT KWT' },
     { id: 'viking', n: ['Viking Mührü', 'Viking Seal'], a: ['Kuzgun', 'Raven'], r: ['İskandinavya', 'Scandinavia'], c: 'NOR SWE DNK FIN ISL' },
@@ -36,7 +36,7 @@
   REG.forEach(function (g) { g.list = g.c.split(' '); });
   DIA.forEach(function (g) { g.list = g.c.split(' '); g.dia = 1; });
   function iron() { try { return !!window.G && G.hard === 2 && !G.mp; } catch (e) { return false; } }
-  function pct(g) { return g && g.dia ? 15 : 2; }
+  function pct(g) { return g && g.dia ? 15 : Math.round(BONUS * 100); }
   function byId(id) { var i; for (i = 0; i < REG.length; i++) if (REG[i].id === id) return REG[i]; for (i = 0; i < DIA.length; i++) if (DIA[i].id === id) return DIA[i]; return null; }
   function img(g) { return g.dia ? 'assets/diamond/' + g.id + '.webp' : 'assets/goldseals/' + g.id + '.png'; }
   function got() { try { var a = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
@@ -52,7 +52,7 @@
     var el = document.getElementById('gs218n'); if (el) el.remove();
     el = document.createElement('div'); el.id = 'gs218n';
     el.innerHTML = '<i style="background-image:url(' + img(g) + ')"></i><div><small>' + X('ALTIN MÜHÜR AÇILDI', 'GOLDEN SEAL UNLOCKED') + '</small><b>' + esc(X(g.n[0], g.n[1])) + '</b>' +
-      '<span>' + esc(X(g.r[0] + ' fethedildi · yeni oyunda bu bölgeden başlarsan değerler +%2', g.r[1] + ' conquered · start a new game here for +2% stats')) + '</span></div>';
+      '<span>' + esc(X(g.r[0] + ' fethedildi · yeni oyunda bu bölgeden başlarsan değerler +%8', g.r[1] + ' conquered · start a new game here for +8% stats')) + '</span></div>';
     document.body.appendChild(el); requestAnimationFrame(function () { el.classList.add('on'); });
     el.onclick = function () { el.classList.remove('on'); };
     setTimeout(function () { el.classList.remove('on'); setTimeout(function () { el.remove(); }, 400); }, 6500);
@@ -75,8 +75,8 @@
   var SEL = null;
   function chooserHTML() {
     var have = got(), isI = iron(), h = '<div class="wb-wrap still"><div class="wb-panel wb-pause wc141p gs218"><div class="c141h"><span class="p">⚜</span><h3>' + (isI ? X('MÜHÜR SEÇ', 'CHOOSE A SEAL') : X('ALTIN MÜHÜR', 'GOLDEN SEAL')) + '</h3></div>' +
-      '<p class="gs218s">' + (isI ? X('<b>Elmas mühürler</b> Iron Man\'de hazır: yalnızca o bölgeden ülke seçersin, ülkenin tüm değerleri <b>+%15</b>. Altın mühürler <b>+%2</b>.', '<b>Diamond seals</b> are ready in Iron Man: pick only from that region, all stats <b>+15%</b>. Golden seals <b>+2%</b>.') : X('Bu seferi bir altın mühürle başlatmak ister misin? Mühür seçersen yalnızca o bölgeden ülke seçebilirsin; ülkenin tüm değerleri <b>+%2</b> olur.',
-        'Start this campaign with a golden seal? You can then only pick a country from that region; all its stats get <b>+2%</b>.')) + '</p><div class="gs218g">';
+      '<p class="gs218s">' + (isI ? X('<b>Elmas mühürler</b> Iron Man\'de hazır: yalnızca o bölgeden ülke seçersin, ülkenin tüm değerleri <b>+%15</b>. Altın mühürler <b>+%8</b>.', '<b>Diamond seals</b> are ready in Iron Man: pick only from that region, all stats <b>+15%</b>. Golden seals <b>+8%</b>.') : X('Bu seferi bir altın mühürle başlatmak ister misin? Mühür seçersen yalnızca o bölgeden ülke seçebilirsin; ülkenin tüm değerleri <b>+%8</b> olur.',
+        'Start this campaign with a golden seal? You can then only pick a country from that region; all its stats get <b>+8%</b>.')) + '</p><div class="gs218g">';
     if (isI) DIA.forEach(function (g) {
       h += '<button type="button" class="gs218i d237' + (SEL === g.id ? ' on' : '') + '" onclick="GS218.sel(\'' + g.id + '\')"><i style="background-image:url(' + img(g) + ')"></i><b>' + esc(X(g.n[0], g.n[1])) + '</b><small>' + esc(X(g.r[0], g.r[1])) + '</small></button>';
     });
@@ -106,11 +106,12 @@
     sel: function (id) { SEL = id; showChooser(); },
     why: function (id) { var w = document.getElementById('gs218w'), g = byId(id); if (w && g) w.innerHTML = whyTxt(g, false); },
     go: function () {
-      var g = byId(SEL); if (!g || !pickSolo()) return; G.gs218 = g.id; PEND = g.id; try { closeMod(); } catch (e) { }
+      var g = byId(SEL); if (!g || !pickSolo()) return; G.gs218 = g.id; PEND = g.id; try { closeMod(); } catch (e) { } try { render(); } catch (e) { }
       try { var first = g.list.filter(function (c) { return G.owner[c] !== undefined; })[0]; if (first && window.v30FocusOn) v30FocusOn(first); } catch (e) { }
       try { toast('⚜ ' + X(g.n[0] + ': ' + g.r[0] + ' bölgesinden bir ülke seç', g.n[1] + ': pick a country in ' + g.r[1])); } catch (e) { }
     },
     none: function () { SEL = null; PEND = null; try { if (window.G) G.gs218 = null; closeMod(); } catch (e) { } },
+    has: function (id) { var g = byId(window.G && G.gs218); return !!(g && g.list.indexOf(id) >= 0); },
     list: function () { return REG.map(function (g) { return { id: g.id, open: got().indexOf(g.id) >= 0 }; }); },
     diaList: function () { return DIA; }, diaImg: img,
     unlockAll: function () { setGot(REG.map(function (g) { return g.id; })); }   /* yalnızca test için */
